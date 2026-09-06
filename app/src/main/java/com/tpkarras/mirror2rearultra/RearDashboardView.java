@@ -13,6 +13,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 
 import androidx.annotation.Nullable;
 
@@ -30,6 +31,7 @@ public final class RearDashboardView extends View {
     private final Paint iconPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint imagePaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private final TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+    private final Paint selectionPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private DashboardSettings settings = DashboardSettings.defaults();
     private RearDashboardSnapshot snapshot = new RearDashboardSnapshot(
             System.currentTimeMillis(), -1, -1, false, "", null, null, false
@@ -39,6 +41,38 @@ public final class RearDashboardView extends View {
     private Palette currentPalette = new Palette(Color.WHITE, Color.BLACK);
     private int selectedPage = 0;
     private float touchStartX;
+    private float touchStartY;
+    /** The lines of the last frame, for hit testing. */
+    private final List<Line> drawnLines = new ArrayList<>();
+    @Nullable private DashboardWidgetLayout.Widget selectedWidget;
+    @Nullable private OnWidgetSelectedListener widgetSelectedListener;
+    /** The burn-in drift in force, so recorded bounds match what is on screen. */
+    private float shiftX;
+    private float shiftY;
+
+    @Nullable private DashboardWidgetLayout.Widget draggedWidget;
+    private float dragOffsetX;
+    private float dragOffsetY;
+    private boolean dragMoved;
+    @Nullable private ScaleGestureDetector scaleDetector;
+
+    /** Told what the finger did to a widget. Only the builder listens. */
+    interface OnWidgetSelectedListener {
+        /** Picked by a tap, so the builder may bring its card into view. */
+        void onWidgetSelected(@Nullable DashboardWidgetLayout.Widget widget);
+
+        /**
+         * Taken hold of for a drag.
+         *
+         * <p>Separate from a tap because nothing may move on screen while a
+         * finger is down on it: scrolling the card into view here slid the
+         * preview out from under the finger, and the widget followed.
+         */
+        void onWidgetGrabbed(DashboardWidgetLayout.Widget widget);
+
+        /** Finished being moved or resized. */
+        void onWidgetChanged(DashboardWidgetLayout.Widget widget);
+    }
     /** The page {@link #pageLines} last chose, for per-page layout. */
     private int currentPage = 1;
     /**
@@ -77,6 +111,7 @@ public final class RearDashboardView extends View {
     private void initialize() {
         setLayerType(LAYER_TYPE_HARDWARE, null);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+        selectionPaint.setStyle(Paint.Style.STROKE);
         iconPaint.setStyle(Paint.Style.STROKE);
         iconPaint.setStrokeCap(Paint.Cap.ROUND);
         iconPaint.setStrokeJoin(Paint.Join.ROUND);
@@ -109,6 +144,97 @@ public final class RearDashboardView extends View {
         pageChangedListener = listener;
     }
 
+    /**
+     * Turns the view into something you can pick widgets in.
+     *
+     * <p>Only the builder's preview passes a listener. On the panel itself a
+     * tap must keep meaning nothing, so the rest of this stays inert.
+     */
+    void setOnWidgetSelectedListener(@Nullable OnWidgetSelectedListener listener) {
+        widgetSelectedListener = listener;
+        scaleDetector = listener == null ? null : new ScaleGestureDetector(getContext(),
+                new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                    @Override
+                    public boolean onScale(ScaleGestureDetector detector) {
+                        DashboardWidgetLayout.Widget widget = selectedWidget;
+                        if (widget == null) {
+                            return false;
+                        }
+                        DashboardWidgetLayout.saveScale(getContext(), widget,
+                                DashboardWidgetLayout.scale(getContext(), widget)
+                                        * detector.getScaleFactor());
+                        invalidate();
+                        return true;
+                    }
+
+                    @Override
+                    public void onScaleEnd(ScaleGestureDetector detector) {
+                        // Told once at the end rather than on every step: the
+                        // builder rebuilds its card list from this.
+                        DashboardWidgetLayout.Widget widget = selectedWidget;
+                        OnWidgetSelectedListener target = widgetSelectedListener;
+                        if (widget != null && target != null) {
+                            target.onWidgetChanged(widget);
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Gives widgets that have never been placed the place they occupy now.
+     *
+     * <p>Called on the way into the free layout, so it opens showing what was
+     * already on screen instead of a heap in the middle. Widgets that were
+     * placed before keep where they were put: switching away and back must not
+     * throw an arrangement away.
+     */
+    void seedFreePositions() {
+        for (Line line : drawnLines) {
+            if (DashboardWidgetLayout.hasFreePosition(getContext(), line.widget)) {
+                continue;
+            }
+            if (getWidth() <= 0 || getHeight() <= 0) {
+                continue;
+            }
+            DashboardWidgetLayout.saveFreePosition(getContext(), line.widget,
+                    line.bounds.centerX() / getWidth(),
+                    line.bounds.centerY() / getHeight());
+        }
+    }
+
+    /** The arrangement style in force for the page on screen. */
+    private DashboardSettings.Layout currentLayout() {
+        return DashboardWidgetLayout.loadPageLayout(getContext(), currentPage, settings.layout);
+    }
+
+    void setSelectedWidget(@Nullable DashboardWidgetLayout.Widget widget) {
+        if (selectedWidget == widget) {
+            return;
+        }
+        selectedWidget = widget;
+        invalidate();
+    }
+
+    @Nullable DashboardWidgetLayout.Widget getSelectedWidget() {
+        return selectedWidget;
+    }
+
+    /** The widget under a point, or null. Topmost first, so later lines win. */
+    @Nullable
+    private DashboardWidgetLayout.Widget widgetAt(float x, float y) {
+        for (int index = drawnLines.size() - 1; index >= 0; index--) {
+            Line line = drawnLines.get(index);
+            // A 126px-wide panel makes for small targets, so the strip is
+            // widened to something a finger can actually land on.
+            float slack = Math.max(6f, line.bounds.height() * 0.4f);
+            if (x >= line.bounds.left - slack && x <= line.bounds.right + slack
+                    && y >= line.bounds.top - slack && y <= line.bounds.bottom + slack) {
+                return line.widget;
+            }
+        }
+        return null;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -136,6 +262,9 @@ public final class RearDashboardView extends View {
         pageFlipPeriodMillis = 0L;
         float density = getResources().getDisplayMetrics().density;
         float shift = burnInShift(density);
+        shiftX = shift;
+        shiftY = -shift;
+        drawnLines.clear();
         canvas.save();
         canvas.translate(shift, -shift);
 
@@ -149,11 +278,34 @@ public final class RearDashboardView extends View {
             drawCorners(canvas, lines, density);
         } else if (layout == DashboardSettings.Layout.COMPACT) {
             drawCompact(canvas, lines, density);
+        } else if (layout == DashboardSettings.Layout.FREE) {
+            drawFree(canvas, lines, density);
         } else {
             drawStacked(canvas, lines, density);
         }
         canvas.restore();
+        drawSelection(canvas, density);
         schedulePageFlip();
+    }
+
+    /** Outlines the picked widget, so the preview says what is being edited. */
+    private void drawSelection(Canvas canvas, float density) {
+        if (selectedWidget == null || widgetSelectedListener == null) {
+            return;
+        }
+        for (Line line : drawnLines) {
+            if (line.widget != selectedWidget) {
+                continue;
+            }
+            float padding = 3f * density;
+            RectF box = new RectF(line.bounds);
+            box.inset(-padding, -padding);
+            selectionPaint.setColor(MaterialColors.getColor(this,
+                    androidx.appcompat.R.attr.colorPrimary, currentPalette.text));
+            selectionPaint.setStrokeWidth(Math.max(1f, 1.2f * density));
+            canvas.drawRoundRect(box, 6f * density, 6f * density, selectionPaint);
+            return;
+        }
     }
 
     /**
@@ -403,26 +555,98 @@ public final class RearDashboardView extends View {
         }
     }
 
+    /**
+     * Turns finger movement into a selection, a drag, or a page turn.
+     *
+     * <p>On the panel itself only the page turn exists: a tap there must keep
+     * meaning nothing. In the builder's preview the same view also picks a
+     * widget, and in the free layout drags it, which is the only place a
+     * position can be chosen directly rather than out of three alignments.
+     */
     @Override public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            touchStartX = event.getX();
-            return true;
-        }
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-            float distance = event.getX() - touchStartX;
-            if (Math.abs(distance) >= Math.max(18f, getWidth() * 0.18f)) {
-                int maxPage = 1;
-                for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values())
-                    maxPage = Math.max(maxPage, DashboardWidgetLayout.loadPage(getContext(), widget));
-                int current = selectedPage > 0 ? selectedPage
-                        : (int) ((snapshot.timestampMillis / 8_000L) % maxPage) + 1;
-                selectedPage = distance < 0 ? current % maxPage + 1
-                        : (current + maxPage - 2) % maxPage + 1;
-                invalidate();
+        ScaleGestureDetector detector = scaleDetector;
+        if (detector != null) {
+            detector.onTouchEvent(event);
+            if (detector.isInProgress()) {
+                draggedWidget = null;
+                return true;
             }
-            return true;
         }
-        return true;
+        boolean interactive = widgetSelectedListener != null;
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN: {
+                touchStartX = event.getX();
+                touchStartY = event.getY();
+                dragMoved = false;
+                draggedWidget = null;
+                if (interactive && currentLayout() == DashboardSettings.Layout.FREE) {
+                    DashboardWidgetLayout.Widget hit = widgetAt(event.getX(), event.getY());
+                    if (hit != null) {
+                        draggedWidget = hit;
+                        setSelectedWidget(hit);
+                        widgetSelectedListener.onWidgetGrabbed(hit);
+                        // Keep the grab point under the finger rather than
+                        // snapping the widget's middle to it.
+                        dragOffsetX = DashboardWidgetLayout.loadFreeX(getContext(), hit) * getWidth()
+                                - event.getX();
+                        dragOffsetY = DashboardWidgetLayout.loadFreeY(getContext(), hit) * getHeight()
+                                - event.getY();
+                        if (!DashboardWidgetLayout.hasFreePosition(getContext(), hit)) {
+                            dragOffsetX = 0f;
+                            dragOffsetY = 0f;
+                        }
+                        getParent().requestDisallowInterceptTouchEvent(true);
+                    }
+                }
+                return true;
+            }
+            case MotionEvent.ACTION_MOVE: {
+                if (draggedWidget == null) {
+                    return true;
+                }
+                if (Math.hypot(event.getX() - touchStartX, event.getY() - touchStartY) > 4f) {
+                    dragMoved = true;
+                }
+                DashboardWidgetLayout.saveFreePosition(getContext(), draggedWidget,
+                        (event.getX() + dragOffsetX) / Math.max(1, getWidth()),
+                        (event.getY() + dragOffsetY) / Math.max(1, getHeight()));
+                invalidate();
+                return true;
+            }
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP: {
+                if (draggedWidget != null) {
+                    DashboardWidgetLayout.Widget moved = draggedWidget;
+                    draggedWidget = null;
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                    if (dragMoved) {
+                        widgetSelectedListener.onWidgetChanged(moved);
+                        return true;
+                    }
+                }
+                float distance = event.getX() - touchStartX;
+                boolean swipe = Math.abs(distance) >= Math.max(18f, getWidth() * 0.18f);
+                if (interactive && !swipe) {
+                    DashboardWidgetLayout.Widget hit = widgetAt(event.getX(), event.getY());
+                    setSelectedWidget(hit);
+                    widgetSelectedListener.onWidgetSelected(hit);
+                    return true;
+                }
+                if (swipe) {
+                    int maxPage = 1;
+                    for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values())
+                        maxPage = Math.max(maxPage, DashboardWidgetLayout.loadPage(getContext(), widget));
+                    int current = selectedPage > 0 ? selectedPage
+                            : (int) ((snapshot.timestampMillis / 8_000L) % maxPage) + 1;
+                    selectedPage = distance < 0 ? current % maxPage + 1
+                            : (current + maxPage - 2) % maxPage + 1;
+                    invalidate();
+                }
+                return true;
+            }
+            default:
+                return true;
+        }
     }
 
     private List<Line> paginateLines(List<Line> source) {
@@ -505,6 +729,63 @@ public final class RearDashboardView extends View {
             return Icon.WEATHER_STORM;
         }
         return Icon.WEATHER_CLOUD;
+    }
+
+    /**
+     * Draws each widget where it was put.
+     *
+     * <p>The other layouts flow their widgets and work out the sizes, so there
+     * is nothing in them a finger could move. Here every widget carries its own
+     * place as a fraction of the panel, which is what makes dragging in the
+     * preview mean anything on a panel of a different size and density.
+     *
+     * <p>A widget that has never been placed falls back to an even column, so
+     * switching to this layout shows the same widgets in the same order rather
+     * than a heap in the middle.
+     */
+    private void drawFree(Canvas canvas, List<Line> lines, float density) {
+        if (lines.isEmpty()) {
+            return;
+        }
+        float scale = settings.textScalePercent / 100f;
+        float shortSide = Math.min(getWidth(), getHeight());
+        float normalSize = clamp(shortSide * 0.105f * scale, 12f * density, 36f * density);
+        float clockSize = clamp(shortSide * 0.24f * scale, 28f * density, 76f * density);
+        float padding = Math.min(6f * density, getWidth() * 0.04f);
+        int opacity = Math.round(settings.backgroundOpacityPercent * 2.55f);
+        if (opacity > 0) {
+            canvas.drawRoundRect(
+                    new RectF(padding, padding, getWidth() - padding, getHeight() - padding),
+                    20f * density, 20f * density, panelPaint);
+        }
+        for (int index = 0; index < lines.size(); index++) {
+            Line line = lines.get(index);
+            float size = (line.primary ? clockSize : normalSize) * line.scale;
+            textPaint.setTextSize(size);
+            textPaint.setFakeBoldText(line.primary);
+            float x;
+            float y;
+            if (DashboardWidgetLayout.hasFreePosition(getContext(), line.widget)) {
+                x = DashboardWidgetLayout.loadFreeX(getContext(), line.widget) * getWidth();
+                y = DashboardWidgetLayout.loadFreeY(getContext(), line.widget) * getHeight();
+            } else {
+                x = getWidth() / 2f;
+                y = getHeight() * (index + 1f) / (lines.size() + 1f);
+            }
+            Alignment alignment = alignmentFor(line);
+            float available;
+            if (alignment == Alignment.LEFT) {
+                available = Math.max(1f, getWidth() - padding - x);
+            } else if (alignment == Alignment.RIGHT) {
+                available = Math.max(1f, x - padding);
+            } else {
+                available = Math.max(1f, Math.min(x - padding, getWidth() - padding - x) * 2f);
+            }
+            // The stored point is the middle of the widget; text is drawn from
+            // its baseline, so the two have to be reconciled here.
+            float baseline = y - (textPaint.ascent() + textPaint.descent()) / 2f;
+            drawLine(canvas, line, x, baseline, available, alignment);
+        }
     }
 
     private void drawStacked(Canvas canvas, List<Line> lines, float density) {
@@ -792,6 +1073,13 @@ public final class RearDashboardView extends View {
         }
         textPaint.setTextAlign(Paint.Align.LEFT);
         canvas.drawText(fitted.toString(), startX + iconSize + gap, baseline, textPaint);
+        line.bounds.set(
+                startX + shiftX,
+                baseline + textPaint.ascent() + shiftY,
+                startX + totalWidth + shiftX,
+                baseline + textPaint.descent() + shiftY
+        );
+        drawnLines.add(line);
     }
 
     private void fitTextToWidth(Line line, float width) {
@@ -1151,6 +1439,15 @@ public final class RearDashboardView extends View {
         final float scale;
         final DashboardWidgetLayout.Position position;
         final DashboardWidgetLayout.Style style;
+        /**
+         * Where this line landed in the last frame, in view coordinates.
+         *
+         * <p>The renderer used to draw and forget, so there was nothing for a
+         * finger to hit: picking a widget meant finding its card in a list.
+         * Every layout draws through {@link #drawLine}, so recording it there
+         * covers all of them at once.
+         */
+        final RectF bounds = new RectF();
 
         Line(DashboardWidgetLayout.Widget widget, String text, boolean primary, Icon icon) {
             this.widget = widget;

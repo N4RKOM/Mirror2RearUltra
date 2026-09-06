@@ -51,6 +51,9 @@ final class DashboardWidgetLayout {
     private static final String PRESENCE_PREFIX = "presence_";
     private static final String GAP_PREFIX = "gap_";
     private static final String BURN_IN_SHIFT = "burn_in_shift";
+    private static final String SCALE_PREFIX = "scale_";
+    private static final String FREE_X_PREFIX = "free_x_";
+    private static final String FREE_Y_PREFIX = "free_y_";
     private static final String PAGE_LAYOUT_PREFIX = "layout_page_";
     private static final String PAGE_ORIENTATION_PREFIX = "orientation_page_";
 
@@ -77,18 +80,101 @@ final class DashboardWidgetLayout {
         prefs(context).edit().putString(ORDER, value.toString()).apply();
     }
 
+    /**
+     * The three-way control's reading of the widget's size.
+     *
+     * <p>Size is a continuous factor underneath - a pinch in the preview can
+     * land anywhere - so this reports whichever of the three steps the factor
+     * is nearest to. The control then shows something true rather than
+     * snapping back to a value the widget no longer has.
+     */
     static Size loadSize(Context context, Widget widget) {
-        try { return Size.valueOf(prefs(context).getString(SIZE_PREFIX + widget.name(), Size.NORMAL.name())); }
-        catch (IllegalArgumentException error) { return Size.NORMAL; }
+        float factor = scale(context, widget);
+        Size nearest = Size.NORMAL;
+        float best = Float.MAX_VALUE;
+        for (Size size : Size.values()) {
+            float distance = Math.abs(factorOf(size) - factor);
+            if (distance < best) {
+                best = distance;
+                nearest = size;
+            }
+        }
+        return nearest;
     }
 
     static void saveSize(Context context, Widget widget, Size size) {
-        prefs(context).edit().putString(SIZE_PREFIX + widget.name(), size.name()).apply();
+        prefs(context).edit()
+                .putString(SIZE_PREFIX + widget.name(), size.name())
+                .putInt(SCALE_PREFIX + widget.name(), Math.round(factorOf(size) * 1000f))
+                .apply();
+    }
+
+    /** Smallest and largest a widget may be scaled to by hand. */
+    static final float MIN_SCALE = 0.5f;
+    static final float MAX_SCALE = 2.2f;
+
+    static void saveScale(Context context, Widget widget, float factor) {
+        float clamped = Math.max(MIN_SCALE, Math.min(MAX_SCALE, factor));
+        prefs(context).edit()
+                .putInt(SCALE_PREFIX + widget.name(), Math.round(clamped * 1000f))
+                .apply();
     }
 
     static float scale(Context context, Widget widget) {
-        Size size = loadSize(context, widget);
+        int stored = prefs(context).getInt(SCALE_PREFIX + widget.name(), 0);
+        if (stored > 0) {
+            return Math.max(MIN_SCALE, Math.min(MAX_SCALE, stored / 1000f));
+        }
+        // Nothing stored: an arrangement made before the size was continuous,
+        // which kept only the three-way choice.
+        try {
+            return factorOf(Size.valueOf(prefs(context)
+                    .getString(SIZE_PREFIX + widget.name(), Size.NORMAL.name())));
+        } catch (IllegalArgumentException error) {
+            return 1f;
+        }
+    }
+
+    private static float factorOf(Size size) {
         return size == Size.SMALL ? 0.8f : size == Size.LARGE ? 1.25f : 1f;
+    }
+
+    /**
+     * Where a widget sits in the free arrangement, as a fraction of the panel.
+     *
+     * <p>Fractions rather than pixels: the builder's preview and the panel are
+     * different sizes at different densities, and a widget placed by finger in
+     * one has to land in the same place in the other.
+     */
+    static boolean hasFreePosition(Context context, Widget widget) {
+        return prefs(context).contains(FREE_X_PREFIX + widget.name());
+    }
+
+    static float loadFreeX(Context context, Widget widget) {
+        return clampFraction(prefs(context).getInt(FREE_X_PREFIX + widget.name(), 500) / 1000f);
+    }
+
+    static float loadFreeY(Context context, Widget widget) {
+        return clampFraction(prefs(context).getInt(FREE_Y_PREFIX + widget.name(), 500) / 1000f);
+    }
+
+    static void saveFreePosition(Context context, Widget widget, float x, float y) {
+        prefs(context).edit()
+                .putInt(FREE_X_PREFIX + widget.name(), Math.round(clampFraction(x) * 1000f))
+                .putInt(FREE_Y_PREFIX + widget.name(), Math.round(clampFraction(y) * 1000f))
+                .apply();
+    }
+
+    /** Forgets a widget's place, so the free layout falls back to the column. */
+    static void clearFreePosition(Context context, Widget widget) {
+        prefs(context).edit()
+                .remove(FREE_X_PREFIX + widget.name())
+                .remove(FREE_Y_PREFIX + widget.name())
+                .apply();
+    }
+
+    private static float clampFraction(float value) {
+        return Math.max(0.02f, Math.min(0.98f, value));
     }
 
     static Position loadPosition(Context context, Widget widget) {

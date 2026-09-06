@@ -278,6 +278,7 @@
         <item>Stacked</item>
         <item>Corners</item>
         <item>Compact</item>
+        <item>Free</item>
     </string-array>
     <string-array name="dashboard_theme_entries">
         <item>System</item>
@@ -324,6 +325,9 @@
     <string name="dashboard_named_template_delete">Delete</string>
     <string name="dashboard_named_template_delete_message">Delete the template «%1$s»?</string>
     <string name="dashboard_named_template_full">No room for another template</string>
+    <string name="dashboard_builder_layout_free">View: free</string>
+    <string name="dashboard_builder_preview_pick_hint">Tap a widget in the preview to reach its settings. In the free view you can also drag it and pinch to resize.</string>
+    <string name="dashboard_builder_preview_free_hint">Drag a widget in the preview to place it, and pinch to resize. Tap one to reach its settings.</string>
     <string name="dashboard_custom_templates_title">My templates</string>
     <string name="dashboard_custom_template_save">Save current</string>
     <string name="dashboard_custom_template_apply">Apply saved</string>

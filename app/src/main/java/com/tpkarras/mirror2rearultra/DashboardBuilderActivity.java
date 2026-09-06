@@ -49,6 +49,10 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private MaterialButtonToggleGroup pagesSegment;
     private MaterialButtonToggleGroup previewPagesSegment;
     private TextView previewPageNote;
+    private androidx.core.widget.NestedScrollView scroll;
+    private TextView previewHint;
+    /** The widget picked in the preview, outlined there and in its card. */
+    @Nullable private DashboardWidgetLayout.Widget selectedWidget;
     private LinearLayout namedTemplates;
     private TextView namedTemplatesEmpty;
     private MaterialButton addNamedTemplateButton;
@@ -80,6 +84,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         pagesSegment = findViewById(R.id.dashboard_builder_pages_segment);
         previewPagesSegment = findViewById(R.id.dashboard_builder_preview_pages);
         previewPageNote = findViewById(R.id.dashboard_builder_preview_page_note);
+        scroll = findViewById(R.id.dashboard_builder_scroll);
+        previewHint = findViewById(R.id.dashboard_builder_preview_hint);
         namedTemplates = findViewById(R.id.dashboard_named_templates);
         namedTemplatesEmpty = findViewById(R.id.dashboard_named_templates_empty);
         addNamedTemplateButton = findViewById(R.id.dashboard_named_template_add);
@@ -88,6 +94,26 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         layoutButton.setOnClickListener(view -> cycleLayout());
         widgets.addAll(DashboardWidgetLayout.loadOrder(this));
         rows.setOnDragListener(this::handleDrop);
+        // The preview is the other half of the list: tapping a widget there
+        // picks it here, and in the free layout dragging it moves it.
+        preview.setOnWidgetSelectedListener(new RearDashboardView.OnWidgetSelectedListener() {
+            @Override
+            public void onWidgetSelected(@Nullable DashboardWidgetLayout.Widget widget) {
+                selectWidget(widget, true);
+            }
+
+            @Override
+            public void onWidgetGrabbed(DashboardWidgetLayout.Widget widget) {
+                selectWidget(widget, false);
+            }
+
+            @Override
+            public void onWidgetChanged(DashboardWidgetLayout.Widget widget) {
+                renderRows();
+                refreshPreview();
+                selectWidget(widget, false);
+            }
+        });
         refreshPageControls();
         addNamedTemplateButton.setOnClickListener(view -> promptForNewTemplate());
         renderNamedTemplates();
@@ -355,6 +381,46 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Picks a widget in both halves of the screen.
+     *
+     * <p>Selecting in the preview scrolls its card into view, because the
+     * point of tapping a widget is to reach its controls without hunting
+     * through the list for it.
+     */
+    private void selectWidget(@Nullable DashboardWidgetLayout.Widget widget, boolean scrollToCard) {
+        selectedWidget = widget;
+        preview.setSelectedWidget(widget);
+        for (int index = 0; index < rows.getChildCount(); index++) {
+            View child = rows.getChildAt(index);
+            if (!(child instanceof MaterialCardView)) {
+                continue;
+            }
+            MaterialCardView card = (MaterialCardView) child;
+            boolean picked = card.getTag() == widget && widget != null;
+            card.setStrokeWidth(picked ? dp(2) : 0);
+            if (picked) {
+                card.setStrokeColor(com.google.android.material.color.MaterialColors.getColor(
+                        card, androidx.appcompat.R.attr.colorPrimary));
+                if (scrollToCard && scroll != null) {
+                    scroll.post(() -> scroll.smoothScrollTo(0, Math.max(0, topInScroll(card) - dp(24))));
+                }
+            }
+        }
+    }
+
+    /** How far down the scrolling page a view sits. */
+    private int topInScroll(View view) {
+        int top = 0;
+        View current = view;
+        while (current != null && current != scroll) {
+            top += current.getTop();
+            android.view.ViewParent parent = current.getParent();
+            current = parent instanceof View ? (View) parent : null;
+        }
+        return top;
+    }
+
     /** A page heading, tagged with its number so a drop can read it back. */
     private TextView pageHeader(int page) {
         TextView header = new TextView(this);
@@ -388,7 +454,17 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         card.setTag(widget);
         card.setCardBackgroundColor(androidx.core.content.ContextCompat.getColor(
                 this, R.color.hyper_surface_grouped));
-        card.setRadius(dp(20)); card.setCardElevation(0f); card.setStrokeWidth(0);
+        card.setRadius(dp(20)); card.setCardElevation(0f);
+        boolean picked = widget == selectedWidget;
+        card.setStrokeWidth(picked ? dp(2) : 0);
+        if (picked) {
+            card.setStrokeColor(com.google.android.material.color.MaterialColors.getColor(
+                    card, androidx.appcompat.R.attr.colorPrimary));
+        }
+        // Tapping the card is the way back: it outlines the widget in the
+        // preview, so a name in the list and a line on the panel can be
+        // matched up in either direction.
+        card.setOnClickListener(view -> selectWidget(widget, false));
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.VERTICAL);
         row.setPadding(dp(16), dp(8), dp(8), dp(12));
@@ -715,6 +791,11 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         orientationButton.setText(orientationLabel(orientation));
         layoutButton.setText(layoutLabel(
                 DashboardWidgetLayout.loadPageLayout(this, previewPage, settings.layout)));
+        boolean free = DashboardWidgetLayout.loadPageLayout(this, previewPage, settings.layout)
+                == DashboardSettings.Layout.FREE;
+        previewHint.setText(free
+                ? R.string.dashboard_builder_preview_free_hint
+                : R.string.dashboard_builder_preview_pick_hint);
         sizePreviewToPanel(orientation);
     }
 
@@ -848,7 +929,14 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 DashboardWidgetLayout.loadPageLayout(this, previewPage, settings.layout);
         DashboardSettings.Layout next = old == DashboardSettings.Layout.STACKED
                 ? DashboardSettings.Layout.CORNERS : old == DashboardSettings.Layout.CORNERS
-                ? DashboardSettings.Layout.COMPACT : DashboardSettings.Layout.STACKED;
+                ? DashboardSettings.Layout.COMPACT
+                : old == DashboardSettings.Layout.COMPACT
+                ? DashboardSettings.Layout.FREE : DashboardSettings.Layout.STACKED;
+        if (next == DashboardSettings.Layout.FREE) {
+            // Seeded from the frame still on screen, so the free layout opens
+            // where the flowed one left off.
+            preview.seedFreePositions();
+        }
         // The first page is the panel-wide setting the rear-panel screen shows,
         // so it is written there; later pages are overrides of it.
         if (previewPage <= 1) {
@@ -1047,6 +1135,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 ? R.string.dashboard_builder_layout_corners
                 : layout == DashboardSettings.Layout.COMPACT
                 ? R.string.dashboard_builder_layout_compact
+                : layout == DashboardSettings.Layout.FREE
+                ? R.string.dashboard_builder_layout_free
                 : R.string.dashboard_builder_layout_stacked);
     }
 

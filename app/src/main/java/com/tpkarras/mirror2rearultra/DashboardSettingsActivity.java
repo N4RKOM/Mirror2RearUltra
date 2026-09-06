@@ -182,11 +182,23 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * The label for an enum value, without trusting the array to match it.
+     *
+     * <p>These arrays are indexed by ordinal, so adding a value to one of the
+     * enums and forgetting the string array took the whole screen down with an
+     * index out of bounds. A missing label is a defect worth fixing, but not
+     * one worth a crash on the app's main settings page.
+     */
+    private String labelAt(String[] labels, int index) {
+        return index >= 0 && index < labels.length ? labels[index] : "";
+    }
+
     private void render(DashboardSettings settings) {
         bindingUi = true;
-        modeInput.setValue(modeLabels[settings.contentMode.ordinal()]);
-        layoutInput.setValue(layoutLabels[settings.layout.ordinal()]);
-        themeInput.setValue(themeLabels[settings.theme.ordinal()]);
+        modeInput.setValue(labelAt(modeLabels, settings.contentMode.ordinal()));
+        layoutInput.setValue(labelAt(layoutLabels, settings.layout.ordinal()));
+        themeInput.setValue(labelAt(themeLabels, settings.theme.ordinal()));
         int shiftDp = DashboardWidgetLayout.loadBurnInShiftDp(this);
         int burnInIndex = 2;
         for (int index = 0; index < BURN_IN_SHIFTS_DP.length; index++) {

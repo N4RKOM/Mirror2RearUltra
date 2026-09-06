@@ -4,6 +4,7 @@
         <item>Столбцом</item>
         <item>По углам</item>
         <item>Компактно</item>
+        <item>Свободно</item>
     </string-array>
     <string-array name="dashboard_mode_entries">
         <item>Только зеркало</item>
@@ -155,6 +156,9 @@
     <string name="dashboard_named_template_delete">Удалить</string>
     <string name="dashboard_named_template_delete_message">Удалить шаблон «%1$s»?</string>
     <string name="dashboard_named_template_full">Больше шаблонов сохранить нельзя</string>
+    <string name="dashboard_builder_layout_free">Вид: свободный</string>
+    <string name="dashboard_builder_preview_pick_hint">Нажмите на виджет в предпросмотре, чтобы попасть к его настройкам. В свободном виде его можно ещё перетаскивать и менять размер щипком.</string>
+    <string name="dashboard_builder_preview_free_hint">Перетаскивайте виджеты в предпросмотре, размер меняется щипком. Нажатие открывает его настройки.</string>
     <string name="dashboard_custom_templates_title">Мои шаблоны</string>
     <string name="dashboard_custom_text_help">До 60 символов.</string>
     <string name="dashboard_custom_text_hint">Текст на заднем экране</string>

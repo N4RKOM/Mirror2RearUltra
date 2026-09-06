@@ -6,7 +6,15 @@ final class DashboardSettings {
     enum Layout {
         STACKED,
         CORNERS,
-        COMPACT
+        COMPACT,
+        /**
+         * Widgets sit where they were put rather than being flowed.
+         *
+         * <p>The other three place widgets for you, which is why they cannot
+         * offer a widget dragged to a corner. This one keeps a position per
+         * widget instead.
+         */
+        FREE
     }
 
     enum Theme {

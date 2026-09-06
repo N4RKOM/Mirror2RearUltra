@@ -25,6 +25,7 @@
         app:navigationIcon="@drawable/ic_hyper_back" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/dashboard_builder_scroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -105,6 +106,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- What the preview responds to depends on the layout, so the
+                 line is written by DashboardBuilderActivity. -->
+            <TextView
+                android:id="@+id/dashboard_builder_preview_hint"
+                style="@style/HyperOS.GroupFootnote"
+                android:accessibilityLiveRegion="polite"
+                android:text="@string/dashboard_builder_preview_pick_hint" />
 
             <!-- The in-app preview can only approximate a 126x294 panel at a
                  different density, so legibility is checked on the panel. -->

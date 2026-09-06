@@ -93,6 +93,16 @@ final class DashboardTemplateStore {
                     DashboardWidgetLayout.loadPresence(context, widget).name());
             out.putString(prefix + "gap_" + widget.name(),
                     DashboardWidgetLayout.loadGap(context, widget).name());
+            // The continuous size and the free position, which the three-way
+            // size control and the flowed layouts never touch.
+            out.putInt(prefix + "scale_" + widget.name(),
+                    Math.round(DashboardWidgetLayout.scale(context, widget) * 1000f));
+            out.putBoolean(prefix + "placed_" + widget.name(),
+                    DashboardWidgetLayout.hasFreePosition(context, widget));
+            out.putInt(prefix + "free_x_" + widget.name(),
+                    Math.round(DashboardWidgetLayout.loadFreeX(context, widget) * 1000f));
+            out.putInt(prefix + "free_y_" + widget.name(),
+                    Math.round(DashboardWidgetLayout.loadFreeY(context, widget) * 1000f));
         }
         out.putString(prefix + "order", serializedOrder.toString()).apply();
     }
@@ -162,6 +172,17 @@ final class DashboardTemplateStore {
                     in.getString(prefix + "gap_" + widget.name(),
                             DashboardWidgetLayout.Gap.NONE.name()))); }
             catch (IllegalArgumentException ignored) {}
+            int scale = in.getInt(prefix + "scale_" + widget.name(), 0);
+            if (scale > 0) {
+                DashboardWidgetLayout.saveScale(context, widget, scale / 1000f);
+            }
+            if (in.getBoolean(prefix + "placed_" + widget.name(), false)) {
+                DashboardWidgetLayout.saveFreePosition(context, widget,
+                        in.getInt(prefix + "free_x_" + widget.name(), 500) / 1000f,
+                        in.getInt(prefix + "free_y_" + widget.name(), 500) / 1000f);
+            } else {
+                DashboardWidgetLayout.clearFreePosition(context, widget);
+            }
         }
         MirrorSettings.saveDashboardSettings(context, settings);
         return true;
