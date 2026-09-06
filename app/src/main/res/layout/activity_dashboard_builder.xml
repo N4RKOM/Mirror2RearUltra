@@ -121,6 +121,13 @@
                     android:text="@string/dashboard_builder_snap" />
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/dashboard_builder_overflow"
+                style="@style/HyperOS.GroupFootnote"
+                android:accessibilityLiveRegion="polite"
+                android:textColor="@color/hyper_accent"
+                android:visibility="gone" />
+
             <!-- What the preview responds to depends on the layout, so the
                  line is written by DashboardBuilderActivity. -->
             <TextView

@@ -51,6 +51,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private TextView previewPageNote;
     private androidx.core.widget.NestedScrollView scroll;
     private TextView previewHint;
+    private TextView overflowNote;
     private View snapGroup;
     private com.google.android.material.materialswitch.MaterialSwitch snapSwitch;
     /** Guards the switch while it is being written from stored state. */
@@ -90,6 +91,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         previewPageNote = findViewById(R.id.dashboard_builder_preview_page_note);
         scroll = findViewById(R.id.dashboard_builder_scroll);
         previewHint = findViewById(R.id.dashboard_builder_preview_hint);
+        overflowNote = findViewById(R.id.dashboard_builder_overflow);
         snapGroup = findViewById(R.id.dashboard_builder_snap_group);
         snapSwitch = findViewById(R.id.dashboard_builder_snap_switch);
         snapSwitch.setOnCheckedChangeListener((button, checked) -> {
@@ -822,6 +824,16 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 ? R.string.dashboard_builder_preview_free_hint
                 : R.string.dashboard_builder_preview_pick_hint);
         snapGroup.setVisibility(free ? View.VISIBLE : View.GONE);
+        // Say when the panel has run out of room, rather than leaving the
+        // preview to cycle through widgets with no explanation of why.
+        preview.post(() -> {
+            int overflow = preview.overflowCount();
+            overflowNote.setVisibility(overflow > 0 ? View.VISIBLE : View.GONE);
+            if (overflow > 0) {
+                overflowNote.setText(getResources().getQuantityString(
+                        R.plurals.dashboard_builder_overflow, overflow, overflow));
+            }
+        });
         bindingSnap = true;
         snapSwitch.setChecked(DashboardWidgetLayout.isGridSnapEnabled(this));
         bindingSnap = false;
@@ -941,7 +953,13 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         if (display == null) {
             return 0f;
         }
-        return createDisplayContext(display).getResources().getDisplayMetrics().density;
+        // The display's own metrics rather than a context's: a display context
+        // reports the density this screen was configured with, which is the
+        // phone's, and sizing the preview against that made it a drawing of
+        // the wrong panel.
+        android.util.DisplayMetrics metrics = new android.util.DisplayMetrics();
+        display.getRealMetrics(metrics);
+        return metrics.density;
     }
 
     /** Physical size of the rear panel, or null when it cannot be read. */

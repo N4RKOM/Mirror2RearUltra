@@ -858,18 +858,85 @@ public final class RearDashboardView extends View {
         invalidate();
     }
 
+    /**
+     * How many of these lines the panel can actually hold at once.
+     *
+     * <p>It used to be five, whatever the panel, the text size or the sizes
+     * the widgets had been given. The panel holds seven or eight at the normal
+     * size, so a sixth widget was pushed into a rotation nobody asked for -
+     * invisible in the preview, and belonging to no page the builder lists, so
+     * there was no way to get at it. This measures the lines the same way
+     * {@link #drawStacked} lays them out, so what fits is shown.
+     */
+    private int lineCapacity(List<Line> source) {
+        float density = contentDensity();
+        float scale = settings.textScalePercent / 100f;
+        float shortSide = Math.min(getWidth(), getHeight());
+        float normalSize = clamp(shortSide * 0.105f * scale, 12f * density, 36f * density);
+        float clockSize = clamp(shortSide * 0.24f * scale, 28f * density, 76f * density);
+        float gap = Math.min(8f * density, getHeight() * 0.025f);
+        float available = getHeight() - 2f * Math.min(12f * density, getWidth() * 0.06f);
+        float used = 0f;
+        int fits = 0;
+        for (Line line : source) {
+            float height = (line.primary ? clockSize * 1.12f : normalSize * 1.35f) * line.scale;
+            float before = fits == 0 ? 0f
+                    : gap * (1f + DashboardWidgetLayout.gapMultiplier(getContext(), line.widget));
+            if (fits > 0 && used + before + height > available) {
+                break;
+            }
+            used += before + height;
+            fits++;
+        }
+        return Math.max(1, fits);
+    }
+
+    /**
+     * How many widgets are on the page but cannot be shown at once, or zero.
+     *
+     * <p>The panel falls back to cycling them, which is better than dropping
+     * them but says nothing about why the panel keeps changing. The builder
+     * asks so that it can.
+     */
+    int overflowCount() {
+        if (currentLayout() == DashboardSettings.Layout.FREE) {
+            return 0;
+        }
+        List<Line> lines = createLines();
+        int maxPage = 1;
+        for (Line line : lines) maxPage = Math.max(maxPage,
+                DashboardWidgetLayout.loadPage(getContext(), line.widget));
+        if (maxPage > 1) {
+            List<Line> onPage = new ArrayList<>();
+            int page = selectedPage > 0 ? Math.min(selectedPage, maxPage) : currentPage;
+            for (Line line : lines) {
+                if (DashboardWidgetLayout.loadPage(getContext(), line.widget) == page) {
+                    onPage.add(line);
+                }
+            }
+            lines = onPage;
+        }
+        return Math.max(0, lines.size() - lineCapacity(lines));
+    }
+
     private List<Line> paginateLines(List<Line> source) {
-        int capacity = 5;
+        // Nothing to overflow in the free layout: the widgets are where they
+        // were put, they do not stack, and splitting a hand-made arrangement
+        // across a rotation only hides half of it.
+        if (currentLayout() == DashboardSettings.Layout.FREE) {
+            return source;
+        }
+        int capacity = lineCapacity(source);
         if (source.size() <= capacity) {
             return source;
         }
+        // The clock used to be pinned to every page so the time was always
+        // up. It read as the same widget appearing twice, and it spent a row
+        // on each page saying what the previous page had already said, so
+        // every page is now simply a share of the lines.
         List<Line> result = new ArrayList<>(capacity);
         int start = 0;
-        if (source.get(0).primary) {
-            result.add(source.get(0));
-            start = 1;
-        }
-        int pageSize = capacity - result.size();
+        int pageSize = capacity;
         int secondaryCount = source.size() - start;
         int pageCount = (secondaryCount + pageSize - 1) / pageSize;
         // Spread the rows over the pages rather than filling the first and
