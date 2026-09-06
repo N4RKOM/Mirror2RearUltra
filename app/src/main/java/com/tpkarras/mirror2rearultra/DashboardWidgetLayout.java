@@ -110,7 +110,7 @@ final class DashboardWidgetLayout {
     }
 
     /** Smallest and largest a widget may be scaled to by hand. */
-    static final float MIN_SCALE = 0.5f;
+    static final float MIN_SCALE = 0.4f;
     static final float MAX_SCALE = 2.2f;
 
     static void saveScale(Context context, Widget widget, float factor) {

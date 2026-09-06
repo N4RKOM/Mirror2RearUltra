@@ -13,7 +13,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 
 import androidx.annotation.Nullable;
 
@@ -54,9 +53,13 @@ public final class RearDashboardView extends View {
     private float dragOffsetX;
     private float dragOffsetY;
     private boolean dragMoved;
-    @Nullable private ScaleGestureDetector scaleDetector;
-    /** True from the start of a pinch until every finger has come up. */
-    private boolean scaling;
+    /** Where the dragged widget was before the finger touched it. */
+    private float dragStartFractionX;
+    private float dragStartFractionY;
+    private boolean dragStartHadPosition;
+    /** True from the moment a second finger lands until every finger is up. */
+    private boolean pinching;
+    @Nullable private DashboardWidgetLayout.Widget pinchedWidget;
     private float scaleAtGestureStart = 1f;
     private float spanAtGestureStart = 1f;
 
@@ -156,61 +159,6 @@ public final class RearDashboardView extends View {
      */
     void setOnWidgetSelectedListener(@Nullable OnWidgetSelectedListener listener) {
         widgetSelectedListener = listener;
-        if (listener == null) {
-            scaleDetector = null;
-            return;
-        }
-        scaleDetector = new ScaleGestureDetector(getContext(),
-                new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-                    @Override
-                    public boolean onScaleBegin(ScaleGestureDetector detector) {
-                        DashboardWidgetLayout.Widget widget = selectedWidget;
-                        if (widget == null) {
-                            return false;
-                        }
-                        // The size at the start of the gesture and the span at
-                        // the start of it. Multiplying the stored size by each
-                        // step's factor instead accumulated rounding - the
-                        // value is kept to a thousandth - so a pinch that went
-                        // out and back came home smaller every time.
-                        scaleAtGestureStart = DashboardWidgetLayout.scale(getContext(), widget);
-                        spanAtGestureStart = Math.max(1f, detector.getCurrentSpan());
-                        scaling = true;
-                        draggedWidget = null;
-                        if (getParent() != null) {
-                            getParent().requestDisallowInterceptTouchEvent(true);
-                        }
-                        return true;
-                    }
-
-                    @Override
-                    public boolean onScale(ScaleGestureDetector detector) {
-                        DashboardWidgetLayout.Widget widget = selectedWidget;
-                        if (widget == null) {
-                            return false;
-                        }
-                        DashboardWidgetLayout.saveScale(getContext(), widget,
-                                scaleAtGestureStart
-                                        * (detector.getCurrentSpan() / spanAtGestureStart));
-                        invalidate();
-                        return true;
-                    }
-
-                    @Override
-                    public void onScaleEnd(ScaleGestureDetector detector) {
-                        // Told once at the end rather than on every step: the
-                        // builder rebuilds its card list from this.
-                        DashboardWidgetLayout.Widget widget = selectedWidget;
-                        OnWidgetSelectedListener target = widgetSelectedListener;
-                        if (widget != null && target != null) {
-                            target.onWidgetChanged(widget);
-                        }
-                    }
-                });
-        // Off by default it is not: a double tap followed by a drag would
-        // otherwise resize with one finger, in the middle of a drag.
-        scaleDetector.setQuickScaleEnabled(false);
-        scaleDetector.setStylusScaleEnabled(false);
     }
 
     /**
@@ -613,28 +561,21 @@ public final class RearDashboardView extends View {
      * widget, and in the free layout drags it, which is the only place a
      * position can be chosen directly rather than out of three alignments.
      */
+    /**
+     * Turns finger movement into a selection, a drag, a pinch, or a page turn.
+     *
+     * <p>On the panel itself only the page turn exists: a tap there must keep
+     * meaning nothing. In the builder's preview the same view also picks a
+     * widget, and in the free layout moves and resizes it.
+     *
+     * <p>The pinch is tracked here rather than by {@link
+     * android.view.ScaleGestureDetector}, which only starts once the fingers
+     * have moved a threshold apart. That threshold cost the gesture both ends:
+     * the widget went on following the first finger until the detector woke
+     * up, and a pinch inwards had already spent much of its travel by the time
+     * the reference span was taken, so it could barely shrink anything.
+     */
     @Override public boolean onTouchEvent(MotionEvent event) {
-        ScaleGestureDetector detector = scaleDetector;
-        if (detector != null) {
-            detector.onTouchEvent(event);
-            if (detector.isInProgress()) {
-                draggedWidget = null;
-                return true;
-            }
-        }
-        // The last finger of a pinch coming up is not a tap. It used to be
-        // read as one, which picked the widget again and scrolled the page
-        // down to its card the moment the pinch finished.
-        if (scaling) {
-            if (event.getActionMasked() == MotionEvent.ACTION_UP
-                    || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-                scaling = false;
-                if (getParent() != null) {
-                    getParent().requestDisallowInterceptTouchEvent(false);
-                }
-            }
-            return true;
-        }
         boolean interactive = widgetSelectedListener != null;
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
@@ -642,63 +583,89 @@ public final class RearDashboardView extends View {
                 touchStartY = event.getY();
                 dragMoved = false;
                 draggedWidget = null;
-                scaling = false;
+                pinching = false;
+                pinchedWidget = null;
                 if (interactive && currentLayout() == DashboardSettings.Layout.FREE) {
                     DashboardWidgetLayout.Widget hit = widgetAt(event.getX(), event.getY());
                     if (hit != null) {
-                        draggedWidget = hit;
-                        setSelectedWidget(hit);
-                        widgetSelectedListener.onWidgetGrabbed(hit);
-                        // Keep the grab point under the finger rather than
-                        // snapping the widget's middle to it.
-                        dragOffsetX = DashboardWidgetLayout.loadFreeX(getContext(), hit) * getWidth()
-                                - event.getX();
-                        dragOffsetY = DashboardWidgetLayout.loadFreeY(getContext(), hit) * getHeight()
-                                - event.getY();
-                        if (!DashboardWidgetLayout.hasFreePosition(getContext(), hit)) {
-                            dragOffsetX = 0f;
-                            dragOffsetY = 0f;
-                        }
-                        if (getParent() != null) {
-                            getParent().requestDisallowInterceptTouchEvent(true);
-                        }
+                        beginDrag(hit, event.getX(), event.getY());
                     }
                 }
                 return true;
             }
+            case MotionEvent.ACTION_POINTER_DOWN: {
+                if (!interactive || event.getPointerCount() < 2) {
+                    return true;
+                }
+                // A second finger means a pinch, not a drag. Whatever the one
+                // finger dragged on the way here is put back: a pinch should
+                // resize a widget, not shove it across the panel first.
+                if (draggedWidget != null) {
+                    restoreDragStart();
+                }
+                // Whatever the fingers are actually around, falling back to
+                // the picked widget when they are around nothing: pinching on
+                // a widget should resize that one, not the last one tapped.
+                DashboardWidgetLayout.Widget target = widgetAt(
+                        (event.getX(0) + event.getX(1)) / 2f,
+                        (event.getY(0) + event.getY(1)) / 2f);
+                if (target == null) {
+                    target = selectedWidget;
+                }
+                if (target == null) {
+                    return true;
+                }
+                draggedWidget = null;
+                pinchedWidget = target;
+                pinching = true;
+                setSelectedWidget(target);
+                widgetSelectedListener.onWidgetGrabbed(target);
+                scaleAtGestureStart = DashboardWidgetLayout.scale(getContext(), target);
+                spanAtGestureStart = Math.max(1f, spanOf(event));
+                if (getParent() != null) {
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                }
+                return true;
+            }
             case MotionEvent.ACTION_MOVE: {
+                if (pinching) {
+                    if (pinchedWidget != null && event.getPointerCount() >= 2) {
+                        DashboardWidgetLayout.saveScale(getContext(), pinchedWidget,
+                                scaleAtGestureStart * (spanOf(event) / spanAtGestureStart));
+                        invalidate();
+                    }
+                    return true;
+                }
                 if (draggedWidget == null) {
                     return true;
                 }
                 if (Math.hypot(event.getX() - touchStartX, event.getY() - touchStartY) > 4f) {
                     dragMoved = true;
                 }
-                // Held to the same range the drawing is held to. Storing a
-                // point the panel cannot show left a dead zone at each edge:
-                // the widget stopped, the stored position carried on, and
-                // dragging back did nothing until it caught up.
-                float edge = Math.min(6f * getResources().getDisplayMetrics().density,
-                        getWidth() * 0.04f);
-                RectF box = boundsOf(draggedWidget);
-                float halfWidth = box == null ? 0f : box.width() / 2f;
-                float halfHeight = box == null ? 0f : box.height() / 2f;
-                float x = clampBetween(event.getX() + dragOffsetX,
-                        edge + halfWidth, getWidth() - edge - halfWidth);
-                float y = clampBetween(event.getY() + dragOffsetY,
-                        edge + halfHeight, getHeight() - edge - halfHeight);
-                DashboardWidgetLayout.saveFreePosition(getContext(), draggedWidget,
-                        x / Math.max(1, getWidth()), y / Math.max(1, getHeight()));
-                invalidate();
+                moveDragTo(event.getX(), event.getY());
                 return true;
             }
+            case MotionEvent.ACTION_POINTER_UP:
+                // One finger left: stop resizing, but do not let what remains
+                // of the gesture be read as a drag or a tap.
+                return true;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
+                if (getParent() != null) {
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                }
+                if (pinching) {
+                    DashboardWidgetLayout.Widget resized = pinchedWidget;
+                    pinching = false;
+                    pinchedWidget = null;
+                    if (resized != null) {
+                        widgetSelectedListener.onWidgetChanged(resized);
+                    }
+                    return true;
+                }
                 if (draggedWidget != null) {
                     DashboardWidgetLayout.Widget moved = draggedWidget;
                     draggedWidget = null;
-                    if (getParent() != null) {
-                        getParent().requestDisallowInterceptTouchEvent(false);
-                    }
                     if (dragMoved) {
                         widgetSelectedListener.onWidgetChanged(moved);
                         return true;
@@ -727,6 +694,59 @@ public final class RearDashboardView extends View {
             default:
                 return true;
         }
+    }
+
+    /** Distance between the first two fingers. */
+    private static float spanOf(MotionEvent event) {
+        return (float) Math.hypot(
+                event.getX(0) - event.getX(1),
+                event.getY(0) - event.getY(1));
+    }
+
+    private void beginDrag(DashboardWidgetLayout.Widget widget, float x, float y) {
+        draggedWidget = widget;
+        setSelectedWidget(widget);
+        widgetSelectedListener.onWidgetGrabbed(widget);
+        dragStartHadPosition = DashboardWidgetLayout.hasFreePosition(getContext(), widget);
+        dragStartFractionX = DashboardWidgetLayout.loadFreeX(getContext(), widget);
+        dragStartFractionY = DashboardWidgetLayout.loadFreeY(getContext(), widget);
+        // Keep the grab point under the finger rather than snapping the
+        // widget's middle to it.
+        dragOffsetX = dragStartHadPosition ? dragStartFractionX * getWidth() - x : 0f;
+        dragOffsetY = dragStartHadPosition ? dragStartFractionY * getHeight() - y : 0f;
+        if (getParent() != null) {
+            getParent().requestDisallowInterceptTouchEvent(true);
+        }
+    }
+
+    /** Undoes whatever a drag did, for a gesture that turned out to be a pinch. */
+    private void restoreDragStart() {
+        if (draggedWidget == null) {
+            return;
+        }
+        if (dragStartHadPosition) {
+            DashboardWidgetLayout.saveFreePosition(
+                    getContext(), draggedWidget, dragStartFractionX, dragStartFractionY);
+        } else {
+            DashboardWidgetLayout.clearFreePosition(getContext(), draggedWidget);
+        }
+        invalidate();
+    }
+
+    private void moveDragTo(float x, float y) {
+        // Held to the same range the drawing is held to. Storing a point the
+        // panel cannot show left a dead zone at each edge: the widget stopped,
+        // the stored position carried on, and dragging back did nothing until
+        // it caught up.
+        float edge = Math.min(6f * getResources().getDisplayMetrics().density, getWidth() * 0.04f);
+        RectF box = boundsOf(draggedWidget);
+        float halfWidth = box == null ? 0f : box.width() / 2f;
+        float halfHeight = box == null ? 0f : box.height() / 2f;
+        float placedX = clampBetween(x + dragOffsetX, edge + halfWidth, getWidth() - edge - halfWidth);
+        float placedY = clampBetween(y + dragOffsetY, edge + halfHeight, getHeight() - edge - halfHeight);
+        DashboardWidgetLayout.saveFreePosition(getContext(), draggedWidget,
+                placedX / Math.max(1, getWidth()), placedY / Math.max(1, getHeight()));
+        invalidate();
     }
 
     private List<Line> paginateLines(List<Line> source) {
