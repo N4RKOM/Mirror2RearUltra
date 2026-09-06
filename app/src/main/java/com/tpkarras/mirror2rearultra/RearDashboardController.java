@@ -2,7 +2,6 @@ package com.tpkarras.mirror2rearultra;
 
 import android.Manifest;
 import android.app.AlarmManager;
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,10 +20,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.os.StatFs;
-import android.os.Environment;
-import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
 import android.provider.CalendarContract;
 import android.net.Uri;
 
@@ -482,26 +477,10 @@ final class RearDashboardController implements
         long now = SystemClock.elapsedRealtime();
         if (now - systemStatsUpdatedAt < 30_000L) return;
         systemStatsUpdatedAt = now;
-        ConnectivityManager connectivity = context.getSystemService(ConnectivityManager.class);
-        NetworkCapabilities capabilities = connectivity == null ? null
-                : connectivity.getNetworkCapabilities(connectivity.getActiveNetwork());
-        if (capabilities == null) networkSummary = context.getString(R.string.dashboard_network_offline);
-        else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))
-            networkSummary = context.getString(R.string.dashboard_network_wifi);
-        else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
-            networkSummary = context.getString(R.string.dashboard_network_mobile);
-        else networkSummary = context.getString(R.string.dashboard_network_connected);
-
-        ActivityManager manager = context.getSystemService(ActivityManager.class);
-        if (manager != null) {
-            ActivityManager.MemoryInfo info = new ActivityManager.MemoryInfo();
-            manager.getMemoryInfo(info);
-            memoryPercent = info.totalMem <= 0 ? -1
-                    : Math.round((info.totalMem - info.availMem) * 100f / info.totalMem);
-        }
-        StatFs storage = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-        storagePercentFree = storage.getTotalBytes() <= 0 ? -1
-                : Math.round(storage.getAvailableBytes() * 100f / storage.getTotalBytes());
+        SystemStats stats = SystemStats.read(context);
+        networkSummary = stats.networkSummary;
+        memoryPercent = stats.memoryPercent;
+        storagePercentFree = stats.storagePercentFree;
     }
 
     private static final class WeatherResult {

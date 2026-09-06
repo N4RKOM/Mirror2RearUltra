@@ -333,6 +333,7 @@
         <item quantity="one">%1$d widget does not fit and is shown in turn. Make the text smaller, or move it to another page.</item>
         <item quantity="other">%1$d widgets do not fit and are shown in turn. Make the text smaller, or move them to another page.</item>
     </plurals>
+    <string name="dashboard_builder_sample_event">Sample event</string>
     <string name="dashboard_custom_templates_title">My templates</string>
     <string name="dashboard_custom_template_save">Save current</string>
     <string name="dashboard_custom_template_apply">Apply saved</string>

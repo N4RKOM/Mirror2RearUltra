@@ -846,10 +846,15 @@ public class DashboardBuilderActivity extends AppCompatActivity {
      * <p>It used to be entirely invented - 72%, 36.5 degrees, a sample track -
      * so the preview could not show that the battery reading wraps at the
      * current text size, or that the playing track is too long for one line.
-     * Battery, temperature, charging, the current track, the clock and the
-     * profile name are real. Weather, heading, speed, altitude and the system
-     * counters still stand in: those come from sensors and network the builder
+     * Battery, temperature, charging, the current track, the clock, the
+     * profile name, the network, memory and storage are real. Weather,
+     * heading, speed, altitude, the next event and today's steps stand in:
+     * those come from sensors, a network fetch and a content query the builder
      * does not start, and the rear-panel preview shows them for real.
+     *
+     * <p>The system counters used to be left at "no reading", which is not the
+     * same as standing in for them: a widget with no reading is dropped, so a
+     * page made of them looked empty here while the panel showed it.
      */
     private RearDashboardSnapshot previewSnapshot() {
         MediaWidgetState.Snapshot media = MediaWidgetState.get();
@@ -868,6 +873,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 ? -1 : battery.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean charging = status == BatteryManager.BATTERY_STATUS_CHARGING
                 || status == BatteryManager.BATTERY_STATUS_FULL;
+        SystemStats stats = SystemStats.read(this);
         return new RearDashboardSnapshot(
                 System.currentTimeMillis(),
                 batteryPercent,
@@ -884,7 +890,13 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 8.3f,
                 120.0,
                 754_000L,
-                MirrorSettings.profileDisplayName(this, MirrorSettings.loadActiveProfile(this)));
+                MirrorSettings.profileDisplayName(this, MirrorSettings.loadActiveProfile(this)),
+                stats.networkSummary,
+                stats.memoryPercent,
+                stats.storagePercentFree,
+                getString(R.string.dashboard_builder_sample_event),
+                System.currentTimeMillis() + 5_400_000L,
+                4_820);
     }
 
     /**
