@@ -1,0 +1,613 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    HyperOS component styles.
+
+    These are the wrapper layer: Material primitives keep their behaviour and
+    accessibility, and every HyperOS-specific decision about geometry, colour,
+    weight and press feedback is centralised here rather than repeated across
+    layouts. Adding a screen means reusing these styles, not re-deriving them.
+-->
+<resources>
+
+    <!-- ==========================================================
+         Shapes
+         A deliberately small vocabulary: group, button, field, overlay.
+         Inner radii stay smaller than the group radius they sit inside.
+         ========================================================== -->
+
+    <style name="HyperOS.Shape.Group" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/group_corner</item>
+    </style>
+
+    <style name="HyperOS.Shape.Button" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/button_corner</item>
+    </style>
+
+    <style name="HyperOS.Shape.Field" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/field_corner</item>
+    </style>
+
+    <style name="HyperOS.Shape.Dialog" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">28dp</item>
+    </style>
+
+    <style name="HyperOS.Shape.Snackbar" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">18dp</item>
+    </style>
+
+    <!-- ==========================================================
+         Typography
+         Hierarchy through size and weight on the platform sans-serif,
+         since MiSans is not bundled with this app.
+         ========================================================== -->
+
+    <style name="HyperOS.Text.PageTitle" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textSize">@dimen/text_page_title</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/hyper_text_primary</item>
+        <item name="android:letterSpacing">-0.01</item>
+    </style>
+
+    <style name="HyperOS.Text.ToolbarTitle" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">17sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/hyper_text_primary</item>
+    </style>
+
+    <style name="HyperOS.Text.Title" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/hyper_text_primary</item>
+    </style>
+
+    <!-- Section label above a group. Quiet by design: the group boundary does
+         the separating, so the header does not need to shout. -->
+    <style name="HyperOS.Text.SectionHeader" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textSize">@dimen/text_section_header</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/hyper_text_secondary</item>
+        <item name="android:letterSpacing">0.01</item>
+    </style>
+
+    <style name="HyperOS.Text.RowTitle" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textSize">@dimen/text_row_title</item>
+        <item name="android:textColor">@color/hyper_text_primary</item>
+    </style>
+
+    <style name="HyperOS.Text.RowSummary" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textSize">@dimen/text_row_summary</item>
+        <item name="android:textColor">@color/hyper_text_secondary</item>
+        <item name="android:lineSpacingExtra">1sp</item>
+    </style>
+
+    <style name="HyperOS.Text.RowValue" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">@dimen/text_row_value</item>
+        <item name="android:textColor">@color/hyper_text_secondary</item>
+    </style>
+
+    <!-- Numeric emphasis for slider read-outs and live status. -->
+    <style name="HyperOS.Text.StatusValue" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">@dimen/text_status_value</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/hyper_text_primary</item>
+    </style>
+
+    <style name="HyperOS.Text.Body" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/hyper_text_primary</item>
+    </style>
+
+    <style name="HyperOS.Text.Summary" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/hyper_text_secondary</item>
+    </style>
+
+    <!-- Explanatory text under a group, on the page ground rather than inside
+         the group, so groups stay scannable. -->
+    <style name="HyperOS.Text.Caption" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textSize">@dimen/text_caption</item>
+        <item name="android:textColor">@color/hyper_text_tertiary</item>
+        <item name="android:lineSpacingExtra">2sp</item>
+    </style>
+
+    <style name="HyperOS.Text.Button" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <!-- ==========================================================
+         Structure
+         ========================================================== -->
+
+    <style name="HyperOS.Page" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingStart">@dimen/page_margin_horizontal</item>
+        <item name="android:paddingEnd">@dimen/page_margin_horizontal</item>
+        <item name="android:paddingBottom">@dimen/page_padding_bottom</item>
+    </style>
+
+    <style name="HyperOS.PageTitle" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">@dimen/spacing_sm</item>
+        <item name="android:paddingBottom">@dimen/spacing_lg</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.PageTitle</item>
+    </style>
+
+    <!-- The grouped container. Rows live directly inside it; it never nests
+         inside another card. -->
+    <style name="HyperOS.Group" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/hyper_group_background</item>
+        <item name="android:clipToOutline">true</item>
+    </style>
+
+    <style name="HyperOS.SectionHeader" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingStart">@dimen/spacing_xs</item>
+        <item name="android:paddingEnd">@dimen/spacing_xs</item>
+        <item name="android:paddingTop">@dimen/section_header_top</item>
+        <item name="android:paddingBottom">@dimen/section_header_bottom</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.SectionHeader</item>
+    </style>
+
+    <!-- Footnote below a group. -->
+    <style name="HyperOS.GroupFootnote" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingStart">@dimen/spacing_xs</item>
+        <item name="android:paddingEnd">@dimen/spacing_xs</item>
+        <item name="android:paddingTop">@dimen/spacing_sm</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.Caption</item>
+    </style>
+
+    <style name="HyperOS.Divider" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/divider_height</item>
+        <item name="android:layout_marginStart">@dimen/divider_inset</item>
+        <item name="android:background">@drawable/hyper_divider</item>
+    </style>
+
+    <!--
+        Edge between the scrolling page and a pinned action bar.
+
+        Both sit on the same page colour, so without this the last row of
+        content looks truncated rather than scrolled under the bar.
+    -->
+    <style name="HyperOS.BottomBarEdge" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/divider_height</item>
+        <item name="android:background">@drawable/hyper_divider</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+
+    <!-- Generic row body: a block inside a group that is not itself a control,
+         such as a slider row or a paragraph. -->
+    <style name="HyperOS.RowBlock" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingStart">@dimen/row_padding_horizontal</item>
+        <item name="android:paddingEnd">@dimen/row_padding_horizontal</item>
+        <item name="android:paddingTop">@dimen/row_padding_vertical</item>
+        <item name="android:paddingBottom">@dimen/row_padding_vertical</item>
+    </style>
+
+    <!-- ==========================================================
+         Controls
+         ========================================================== -->
+
+    <!--
+        Switch row. A full-width MaterialSwitch already lays out as
+        label ......... control and toggles on a tap anywhere in the row,
+        which is exactly the HyperOS preference-row behaviour, so the row is
+        the switch rather than a container wrapping one.
+    -->
+    <style name="HyperOS.Switch" parent="Widget.Material3.CompoundButton.MaterialSwitch">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">@dimen/row_min_height</item>
+        <item name="android:paddingStart">@dimen/row_padding_horizontal</item>
+        <item name="android:paddingEnd">@dimen/row_padding_horizontal</item>
+        <item name="android:background">@drawable/hyper_row_bg_middle</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.RowTitle</item>
+        <item name="android:textColor">@color/hyper_text_primary</item>
+        <item name="android:switchPadding">@dimen/spacing_md</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="track">@drawable/hyper_switch_track</item>
+        <item name="trackTint">@color/hyper_switch_track_tint</item>
+        <item name="android:thumb">@drawable/hyper_switch_thumb</item>
+        <item name="thumbTint">@color/hyper_switch_thumb_tint</item>
+    </style>
+
+    <style name="HyperOS.Switch.Top">
+        <item name="android:background">@drawable/hyper_row_bg_top</item>
+    </style>
+
+    <style name="HyperOS.Switch.Bottom">
+        <item name="android:background">@drawable/hyper_row_bg_bottom</item>
+    </style>
+
+    <style name="HyperOS.Switch.Single">
+        <item name="android:background">@drawable/hyper_row_bg_single</item>
+    </style>
+
+    <!--
+        Slider: thick rounded track, plain round handle, no floating value
+        bubble. The value is already shown as text in the row above, so the
+        Material label would duplicate it.
+    -->
+    <!--
+        Capsule slider. See HyperSlider for why this is not a Material slider:
+        at this track height Material leaves a corner-radius gap at maximum, so
+        a bar at 100% never looks full.
+    -->
+    <style name="HyperOS.Slider" parent="Widget.AppCompat.SeekBar">
+        <item name="android:progressDrawable">@drawable/hyper_slider_track</item>
+        <item name="android:thumb">@null</item>
+        <item name="android:splitTrack">false</item>
+        <item name="android:minHeight">@dimen/slider_track_height</item>
+        <item name="android:maxHeight">@dimen/slider_track_height</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="HyperOS.Button.Primary" parent="Widget.Material3.Button">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="backgroundTint">@color/hyper_button_primary_bg</item>
+        <item name="android:textColor">@color/hyper_button_primary_text</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.Button</item>
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.Button</item>
+        <item name="rippleColor">@color/hyper_press_overlay</item>
+        <item name="elevation">0dp</item>
+        <item name="iconTint">@color/hyper_button_primary_text</item>
+    </style>
+
+    <!-- Quiet alternate action: a tonal fill, not an outline. -->
+    <style name="HyperOS.Button.Secondary" parent="Widget.Material3.Button">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="backgroundTint">@color/hyper_button_secondary_bg</item>
+        <item name="android:textColor">@color/hyper_button_secondary_text</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.Button</item>
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.Button</item>
+        <item name="rippleColor">@color/hyper_press_overlay</item>
+        <item name="elevation">0dp</item>
+        <item name="iconTint">@color/hyper_button_secondary_text</item>
+    </style>
+
+    <style name="HyperOS.Button.Compact" parent="HyperOS.Button.Secondary">
+        <item name="android:minHeight">@dimen/button_height_compact</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:paddingStart">@dimen/spacing_md</item>
+        <item name="android:paddingEnd">@dimen/spacing_md</item>
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.Field</item>
+    </style>
+
+    <style name="HyperOS.Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="android:minHeight">@dimen/touch_target_min</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textColor">@color/hyper_text_button_text</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.Button</item>
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.Field</item>
+        <item name="rippleColor">@color/hyper_press_overlay</item>
+    </style>
+
+    <!-- Destructive actions carry the error colour, never the primary accent. -->
+    <style name="HyperOS.Button.Destructive" parent="HyperOS.Button.Text">
+        <item name="android:textColor">@color/hyper_destructive_text</item>
+    </style>
+
+    <!--
+        Filled borderless field, replacing the Material outlined box: a stroke
+        drawn around every dropdown is the loudest M3 tell on a settings page.
+    -->
+    <style name="HyperOS.Field" parent="Widget.Material3.TextInputLayout.FilledBox">
+        <item name="boxBackgroundMode">filled</item>
+        <item name="boxBackgroundColor">@color/hyper_field</item>
+        <item name="boxStrokeWidth">0dp</item>
+        <item name="boxStrokeWidthFocused">0dp</item>
+        <item name="boxCornerRadiusTopStart">@dimen/field_corner</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/field_corner</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/field_corner</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/field_corner</item>
+        <item name="hintTextColor">@color/hyper_text_secondary</item>
+        <item name="android:textColorHint">@color/hyper_text_tertiary</item>
+        <item name="endIconTint">@color/hyper_text_tertiary</item>
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.Field</item>
+    </style>
+
+    <style name="HyperOS.CheckBox" parent="Widget.Material3.CompoundButton.CheckBox">
+        <item name="buttonTint">@color/hyper_checkbox_tint</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.RowTitle</item>
+        <item name="android:minHeight">@dimen/row_min_height_compact</item>
+        <item name="android:paddingStart">@dimen/spacing_md</item>
+    </style>
+
+    <style name="HyperOS.Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="titleTextAppearance">@style/HyperOS.Text.ToolbarTitle</item>
+        <item name="titleTextColor">@color/hyper_text_primary</item>
+        <item name="navigationIconTint">@color/hyper_text_primary</item>
+        <item name="android:elevation">0dp</item>
+    </style>
+
+    <style name="HyperOS.Card" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">@color/hyper_surface_elevated</item>
+        <item name="cardCornerRadius">@dimen/group_corner</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
+
+    <!-- ==========================================================
+         Overlays
+         ========================================================== -->
+
+    <style name="HyperOS.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.Dialog</item>
+        <item name="colorSurface">@color/hyper_surface_transient</item>
+        <item name="android:backgroundDimAmount">0.45</item>
+        <item name="buttonBarPositiveButtonStyle">@style/HyperOS.Button.Text</item>
+        <item name="buttonBarNegativeButtonStyle">@style/HyperOS.Button.Text</item>
+        <item name="buttonBarNeutralButtonStyle">@style/HyperOS.Button.Text</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/HyperOS.DialogTitle</item>
+    </style>
+
+    <style name="HyperOS.DialogTitle" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textAppearance">@style/HyperOS.Text.Title</item>
+    </style>
+
+    <style name="HyperOS.Snackbar" parent="Widget.Material3.Snackbar">
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.Snackbar</item>
+        <item name="backgroundTint">@color/hyper_text_primary</item>
+    </style>
+
+    <style name="HyperOS.PopupMenu" parent="Widget.Material3.PopupMenu">
+        <item name="android:popupBackground">@drawable/hyper_popup_background</item>
+    </style>
+
+    <!-- ==========================================================
+         Rows built on MaterialButton
+
+         MaterialButton owns its background drawable, so a row cannot take a
+         state-list background the way the switch rows do. Press feedback comes
+         from backgroundTint instead, and the corner treatment comes from a
+         shape overlay chosen by the row position in its group. Using a real
+         button keeps the control announced as a button to TalkBack.
+         ========================================================== -->
+
+    <style name="HyperOS.Shape.RowMiddle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">0dp</item>
+    </style>
+
+    <style name="HyperOS.Shape.RowTop" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">@dimen/group_corner</item>
+        <item name="cornerSizeTopRight">@dimen/group_corner</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <style name="HyperOS.Shape.RowBottom" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">0dp</item>
+        <item name="cornerSizeTopRight">0dp</item>
+        <item name="cornerSizeBottomLeft">@dimen/group_corner</item>
+        <item name="cornerSizeBottomRight">@dimen/group_corner</item>
+    </style>
+
+    <!-- Row that opens another page. Carries a trailing chevron. -->
+    <style name="HyperOS.NavRow" parent="Widget.Material3.Button.TextButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">@dimen/row_min_height</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:textAlignment">viewStart</item>
+        <item name="android:paddingStart">@dimen/row_padding_horizontal</item>
+        <item name="android:paddingEnd">@dimen/row_padding_horizontal</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.RowTitle</item>
+        <item name="android:textColor">@color/hyper_row_title_text</item>
+        <item name="backgroundTint">@color/hyper_row_press_tint</item>
+        <item name="rippleColor">@android:color/transparent</item>
+        <item name="icon">@drawable/ic_hyper_chevron</item>
+        <item name="iconGravity">end</item>
+        <item name="iconTint">@color/hyper_text_tertiary</item>
+        <item name="iconSize">20dp</item>
+        <item name="iconPadding">0dp</item>
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.RowMiddle</item>
+    </style>
+
+    <style name="HyperOS.NavRow.Top">
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.RowTop</item>
+    </style>
+
+    <style name="HyperOS.NavRow.Bottom">
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.RowBottom</item>
+    </style>
+
+    <style name="HyperOS.NavRow.Single">
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.Group</item>
+    </style>
+
+    <!-- Row that performs an action in place. No chevron, accent label. -->
+    <style name="HyperOS.ActionRow" parent="HyperOS.NavRow">
+        <item name="icon">@null</item>
+        <item name="android:textColor">@color/hyper_text_button_text</item>
+    </style>
+
+    <style name="HyperOS.ActionRow.Top">
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.RowTop</item>
+    </style>
+
+    <style name="HyperOS.ActionRow.Bottom">
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.RowBottom</item>
+    </style>
+
+    <style name="HyperOS.ActionRow.Single">
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.Group</item>
+    </style>
+
+    <!-- Destructive action row: error colour, kept out of the primary accent. -->
+    <style name="HyperOS.ActionRow.Destructive">
+        <item name="android:textColor">@color/hyper_destructive_text</item>
+    </style>
+
+    <!-- Bounded choice presented as a row. See HyperValueRow. -->
+    <style name="HyperOS.ValueRow" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">@dimen/row_min_height</item>
+        <item name="android:paddingStart">@dimen/row_padding_horizontal</item>
+        <item name="android:paddingEnd">@dimen/row_padding_horizontal</item>
+        <item name="android:background">@drawable/hyper_row_bg_middle</item>
+    </style>
+
+    <style name="HyperOS.ValueRow.Top">
+        <item name="android:background">@drawable/hyper_row_bg_top</item>
+    </style>
+
+    <style name="HyperOS.ValueRow.Bottom">
+        <item name="android:background">@drawable/hyper_row_bg_bottom</item>
+    </style>
+
+    <style name="HyperOS.ValueRow.Single">
+        <item name="android:background">@drawable/hyper_row_bg_single</item>
+    </style>
+
+    <style name="HyperOS.Field.Flat" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <!-- boxBackgroundMode=none rather than a filled box tinted transparent:
+             a filled box keeps painting its own surface, which shows up as a
+             box drawn inside the group's box. -->
+        <item name="boxBackgroundMode">none</item>
+        <item name="boxStrokeWidth">0dp</item>
+        <item name="boxStrokeWidthFocused">0dp</item>
+        <item name="hintTextColor">@color/hyper_text_secondary</item>
+        <item name="android:textColorHint">@color/hyper_text_tertiary</item>
+        <item name="endIconTint">@color/hyper_text_tertiary</item>
+        <item name="android:paddingStart">@dimen/row_padding_horizontal</item>
+        <item name="android:paddingEnd">@dimen/row_padding_horizontal</item>
+        <item name="android:paddingBottom">@dimen/spacing_sm</item>
+    </style>
+
+    <!--
+        Segmented control: every choice visible, one tap to any of them.
+
+        Replaces the cycle buttons the builder used, where a single button
+        relabelled itself on each press. With three values that meant tapping
+        blind and having no way back.
+    -->
+    <style name="HyperOS.SegmentGroup" parent="Widget.Material3.MaterialButtonToggleGroup">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/hyper_segment_track</item>
+        <item name="android:padding">3dp</item>
+        <item name="singleSelection">true</item>
+        <item name="selectionRequired">true</item>
+    </style>
+
+    <style name="HyperOS.Segment" parent="Widget.Material3.Button.TextButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">@dimen/button_height_compact</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingStart">@dimen/spacing_sm</item>
+        <item name="android:paddingEnd">@dimen/spacing_sm</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.Button</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/hyper_segment_text</item>
+        <item name="backgroundTint">@color/hyper_segment_bg</item>
+        <item name="rippleColor">@android:color/transparent</item>
+        <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.Segment</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="HyperOS.Shape.Segment" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">13dp</item>
+    </style>
+
+    <!-- Label naming what a segmented control sets. -->
+    <style name="HyperOS.SegmentLabel" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingBottom">@dimen/spacing_xs</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.RowSummary</item>
+    </style>
+
+    <!-- Read-only status line inside a group, written by the activity. -->
+    <style name="HyperOS.TextRow" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">@dimen/row_min_height_compact</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">@dimen/row_padding_horizontal</item>
+        <item name="android:paddingEnd">@dimen/row_padding_horizontal</item>
+        <item name="android:paddingTop">@dimen/spacing_sm</item>
+        <item name="android:paddingBottom">@dimen/spacing_sm</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.RowTitle</item>
+    </style>
+
+    <!-- Explanatory line that belongs to the row above it, inside the group. -->
+    <style name="HyperOS.RowSummary" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingStart">@dimen/row_padding_horizontal</item>
+        <item name="android:paddingEnd">@dimen/row_padding_horizontal</item>
+        <item name="android:paddingBottom">@dimen/row_padding_vertical</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.RowSummary</item>
+    </style>
+
+    <!-- Label above a slider, holding the current numeric value. The bottom
+         padding is what separates it from the bar; without it the two read as
+         one block. -->
+    <style name="HyperOS.SliderLabel" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingStart">@dimen/row_padding_horizontal</item>
+        <item name="android:paddingEnd">@dimen/row_padding_horizontal</item>
+        <item name="android:paddingTop">@dimen/row_padding_vertical</item>
+        <item name="android:paddingBottom">@dimen/spacing_sm</item>
+        <item name="android:textAppearance">@style/HyperOS.Text.RowValue</item>
+        <item name="android:textColor">@color/hyper_text_primary</item>
+    </style>
+
+    <!-- Slider inside a group, inset to the same margin as row text so the bar
+         starts where the labels above it start. -->
+    <style name="HyperOS.Slider.Row" parent="HyperOS.Slider">
+        <item name="android:layout_marginStart">@dimen/row_padding_horizontal</item>
+        <item name="android:layout_marginEnd">@dimen/row_padding_horizontal</item>
+        <item name="android:layout_marginBottom">@dimen/row_padding_vertical</item>
+    </style>
+
+    <!-- Field inside a group: no extra fill, the group already provides one. -->
+    <!-- Restrained continuity: a short fade with a small rise, nothing bouncing. -->
+    <style name="HyperOS.WindowAnimation" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/hyper_activity_open_enter</item>
+        <item name="android:activityOpenExitAnimation">@anim/hyper_activity_open_exit</item>
+        <item name="android:activityCloseEnterAnimation">@anim/hyper_activity_close_enter</item>
+        <item name="android:activityCloseExitAnimation">@anim/hyper_activity_close_exit</item>
+    </style>
+</resources>

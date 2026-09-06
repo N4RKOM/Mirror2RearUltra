@@ -1,10 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Semantic colour tokens - LIGHT.
+
+    The neutral counterpart to the dark palette: achromatic greys, no blue
+    cast, grouped white content on a light grey page. Project tokens shaped to
+    the HyperOS settings look, not published Xiaomi values.
+-->
 <resources>
-    <color name="purple_200">#00BB86FC</color>
-    <color name="purple_500">#006200EE</color>
-    <color name="purple_700">#003700B3</color>
-    <color name="teal_200">#0003DAC5</color>
-    <color name="teal_700">#00018786</color>
-    <color name="black">#00000000</color>
-    <color name="white">#00FFFFFF</color>
+
+    <!-- Surfaces -->
+    <color name="hyper_background">#F4F4F4</color>
+    <color name="hyper_surface">#FFFFFF</color>
+    <color name="hyper_surface_grouped">#FFFFFF</color>
+    <color name="hyper_surface_elevated">#FFFFFF</color>
+    <color name="hyper_surface_sunken">#EAEAEA</color>
+    <color name="hyper_surface_transient">#FFFFFF</color>
+
+    <!-- Text -->
+    <color name="hyper_text_primary">#111111</color>
+    <color name="hyper_text_secondary">#6B6B6B</color>
+    <color name="hyper_text_tertiary">#9A9A9A</color>
+    <color name="hyper_text_disabled">#C2C2C2</color>
+
+    <!-- Accent -->
+    <color name="hyper_accent">#1668E3</color>
+    <color name="hyper_accent_pressed">#1153BC</color>
+    <color name="hyper_accent_disabled">#AFC9F1</color>
+    <color name="hyper_on_accent">#FFFFFF</color>
+    <color name="hyper_accent_container">#E3EEFD</color>
+    <color name="hyper_on_accent_container">#0B3A7A</color>
+
+    <!-- Lines -->
+    <color name="hyper_divider">#EBEBEB</color>
+    <color name="hyper_outline_subtle">#E0E0E0</color>
+
+    <!-- Status -->
+    <color name="hyper_success">#1E9E5A</color>
+    <color name="hyper_warning">#D9860F</color>
+    <color name="hyper_error">#D93B41</color>
+    <color name="hyper_info">#1668E3</color>
+
+    <!-- Interaction -->
+    <color name="hyper_press_overlay">#0F000000</color>
+    <color name="hyper_press_on_surface">#F0F0F0</color>
+    <color name="hyper_selection">#E3EEFD</color>
+    <color name="hyper_scrim">#66000000</color>
+
+    <!-- Controls -->
+    <color name="hyper_track_off">#DCDCDC</color>
+    <color name="hyper_track_disabled">#EDEDED</color>
+    <color name="hyper_thumb">#FFFFFF</color>
+    <color name="hyper_thumb_disabled">#F7F7F7</color>
+    <color name="hyper_field">#F0F0F0</color>
+    <color name="hyper_field_pressed">#E6E6E6</color>
+
+    <!-- Retained: the mirror output window must stay true black on the rear OLED. -->
+    <color name="black">#FF000000</color>
 </resources>

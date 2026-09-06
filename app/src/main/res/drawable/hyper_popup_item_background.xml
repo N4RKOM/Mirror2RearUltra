@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Picker entry. The chosen one keeps a tinted band so the selection is
+     readable without relying on the checkmark alone. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_activated="true">
+        <color android:color="@color/hyper_selection" />
+    </item>
+    <item android:state_pressed="true">
+        <color android:color="@color/hyper_press_on_surface" />
+    </item>
+    <item>
+        <color android:color="@android:color/transparent" />
+    </item>
+</selector>

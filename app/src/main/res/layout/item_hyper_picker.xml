@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One entry of the anchored picker panel. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/hyper_popup_item_background"
+    android:gravity="center_vertical"
+    android:minHeight="56dp"
+    android:orientation="horizontal"
+    android:paddingStart="24dp"
+    android:paddingEnd="20dp">
+
+    <TextView
+        android:id="@+id/hyper_picker_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textAppearance="@style/HyperOS.Text.RowTitle"
+        android:textColor="@color/hyper_popup_item_text" />
+
+    <ImageView
+        android:id="@+id/hyper_picker_check"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_hyper_check"
+        android:visibility="invisible" />
+</LinearLayout>

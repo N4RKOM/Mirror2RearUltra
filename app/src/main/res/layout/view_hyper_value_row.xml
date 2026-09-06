@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Contents of HyperValueRow. Merged into the row itself, which supplies the
+    orientation, padding, minimum height and press background.
+-->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        android:id="@+id/hyper_row_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textAppearance="@style/HyperOS.Text.RowTitle" />
+
+    <TextView
+        android:id="@+id/hyper_row_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="@style/HyperOS.Text.RowValue" />
+
+    <!-- Paired arrows, not a chevron: this row changes a value where it
+         stands instead of opening another page. -->
+    <ImageView
+        android:id="@+id/hyper_row_chevron"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_hyper_selector" />
+</merge>

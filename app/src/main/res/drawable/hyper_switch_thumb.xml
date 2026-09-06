@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Plain circular thumb, inset inside the track.
+
+    Deliberately carries no glyph: the Material 3 switch puts a checkmark in
+    the thumb, and that icon is the single loudest M3 tell on a settings screen.
+    The layer inset makes the drawable measure the full track height so the
+    thumb travels the correct distance.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:left="@dimen/switch_thumb_inset"
+        android:top="@dimen/switch_thumb_inset"
+        android:right="@dimen/switch_thumb_inset"
+        android:bottom="@dimen/switch_thumb_inset">
+        <shape android:shape="oval">
+            <solid android:color="#FFFFFFFF" />
+            <size
+                android:width="@dimen/switch_thumb_size"
+                android:height="@dimen/switch_thumb_size" />
+        </shape>
+    </item>
+</layer-list>

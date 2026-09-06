@@ -1,0 +1,110 @@
+package com.tpkarras.mirror2rearultra;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+public class SettingsBackupCodecTest {
+    @Test
+    public void roundTripPreservesProfilesGlobalsAndAssignments() throws Exception {
+        SettingsBackupCodec.Data source = sampleData(true);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        SettingsBackupCodec.write(source, output);
+        SettingsBackupCodec.Data restored = SettingsBackupCodec.read(
+                new ByteArrayInputStream(output.toByteArray())
+        );
+
+        assertEquals("CUSTOM_42", restored.activeProfileId);
+        assertEquals(ProjectionQuality.SHARP, restored.projectionQuality);
+        assertTrue(restored.autoProfileEnabled);
+        assertTrue(restored.temperatureProtectionEnabled);
+        assertEquals(47, restored.temperatureThreshold);
+        assertEquals(4, restored.profiles.size());
+        assertEquals("Мой профиль", restored.profiles.get(3).customName);
+        assertEquals("CUSTOM_42", restored.assignments.get("com.example.maps"));
+    }
+
+    @Test
+    public void rejectsBackupWithoutAllBuiltInProfiles() throws Exception {
+        SettingsBackupCodec.Data source = sampleData(false);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        SettingsBackupCodec.write(source, output);
+
+        assertThrows(
+                SettingsBackupCodec.BackupException.class,
+                () -> SettingsBackupCodec.read(new ByteArrayInputStream(output.toByteArray()))
+        );
+    }
+
+    @Test
+    public void rejectsOutOfRangeProtectionThreshold() throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        SettingsBackupCodec.write(sampleData(true), output);
+        String xml = output.toString(StandardCharsets.UTF_8)
+                .replace(">20</entry>", ">99</entry>");
+
+        assertThrows(
+                SettingsBackupCodec.BackupException.class,
+                () -> SettingsBackupCodec.read(new ByteArrayInputStream(
+                        xml.getBytes(StandardCharsets.UTF_8)
+                ))
+        );
+    }
+
+    @Test
+    public void rejectsNonBackupXml() {
+        byte[] bytes = "<not-a-backup/>".getBytes(StandardCharsets.UTF_8);
+        assertThrows(
+                SettingsBackupCodec.BackupException.class,
+                () -> SettingsBackupCodec.read(new ByteArrayInputStream(bytes))
+        );
+    }
+
+    private static SettingsBackupCodec.Data sampleData(boolean includeVideo) {
+        List<MirrorProfile> profiles = new java.util.ArrayList<>();
+        profiles.add(new MirrorProfile(MirrorProfile.Id.CAMERA,
+                MirrorProfile.ScaleMode.FILL, 0, true, 100));
+        profiles.add(new MirrorProfile(MirrorProfile.Id.NAVIGATION,
+                MirrorProfile.ScaleMode.FIT, 0, false, 80));
+        if (includeVideo) {
+            profiles.add(new MirrorProfile(MirrorProfile.Id.VIDEO,
+                    MirrorProfile.ScaleMode.FIT, 90, false, 70));
+        }
+        profiles.add(new MirrorProfile(
+                "CUSTOM_42",
+                "Мой профиль",
+                MirrorProfile.ScaleMode.STRETCH,
+                180,
+                false,
+                65,
+                150,
+                10,
+                -5
+        ));
+        Map<String, String> assignments = new LinkedHashMap<>();
+        assignments.put("com.example.maps", "CUSTOM_42");
+        return new SettingsBackupCodec.Data(
+                "CUSTOM_42",
+                ProjectionQuality.SHARP,
+                true,
+                false,
+                true,
+                true,
+                47,
+                true,
+                20,
+                profiles,
+                assignments
+        );
+    }
+}

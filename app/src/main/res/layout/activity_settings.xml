@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Rear screen settings - hub.
+
+    This page used to hold everything: nine sections and around forty controls
+    in one scroll, with per-profile settings sitting directly beside app-wide
+    ones. Scale, rotation, mirroring and brightness belong to whichever profile
+    is selected; projection quality and the calibration grid do not. Mixed into
+    the same groups, nothing told you which was which, so switching profile
+    silently changed half of what you had just set.
+
+    The page is now a hub. Everything to do with the projected image - the
+    per-profile settings and the app-wide ones that are used alongside them -
+    lives behind one row that opens ImageSettingsActivity. The two long device
+    sections became their own pages. What stays here is short and read from top
+    to bottom in one screen or two.
+
+    No Done button: settings save on change, so there was nothing to confirm;
+    back leaves the screen.
+
+    settings_content stays a direct child of the NestedScrollView -
+    SettingsLayout.constrainContentOnWideScreens needs FrameLayout.LayoutParams.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/hyper_background"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/settings_content"
+            style="@style/HyperOS.Page">
+
+            <TextView
+                style="@style/HyperOS.PageTitle"
+                android:text="@string/settings_title" />
+
+            <!-- The one object on the page that reports state instead of
+                 setting it, so it gets its own surface. -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/hyper_surface_background"
+                android:orientation="vertical"
+                android:paddingStart="@dimen/row_padding_horizontal"
+                android:paddingTop="@dimen/spacing_md"
+                android:paddingEnd="@dimen/row_padding_horizontal"
+                android:paddingBottom="@dimen/spacing_md">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/status_title"
+                    android:textAppearance="@style/HyperOS.Text.SectionHeader" />
+
+                <!-- Simple line breaking, not the balanced strategy inherited
+                     from the Material text appearance: balanced breaking
+                     overruns the measured width at non-integer font scales and
+                     clips the last glyph of a line. -->
+                <TextView
+                    android:id="@+id/status_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:accessibilityLiveRegion="polite"
+                    android:breakStrategy="simple"
+                    android:hyphenationFrequency="none"
+                    android:textAppearance="@style/HyperOS.Text.StatusValue" />
+            </LinearLayout>
+
+            <!-- ===================== Profile =====================
+                 Everything in this group is about the selected profile:
+                 which one is active, its image settings, and the profile
+                 list itself. -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/profile_title" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/profile_input"
+                    style="@style/HyperOS.ValueRow.Top"
+                    app:rowTitle="@string/profile_selected_title" />
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/image_settings_button"
+                    style="@style/HyperOS.NavRow"
+                    android:text="@string/profile_image_title" />
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/manage_profiles_button"
+                    style="@style/HyperOS.NavRow.Bottom"
+                    android:text="@string/manage_profiles_and_apps" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/profile_summary"
+                style="@style/HyperOS.GroupFootnote" />
+
+            <!-- ===================== Destinations =====================
+                 Three pages of their own. No section header: the row labels
+                 say where each one goes, and a header above them would only
+                 repeat the words. -->
+
+            <LinearLayout
+                style="@style/HyperOS.Group"
+                android:layout_marginTop="@dimen/section_spacing">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/dashboard_settings_button"
+                    style="@style/HyperOS.NavRow.Top"
+                    android:text="@string/dashboard_settings_title" />
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/automation_button"
+                    style="@style/HyperOS.NavRow"
+                    android:text="@string/auto_profile_title" />
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/device_protection_button"
+                    style="@style/HyperOS.NavRow.Bottom"
+                    android:text="@string/device_protection_title" />
+            </LinearLayout>
+
+            <!-- ===================== Capabilities =====================
+                 Read-only diagnostics. Low in the page because you look at it
+                 when something is wrong, not while setting things up. -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/capabilities_title" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <TextView
+                    android:id="@+id/root_status_value"
+                    style="@style/HyperOS.TextRow"
+                    android:text="@string/capability_unknown" />
+
+
+                <TextView
+                    android:id="@+id/hardware_brightness_status_value"
+                    style="@style/HyperOS.TextRow"
+                    android:text="@string/capability_unknown" />
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/capability_refresh_button"
+                    style="@style/HyperOS.ActionRow.Bottom"
+                    android:text="@string/capability_refresh" />
+            </LinearLayout>
+
+            <!-- ===================== Backup ===================== -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/backup_title" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/export_backup_button"
+                    style="@style/HyperOS.ActionRow.Top"
+                    android:text="@string/backup_export" />
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/import_backup_button"
+                    style="@style/HyperOS.ActionRow"
+                    android:text="@string/backup_import" />
+
+
+                <TextView
+                    android:id="@+id/backup_status"
+                    style="@style/HyperOS.TextRow"
+                    android:accessibilityLiveRegion="polite"
+                    android:text="@string/backup_status_ready"
+                    android:textAppearance="@style/HyperOS.Text.RowValue" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/backup_help" />
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:paddingTop="@dimen/spacing_lg"
+                android:text="@string/settings_saved_automatically" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

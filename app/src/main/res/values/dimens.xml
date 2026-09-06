@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Spacing, shape and density tokens.
+
+    A deliberately small scale: HyperOS-like screens read as ordered because
+    gaps repeat, not because each section invents its own margin. Project
+    values, not published Xiaomi measurements.
+-->
+<resources>
+
+    <!-- Spacing scale (original four names kept so nothing silently shifts) -->
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">16dp</dimen>
+    <dimen name="spacing_lg">24dp</dimen>
+    <dimen name="spacing_xl">32dp</dimen>
+
+    <!-- Page rhythm -->
+    <dimen name="page_margin_horizontal">20dp</dimen>
+    <dimen name="page_padding_bottom">32dp</dimen>
+    <dimen name="section_spacing">22dp</dimen>
+    <dimen name="section_header_top">10dp</dimen>
+    <dimen name="section_header_bottom">10dp</dimen>
+
+    <!-- Grouped list geometry -->
+    <dimen name="group_corner">20dp</dimen>
+    <dimen name="card_corner">20dp</dimen>
+    <dimen name="row_padding_horizontal">18dp</dimen>
+    <dimen name="row_padding_vertical">14dp</dimen>
+    <dimen name="row_min_height">60dp</dimen>
+    <dimen name="row_min_height_compact">54dp</dimen>
+    <dimen name="divider_height">1dp</dimen>
+    <dimen name="divider_inset">18dp</dimen>
+
+    <!-- Controls -->
+    <dimen name="touch_target_min">48dp</dimen>
+    <dimen name="button_corner">18dp</dimen>
+    <dimen name="button_height">50dp</dimen>
+    <dimen name="button_height_compact">42dp</dimen>
+    <dimen name="field_corner">16dp</dimen>
+    <dimen name="field_height">56dp</dimen>
+    <dimen name="chip_corner">14dp</dimen>
+
+    <!-- Switch: wide capsule with an inset circular thumb -->
+    <dimen name="switch_track_width">51dp</dimen>
+    <dimen name="switch_track_height">31dp</dimen>
+    <dimen name="switch_thumb_size">27dp</dimen>
+    <dimen name="switch_thumb_inset">2dp</dimen>
+
+    <!--
+        Slider: a thick capsule that fills, with no handle at all - the shape
+        HyperOS uses for volume. The bar itself is the control, so it needs a
+        comfortable height to grab rather than a small thumb to hit.
+    -->
+    <dimen name="slider_track_height">30dp</dimen>
+    <dimen name="slider_thumb_size">0dp</dimen>
+    <dimen name="slider_corner">15dp</dimen>
+
+    <!-- Type scale -->
+    <dimen name="text_page_title">30sp</dimen>
+    <dimen name="text_section_header">13sp</dimen>
+    <dimen name="text_row_title">16sp</dimen>
+    <dimen name="text_row_summary">13sp</dimen>
+    <dimen name="text_row_value">15sp</dimen>
+    <dimen name="text_status_value">20sp</dimen>
+    <dimen name="text_caption">12sp</dimen>
+
+    <!-- Wide layouts: keep line length readable instead of stretching rows -->
+    <dimen name="content_max_width">600dp</dimen>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Inflatable segmented control container. The builder assembles its rows in
+     code, and a view constructed in Java cannot pick up an XML widget style. -->
+<com.google.android.material.button.MaterialButtonToggleGroup
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/HyperOS.SegmentGroup" />

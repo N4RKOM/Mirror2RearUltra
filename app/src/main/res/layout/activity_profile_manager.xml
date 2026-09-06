@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Profiles and apps.
+
+    Two tasks on one page, so they get two sections rather than one long list:
+    picking and editing a profile, then choosing which apps switch to it.
+
+    The toolbar keeps the up affordance but drops its title, because the page
+    title below states the same thing at full size. The destructive action sits
+    apart from the other two and carries the error colour, never the accent.
+
+    profile_manager_content stays a direct child of the NestedScrollView:
+    ProfileManagerActivity.constrainContentOnWideScreens casts its layout
+    params to FrameLayout.LayoutParams.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/hyper_background"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/profile_manager_toolbar"
+        style="@style/HyperOS.Toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:navigationContentDescription="@string/abc_action_bar_up_description"
+        app:navigationIcon="@drawable/ic_hyper_back" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/profile_manager_content"
+            style="@style/HyperOS.Page">
+
+            <TextView
+                style="@style/HyperOS.PageTitle"
+                android:text="@string/profiles_manager_title" />
+
+            <!-- ===================== Profiles ===================== -->
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/profile_manager_input"
+                    style="@style/HyperOS.ValueRow.Top"
+                    app:rowTitle="@string/profile_selected_title" />
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/add_profile_button"
+                    style="@style/HyperOS.ActionRow"
+                    android:text="@string/add_profile" />
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/rename_profile_button"
+                    style="@style/HyperOS.ActionRow"
+                    android:text="@string/rename_profile" />
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/delete_profile_button"
+                    style="@style/HyperOS.ActionRow.Destructive"
+                    android:text="@string/delete_profile"
+                    app:shapeAppearanceOverlay="@style/HyperOS.Shape.RowBottom" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/profiles_manager_help" />
+
+            <!-- ===================== App assignment ===================== -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/profile_apps_title" />
+
+            <!-- Search sits on the page ground, not inside the results group:
+                 it filters the group rather than belonging to it. -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/HyperOS.Field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:endIconMode="clear_text"
+                app:hintEnabled="false">
+
+                <!-- Hint on the field itself, not a floating label: a label that
+                     animates up out of a search box is a Material 3 behaviour,
+                     and a search field reads better as a plain prompt that the
+                     query replaces. -->
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/app_search_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/search_apps"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:textAppearance="@style/HyperOS.Text.RowTitle" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/assigned_apps_summary"
+                style="@style/HyperOS.GroupFootnote"
+                android:accessibilityLiveRegion="polite"
+                android:paddingBottom="@dimen/spacing_sm" />
+
+            <!-- Rows are added by ProfileManagerActivity.renderApps. -->
+            <LinearLayout
+                android:id="@+id/apps_container"
+                style="@style/HyperOS.Group" />
+
+            <TextView
+                android:id="@+id/apps_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:gravity="center"
+                android:paddingBottom="@dimen/spacing_lg"
+                android:text="@string/no_apps_found"
+                android:textAppearance="@style/HyperOS.Text.Summary"
+                android:visibility="gone" />
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/profile_apps_help" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Profile name entry, hosted inside a HyperOS-styled alert dialog. -->
+<com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/HyperOS.Field"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/spacing_lg"
+    android:layout_marginTop="@dimen/spacing_sm"
+    android:layout_marginEnd="@dimen/spacing_lg"
+    android:hint="@string/profile_name">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/profile_name_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textCapSentences"
+        android:maxLength="40"
+        android:maxLines="1"
+        android:textAppearance="@style/HyperOS.Text.RowTitle" />
+</com.google.android.material.textfield.TextInputLayout>

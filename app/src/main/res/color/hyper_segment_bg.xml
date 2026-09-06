@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The chosen segment is the only one that gets a surface; the rest stay on
+     the group's own grey track. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true" android:color="@color/hyper_surface_elevated" />
+    <item android:state_pressed="true" android:color="@color/hyper_press_on_surface" />
+    <item android:color="@android:color/transparent" />
+</selector>

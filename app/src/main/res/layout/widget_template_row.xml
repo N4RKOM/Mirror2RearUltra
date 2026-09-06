@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Inflatable list row for the saved templates in DashboardBuilderActivity.
+
+    The rows are built in code because the list is as long as the user's set of
+    templates, and a MaterialButton constructed in Java cannot pick up an XML
+    widget style. The group behind it draws the surface, so the row itself only
+    carries the label and the pressed tint.
+-->
+<com.google.android.material.button.MaterialButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/HyperOS.ActionRow"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />

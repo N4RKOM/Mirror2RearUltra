@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Widget picker - the one place a widget is switched on or off.
+
+    Selection used to sit in two screens at once: a switch per widget on the
+    dashboard settings page, and a second switch inside every builder card.
+    The builder therefore had to list all nineteen widgets, so arranging four
+    of them meant scrolling past fifteen greyed-out cards.
+
+    Selection now lives only here. The builder lists what is on and nothing
+    else; what is off waits on this screen instead of taking space there. Both
+    the dashboard settings page and the builder open this screen.
+
+    Widgets are grouped by what they show, and a widget that needs a value or a
+    permission carries it directly underneath rather than in a block of its own.
+
+    widget_picker_content stays a direct child of the NestedScrollView:
+    SettingsLayout.constrainContentOnWideScreens needs FrameLayout.LayoutParams.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/hyper_background"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/widget_picker_toolbar"
+        style="@style/HyperOS.Toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:navigationContentDescription="@string/abc_action_bar_up_description"
+        app:navigationIcon="@drawable/ic_hyper_back" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/widget_picker_content"
+            style="@style/HyperOS.Page">
+
+            <TextView
+                style="@style/HyperOS.PageTitle"
+                android:paddingBottom="@dimen/spacing_sm"
+                android:text="@string/dashboard_widgets_title" />
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:paddingTop="0dp"
+                android:text="@string/dashboard_widgets_pick_help" />
+
+            <!-- ===================== Time ===================== -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/dashboard_group_time" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_clock_switch"
+                    style="@style/HyperOS.Switch.Top"
+                    android:text="@string/dashboard_widget_clock" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_date_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_date" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_next_alarm_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_next_alarm" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_session_timer_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_session_timer" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_calendar_switch"
+                    style="@style/HyperOS.Switch.Bottom"
+                    android:text="@string/dashboard_widget_calendar" />
+            </LinearLayout>
+
+            <!-- ===================== Device ===================== -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/dashboard_group_device" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_battery_switch"
+                    style="@style/HyperOS.Switch.Top"
+                    android:text="@string/dashboard_widget_battery" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_temperature_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_temperature" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_memory_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_memory" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_storage_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_storage" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_network_switch"
+                    style="@style/HyperOS.Switch.Bottom"
+                    android:text="@string/dashboard_widget_network" />
+            </LinearLayout>
+
+            <!-- ===================== Weather and sensors ===================== -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/dashboard_group_sensors" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_weather_switch"
+                    style="@style/HyperOS.Switch.Top"
+                    android:text="@string/dashboard_widget_weather" />
+
+                <!-- The city belongs to the weather widget, so it sits under
+                     it rather than in a settings block of its own. -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/dashboard_weather_city_container"
+                    style="@style/HyperOS.Field.Flat"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/dashboard_weather_city"
+                    app:endIconMode="clear_text">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dashboard_weather_city_input"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionDone"
+                        android:inputType="textCapWords"
+                        android:maxLength="80"
+                        android:maxLines="1"
+                        android:textAppearance="@style/HyperOS.Text.RowTitle" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_compass_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_compass" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_speed_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_speed" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_altitude_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_altitude" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_steps_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_steps" />
+
+                <TextView
+                    android:id="@+id/dashboard_location_access_status"
+                    style="@style/HyperOS.RowSummary"
+                    android:accessibilityLiveRegion="polite" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/dashboard_location_access_button"
+                    style="@style/HyperOS.ActionRow.Bottom"
+                    android:text="@string/dashboard_grant_location_access"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/dashboard_weather_help" />
+
+            <!-- ===================== Media and notifications ===================== -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/dashboard_group_media" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_media_switch"
+                    style="@style/HyperOS.Switch.Top"
+                    android:text="@string/dashboard_widget_media" />
+
+                <TextView
+                    android:id="@+id/dashboard_media_access_status"
+                    style="@style/HyperOS.RowSummary"
+                    android:accessibilityLiveRegion="polite" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/dashboard_media_access_button"
+                    style="@style/HyperOS.ActionRow"
+                    android:text="@string/dashboard_grant_media_access"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/dashboard_media_now_playing"
+                    style="@style/HyperOS.TextRow"
+                    android:accessibilityLiveRegion="polite"
+                    android:breakStrategy="simple"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="@string/dashboard_media_nothing_playing"
+                    android:textAppearance="@style/HyperOS.Text.RowValue" />
+
+                <!-- Not a setting: a remote for checking that the widget picks
+                     the session up. Peer actions, so one weight for all three. -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/row_padding_horizontal"
+                    android:paddingEnd="@dimen/row_padding_horizontal"
+                    android:paddingBottom="@dimen/row_padding_vertical">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dashboard_media_previous_button"
+                        style="@style/HyperOS.Button.Compact"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/dashboard_media_previous" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dashboard_media_play_pause_button"
+                        style="@style/HyperOS.Button.Compact"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:layout_marginEnd="@dimen/spacing_sm"
+                        android:layout_weight="1"
+                        android:text="@string/dashboard_media_play_pause" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dashboard_media_next_button"
+                        style="@style/HyperOS.Button.Compact"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/dashboard_media_next" />
+                </LinearLayout>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_notifications_switch"
+                    style="@style/HyperOS.Switch.Bottom"
+                    android:text="@string/dashboard_widget_notifications" />
+            </LinearLayout>
+
+            <!-- ===================== Other ===================== -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/dashboard_group_other" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_active_profile_switch"
+                    style="@style/HyperOS.Switch.Top"
+                    android:text="@string/dashboard_widget_active_profile" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_custom_text_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_custom_text" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/dashboard_custom_text_container"
+                    style="@style/HyperOS.Field.Flat"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/dashboard_custom_text_hint"
+                    app:endIconMode="clear_text">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dashboard_custom_text_input"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionDone"
+                        android:inputType="textCapSentences"
+                        android:maxLength="60"
+                        android:maxLines="1"
+                        android:textAppearance="@style/HyperOS.Text.RowTitle" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/dashboard_custom_text_help" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

@@ -2,14 +2,37 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mirror_layout"
-    android:layout_width="294px"
-    android:layout_height="294px"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="@android:color/transparent">
 
     <TextureView
         android:id="@+id/mirror"
-        android:layout_width="294px"
-        android:layout_height="294px"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:visibility="visible" />
+
+    <com.tpkarras.mirror2rearultra.RearDashboardView
+        android:id="@+id/rear_dashboard"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
+
+    <View
+        android:id="@+id/brightness_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:importantForAccessibility="no"
+        android:visibility="visible"
+        tools:alpha="0" />
+
+    <com.tpkarras.mirror2rearultra.CalibrationGridView
+        android:id="@+id/calibration_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
 
 </FrameLayout>

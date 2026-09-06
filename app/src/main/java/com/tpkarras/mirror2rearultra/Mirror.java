@@ -1,11 +1,7 @@
 package com.tpkarras.mirror2rearultra;
 
-import static com.tpkarras.mirror2rearultra.DisplayActivity.displayManager;
-import static com.tpkarras.mirror2rearultra.DisplayActivity.mediaProjection;
-import static com.tpkarras.mirror2rearultra.ForegroundService.screenRotation;
-import static com.tpkarras.mirror2rearultra.QuickTileService.mirrorSwitch;
-
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +11,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.hardware.display.VirtualDisplay;
+import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -23,239 +19,783 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.view.IWindowManager;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.Surface;
 import android.view.TextureView;
-import android.view.Window;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
-import androidx.databinding.Observable;
+import androidx.annotation.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class Mirror extends Activity {
-    private IWindowManager wm;
-    private TextureView textureView;
-    private VirtualDisplay virtualDisplay;
-    private static int subscreenSwitch;
-    private static Method serviceMethod;
-    private IBinder windowBinder;
+public class Mirror extends Activity implements
+        TextureView.SurfaceTextureListener,
+        SensorEventListener,
+        DisplayManager.DisplayListener,
+        MirrorState.Listener,
+        MirrorSettings.Listener {
+    private static final String TAG = "Mirror2Rear";
+    private static final String POWER_INTERFACE = "android.os.IPowerManager";
+    private static final int TRANSACTION_WAKE_REAR_SCREEN = 16777210;
+    private static final int TRANSACTION_SLEEP_REAR_SCREEN = 16777211;
+    static final String EXTRA_SESSION_HAS_PROJECTION = "session_has_projection";
 
-    public static void rearScreenSwitch(boolean z){
-        Parcel parcel = Parcel.obtain();
-        Parcel parcel2 = Parcel.obtain();
-        parcel.writeInterfaceToken("android.os.IPowerManager");
-        int code;
-        if(z) {
-            code = 16777210;
-            Binder binder = new Binder();
-            parcel.writeStrongBinder(binder);
-            parcel.writeLong(SystemClock.uptimeMillis());
-            parcel.writeInt(1);
-            parcel.writeString("CAMERA_CALL");
-        } else {
-                code = 16777211;
-                parcel.writeLong(SystemClock.uptimeMillis());
-                parcel.writeString("CAMERA_CALL");
+    private TextureView textureView;
+    private View brightnessOverlay;
+    private CalibrationGridView calibrationGrid;
+    private RearDashboardView dashboardView;
+    /** The dashboard page on screen, which decides which way round it sits. */
+    private int dashboardPage = 1;
+    private FrameLayout mirrorLayout;
+    private RearDashboardController dashboardController;
+    private RearBrightnessController brightnessController;
+    private DeviceHealthMonitor deviceHealthMonitor;
+    private ForegroundAppMonitor foregroundAppMonitor;
+    private DisplayManager displayManager;
+    private SensorManager sensorManager;
+    private Sensor screenDownSensor;
+    private Surface projectionSurface;
+    private int projectionBufferWidth;
+    private int projectionBufferHeight;
+    private int originalSubscreenSwitch;
+    private boolean listenersRegistered;
+    private boolean automaticOutputVisible;
+    private boolean outputVisibilityInitialized;
+    private boolean appOutputAllowed;
+    /**
+     * Whether the assigned-apps rule currently lets the mirrored image through.
+     *
+     * <p>Separate from {@link #appOutputAllowed} because the rule is about the
+     * image, not about the panel.
+     */
+    private boolean appProjectionAllowed;
+    private boolean healthOutputAllowed = true;
+    private MirrorProfile activeProfile;
+    private DashboardSettings dashboardSettings;
+    private RearContentMode sessionContentMode;
+    private boolean sessionHasProjection;
+    private String appliedDashboardProfileId;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (!MirrorState.isActive()) {
+            finish();
+            return;
         }
-        try {
-            Method serviceMethod = Class.forName("android.os.ServiceManager").getMethod("getService", String.class);
-            IBinder serviceBinder = (IBinder) serviceMethod.invoke(null, "power");
-            serviceBinder.transact(code, parcel, parcel2, 1);
-        } catch (RemoteException | ClassNotFoundException | NoSuchMethodException e) {
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } finally {
-            parcel.recycle();
-            parcel2.recycle();
+
+        MirrorState.addListener(this);
+        activeProfile = MirrorSettings.loadActiveProfile(this);
+        appliedDashboardProfileId = activeProfile.id;
+        if (DashboardTemplateStore.exists(this, activeProfile.id)) {
+            DashboardTemplateStore.apply(this, activeProfile.id);
+        }
+        MirrorSettings.addListener(this);
+        dashboardSettings = MirrorSettings.loadDashboardSettings(this);
+        sessionContentMode = dashboardSettings.contentMode;
+        sessionHasProjection = getIntent().getBooleanExtra(
+                EXTRA_SESSION_HAS_PROJECTION,
+                sessionContentMode.usesProjection()
+        );
+        originalSubscreenSwitch = Settings.System.getInt(
+                getContentResolver(),
+                "subscreen_switch",
+                0
+        );
+        displayManager = getSystemService(DisplayManager.class);
+        sensorManager = getSystemService(SensorManager.class);
+        screenDownSensor = findScreenDownSensor(sensorManager);
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+        if (!sessionContentMode.showsDashboard()) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        }
+        setContentView(R.layout.mirror_surface);
+        textureView = findViewById(R.id.mirror);
+        mirrorLayout = findViewById(R.id.mirror_layout);
+        brightnessOverlay = findViewById(R.id.brightness_overlay);
+        calibrationGrid = findViewById(R.id.calibration_grid);
+        dashboardView = findViewById(R.id.rear_dashboard);
+        textureView.setClickable(false);
+        brightnessOverlay.setClickable(false);
+        calibrationGrid.setClickable(false);
+        dashboardView.setClickable(true);
+        dashboardView.setDashboardSettings(dashboardSettings, sessionContentMode);
+        // Each page can be turned a different way round, and the rotation is
+        // applied out here because it needs the panel's own dimensions.
+        dashboardView.setOnPageChangedListener(page -> {
+            dashboardPage = page;
+            applyDashboardOrientation();
+        });
+        mirrorLayout.post(this::applyDashboardOrientation);
+        applyAppVisibility(null);
+        textureView.setVisibility(View.INVISIBLE);
+        brightnessController = new RearBrightnessController(hardwareControlActive ->
+                runOnUiThread(() -> applyBrightnessOverlay(hardwareControlActive))
+        );
+        configureProjectionSurfaceSize();
+        if (usesProjection()) {
+            textureView.setSurfaceTextureListener(this);
+        }
+        if (sessionContentMode.showsDashboard()) {
+            dashboardController = new RearDashboardController(
+                    this,
+                    dashboardSettings,
+                    snapshot -> runOnUiThread(() -> dashboardView.setSnapshot(snapshot))
+            );
+            dashboardController.start();
+        }
+        configureAutoProfileMonitoring();
+        deviceHealthMonitor = new DeviceHealthMonitor(this, snapshot ->
+                runOnUiThread(() -> applyDeviceHealth(snapshot))
+        );
+        deviceHealthMonitor.start();
+        updateOutputVisibility();
+        updateCalibrationGridVisibility();
+        if (automaticOutputVisible) {
+            applyProfileBrightness();
         }
     }
 
-    protected void onCreate(Bundle savedInstanceState){
-        try {
-            serviceMethod = Class.forName("android.os.ServiceManager").getMethod("getService", String.class);
-            windowBinder = (IBinder) serviceMethod.invoke(null, "window");
-            wm = IWindowManager.Stub.asInterface(windowBinder);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+    private void configureProjectionSurfaceSize() {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int side = Math.max(metrics.widthPixels, metrics.heightPixels);
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) textureView.getLayoutParams();
+        layoutParams.width = side;
+        layoutParams.height = side;
+        layoutParams.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+        textureView.setLayoutParams(layoutParams);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        registerRuntimeListeners();
+    }
+
+    @Override
+    protected void onStop() {
+        unregisterRuntimeListeners();
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        MirrorState.removeListener(this);
+        MirrorSettings.removeListener(this);
+        unregisterRuntimeListeners();
+        detachProjectionSurface();
+        stopAutoProfileMonitoring();
+        if (deviceHealthMonitor != null) {
+            deviceHealthMonitor.stop();
         }
-        Runnable rotationListener = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (mirrorSwitch.get() == 1) {
-                        if (wm.getDefaultDisplayRotation() == 3 && screenRotation.get() != 3) {
-                            screenRotation.set(3);
-                        } else if (wm.getDefaultDisplayRotation() == 2 && screenRotation.get() != 2) {
-                            screenRotation.set(2);
-                        } else if (wm.getDefaultDisplayRotation() == 1 && screenRotation.get() != 1) {
-                            screenRotation.set(1);
-                        } else if (wm.getDefaultDisplayRotation() == 0 && screenRotation.get() != 0) {
-                            screenRotation.set(Surface.ROTATION_0);
-                        }
-                        Thread.sleep(250);
-                    }
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-        Thread rotationThread = new Thread(rotationListener);
-        try {
-            subscreenSwitch = Settings.System.getInt(getContentResolver(), "subscreen_switch");
-        } catch (Settings.SettingNotFoundException e) {
-            e.printStackTrace();
+        if (dashboardController != null) {
+            dashboardController.stop();
         }
-        super.onCreate(savedInstanceState);
-        SensorManager sensorManager = (SensorManager) getApplicationContext().getSystemService(Context.SENSOR_SERVICE);
-        Sensor screenDown = null;
-        for (Sensor sensor: sensorManager.getSensorList(Sensor.TYPE_ALL)){
-            if(sensor.getName().matches("screen_down.*") && sensor.isWakeUpSensor() == false) {
-                screenDown = sensor;
-                break;
+        AutoProfileState.clear();
+
+        if (!isChangingConfigurations()) {
+            if (brightnessController != null) {
+                brightnessController.closeAndRestore();
             }
+            boolean wasActive = MirrorState.isActive();
+            if (wasActive) {
+                MirrorState.setActive(this, false);
+                if (sessionHasProjection && ForegroundService.isRunning()) {
+                    startService(ForegroundService.createStopIntent(this));
+                }
+            }
+            rearScreenSwitch(false);
+            restoreXiaomiRearScreenUi();
+        } else if (brightnessController != null) {
+            brightnessController.closeWithoutRestore();
         }
-        SensorEventListener sensorEventListener = new SensorEventListener() {
-            @Override
-            public void onSensorChanged(SensorEvent sensorEvent) {
-                rearScreenSwitch(true);
+        super.onDestroy();
+    }
+
+    @Override
+    public void onMirrorStateChanged(boolean active) {
+        if (!active) {
+            runOnUiThread(this::finishAndRemoveTask);
+        }
+    }
+
+    @Override
+    public void onMirrorSettingsChanged(MirrorProfile profile) {
+        runOnUiThread(() -> {
+            dashboardSettings = MirrorSettings.loadDashboardSettings(this)
+                    .withContentMode(sessionContentMode);
+            dashboardView.setDashboardSettings(dashboardSettings, sessionContentMode);
+            applyDashboardOrientation();
+            if (dashboardController != null) {
+                dashboardController.updateSettings(dashboardSettings);
             }
-
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int i) {
-
+            configureAutoProfileMonitoring();
+            AutoProfileState.Snapshot automatic = AutoProfileState.get();
+            String automaticProfileId = automatic.packageName == null
+                    ? null
+                    : MirrorSettings.assignedProfileId(this, automatic.packageName);
+            if (!sameValue(automatic.profileId, automaticProfileId)) {
+                AutoProfileState.set(automaticProfileId, automatic.packageName);
             }
-        };
-            sensorManager.registerListener(sensorEventListener, screenDown, 0);
-        Window window = getWindow();
-        Matrix matrix = new Matrix();
-        virtualDisplay = mediaProjection.createVirtualDisplay("Mirror", 294, 294, 290, displayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, null, null, null);
-        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-        layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION;
-        layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-        window.setAttributes(layoutParams);
-        window.setContentView(R.layout.mirror_surface);
-        textureView = findViewById(R.id.mirror);
-        TextureView.SurfaceTextureListener surfaceTextureListener = new TextureView.SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surfaceTexture, int i, int i1) {
-                Surface surface = new Surface(surfaceTexture);
-                virtualDisplay.setSurface(surface);
-                try {
-                    if (wm.getDefaultDisplayRotation() == 0) {
-                        matrix.setRotate(0, textureView.getWidth() / 2, textureView.getHeight() / 2);
-                        textureView.setScaleX(-1);
-                        textureView.setScaleY(1);
-                        matrix.postTranslate(84, 0);
-                        screenRotation.set(Surface.ROTATION_0);
-                    } else if (wm.getDefaultDisplayRotation() == 3) {
-                        matrix.setRotate(90, textureView.getWidth() / 2, textureView.getHeight() / 2);
-                        textureView.setScaleX(1);
-                        textureView.setScaleY(-1);
-                        matrix.postTranslate(-84, 0);
-                        screenRotation.set(3);
-                    } else if (wm.getDefaultDisplayRotation() == 1) {
-                        matrix.setRotate(90, textureView.getWidth() / 2, textureView.getHeight() / 2);
-                        textureView.setScaleX(1);
-                        textureView.setScaleY(-1);
-                        matrix.postTranslate(-84, 0);
-                        screenRotation.set(1);
-                    } else if (wm.getDefaultDisplayRotation() == 2) {
-                        matrix.setRotate(0, textureView.getWidth() / 2, textureView.getHeight() / 2);
-                        textureView.setScaleX(-1);
-                        textureView.setScaleY(1);
-                        matrix.postTranslate(84, 0);
-                        screenRotation.set(2);
-                    }
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-                textureView.setTransform(matrix);
-                screenRotation.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-                    @Override
-                    public void onPropertyChanged(Observable observable, int i) {
-                        if (screenRotation.get() == 0) {
-                            matrix.setRotate(0, textureView.getWidth() / 2, textureView.getHeight() / 2);
-                            textureView.setScaleX(-1);
-                            textureView.setScaleY(1);
-                            matrix.postTranslate(84, 0);
-                        } else if (screenRotation.get() == 3) {
-                            matrix.setRotate(90, textureView.getWidth() / 2, textureView.getHeight() / 2);
-                            textureView.setScaleX(1);
-                            textureView.setScaleY(-1);
-                            matrix.postTranslate(-84, 0);
-                        } else if (screenRotation.get() == 1) {
-                            matrix.setRotate(-90, textureView.getWidth() / 2, textureView.getHeight() / 2);
-                            textureView.setScaleX(1);
-                            textureView.setScaleY(-1);
-                            matrix.postTranslate(-84, 0);
-                        } else if (screenRotation.get() == 2) {
-                            matrix.setRotate(-180, textureView.getWidth() / 2, textureView.getHeight() / 2);
-                            textureView.setScaleX(-1);
-                            textureView.setScaleY(1);
-                            matrix.postTranslate(84, 0);
-                        }
-                        textureView.setTransform(matrix);
-                    }
-                });
+            if (MirrorSettings.isAutoProfileEnabled(this) && automaticProfileId != null) {
+                activeProfile = MirrorSettings.loadProfile(this, automaticProfileId);
+            } else {
+                activeProfile = profile;
             }
-
-            @Override
-            public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surfaceTexture, int i, int i1) {
-
+            applyDashboardForProfile(activeProfile);
+            if (dashboardController != null) {
+                dashboardController.setActiveProfile(activeProfile);
             }
-
-            @Override
-            public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surfaceTexture) {
-                sensorManager.unregisterListener(sensorEventListener);
-                virtualDisplay.release();
-                if(subscreenSwitch == 1) {
-                    Intent intent = new Intent();
-                    intent.setComponent(ComponentName.createRelative("com.xiaomi.misubscreenui", ".SubScreenMainActivity"));
-                    intent.setFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                    startActivity(intent);
-                }
-                return false;
+            applyAppVisibility(automaticProfileId);
+            if (deviceHealthMonitor != null) {
+                deviceHealthMonitor.refresh();
             }
-
-            @Override
-            public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surfaceTexture) {
-
-            }
-        };
-        textureView.setSurfaceTextureListener(surfaceTextureListener);
-        rearScreenSwitch(true);
-        rotationThread.start();
-        mirrorSwitch.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(Observable sender, int propertyId) {
-                if (mirrorSwitch.get() == 0) {
-                    rearScreenSwitch(false);
-                    finishAffinity();
-                }
+            updateOutputVisibility();
+            updateCalibrationGridVisibility();
+            updateProjectionBufferFromSettings();
+            if (automaticOutputVisible) {
+                applyProfileBrightness();
+                applyRotationTransform();
             }
         });
     }
 
-    public void onPause() {
-        super.onPause();
-
+    @Override
+    public void onSurfaceTextureAvailable(
+            @NonNull SurfaceTexture surfaceTexture,
+            int width,
+            int height
+    ) {
+        if (!usesProjection()) {
+            return;
+        }
+        configureProjectionBuffer(surfaceTexture, width, height);
+        if (automaticOutputVisible) {
+            projectionSurface = new Surface(surfaceTexture);
+            attachProjectionSurface(projectionBufferWidth, projectionBufferHeight);
+            applyRotationTransform();
+        }
     }
 
-    public void onResume() {
-        super.onResume();
+    @Override
+    public void onSurfaceTextureSizeChanged(
+            @NonNull SurfaceTexture surfaceTexture,
+            int width,
+            int height
+    ) {
+        if (!usesProjection()) {
+            return;
+        }
+        configureProjectionBuffer(surfaceTexture, width, height);
+        if (automaticOutputVisible) {
+            attachProjectionSurface(projectionBufferWidth, projectionBufferHeight);
+            applyRotationTransform();
+        }
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surfaceTexture) {
+        detachProjectionSurface();
+        projectionBufferWidth = 0;
+        projectionBufferHeight = 0;
+        return true;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surfaceTexture) {
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (automaticOutputVisible) {
+            rearScreenSwitch(true);
+            applyProfileBrightness();
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    @Override
+    public void onDisplayAdded(int displayId) {
+    }
+
+    @Override
+    public void onDisplayRemoved(int displayId) {
+        Display currentDisplay = getDisplay();
+        if (currentDisplay != null && currentDisplay.getDisplayId() == displayId) {
+            MirrorState.setActive(this, false);
+        }
+    }
+
+    @Override
+    public void onDisplayChanged(int displayId) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            applyRotationTransform();
+        }
+    }
+
+    private void registerRuntimeListeners() {
+        if (listenersRegistered) {
+            return;
+        }
+        if (displayManager != null) {
+            displayManager.registerDisplayListener(this, null);
+        }
+        if (sensorManager != null && screenDownSensor != null) {
+            sensorManager.registerListener(this, screenDownSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+        listenersRegistered = true;
+    }
+
+    private void unregisterRuntimeListeners() {
+        if (!listenersRegistered) {
+            return;
+        }
+        if (displayManager != null) {
+            displayManager.unregisterDisplayListener(this);
+        }
+        if (sensorManager != null) {
+            sensorManager.unregisterListener(this);
+        }
+        listenersRegistered = false;
+    }
+
+    private void attachProjectionSurface(int width, int height) {
+        if (!usesProjection()
+                || !MirrorState.isActive()
+                || projectionSurface == null
+                || !projectionSurface.isValid()) {
+            return;
+        }
+        try {
+            startService(ForegroundService.createAttachSurfaceIntent(
+                    this,
+                    projectionSurface,
+                    width,
+                    height,
+                    getResources().getDisplayMetrics().densityDpi
+            ));
+        } catch (RuntimeException error) {
+            Log.e(TAG, "Unable to send the projection surface to the service", error);
+            MirrorState.setActive(this, false);
+        }
+    }
+
+    private void detachProjectionSurface() {
+        if (projectionSurface == null) {
+            return;
+        }
+        if (MirrorState.isActive()) {
+            try {
+                startService(ForegroundService.createDetachSurfaceIntent(this));
+            } catch (RuntimeException error) {
+                Log.w(TAG, "Unable to detach the projection surface", error);
+            }
+        }
+        projectionSurface.release();
+        projectionSurface = null;
+    }
+
+    private void applyRotationTransform() {
+        if (textureView == null || textureView.getWidth() == 0 || textureView.getHeight() == 0) {
+            return;
+        }
+        Display mainDisplay = displayManager == null
+                ? null
+                : displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+        int rotation = mainDisplay == null ? Surface.ROTATION_0 : mainDisplay.getRotation();
+        MirrorProfile profile = activeProfile == null
+                ? MirrorSettings.loadActiveProfile(this)
+                : activeProfile;
+        RotationTransform transform = RotationTransform.forRotation(
+                rotation,
+                profile.rotationDegrees,
+                profile.mirrorHorizontally
+        );
+
+        DisplayMetrics rearMetrics = getResources().getDisplayMetrics();
+        Display.Mode mode = mainDisplay == null ? null : mainDisplay.getMode();
+        ProjectionGeometry.Scale scale = ProjectionGeometry.calculateScale(
+                profile.scaleMode,
+                rearMetrics.widthPixels,
+                rearMetrics.heightPixels,
+                textureView.getWidth(),
+                mode == null ? rearMetrics.widthPixels : mode.getPhysicalWidth(),
+                mode == null ? rearMetrics.heightPixels : mode.getPhysicalHeight(),
+                profile.rotationDegrees
+        );
+
+        float calibrationZoom = profile.zoomPercent / 100f;
+        float combinedScaleX = transform.scaleX * scale.x * calibrationZoom;
+        float combinedScaleY = transform.scaleY * scale.y * calibrationZoom;
+        float pivotX = textureView.getWidth() / 2f;
+        float pivotY = textureView.getHeight() / 2f;
+
+        Matrix matrix = new Matrix();
+        matrix.setRotate(
+                transform.degrees,
+                pivotX,
+                pivotY
+        );
+        matrix.postScale(combinedScaleX, combinedScaleY, pivotX, pivotY);
+        textureView.setScaleX(1f);
+        textureView.setScaleY(1f);
+        textureView.setTranslationX(Math.round(ProjectionGeometry.calculateTranslation(
+                rearMetrics.widthPixels,
+                profile.horizontalOffsetPercent
+        )));
+        textureView.setTranslationY(Math.round(ProjectionGeometry.calculateTranslation(
+                rearMetrics.heightPixels,
+                profile.verticalOffsetPercent
+        )));
+        textureView.setTransform(matrix);
+    }
+
+    private void configureProjectionBuffer(
+            SurfaceTexture surfaceTexture,
+            int reportedWidth,
+            int reportedHeight
+    ) {
+        if (!usesProjection()) {
+            return;
+        }
+        int viewWidth = textureView.getWidth() > 0 ? textureView.getWidth() : reportedWidth;
+        int viewHeight = textureView.getHeight() > 0 ? textureView.getHeight() : reportedHeight;
+        ProjectionQuality quality = MirrorSettings.loadProjectionQuality(this);
+        MirrorProfile profile = activeProfile == null
+                ? MirrorSettings.loadActiveProfile(this)
+                : activeProfile;
+        int desiredWidth = quality.bufferDimension(viewWidth, profile.zoomPercent);
+        int desiredHeight = quality.bufferDimension(viewHeight, profile.zoomPercent);
+        if (projectionBufferWidth == desiredWidth && projectionBufferHeight == desiredHeight) {
+            return;
+        }
+        surfaceTexture.setDefaultBufferSize(desiredWidth, desiredHeight);
+        projectionBufferWidth = desiredWidth;
+        projectionBufferHeight = desiredHeight;
+        Log.i(TAG, "Projection buffer: " + desiredWidth + "x" + desiredHeight
+                + " (" + quality + ", zoom=" + profile.zoomPercent + "%, resolution="
+                + quality.bufferPercent(profile.zoomPercent) + "%)");
+    }
+
+    private void updateProjectionBufferFromSettings() {
+        if (!usesProjection()) {
+            return;
+        }
+        SurfaceTexture surfaceTexture = textureView == null ? null : textureView.getSurfaceTexture();
+        if (surfaceTexture == null || projectionSurface == null || !projectionSurface.isValid()) {
+            return;
+        }
+        int oldWidth = projectionBufferWidth;
+        int oldHeight = projectionBufferHeight;
+        configureProjectionBuffer(surfaceTexture, textureView.getWidth(), textureView.getHeight());
+        if (oldWidth != projectionBufferWidth || oldHeight != projectionBufferHeight) {
+            attachProjectionSurface(projectionBufferWidth, projectionBufferHeight);
+        }
+    }
+
+    private void applyProfileBrightness() {
+        if (activeProfile == null || brightnessOverlay == null) {
+            return;
+        }
+        applyBrightnessOverlay(false);
+        if (brightnessController != null) {
+            brightnessController.applyPercent(activeProfile.brightnessPercent);
+        }
+    }
+
+    private void applyBrightnessOverlay(boolean hardwareControlActive) {
+        if (activeProfile == null || brightnessOverlay == null) {
+            return;
+        }
+        brightnessOverlay.setAlpha(
+                hardwareControlActive ? 0f : 1f - activeProfile.brightnessPercent / 100f
+        );
+    }
+
+    private void configureAutoProfileMonitoring() {
+        boolean shouldMonitor = (MirrorSettings.isAutoProfileEnabled(this)
+                || MirrorSettings.isAutoVisibilityEnabled(this))
+                && ForegroundAppMonitor.hasUsageAccess(this);
+        if (!shouldMonitor) {
+            stopAutoProfileMonitoring();
+            AutoProfileState.clear();
+            return;
+        }
+        if (foregroundAppMonitor != null) {
+            return;
+        }
+        ForegroundAppMonitor monitor = new ForegroundAppMonitor(this, (profileId, packageName) ->
+                runOnUiThread(() -> applyAutomaticProfile(profileId, packageName))
+        );
+        if (monitor.start()) {
+            foregroundAppMonitor = monitor;
+        } else {
+            monitor.stop();
+        }
+    }
+
+    private void stopAutoProfileMonitoring() {
+        if (foregroundAppMonitor != null) {
+            foregroundAppMonitor.stop();
+            foregroundAppMonitor = null;
+        }
+    }
+
+    private void applyAutomaticProfile(String profileId, String packageName) {
+        if (!MirrorSettings.isAutoProfileEnabled(this)
+                && !MirrorSettings.isAutoVisibilityEnabled(this)) {
+            return;
+        }
+        Log.i(TAG, "Automatic profile: package=" + packageName
+                + ", profile=" + (profileId == null ? "manual fallback" : profileId));
+        AutoProfileState.set(profileId, packageName);
+        if (MirrorSettings.isAutoProfileEnabled(this)) {
+            activeProfile = profileId == null
+                    ? MirrorSettings.loadActiveProfile(this)
+                    : MirrorSettings.loadProfile(this, profileId);
+            applyDashboardForProfile(activeProfile);
+            if (dashboardController != null) {
+                dashboardController.setActiveProfile(activeProfile);
+            }
+        }
+        applyAppVisibility(profileId);
+        updateOutputVisibility();
+        if (automaticOutputVisible) {
+            updateProjectionBufferFromSettings();
+            applyProfileBrightness();
+            applyRotationTransform();
+        }
+    }
+
+    /**
+     * Applies the "only for assigned apps" rule.
+     *
+     * <p>The rule is about the mirrored image: show it only while one of the
+     * assigned apps is in front, and pause it on the way out. It used to switch
+     * the whole rear panel off instead, so in the dashboard-only mode - where
+     * there is no image to gate - the panel went black and stayed black with
+     * nothing anywhere saying why. The widgets now stay put; only the image
+     * waits for an assigned app.
+     *
+     * @param automaticProfileId the profile the app in front is assigned to,
+     *     or null when the app in front has none
+     */
+    private void applyAppVisibility(@Nullable String automaticProfileId) {
+        appProjectionAllowed = !MirrorSettings.isAutoVisibilityEnabled(this)
+                || automaticProfileId != null;
+        appOutputAllowed = appProjectionAllowed || sessionContentMode.showsDashboard();
+    }
+
+    private void applyDashboardForProfile(MirrorProfile profile) {
+        if (profile == null || profile.id.equals(appliedDashboardProfileId)) return;
+        appliedDashboardProfileId = profile.id;
+        if (!DashboardTemplateStore.apply(this, profile.id)) return;
+        dashboardSettings = MirrorSettings.loadDashboardSettings(this)
+                .withContentMode(sessionContentMode);
+        if (dashboardView != null) {
+            dashboardView.setDashboardSettings(dashboardSettings, sessionContentMode);
+            applyDashboardOrientation();
+        }
+        if (dashboardController != null) dashboardController.updateSettings(dashboardSettings);
+    }
+
+    private void setAutomaticOutputVisible(boolean visible) {
+        if (outputVisibilityInitialized && automaticOutputVisible == visible) {
+            applyContentVisibility();
+            updateCalibrationGridVisibility();
+            return;
+        }
+        outputVisibilityInitialized = true;
+        automaticOutputVisible = visible;
+        if (textureView == null) {
+            return;
+        }
+        applyContentVisibility();
+        if (!visible) {
+            detachProjectionSurface();
+            if (brightnessOverlay != null) {
+                brightnessOverlay.setAlpha(1f);
+            }
+            if (brightnessController != null) {
+                brightnessController.restoreWhileOpen();
+            }
+            rearScreenSwitch(false);
+            Log.i(TAG, "Rear output paused");
+            updateCalibrationGridVisibility();
+            return;
+        }
+
         rearScreenSwitch(true);
+        SurfaceTexture surfaceTexture = usesProjection() && appProjectionAllowed
+                ? textureView.getSurfaceTexture()
+                : null;
+        if (surfaceTexture != null && projectionSurface == null) {
+            configureProjectionBuffer(surfaceTexture, textureView.getWidth(), textureView.getHeight());
+            projectionSurface = new Surface(surfaceTexture);
+            attachProjectionSurface(projectionBufferWidth, projectionBufferHeight);
+        }
+        updateCalibrationGridVisibility();
+        Log.i(TAG, "Rear output resumed");
+    }
+
+    private void applyContentVisibility() {
+        boolean showProjection = automaticOutputVisible && usesProjection() && appProjectionAllowed;
+        textureView.setVisibility(showProjection ? View.VISIBLE : View.INVISIBLE);
+        if (dashboardView != null) {
+            dashboardView.setVisibility(
+                    automaticOutputVisible && sessionContentMode.showsDashboard()
+                            ? View.VISIBLE
+                            : View.GONE
+            );
+        }
+        if (!showProjection) {
+            detachProjectionSurface();
+        }
+    }
+
+    private void applyDashboardOrientation() {
+        if (dashboardView == null || mirrorLayout == null
+                || mirrorLayout.getWidth() == 0 || mirrorLayout.getHeight() == 0) return;
+        DashboardWidgetLayout.Orientation orientation =
+                DashboardWidgetLayout.loadPageOrientation(this, dashboardPage);
+        int parentWidth = mirrorLayout.getWidth();
+        int parentHeight = mirrorLayout.getHeight();
+        boolean rotate = (orientation == DashboardWidgetLayout.Orientation.LANDSCAPE
+                && parentHeight > parentWidth)
+                || (orientation == DashboardWidgetLayout.Orientation.PORTRAIT
+                && parentWidth > parentHeight);
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) dashboardView.getLayoutParams();
+        params.width = rotate ? parentHeight : FrameLayout.LayoutParams.MATCH_PARENT;
+        params.height = rotate ? parentWidth : FrameLayout.LayoutParams.MATCH_PARENT;
+        params.gravity = Gravity.CENTER;
+        dashboardView.setLayoutParams(params);
+        dashboardView.setPivotX(params.width > 0 ? params.width / 2f : dashboardView.getWidth() / 2f);
+        dashboardView.setPivotY(params.height > 0 ? params.height / 2f : dashboardView.getHeight() / 2f);
+        dashboardView.setRotation(rotate ? 90f : 0f);
+    }
+
+    private boolean usesProjection() {
+        return sessionHasProjection && sessionContentMode.usesProjection();
+    }
+
+    private void updateOutputVisibility() {
+        setAutomaticOutputVisible(appOutputAllowed && healthOutputAllowed);
+    }
+
+    private void applyDeviceHealth(DeviceHealthState.Snapshot snapshot) {
+        boolean wasAllowed = healthOutputAllowed;
+        healthOutputAllowed = snapshot.outputAllowed();
+        updateOutputVisibility();
+        if (healthOutputAllowed && (!wasAllowed || automaticOutputVisible)) {
+            updateProjectionBufferFromSettings();
+            applyProfileBrightness();
+            applyRotationTransform();
+        } else if (!healthOutputAllowed) {
+            Log.w(TAG, "Device protection paused rear output: " + snapshot.pauseReason);
+        }
+    }
+
+    private void updateCalibrationGridVisibility() {
+        if (calibrationGrid != null) {
+            calibrationGrid.setVisibility(
+                    automaticOutputVisible && MirrorSettings.isCalibrationGridEnabled(this)
+                            && usesProjection() && appProjectionAllowed
+                            ? View.VISIBLE
+                            : View.GONE
+            );
+        }
+    }
+
+    private static boolean sameValue(String first, String second) {
+        return first == null ? second == null : first.equals(second);
+    }
+
+    private static Sensor findScreenDownSensor(SensorManager manager) {
+        if (manager == null) {
+            return null;
+        }
+        for (Sensor sensor : manager.getSensorList(Sensor.TYPE_ALL)) {
+            if (sensor.getName().matches("screen_down.*") && !sensor.isWakeUpSensor()) {
+                return sensor;
+            }
+        }
+        Log.w(TAG, "Xiaomi screen_down sensor is unavailable");
+        return null;
+    }
+
+    private void restoreXiaomiRearScreenUi() {
+        if (originalSubscreenSwitch != 1) {
+            return;
+        }
+        Intent intent = new Intent()
+                .setComponent(ComponentName.createRelative(
+                        "com.xiaomi.misubscreenui",
+                        ".SubScreenMainActivity"
+                ))
+                .addFlags(
+                        Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT
+                                | Intent.FLAG_ACTIVITY_NEW_TASK
+                                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                );
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException | SecurityException error) {
+            Log.w(TAG, "Unable to restore Xiaomi rear screen UI", error);
+        }
+    }
+
+    static boolean rearScreenSwitch(boolean enabled) {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        try {
+            data.writeInterfaceToken(POWER_INTERFACE);
+            int transactionCode;
+            if (enabled) {
+                transactionCode = TRANSACTION_WAKE_REAR_SCREEN;
+                data.writeStrongBinder(new Binder());
+                data.writeLong(SystemClock.uptimeMillis());
+                data.writeInt(1);
+                data.writeString("CAMERA_CALL");
+            } else {
+                transactionCode = TRANSACTION_SLEEP_REAR_SCREEN;
+                data.writeLong(SystemClock.uptimeMillis());
+                data.writeString("CAMERA_CALL");
+            }
+
+            Method getService = Class.forName("android.os.ServiceManager")
+                    .getMethod("getService", String.class);
+            IBinder powerService = (IBinder) getService.invoke(null, "power");
+            if (powerService == null) {
+                Log.e(TAG, "Power service binder is unavailable");
+                return false;
+            }
+            boolean handled = powerService.transact(transactionCode, data, reply, IBinder.FLAG_ONEWAY);
+            if (!handled) {
+                Log.e(TAG, "Rear screen transaction was rejected: " + transactionCode);
+            }
+            return handled;
+        } catch (RemoteException | ReflectiveOperationException | RuntimeException error) {
+            Throwable cause = error instanceof InvocationTargetException && error.getCause() != null
+                    ? error.getCause()
+                    : error;
+            Log.e(TAG, "Unable to change rear screen power state", cause);
+            return false;
+        } finally {
+            data.recycle();
+            reply.recycle();
+        }
     }
 }

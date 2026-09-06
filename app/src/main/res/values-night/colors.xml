@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Semantic colour tokens - DARK.
+
+    Matched to HyperOS system settings: the page is true black so the panel
+    switches off those pixels, grouped content sits on it as a neutral grey,
+    and nothing carries a blue cast. Greys here are deliberately achromatic
+    (R=G=B); the earlier palette tinted them toward blue, which read as a
+    filter laid over the whole app.
+-->
+<resources>
+
+    <!-- Surfaces -->
+    <color name="hyper_background">#000000</color>
+    <color name="hyper_surface">#1C1C1C</color>
+    <color name="hyper_surface_grouped">#1C1C1C</color>
+    <color name="hyper_surface_elevated">#262626</color>
+    <color name="hyper_surface_sunken">#000000</color>
+    <color name="hyper_surface_transient">#2E2E2E</color>
+
+    <!-- Text -->
+    <color name="hyper_text_primary">#FFFFFF</color>
+    <color name="hyper_text_secondary">#9A9A9A</color>
+    <color name="hyper_text_tertiary">#6E6E6E</color>
+    <color name="hyper_text_disabled">#4A4A4A</color>
+
+    <!-- Accent: the vivid blue the reference uses for fills and selection. -->
+    <color name="hyper_accent">#3B82F7</color>
+    <color name="hyper_accent_pressed">#2E6AD8</color>
+    <color name="hyper_accent_disabled">#2A3A55</color>
+    <color name="hyper_on_accent">#FFFFFF</color>
+    <color name="hyper_accent_container">#17243A</color>
+    <color name="hyper_on_accent_container">#B9D2FA</color>
+
+    <!-- Lines. Rows no longer carry dividers; these remain for the few edges
+         that still need one, such as above a pinned action bar. -->
+    <color name="hyper_divider">#2C2C2C</color>
+    <color name="hyper_outline_subtle">#333333</color>
+
+    <!-- Status -->
+    <color name="hyper_success">#4CC26B</color>
+    <color name="hyper_warning">#FFA726</color>
+    <color name="hyper_error">#FF5B5B</color>
+    <color name="hyper_info">#3B82F7</color>
+
+    <!-- Interaction -->
+    <color name="hyper_press_overlay">#1FFFFFFF</color>
+    <color name="hyper_press_on_surface">#262626</color>
+    <!-- Band behind the chosen entry in a picker panel. -->
+    <color name="hyper_selection">#1E3A63</color>
+    <color name="hyper_scrim">#99000000</color>
+
+    <!-- Controls -->
+    <color name="hyper_track_off">#3A3A3A</color>
+    <color name="hyper_track_disabled">#242424</color>
+    <color name="hyper_thumb">#FFFFFF</color>
+    <color name="hyper_thumb_disabled">#6E6E6E</color>
+    <color name="hyper_field">#2A2A2A</color>
+    <color name="hyper_field_pressed">#333333</color>
+
+    <color name="black">#FF000000</color>
+</resources>

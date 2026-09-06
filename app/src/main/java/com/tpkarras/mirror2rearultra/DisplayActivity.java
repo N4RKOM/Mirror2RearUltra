@@ -1,95 +1,167 @@
 package com.tpkarras.mirror2rearultra;
 
-import static com.tpkarras.mirror2rearultra.QuickTileService.mirrorSwitch;
-import static com.tpkarras.mirror2rearultra.QuickTileService.rearDisplayId;
-
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
-import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 public class DisplayActivity extends AppCompatActivity {
+    private static final String TAG = "Mirror2RearConsent";
+    private static final String XIAOMI_REAR_SCREEN_PACKAGE = "com.xiaomi.misubscreenui";
 
-   public static MediaProjection mediaProjection;
-   public static ActivityResultLauncher<Intent> resultLauncher;
-   public static DisplayManager displayManager;
-   public static MediaProjectionManager mediaProjectionManager;
-   private ActivityOptions activityOptions;
-   public static boolean isAppInstalled(Context context, String packageName) {
-      try {
-         context.getPackageManager().getApplicationInfo(packageName, 0);
-         return true;
-      } catch (PackageManager.NameNotFoundException e) {
-         return false;
-      }
-   }
+    private MediaProjectionManager mediaProjectionManager;
+    private ActivityResultLauncher<Intent> projectionPermissionLauncher;
 
-   @Override
-   protected void onCreate(Bundle savedInstanceState) {
-      resultLauncher = registerForActivityResult(
-              new ActivityResultContracts.StartActivityForResult(),
-              new ActivityResultCallback<ActivityResult>() {
-                 @Override
-                 public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() != 0) {
-                       mediaProjection = mediaProjectionManager.getMediaProjection(result.getResultCode(), result.getData());
-                       displayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
-                       Display[] displays = displayManager.getDisplays();
-                       for (Display display : displays) {
-                          if(display.getName().equals("Built-in Screen") && display.getDisplayId() != 0) {
-                             rearDisplayId.set(display.getDisplayId());
-                             break;
-                          }
-                       }
-                       activityOptions = activityOptions.makeBasic();
-                       activityOptions.setLaunchDisplayId(rearDisplayId.get());
-                       Intent intent = new Intent(getApplicationContext(), Mirror.class);
-                       intent.setFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT | Intent.FLAG_ACTIVITY_NEW_TASK);
-                       startActivity(
-                               intent,
-                               activityOptions.toBundle()
-                       );
-                       finish();
-                    } else {
-                       mirrorSwitch.set(0);
-                       Intent foreground = new Intent(getApplicationContext(), ForegroundService.class);
-                       stopService(foreground);
-                       finish();
-                    }
-                 }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-              });
-      if (isAppInstalled(this, "com.xiaomi.misubscreenui")) {
-         super.onCreate(savedInstanceState);
-         Intent foreground = new Intent(getApplicationContext(), ForegroundService.class);
-            if (mirrorSwitch.get() == 1) {
-               startService(foreground);
-               mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-               resultLauncher.launch(mediaProjectionManager.createScreenCaptureIntent());
-            } else {
-               stopService(foreground);
-               finish();
+        projectionPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> onProjectionPermissionResult(result.getResultCode(), result.getData())
+        );
+
+        if (!MirrorState.isActive()) {
+            finish();
+            return;
+        }
+
+        if (!isPackageInstalled(XIAOMI_REAR_SCREEN_PACKAGE)) {
+            showFatalError(R.string.incompatible);
+            return;
+        }
+
+        DisplayManager displayManager = getSystemService(DisplayManager.class);
+        int rearDisplayId = findRearDisplayId(displayManager);
+        if (rearDisplayId == Display.INVALID_DISPLAY) {
+            showFatalError(R.string.rear_display_missing);
+            return;
+        }
+
+        if (!MirrorSettings.loadDashboardSettings(this).contentMode.usesProjection()) {
+            launchRearActivity(rearDisplayId, false);
+            return;
+        }
+
+        mediaProjectionManager = getSystemService(MediaProjectionManager.class);
+        if (mediaProjectionManager == null) {
+            showFatalError(R.string.projection_failed);
+            return;
+        }
+
+        projectionPermissionLauncher.launch(mediaProjectionManager.createScreenCaptureIntent());
+    }
+
+    @SuppressWarnings("deprecation")
+    private boolean isPackageInstalled(String packageName) {
+        try {
+            getPackageManager().getApplicationInfo(packageName, 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException ignored) {
+            return false;
+        }
+    }
+
+    private void onProjectionPermissionResult(int resultCode, @Nullable Intent resultData) {
+        if (!MirrorState.isActive()) {
+            finish();
+            return;
+        }
+        if (resultCode != Activity.RESULT_OK || resultData == null) {
+            MirrorState.setActive(this, false);
+            finish();
+            return;
+        }
+
+        int rearDisplayId = findRearDisplayId(getSystemService(DisplayManager.class));
+        if (rearDisplayId == Display.INVALID_DISPLAY) {
+            showFatalError(R.string.rear_display_missing);
+            return;
+        }
+
+        try {
+            ContextCompat.startForegroundService(
+                    this,
+                    ForegroundService.createStartIntent(this, resultCode, resultData)
+            );
+
+            launchRearActivity(rearDisplayId, true);
+        } catch (RuntimeException error) {
+            Log.e(TAG, "Unable to start mirroring on display " + rearDisplayId, error);
+            stopService(ForegroundService.createStopIntent(this));
+            showFatalError(R.string.projection_failed);
+        }
+    }
+
+    private void launchRearActivity(int rearDisplayId, boolean hasProjection) {
+        try {
+            ActivityOptions options = ActivityOptions.makeBasic();
+            options.setLaunchDisplayId(rearDisplayId);
+            Intent mirrorIntent = new Intent(this, Mirror.class)
+                    .putExtra(Mirror.EXTRA_SESSION_HAS_PROJECTION, hasProjection)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(mirrorIntent, options.toBundle());
+            finish();
+        } catch (RuntimeException error) {
+            Log.e(TAG, "Unable to start rear content on display " + rearDisplayId, error);
+            if (hasProjection) {
+                stopService(ForegroundService.createStopIntent(this));
             }
-      } else {
-         new AlertDialog.Builder(this)
-                 .setMessage(R.string.incompatible)
-                 .setPositiveButton(android.R.string.ok, null)
-                 .create()
-                 .show();
-         mirrorSwitch.set(0);
-         finish();
-      }
-   }
+            showFatalError(R.string.projection_failed);
+        }
+    }
+
+    static int findRearDisplayId(@Nullable DisplayManager displayManager) {
+        if (displayManager == null) {
+            return Display.INVALID_DISPLAY;
+        }
+
+        Display best = chooseSmallestNonDefaultDisplay(
+                displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
+        );
+        if (best == null) {
+            best = chooseSmallestNonDefaultDisplay(displayManager.getDisplays());
+        }
+        return best == null ? Display.INVALID_DISPLAY : best.getDisplayId();
+    }
+
+    @Nullable
+    private static Display chooseSmallestNonDefaultDisplay(Display[] displays) {
+        Display best = null;
+        long bestArea = Long.MAX_VALUE;
+        for (Display display : displays) {
+            if (display.getDisplayId() == Display.DEFAULT_DISPLAY) {
+                continue;
+            }
+            Display.Mode mode = display.getMode();
+            long area = (long) mode.getPhysicalWidth() * mode.getPhysicalHeight();
+            if (area < bestArea) {
+                best = display;
+                bestArea = area;
+            }
+        }
+        return best;
+    }
+
+    private void showFatalError(int messageResource) {
+        MirrorState.setActive(this, false);
+        new AlertDialog.Builder(this)
+                .setMessage(messageResource)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> finish())
+                .setOnCancelListener(dialog -> finish())
+                .show();
+    }
 }

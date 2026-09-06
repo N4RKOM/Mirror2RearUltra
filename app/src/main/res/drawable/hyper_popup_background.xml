@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Panel behind an anchored picker. Softer corners than a row, because it
+     floats above the page rather than sitting in it. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/hyper_surface_transient" />
+    <corners android:radius="22dp" />
+</shape>

@@ -1,0 +1,405 @@
+package com.tpkarras.mirror2rearultra;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
+final class DashboardWidgetLayout {
+    enum Widget { CLOCK, DATE, BATTERY, TEMPERATURE, WEATHER, NEXT_ALARM, MEDIA,
+        COMPASS, SPEED, ALTITUDE, SESSION_TIMER, ACTIVE_PROFILE, CUSTOM_TEXT,
+        NETWORK, MEMORY, STORAGE, NOTIFICATIONS, CALENDAR, STEPS }
+    enum Size { SMALL, NORMAL, LARGE }
+
+    /**
+     * Whether a widget stays on the panel when it has nothing to report.
+     *
+     * <p>Ten widgets used to draw a literal dash in that case while five others
+     * simply disappeared - no rule, just how each was written. With room for
+     * about five lines, switching on media, the alarm, the compass, speed and
+     * altitude with nothing playing and no fix filled the whole panel with
+     * dashes. {@link #WHEN_DATA} is the default for that reason; {@link
+     * #ALWAYS} restores the dash for anyone who wants the row to hold its
+     * place.
+     */
+    enum Presence { WHEN_DATA, ALWAYS }
+
+    /** Extra space above a widget, for breaking a dense column into blocks. */
+    enum Gap { NONE, SMALL, LARGE }
+    enum Position { LEFT, CENTER, RIGHT }
+    enum Orientation { AUTO, LANDSCAPE, PORTRAIT }
+    enum Style { DEFAULT, ACCENT, MUTED }
+
+    private static final String PREFS = "dashboard_widget_layout";
+    private static final String ORDER = "order";
+    private static final String SIZE_PREFIX = "size_";
+    private static final String POSITION_PREFIX = "position_";
+    private static final String ORIENTATION = "orientation";
+    private static final String HIDDEN = "hidden";
+    private static final String PAGE_PREFIX = "page_";
+    private static final String STYLE_PREFIX = "style_";
+    private static final String EXTRA_ENABLED = "extra_enabled";
+    private static final String PAGE_COUNT = "page_count";
+    private static final String PRESENCE_PREFIX = "presence_";
+    private static final String GAP_PREFIX = "gap_";
+    private static final String BURN_IN_SHIFT = "burn_in_shift";
+    private static final String PAGE_LAYOUT_PREFIX = "layout_page_";
+    private static final String PAGE_ORIENTATION_PREFIX = "orientation_page_";
+
+    private DashboardWidgetLayout() {}
+
+    static List<Widget> loadOrder(Context context) {
+        String saved = prefs(context).getString(ORDER, "");
+        List<Widget> result = new ArrayList<>();
+        Set<Widget> seen = new HashSet<>();
+        for (String value : saved.split(",")) {
+            try { Widget widget = Widget.valueOf(value); if (seen.add(widget)) result.add(widget); }
+            catch (IllegalArgumentException ignored) {}
+        }
+        for (Widget widget : Widget.values()) if (seen.add(widget)) result.add(widget);
+        return result;
+    }
+
+    static void saveOrder(Context context, List<Widget> widgets) {
+        StringBuilder value = new StringBuilder();
+        for (Widget widget : widgets) {
+            if (value.length() > 0) value.append(',');
+            value.append(widget.name());
+        }
+        prefs(context).edit().putString(ORDER, value.toString()).apply();
+    }
+
+    static Size loadSize(Context context, Widget widget) {
+        try { return Size.valueOf(prefs(context).getString(SIZE_PREFIX + widget.name(), Size.NORMAL.name())); }
+        catch (IllegalArgumentException error) { return Size.NORMAL; }
+    }
+
+    static void saveSize(Context context, Widget widget, Size size) {
+        prefs(context).edit().putString(SIZE_PREFIX + widget.name(), size.name()).apply();
+    }
+
+    static float scale(Context context, Widget widget) {
+        Size size = loadSize(context, widget);
+        return size == Size.SMALL ? 0.8f : size == Size.LARGE ? 1.25f : 1f;
+    }
+
+    static Position loadPosition(Context context, Widget widget) {
+        try { return Position.valueOf(prefs(context).getString(
+                POSITION_PREFIX + widget.name(), Position.CENTER.name())); }
+        catch (IllegalArgumentException error) { return Position.CENTER; }
+    }
+
+    static void savePosition(Context context, Widget widget, Position position) {
+        prefs(context).edit().putString(POSITION_PREFIX + widget.name(), position.name()).apply();
+    }
+
+    static Orientation loadOrientation(Context context) {
+        try { return Orientation.valueOf(prefs(context).getString(ORIENTATION, Orientation.AUTO.name())); }
+        catch (IllegalArgumentException error) { return Orientation.AUTO; }
+    }
+
+    static void saveOrientation(Context context, Orientation orientation) {
+        prefs(context).edit().putString(ORIENTATION, orientation.name()).apply();
+    }
+
+    static boolean isVisible(Context context, Widget widget) {
+        return !prefs(context).getStringSet(HIDDEN, Collections.emptySet()).contains(widget.name());
+    }
+
+    static void setVisible(Context context, Widget widget, boolean visible) {
+        Set<String> hidden = new HashSet<>(prefs(context).getStringSet(HIDDEN, Collections.emptySet()));
+        if (visible) hidden.remove(widget.name()); else hidden.add(widget.name());
+        prefs(context).edit().putStringSet(HIDDEN, hidden).apply();
+    }
+
+    /** Most pages the panel is allowed to cycle through. */
+    static final int MAX_PAGES = 3;
+
+    /**
+     * How many pages the arrangement uses.
+     *
+     * <p>Pages were only ever implicit: the renderer took the highest page any
+     * widget sat on and cycled through that many. Nothing stated how many
+     * pages existed, so the builder offered three per widget whether or not
+     * the user wanted more than one screen. Storing the count makes it a
+     * setting the user chooses, and lets the per-widget page control disappear
+     * entirely when there is only one page.
+     *
+     * <p>An arrangement made before the count existed infers it from the pages
+     * its widgets already sit on, so nothing moves on upgrade.
+     */
+    static int loadPageCount(Context context) {
+        int stored = prefs(context).getInt(PAGE_COUNT, 0);
+        if (stored >= 1) {
+            return Math.min(MAX_PAGES, stored);
+        }
+        int inferred = 1;
+        for (Widget widget : Widget.values()) {
+            inferred = Math.max(inferred, loadPage(context, widget));
+        }
+        return inferred;
+    }
+
+    static void savePageCount(Context context, int count) {
+        int clamped = Math.max(1, Math.min(MAX_PAGES, count));
+        prefs(context).edit().putInt(PAGE_COUNT, clamped).apply();
+        // A widget left on a page that no longer exists would drop out of the
+        // rotation without saying so, so pull it back into range.
+        for (Widget widget : Widget.values()) {
+            if (loadPage(context, widget) > clamped) {
+                savePage(context, widget, clamped);
+            }
+        }
+    }
+
+    static int loadPage(Context context, Widget widget) {
+        return Math.max(1, Math.min(3, prefs(context).getInt(PAGE_PREFIX + widget.name(), 1)));
+    }
+
+    static void savePage(Context context, Widget widget, int page) {
+        prefs(context).edit().putInt(PAGE_PREFIX + widget.name(), Math.max(1, Math.min(3, page))).apply();
+    }
+
+    /** Widgets that can have nothing to show, and so can hold a dash. */
+    static boolean canBeEmpty(Widget widget) {
+        switch (widget) {
+            case NEXT_ALARM:
+            case MEDIA:
+            case COMPASS:
+            case SPEED:
+            case ALTITUDE:
+            case NETWORK:
+            case MEMORY:
+            case STORAGE:
+            case NOTIFICATIONS:
+            case CALENDAR:
+            case STEPS:
+                return true;
+            default:
+                // The clock, the date and the session timer always have a
+                // value; battery, temperature, weather, the profile name and
+                // the custom text already drop out on their own.
+                return false;
+        }
+    }
+
+    static Presence loadPresence(Context context, Widget widget) {
+        try {
+            return Presence.valueOf(prefs(context).getString(
+                    PRESENCE_PREFIX + widget.name(), Presence.WHEN_DATA.name()));
+        } catch (IllegalArgumentException error) {
+            return Presence.WHEN_DATA;
+        }
+    }
+
+    static void savePresence(Context context, Widget widget, Presence presence) {
+        prefs(context).edit().putString(PRESENCE_PREFIX + widget.name(), presence.name()).apply();
+    }
+
+    static Gap loadGap(Context context, Widget widget) {
+        try {
+            return Gap.valueOf(prefs(context).getString(
+                    GAP_PREFIX + widget.name(), Gap.NONE.name()));
+        } catch (IllegalArgumentException error) {
+            return Gap.NONE;
+        }
+    }
+
+    static void saveGap(Context context, Widget widget, Gap gap) {
+        prefs(context).edit().putString(GAP_PREFIX + widget.name(), gap.name()).apply();
+    }
+
+    /** Extra gaps to insert above a widget, in multiples of the row gap. */
+    static float gapMultiplier(Context context, Widget widget) {
+        Gap gap = loadGap(context, widget);
+        return gap == Gap.SMALL ? 1f : gap == Gap.LARGE ? 2.5f : 0f;
+    }
+
+    /**
+     * How far the whole arrangement drifts to spare the OLED panel.
+     *
+     * <p>The drift already existed but was fixed at 3dp either way. On a panel
+     * that can be lit for hours it is worth being able to widen, or to switch
+     * off when the extra movement is more distracting than the burn-in risk.
+     */
+    static int loadBurnInShiftDp(Context context) {
+        return Math.max(0, Math.min(6, prefs(context).getInt(BURN_IN_SHIFT, 3)));
+    }
+
+    static void saveBurnInShiftDp(Context context, int dp) {
+        prefs(context).edit().putInt(BURN_IN_SHIFT, Math.max(0, Math.min(6, dp))).apply();
+    }
+
+    /**
+     * The arrangement style for one page.
+     *
+     * <p>Page one has no key of its own: it is the setting already shown on the
+     * rear-panel screen, so an arrangement made before pages existed keeps
+     * working and there is only ever one place the first page is stored. Pages
+     * two and three are overrides and start out following page one.
+     */
+    static DashboardSettings.Layout loadPageLayout(
+            Context context, int page, DashboardSettings.Layout firstPage) {
+        if (page <= 1) {
+            return firstPage;
+        }
+        try {
+            return DashboardSettings.Layout.valueOf(prefs(context)
+                    .getString(PAGE_LAYOUT_PREFIX + page, firstPage.name()));
+        } catch (IllegalArgumentException error) {
+            return firstPage;
+        }
+    }
+
+    /** Pages after the first only; page one is saved with the panel settings. */
+    static void savePageLayout(Context context, int page, DashboardSettings.Layout layout) {
+        if (page <= 1) {
+            return;
+        }
+        prefs(context).edit().putString(PAGE_LAYOUT_PREFIX + page, layout.name()).apply();
+    }
+
+    /** Which way round a page is drawn. Page one is the panel-wide setting. */
+    static Orientation loadPageOrientation(Context context, int page) {
+        Orientation firstPage = loadOrientation(context);
+        if (page <= 1) {
+            return firstPage;
+        }
+        try {
+            return Orientation.valueOf(prefs(context)
+                    .getString(PAGE_ORIENTATION_PREFIX + page, firstPage.name()));
+        } catch (IllegalArgumentException error) {
+            return firstPage;
+        }
+    }
+
+    static void savePageOrientation(Context context, int page, Orientation orientation) {
+        if (page <= 1) {
+            saveOrientation(context, orientation);
+            return;
+        }
+        prefs(context).edit().putString(PAGE_ORIENTATION_PREFIX + page, orientation.name()).apply();
+    }
+
+    static Style loadStyle(Context context, Widget widget) {
+        try { return Style.valueOf(prefs(context).getString(
+                STYLE_PREFIX + widget.name(), Style.DEFAULT.name())); }
+        catch (IllegalArgumentException error) { return Style.DEFAULT; }
+    }
+
+    static void saveStyle(Context context, Widget widget, Style style) {
+        prefs(context).edit().putString(STYLE_PREFIX + widget.name(), style.name()).apply();
+    }
+
+    static boolean hasMultiplePages(Context context) {
+        for (Widget widget : Widget.values()) if (loadPage(context, widget) > 1) return true;
+        return false;
+    }
+
+    /**
+     * Whether a widget is currently shown on the rear panel.
+     *
+     * <p>Enablement lives in two places: the thirteen original widgets are
+     * fields on {@link DashboardSettings}, the six added later are a name set
+     * in this class's own preferences, and both are gated by the hidden flag.
+     * The settings screen and the builder used to reimplement that rule
+     * separately, so they could disagree about what was on. Both now read it
+     * here.
+     */
+    static boolean isWidgetEnabled(Context context, Widget widget) {
+        boolean enabled = isExtraWidget(widget)
+                ? isExtraEnabled(context, widget)
+                : MirrorSettings.loadDashboardSettings(context).isWidgetVisible(widget);
+        return enabled && isVisible(context, widget);
+    }
+
+    /**
+     * Turns a widget on or off, whichever store holds it.
+     *
+     * <p>Switching one on also clears the hidden flag, so a widget the user
+     * just enabled appears even if something had removed it from the layout.
+     */
+    static void setWidgetEnabled(Context context, Widget widget, boolean enabled) {
+        setVisible(context, widget, true);
+        if (isExtraWidget(widget)) {
+            setExtraEnabled(context, widget, enabled);
+            // The rear display listens to the settings store, so re-saving is
+            // what publishes a change that lives outside it.
+            MirrorSettings.saveDashboardSettings(
+                    context, MirrorSettings.loadDashboardSettings(context));
+        } else {
+            MirrorSettings.saveDashboardSettings(context,
+                    MirrorSettings.loadDashboardSettings(context).withWidget(widget, enabled));
+        }
+    }
+
+    static boolean isExtraWidget(Widget widget) {
+        return widget == Widget.NETWORK || widget == Widget.MEMORY || widget == Widget.STORAGE
+                || widget == Widget.NOTIFICATIONS || widget == Widget.CALENDAR
+                || widget == Widget.STEPS;
+    }
+
+    static boolean isExtraEnabled(Context context, Widget widget) {
+        return prefs(context).getStringSet(EXTRA_ENABLED, Collections.emptySet()).contains(widget.name());
+    }
+
+    static void setExtraEnabled(Context context, Widget widget, boolean enabled) {
+        Set<String> values = new HashSet<>(prefs(context).getStringSet(EXTRA_ENABLED, Collections.emptySet()));
+        if (enabled) values.add(widget.name()); else values.remove(widget.name());
+        prefs(context).edit().putStringSet(EXTRA_ENABLED, values).apply();
+    }
+
+    static void reset(Context context) { prefs(context).edit().clear().apply(); }
+
+    static Map<String, String> exportState(Context context) {
+        Map<String, String> result = new LinkedHashMap<>();
+        for (Map.Entry<String, ?> entry : prefs(context).getAll().entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof Integer) result.put(entry.getKey(), "i:" + value);
+            else if (value instanceof String) result.put(entry.getKey(), "s:" + value);
+            else if (value instanceof Set) {
+                @SuppressWarnings("unchecked") Set<String> values = (Set<String>) value;
+                result.put(entry.getKey(), "t:" + String.join(",", values));
+            }
+        }
+        return result;
+    }
+
+    static void importState(Context context, Map<String, String> state) {
+        SharedPreferences.Editor editor = prefs(context).edit().clear();
+        for (Map.Entry<String, String> entry : state.entrySet()) {
+            String value = entry.getValue();
+            if (value.startsWith("i:")) {
+                try { editor.putInt(entry.getKey(), Integer.parseInt(value.substring(2))); }
+                catch (NumberFormatException ignored) {}
+            } else if (value.startsWith("s:")) editor.putString(entry.getKey(), value.substring(2));
+            else if (value.startsWith("t:")) {
+                Set<String> values = new HashSet<>();
+                if (value.length() > 2) Collections.addAll(values, value.substring(2).split(","));
+                editor.putStringSet(entry.getKey(), values);
+            }
+        }
+        editor.apply();
+    }
+
+    static <T extends Item> void sort(Context context, List<T> items) {
+        List<Widget> order = loadOrder(context);
+        EnumMap<Widget, Integer> positions = new EnumMap<>(Widget.class);
+        for (int index = 0; index < order.size(); index++) positions.put(order.get(index), index);
+        Collections.sort(items, Comparator.comparingInt(item -> positions.get(item.widget())));
+    }
+
+    interface Item { Widget widget(); }
+
+    private static SharedPreferences prefs(Context context) {
+        return context.getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+    }
+}

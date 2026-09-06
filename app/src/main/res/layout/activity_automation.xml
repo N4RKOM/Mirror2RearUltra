@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Automation.
+
+    Two switches, the state they produce, and the permission they need. On the
+    old page this sat between the profile section and device protection, where
+    the running state line and the permission button read as loose text.
+    Here the status is the last row of the group it describes, and the
+    permission row appears inside that group only while it is actually needed.
+
+    automation_content stays a direct child of the NestedScrollView -
+    SettingsLayout.constrainContentOnWideScreens needs FrameLayout.LayoutParams.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/hyper_background"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/automation_toolbar"
+        style="@style/HyperOS.Toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:navigationContentDescription="@string/abc_action_bar_up_description"
+        app:navigationIcon="@drawable/ic_hyper_back" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/automation_content"
+            style="@style/HyperOS.Page">
+
+            <TextView
+                style="@style/HyperOS.PageTitle"
+                android:text="@string/auto_profile_title" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/auto_profile_switch"
+                    style="@style/HyperOS.Switch.Top"
+                    android:text="@string/auto_profile_switch" />
+
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/auto_visibility_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/auto_visibility_switch" />
+
+                <TextView
+                    style="@style/HyperOS.RowSummary"
+                    android:text="@string/auto_visibility_help" />
+
+
+                <TextView
+                    android:id="@+id/auto_profile_status"
+                    style="@style/HyperOS.TextRow"
+                    android:accessibilityLiveRegion="polite"
+                    android:text="@string/auto_profile_disabled"
+                    android:textAppearance="@style/HyperOS.Text.RowValue" />
+
+                <!-- Shown only when automation is on and the permission is
+                     missing, so a granted permission removes the row rather
+                     than leaving a dead control behind. -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/usage_access_button"
+                    style="@style/HyperOS.ActionRow.Bottom"
+                    android:text="@string/grant_usage_access"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

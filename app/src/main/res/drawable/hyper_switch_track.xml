@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wide capsule track. Colour comes from app:trackTint so day/night and
+     disabled states resolve from one state list. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FFFFFFFF" />
+    <corners android:radius="16dp" />
+    <size
+        android:width="@dimen/switch_track_width"
+        android:height="@dimen/switch_track_height" />
+</shape>

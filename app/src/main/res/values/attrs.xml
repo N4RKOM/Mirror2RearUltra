@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="HyperValueRow">
+        <!-- Persistent label on the left of the row. -->
+        <attr name="rowTitle" format="string" />
+        <!-- Value shown on the right before a selection is bound. -->
+        <attr name="rowValue" format="string" />
+    </declare-styleable>
+    <declare-styleable name="HyperSlider">
+        <attr name="hyperValueFrom" format="float" />
+        <attr name="hyperValueTo" format="float" />
+        <attr name="hyperStepSize" format="float" />
+    </declare-styleable>
+</resources>

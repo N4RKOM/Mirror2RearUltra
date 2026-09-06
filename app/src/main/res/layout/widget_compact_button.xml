@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Inflatable compact button for DashboardBuilderActivity.
+
+    The builder creates its widget-row controls in code, and a MaterialButton
+    constructed in Java cannot pick up an XML widget style. Inflating this stub
+    keeps those buttons on the same style as every other button in the app
+    instead of re-specifying the look in Java.
+-->
+<com.google.android.material.button.MaterialButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/HyperOS.Button.Compact"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />

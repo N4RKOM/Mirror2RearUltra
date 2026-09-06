@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Standalone surface used for summary/status objects rather than settings rows. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/hyper_surface_elevated" />
+    <corners android:radius="@dimen/group_corner" />
+</shape>

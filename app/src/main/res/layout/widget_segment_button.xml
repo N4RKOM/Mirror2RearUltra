@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One choice inside a segmented control. -->
+<com.google.android.material.button.MaterialButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/HyperOS.Segment"
+    android:layout_width="0dp"
+    android:layout_height="@dimen/button_height_compact" />
