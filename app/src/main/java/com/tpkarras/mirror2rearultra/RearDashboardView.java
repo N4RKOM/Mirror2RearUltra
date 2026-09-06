@@ -55,6 +55,10 @@ public final class RearDashboardView extends View {
     private float dragOffsetY;
     private boolean dragMoved;
     @Nullable private ScaleGestureDetector scaleDetector;
+    /** True from the start of a pinch until every finger has come up. */
+    private boolean scaling;
+    private float scaleAtGestureStart = 1f;
+    private float spanAtGestureStart = 1f;
 
     /** Told what the finger did to a widget. Only the builder listens. */
     interface OnWidgetSelectedListener {
@@ -152,8 +156,33 @@ public final class RearDashboardView extends View {
      */
     void setOnWidgetSelectedListener(@Nullable OnWidgetSelectedListener listener) {
         widgetSelectedListener = listener;
-        scaleDetector = listener == null ? null : new ScaleGestureDetector(getContext(),
+        if (listener == null) {
+            scaleDetector = null;
+            return;
+        }
+        scaleDetector = new ScaleGestureDetector(getContext(),
                 new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                    @Override
+                    public boolean onScaleBegin(ScaleGestureDetector detector) {
+                        DashboardWidgetLayout.Widget widget = selectedWidget;
+                        if (widget == null) {
+                            return false;
+                        }
+                        // The size at the start of the gesture and the span at
+                        // the start of it. Multiplying the stored size by each
+                        // step's factor instead accumulated rounding - the
+                        // value is kept to a thousandth - so a pinch that went
+                        // out and back came home smaller every time.
+                        scaleAtGestureStart = DashboardWidgetLayout.scale(getContext(), widget);
+                        spanAtGestureStart = Math.max(1f, detector.getCurrentSpan());
+                        scaling = true;
+                        draggedWidget = null;
+                        if (getParent() != null) {
+                            getParent().requestDisallowInterceptTouchEvent(true);
+                        }
+                        return true;
+                    }
+
                     @Override
                     public boolean onScale(ScaleGestureDetector detector) {
                         DashboardWidgetLayout.Widget widget = selectedWidget;
@@ -161,8 +190,8 @@ public final class RearDashboardView extends View {
                             return false;
                         }
                         DashboardWidgetLayout.saveScale(getContext(), widget,
-                                DashboardWidgetLayout.scale(getContext(), widget)
-                                        * detector.getScaleFactor());
+                                scaleAtGestureStart
+                                        * (detector.getCurrentSpan() / spanAtGestureStart));
                         invalidate();
                         return true;
                     }
@@ -178,6 +207,10 @@ public final class RearDashboardView extends View {
                         }
                     }
                 });
+        // Off by default it is not: a double tap followed by a drag would
+        // otherwise resize with one finger, in the middle of a drag.
+        scaleDetector.setQuickScaleEnabled(false);
+        scaleDetector.setStylusScaleEnabled(false);
     }
 
     /**
@@ -219,6 +252,22 @@ public final class RearDashboardView extends View {
         return selectedWidget;
     }
 
+    /** Where a widget was drawn last frame, or null if it was not on it. */
+    @Nullable
+    private RectF boundsOf(DashboardWidgetLayout.Widget widget) {
+        for (Line line : drawnLines) {
+            if (line.widget == widget) {
+                return line.bounds;
+            }
+        }
+        return null;
+    }
+
+    /** Low wins when the range is inverted, which happens on a narrow panel. */
+    private static float clampBetween(float value, float low, float high) {
+        return high <= low ? low : Math.max(low, Math.min(high, value));
+    }
+
     /** The widget under a point, or null. Topmost first, so later lines win. */
     @Nullable
     private DashboardWidgetLayout.Widget widgetAt(float x, float y) {
@@ -226,7 +275,8 @@ public final class RearDashboardView extends View {
             Line line = drawnLines.get(index);
             // A 126px-wide panel makes for small targets, so the strip is
             // widened to something a finger can actually land on.
-            float slack = Math.max(6f, line.bounds.height() * 0.4f);
+            float slack = Math.max(10f * getResources().getDisplayMetrics().density * 0.5f,
+                    line.bounds.height() * 0.4f);
             if (x >= line.bounds.left - slack && x <= line.bounds.right + slack
                     && y >= line.bounds.top - slack && y <= line.bounds.bottom + slack) {
                 return line.widget;
@@ -572,6 +622,19 @@ public final class RearDashboardView extends View {
                 return true;
             }
         }
+        // The last finger of a pinch coming up is not a tap. It used to be
+        // read as one, which picked the widget again and scrolled the page
+        // down to its card the moment the pinch finished.
+        if (scaling) {
+            if (event.getActionMasked() == MotionEvent.ACTION_UP
+                    || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                scaling = false;
+                if (getParent() != null) {
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                }
+            }
+            return true;
+        }
         boolean interactive = widgetSelectedListener != null;
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
@@ -579,6 +642,7 @@ public final class RearDashboardView extends View {
                 touchStartY = event.getY();
                 dragMoved = false;
                 draggedWidget = null;
+                scaling = false;
                 if (interactive && currentLayout() == DashboardSettings.Layout.FREE) {
                     DashboardWidgetLayout.Widget hit = widgetAt(event.getX(), event.getY());
                     if (hit != null) {
@@ -595,7 +659,9 @@ public final class RearDashboardView extends View {
                             dragOffsetX = 0f;
                             dragOffsetY = 0f;
                         }
-                        getParent().requestDisallowInterceptTouchEvent(true);
+                        if (getParent() != null) {
+                            getParent().requestDisallowInterceptTouchEvent(true);
+                        }
                     }
                 }
                 return true;
@@ -607,9 +673,21 @@ public final class RearDashboardView extends View {
                 if (Math.hypot(event.getX() - touchStartX, event.getY() - touchStartY) > 4f) {
                     dragMoved = true;
                 }
+                // Held to the same range the drawing is held to. Storing a
+                // point the panel cannot show left a dead zone at each edge:
+                // the widget stopped, the stored position carried on, and
+                // dragging back did nothing until it caught up.
+                float edge = Math.min(6f * getResources().getDisplayMetrics().density,
+                        getWidth() * 0.04f);
+                RectF box = boundsOf(draggedWidget);
+                float halfWidth = box == null ? 0f : box.width() / 2f;
+                float halfHeight = box == null ? 0f : box.height() / 2f;
+                float x = clampBetween(event.getX() + dragOffsetX,
+                        edge + halfWidth, getWidth() - edge - halfWidth);
+                float y = clampBetween(event.getY() + dragOffsetY,
+                        edge + halfHeight, getHeight() - edge - halfHeight);
                 DashboardWidgetLayout.saveFreePosition(getContext(), draggedWidget,
-                        (event.getX() + dragOffsetX) / Math.max(1, getWidth()),
-                        (event.getY() + dragOffsetY) / Math.max(1, getHeight()));
+                        x / Math.max(1, getWidth()), y / Math.max(1, getHeight()));
                 invalidate();
                 return true;
             }
@@ -618,7 +696,9 @@ public final class RearDashboardView extends View {
                 if (draggedWidget != null) {
                     DashboardWidgetLayout.Widget moved = draggedWidget;
                     draggedWidget = null;
-                    getParent().requestDisallowInterceptTouchEvent(false);
+                    if (getParent() != null) {
+                        getParent().requestDisallowInterceptTouchEvent(false);
+                    }
                     if (dragMoved) {
                         widgetSelectedListener.onWidgetChanged(moved);
                         return true;
@@ -773,18 +853,19 @@ public final class RearDashboardView extends View {
                 y = getHeight() * (index + 1f) / (lines.size() + 1f);
             }
             Alignment alignment = alignmentFor(line);
-            float available;
-            if (alignment == Alignment.LEFT) {
-                available = Math.max(1f, getWidth() - padding - x);
-            } else if (alignment == Alignment.RIGHT) {
-                available = Math.max(1f, x - padding);
-            } else {
-                available = Math.max(1f, Math.min(x - padding, getWidth() - padding - x) * 2f);
-            }
+            // The whole panel, not the room left between the anchor and the
+            // nearer edge. Measuring from the anchor made the widget shrink as
+            // it was dragged towards an edge - down to a fifth of its size,
+            // where there was nothing left to put a finger on - and made
+            // growing it near an edge do nothing at all.
+            float available = Math.max(1f, getWidth() - padding * 2f);
             // The stored point is the middle of the widget; text is drawn from
             // its baseline, so the two have to be reconciled here.
-            float baseline = y - (textPaint.ascent() + textPaint.descent()) / 2f;
-            drawLine(canvas, line, x, baseline, available, alignment);
+            float half = (textPaint.descent() - textPaint.ascent()) / 2f;
+            float clampedY = Math.max(padding + half,
+                    Math.min(getHeight() - padding - half, y));
+            float baseline = clampedY - (textPaint.ascent() + textPaint.descent()) / 2f;
+            drawLine(canvas, line, x, baseline, available, alignment, true);
         }
     }
 
@@ -1033,6 +1114,24 @@ public final class RearDashboardView extends View {
             float width,
             Alignment alignment
     ) {
+        drawLine(canvas, line, anchorX, baseline, width, alignment, false);
+    }
+
+    /**
+     * @param keepInsidePanel slide the line back inside the panel rather than
+     *     letting it hang off the edge. The flowed layouts place their own
+     *     lines and never need it; the free one lets a finger put a widget
+     *     wherever it likes, including half off the side.
+     */
+    private void drawLine(
+            Canvas canvas,
+            Line line,
+            float anchorX,
+            float baseline,
+            float width,
+            Alignment alignment,
+            boolean keepInsidePanel
+    ) {
         if (line.style == DashboardWidgetLayout.Style.ACCENT) {
             textPaint.setColor(MaterialColors.getColor(this,
                     androidx.appcompat.R.attr.colorPrimary, currentPalette.text));
@@ -1061,6 +1160,12 @@ public final class RearDashboardView extends View {
             startX = anchorX - totalWidth;
         } else {
             startX = anchorX - totalWidth / 2f;
+        }
+        if (keepInsidePanel) {
+            float edge = Math.min(6f * getResources().getDisplayMetrics().density,
+                    getWidth() * 0.04f);
+            float highest = Math.max(edge, getWidth() - edge - totalWidth);
+            startX = Math.max(edge, Math.min(startX, highest));
         }
         if (line.icon != Icon.NONE) {
             float centerY = baseline + (textPaint.ascent() + textPaint.descent()) / 2f;
