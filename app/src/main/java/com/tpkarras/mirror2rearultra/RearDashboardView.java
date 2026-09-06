@@ -48,6 +48,12 @@ public final class RearDashboardView extends View {
     /** The burn-in drift in force, so recorded bounds match what is on screen. */
     private float shiftX;
     private float shiftY;
+    /**
+     * The rear panel's own short side and density, when this view is standing
+     * in for it rather than being it. Zero on the panel itself.
+     */
+    private int panelShortSidePx;
+    private float panelDensity;
 
     @Nullable private DashboardWidgetLayout.Widget draggedWidget;
     private float dragOffsetX;
@@ -162,6 +168,42 @@ public final class RearDashboardView extends View {
     }
 
     /**
+     * Tells a preview what it is standing in for.
+     *
+     * <p>Text is sized from the panel's short side, but the floors and
+     * ceilings around it are in dp, and dp is not the same thing on the two
+     * screens: the panel reports 240dpi against the phone's 420. On the panel
+     * the floor took hold and the text came out proportionally larger, so
+     * widgets that stood side by side in the preview overlapped for real. With
+     * the panel's own metrics the preview is a scale model of it rather than a
+     * differently-proportioned drawing.
+     *
+     * @param shortSidePx the panel's shorter side in its own pixels, or zero
+     *     for the panel itself
+     */
+    void setPanelMetrics(int shortSidePx, float density) {
+        panelShortSidePx = shortSidePx;
+        panelDensity = density;
+        invalidate();
+    }
+
+    /**
+     * The density to size content with: the panel's, blown up by however much
+     * larger this view is than the panel.
+     */
+    private float contentDensity() {
+        float own = getResources().getDisplayMetrics().density;
+        if (panelShortSidePx <= 0 || panelDensity <= 0f) {
+            return own;
+        }
+        float shortSide = Math.min(getWidth(), getHeight());
+        if (shortSide <= 0f) {
+            return own;
+        }
+        return panelDensity * (shortSide / panelShortSidePx);
+    }
+
+    /**
      * Gives widgets that have never been placed the place they occupy now.
      *
      * <p>Called on the way into the free layout, so it opens showing what was
@@ -258,7 +300,7 @@ public final class RearDashboardView extends View {
         textPaint.setColor(palette.text);
 
         pageFlipPeriodMillis = 0L;
-        float density = getResources().getDisplayMetrics().density;
+        float density = contentDensity();
         float shift = burnInShift(density);
         shiftX = shift;
         shiftY = -shift;
@@ -283,7 +325,7 @@ public final class RearDashboardView extends View {
             drawStacked(canvas, lines, density);
         }
         canvas.restore();
-        drawSelection(canvas, density);
+        drawSelection(canvas, getResources().getDisplayMetrics().density);
         schedulePageFlip();
     }
 

@@ -803,6 +803,10 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         DashboardSettings settings = MirrorSettings.loadDashboardSettings(this)
                 .withContentMode(RearContentMode.DASHBOARD);
         preview.setDashboardSettings(settings, RearContentMode.DASHBOARD);
+        Point panel = rearPanelSize();
+        preview.setPanelMetrics(
+                panel == null ? 0 : Math.min(panel.x, panel.y),
+                panel == null ? 0f : rearPanelDensity());
         preview.setSnapshot(previewSnapshot());
         // Pinned rather than left to cycle: editing page two should not mean
         // waiting eight seconds for it to come round again.
@@ -919,6 +923,25 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         int screen = getResources().getDisplayMetrics().widthPixels;
         int margins = 2 * getResources().getDimensionPixelSize(R.dimen.page_margin_horizontal);
         return screen - margins;
+    }
+
+    /**
+     * Density of the rear panel, or zero when it cannot be read.
+     *
+     * <p>Its own, not this screen's: the preview sizes its text against the
+     * panel's dp, which is a different size from the phone's.
+     */
+    private float rearPanelDensity() {
+        DisplayManager manager = getSystemService(DisplayManager.class);
+        int rearDisplayId = DisplayActivity.findRearDisplayId(manager);
+        if (manager == null || rearDisplayId == Display.INVALID_DISPLAY) {
+            return 0f;
+        }
+        Display display = manager.getDisplay(rearDisplayId);
+        if (display == null) {
+            return 0f;
+        }
+        return createDisplayContext(display).getResources().getDisplayMetrics().density;
     }
 
     /** Physical size of the rear panel, or null when it cannot be read. */
