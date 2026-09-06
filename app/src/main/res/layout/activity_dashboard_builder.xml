@@ -107,6 +107,20 @@
                     android:layout_height="match_parent" />
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Only the free layout has anywhere to snap to, so the row
+                 appears with it. Shown and hidden by the activity. -->
+            <LinearLayout
+                android:id="@+id/dashboard_builder_snap_group"
+                style="@style/HyperOS.Group"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:visibility="gone">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_builder_snap_switch"
+                    style="@style/HyperOS.Switch.Single"
+                    android:text="@string/dashboard_builder_snap" />
+            </LinearLayout>
+
             <!-- What the preview responds to depends on the layout, so the
                  line is written by DashboardBuilderActivity. -->
             <TextView

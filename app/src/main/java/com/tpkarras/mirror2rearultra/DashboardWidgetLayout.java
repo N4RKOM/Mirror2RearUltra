@@ -51,6 +51,7 @@ final class DashboardWidgetLayout {
     private static final String PRESENCE_PREFIX = "presence_";
     private static final String GAP_PREFIX = "gap_";
     private static final String BURN_IN_SHIFT = "burn_in_shift";
+    private static final String GRID_SNAP = "grid_snap";
     private static final String SCALE_PREFIX = "scale_";
     private static final String FREE_X_PREFIX = "free_x_";
     private static final String FREE_Y_PREFIX = "free_y_";
@@ -171,6 +172,21 @@ final class DashboardWidgetLayout {
                 .remove(FREE_X_PREFIX + widget.name())
                 .remove(FREE_Y_PREFIX + widget.name())
                 .apply();
+    }
+
+    /**
+     * How many cells the free layout's grid divides the panel's short side
+     * into. Square cells, so the grid does not change shape with the panel's
+     * orientation.
+     */
+    static final int GRID_DIVISIONS = 8;
+
+    static boolean isGridSnapEnabled(Context context) {
+        return prefs(context).getBoolean(GRID_SNAP, false);
+    }
+
+    static void setGridSnapEnabled(Context context, boolean enabled) {
+        prefs(context).edit().putBoolean(GRID_SNAP, enabled).apply();
     }
 
     private static float clampFraction(float value) {

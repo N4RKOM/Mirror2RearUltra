@@ -51,6 +51,10 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private TextView previewPageNote;
     private androidx.core.widget.NestedScrollView scroll;
     private TextView previewHint;
+    private View snapGroup;
+    private com.google.android.material.materialswitch.MaterialSwitch snapSwitch;
+    /** Guards the switch while it is being written from stored state. */
+    private boolean bindingSnap;
     /** The widget picked in the preview, outlined there and in its card. */
     @Nullable private DashboardWidgetLayout.Widget selectedWidget;
     private LinearLayout namedTemplates;
@@ -86,6 +90,23 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         previewPageNote = findViewById(R.id.dashboard_builder_preview_page_note);
         scroll = findViewById(R.id.dashboard_builder_scroll);
         previewHint = findViewById(R.id.dashboard_builder_preview_hint);
+        snapGroup = findViewById(R.id.dashboard_builder_snap_group);
+        snapSwitch = findViewById(R.id.dashboard_builder_snap_switch);
+        snapSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (bindingSnap) {
+                return;
+            }
+            DashboardWidgetLayout.setGridSnapEnabled(this, checked);
+            // Switching it on tidies what is already there; switching it off
+            // leaves every widget exactly where it was, so a grid can be used
+            // to line things up and then dropped without undoing the work.
+            if (checked) {
+                preview.snapAllToGrid();
+                notifyDashboardChanged();
+            } else {
+                refreshPreview();
+            }
+        });
         namedTemplates = findViewById(R.id.dashboard_named_templates);
         namedTemplatesEmpty = findViewById(R.id.dashboard_named_templates_empty);
         addNamedTemplateButton = findViewById(R.id.dashboard_named_template_add);
@@ -796,6 +817,10 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         previewHint.setText(free
                 ? R.string.dashboard_builder_preview_free_hint
                 : R.string.dashboard_builder_preview_pick_hint);
+        snapGroup.setVisibility(free ? View.VISIBLE : View.GONE);
+        bindingSnap = true;
+        snapSwitch.setChecked(DashboardWidgetLayout.isGridSnapEnabled(this));
+        bindingSnap = false;
         sizePreviewToPanel(orientation);
     }
 

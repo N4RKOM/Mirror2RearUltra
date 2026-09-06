@@ -266,6 +266,7 @@ public final class RearDashboardView extends View {
         canvas.save();
         canvas.translate(shift, -shift);
 
+        drawGrid(canvas);
         List<Line> lines = pageLines(createLines());
         // pageLines has just settled which page is on screen, and each page may
         // want its own arrangement: a dense trip page reads better compact than
@@ -733,6 +734,68 @@ public final class RearDashboardView extends View {
         invalidate();
     }
 
+    /**
+     * The grid the free layout snaps to, in view pixels.
+     *
+     * <p>Taken from the short side so the cells stay square whichever way
+     * round the panel is.
+     */
+    private float gridStep() {
+        return Math.max(1f, Math.min(getWidth(), getHeight())
+                / (float) DashboardWidgetLayout.GRID_DIVISIONS);
+    }
+
+    /** The nearest cell centre to a point, on one axis. */
+    private float snapToGrid(float value, float extent) {
+        float step = gridStep();
+        int cell = Math.round(value / step - 0.5f);
+        int last = Math.max(0, (int) Math.floor(extent / step) - 1);
+        cell = Math.max(0, Math.min(last, cell));
+        return (cell + 0.5f) * step;
+    }
+
+    /**
+     * Puts every widget on the nearest grid cell.
+     *
+     * <p>Widgets that were never placed are given the place they occupy now
+     * first, so switching snapping on tidies the arrangement that is on screen
+     * rather than gathering everything into one corner.
+     */
+    void snapAllToGrid() {
+        seedFreePositions();
+        for (Line line : drawnLines) {
+            if (getWidth() <= 0 || getHeight() <= 0) {
+                continue;
+            }
+            float x = DashboardWidgetLayout.loadFreeX(getContext(), line.widget) * getWidth();
+            float y = DashboardWidgetLayout.loadFreeY(getContext(), line.widget) * getHeight();
+            DashboardWidgetLayout.saveFreePosition(getContext(), line.widget,
+                    snapToGrid(x, getWidth()) / getWidth(),
+                    snapToGrid(y, getHeight()) / getHeight());
+        }
+        invalidate();
+    }
+
+    /** The cell centres, drawn faintly so there is something to aim at. */
+    private void drawGrid(Canvas canvas) {
+        if (widgetSelectedListener == null
+                || currentLayout() != DashboardSettings.Layout.FREE
+                || !DashboardWidgetLayout.isGridSnapEnabled(getContext())) {
+            return;
+        }
+        float step = gridStep();
+        float radius = Math.max(1f, step * 0.045f);
+        selectionPaint.setStyle(Paint.Style.FILL);
+        selectionPaint.setColor(Color.argb(70, Color.red(currentPalette.text),
+                Color.green(currentPalette.text), Color.blue(currentPalette.text)));
+        for (float x = step / 2f; x < getWidth(); x += step) {
+            for (float y = step / 2f; y < getHeight(); y += step) {
+                canvas.drawCircle(x, y, radius, selectionPaint);
+            }
+        }
+        selectionPaint.setStyle(Paint.Style.STROKE);
+    }
+
     private void moveDragTo(float x, float y) {
         // Held to the same range the drawing is held to. Storing a point the
         // panel cannot show left a dead zone at each edge: the widget stopped,
@@ -744,6 +807,10 @@ public final class RearDashboardView extends View {
         float halfHeight = box == null ? 0f : box.height() / 2f;
         float placedX = clampBetween(x + dragOffsetX, edge + halfWidth, getWidth() - edge - halfWidth);
         float placedY = clampBetween(y + dragOffsetY, edge + halfHeight, getHeight() - edge - halfHeight);
+        if (DashboardWidgetLayout.isGridSnapEnabled(getContext())) {
+            placedX = snapToGrid(placedX, getWidth());
+            placedY = snapToGrid(placedY, getHeight());
+        }
         DashboardWidgetLayout.saveFreePosition(getContext(), draggedWidget,
                 placedX / Math.max(1, getWidth()), placedY / Math.max(1, getHeight()));
         invalidate();
