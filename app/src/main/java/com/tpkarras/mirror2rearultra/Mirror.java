@@ -813,12 +813,16 @@ public class Mirror extends Activity implements
     /**
      * Whether the image is waiting for the floating button to be pressed.
      *
-     * <p>Only while an assigned app is in front, which is the flow the button
-     * exists for and the only flow that shows it. Demanding it everywhere left
-     * a session started from the tile with a blank panel and no control
-     * anywhere to turn the image on, and did the same whenever permission to
-     * draw over other apps was missing, since the button cannot appear at all
-     * without it.
+     * <p>Only while an assigned app is in front. That is deliberate rather
+     * than incidental: the panel was built for a camera to preview itself on,
+     * the stock camera app puts the same choice behind the same kind of
+     * button, and matching it is the point. Everywhere else mirroring starts
+     * on its own, as it always has.
+     *
+     * <p>Demanding the button everywhere left a session started from the tile
+     * with a blank panel and no control anywhere to turn the image on, and did
+     * the same whenever permission to draw over other apps was missing, since
+     * the button cannot appear at all without it.
      */
     private boolean requiresManualProjection() {
         return AutoProfileState.get().profileId != null
