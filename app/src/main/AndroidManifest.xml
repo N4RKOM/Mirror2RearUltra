@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
@@ -58,6 +59,20 @@
                 android:name="android.service.quicksettings.TOGGLEABLE_TILE"
                 android:value="true" />
         </service>
+        <service
+            android:name=".DashboardTileService"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@drawable/ic_rear2screenultra_icon"
+            android:label="@string/dashboard_quicktile"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
+        </service>
 
         <activity
             android:name=".DisplayActivity"
@@ -71,6 +86,7 @@
             android:excludeFromRecents="true"
             android:exported="false"
             android:resizeableActivity="false"
+            android:showWhenLocked="true"
             android:theme="@style/Theme.Mirror2RearUltra.Mirror">
         </activity>
         <activity

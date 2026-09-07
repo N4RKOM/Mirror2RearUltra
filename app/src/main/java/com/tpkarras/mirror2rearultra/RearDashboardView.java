@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -95,6 +96,15 @@ public final class RearDashboardView extends View {
      */
     private long pageFlipPeriodMillis;
     private final Runnable pageFlip = this::invalidate;
+    private int userPage = 1;
+    private long lastPageInteractionMillis;
+    private long autoPageResumeMillis;
+    private final Runnable returnToFirstPage = () -> {
+        userPage = 1;
+        lastPageInteractionMillis = 0L;
+        autoPageResumeMillis = System.currentTimeMillis() + 8_000L;
+        invalidate();
+    };
     @Nullable private OnPageChangedListener pageChangedListener;
 
     /** Told which page is on screen, for anything that lives outside the view. */
@@ -315,7 +325,9 @@ public final class RearDashboardView extends View {
         // the clock page beside it.
         DashboardSettings.Layout layout = DashboardWidgetLayout.loadPageLayout(
                 getContext(), currentPage, settings.layout);
-        if (layout == DashboardSettings.Layout.CORNERS) {
+        if (containsFullscreenWidget(lines)) {
+            drawFullscreen(canvas, lines, density);
+        } else if (layout == DashboardSettings.Layout.CORNERS) {
             drawCorners(canvas, lines, density);
         } else if (layout == DashboardSettings.Layout.COMPACT) {
             drawCompact(canvas, lines, density);
@@ -378,6 +390,7 @@ public final class RearDashboardView extends View {
     @Override
     protected void onDetachedFromWindow() {
         removeCallbacks(pageFlip);
+        removeCallbacks(returnToFirstPage);
         super.onDetachedFromWindow();
     }
 
@@ -417,111 +430,183 @@ public final class RearDashboardView extends View {
         Date date = new Date(snapshot.timestampMillis);
         Locale locale = Locale.getDefault();
         if (settings.showClock) {
+            DashboardWidgetLayout.Variant variant = DashboardWidgetLayout.loadVariant(
+                    getContext(), DashboardWidgetLayout.Widget.CLOCK);
+            String pattern;
+            if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
+                pattern = android.text.format.DateFormat.is24HourFormat(getContext())
+                        ? "HH\nmm" : "h\nmm";
+            } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
+                pattern = android.text.format.DateFormat.is24HourFormat(getContext())
+                        ? "HH:mm:ss" : "h:mm:ss";
+            } else {
+                pattern = android.text.format.DateFormat.is24HourFormat(getContext())
+                        ? "HH:mm" : "h:mm";
+            }
             lines.add(new Line(DashboardWidgetLayout.Widget.CLOCK,
-                    new SimpleDateFormat(
-                            android.text.format.DateFormat.is24HourFormat(getContext())
-                                    ? "HH:mm"
-                                    : "h:mm",
-                            locale
-                    ).format(date),
+                    new SimpleDateFormat(pattern, locale).format(date),
                     true,
                     Icon.NONE
             ));
         }
         if (settings.showDate) {
+            DashboardWidgetLayout.Variant variant = DashboardWidgetLayout.loadVariant(
+                    getContext(), DashboardWidgetLayout.Widget.DATE);
+            String pattern = variant == DashboardWidgetLayout.Variant.ALTERNATE
+                    ? "dd.MM" : variant == DashboardWidgetLayout.Variant.DETAILED
+                    ? "dd.MM.yyyy" : "d MMM";
             lines.add(new Line(DashboardWidgetLayout.Widget.DATE,
-                    new SimpleDateFormat("d MMM", locale).format(date),
+                    new SimpleDateFormat(pattern, locale).format(date),
                     false,
                     Icon.NONE
             ));
         }
         if (settings.showBattery && snapshot.batteryPercent >= 0) {
-            lines.add(new Line(DashboardWidgetLayout.Widget.BATTERY, getResources().getString(
+            String value = getResources().getString(
                     snapshot.charging
                             ? R.string.dashboard_battery_charging
                             : R.string.dashboard_battery,
                     snapshot.batteryPercent
-            ), false, snapshot.charging ? Icon.BATTERY_CHARGING : Icon.BATTERY));
+            );
+            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.BATTERY);
+            if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
+                value = snapshot.batteryPercent + "\n%";
+            } else if (variant == DashboardWidgetLayout.Variant.DETAILED && snapshot.charging) {
+                value += "\n" + getResources().getString(R.string.dashboard_variant_charging);
+            }
+            lines.add(new Line(DashboardWidgetLayout.Widget.BATTERY, value, false,
+                    snapshot.charging ? Icon.BATTERY_CHARGING : Icon.BATTERY));
         }
         if (settings.showTemperature && snapshot.temperatureTenthsCelsius >= 0) {
-            lines.add(new Line(DashboardWidgetLayout.Widget.TEMPERATURE, getResources().getString(
-                    R.string.dashboard_device_temperature,
-                    snapshot.temperatureTenthsCelsius / 10f
-            ), false, Icon.TEMPERATURE));
+            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.TEMPERATURE);
+            String value = variant == DashboardWidgetLayout.Variant.ALTERNATE
+                    ? Math.round(snapshot.temperatureTenthsCelsius / 10f) + "°"
+                    : variant == DashboardWidgetLayout.Variant.DETAILED
+                    ? String.format(locale, "%.1f °C", snapshot.temperatureTenthsCelsius / 10f)
+                    : getResources().getString(R.string.dashboard_device_temperature,
+                            snapshot.temperatureTenthsCelsius / 10f);
+            lines.add(new Line(DashboardWidgetLayout.Widget.TEMPERATURE, value, false, Icon.TEMPERATURE));
         }
         if (settings.showWeather) {
             String weather = weatherLine();
             if (!weather.isEmpty()) {
+                DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.WEATHER);
+                if (variant == DashboardWidgetLayout.Variant.ALTERNATE
+                        && snapshot.weatherTemperatureCelsius != null) {
+                    weather = snapshot.weatherTemperatureCelsius + "\n°C";
+                } else if (variant == DashboardWidgetLayout.Variant.DETAILED
+                        && !snapshot.weatherPlace.isEmpty()) {
+                    weather += "\n" + snapshot.weatherPlace;
+                }
                 lines.add(new Line(DashboardWidgetLayout.Widget.WEATHER, weather, false, weatherIcon(snapshot.weatherCode)));
             }
         }
         if (settings.showNextAlarm) {
             boolean hasData = snapshot.nextAlarmMillis != null;
-            addLine(lines, DashboardWidgetLayout.Widget.NEXT_ALARM, hasData,
-                    hasData ? new SimpleDateFormat(
-                            android.text.format.DateFormat.is24HourFormat(getContext())
-                                    ? "HH:mm"
-                                    : "h:mm",
-                            locale
-                    ).format(new Date(snapshot.nextAlarmMillis)) : "",
-                    Icon.ALARM);
+            String value = "";
+            if (hasData) {
+                DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.NEXT_ALARM);
+                String timePattern = android.text.format.DateFormat.is24HourFormat(getContext())
+                        ? "HH:mm" : "h:mm";
+                String pattern = variant == DashboardWidgetLayout.Variant.ALTERNATE
+                        ? timePattern.replace(":", "\n")
+                        : variant == DashboardWidgetLayout.Variant.DETAILED
+                        ? "dd.MM\n" + timePattern : timePattern;
+                value = new SimpleDateFormat(pattern, locale).format(new Date(snapshot.nextAlarmMillis));
+            }
+            addLine(lines, DashboardWidgetLayout.Widget.NEXT_ALARM, hasData, value, Icon.ALARM);
         }
         if (settings.showMedia) {
             boolean hasData = !snapshot.mediaTitle.isEmpty() || !snapshot.mediaArtist.isEmpty();
-            addLine(lines, DashboardWidgetLayout.Widget.MEDIA, hasData,
-                    !snapshot.mediaTitle.isEmpty() ? snapshot.mediaTitle : snapshot.mediaArtist,
-                    Icon.MEDIA);
+            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.MEDIA);
+            String value = !snapshot.mediaTitle.isEmpty() ? snapshot.mediaTitle : snapshot.mediaArtist;
+            if (variant == DashboardWidgetLayout.Variant.ALTERNATE && !snapshot.mediaArtist.isEmpty()) {
+                value = snapshot.mediaArtist;
+            } else if (variant == DashboardWidgetLayout.Variant.DETAILED
+                    && !snapshot.mediaTitle.isEmpty() && !snapshot.mediaArtist.isEmpty()) {
+                value = snapshot.mediaTitle + "\n" + snapshot.mediaArtist;
+            }
+            addLine(lines, DashboardWidgetLayout.Widget.MEDIA, hasData, value, Icon.MEDIA);
         }
         if (settings.showCompass) {
             boolean hasData = snapshot.headingDegrees != null;
-            addLine(lines, DashboardWidgetLayout.Widget.COMPASS, hasData,
-                    hasData ? Math.round(snapshot.headingDegrees) + "° "
-                            + cardinalDirection(snapshot.headingDegrees) : "",
-                    Icon.COMPASS);
+            String value = "";
+            if (hasData) {
+                String direction = cardinalDirection(snapshot.headingDegrees);
+                DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.COMPASS);
+                value = variant == DashboardWidgetLayout.Variant.ALTERNATE ? direction
+                        : variant == DashboardWidgetLayout.Variant.DETAILED
+                        ? Math.round(snapshot.headingDegrees) + "°\n" + direction
+                        : Math.round(snapshot.headingDegrees) + "° " + direction;
+            }
+            addLine(lines, DashboardWidgetLayout.Widget.COMPASS, hasData, value, Icon.COMPASS);
         }
         if (settings.showSpeed) {
             boolean hasData = snapshot.speedMetersPerSecond != null;
-            addLine(lines, DashboardWidgetLayout.Widget.SPEED, hasData,
-                    hasData ? getResources().getString(
-                            R.string.dashboard_speed_short,
-                            Math.round(snapshot.speedMetersPerSecond * 3.6f)) : "",
-                    Icon.SPEED);
+            int speed = hasData ? Math.round(snapshot.speedMetersPerSecond * 3.6f) : 0;
+            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.SPEED);
+            String value = !hasData ? "" : variant == DashboardWidgetLayout.Variant.ALTERNATE
+                    ? String.valueOf(speed) : variant == DashboardWidgetLayout.Variant.DETAILED
+                    ? speed + "\n" + getResources().getString(R.string.dashboard_speed_unit)
+                    : getResources().getString(R.string.dashboard_speed_short, speed);
+            addLine(lines, DashboardWidgetLayout.Widget.SPEED, hasData, value, Icon.SPEED);
         }
         if (settings.showAltitude) {
             boolean hasData = snapshot.altitudeMeters != null;
-            addLine(lines, DashboardWidgetLayout.Widget.ALTITUDE, hasData,
-                    hasData ? getResources().getString(
-                            R.string.dashboard_altitude_short,
-                            Math.round(snapshot.altitudeMeters)) : "",
-                    Icon.ALTITUDE);
+            long altitude = hasData ? Math.round(snapshot.altitudeMeters) : 0L;
+            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.ALTITUDE);
+            String value = !hasData ? "" : variant == DashboardWidgetLayout.Variant.ALTERNATE
+                    ? String.valueOf(altitude) : variant == DashboardWidgetLayout.Variant.DETAILED
+                    ? altitude + "\n" + getResources().getString(R.string.dashboard_altitude_unit)
+                    : getResources().getString(R.string.dashboard_altitude_short, altitude);
+            addLine(lines, DashboardWidgetLayout.Widget.ALTITUDE, hasData, value, Icon.ALTITUDE);
         }
         if (settings.showSessionTimer) {
-            lines.add(new Line(DashboardWidgetLayout.Widget.SESSION_TIMER, formatElapsed(snapshot.sessionElapsedMillis), false, Icon.TIMER));
+            String value = formatElapsed(snapshot.sessionElapsedMillis);
+            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.SESSION_TIMER);
+            if (variant == DashboardWidgetLayout.Variant.ALTERNATE) value = value.replace(":", "\n");
+            else if (variant == DashboardWidgetLayout.Variant.DETAILED) value = formatElapsedDetailed(snapshot.sessionElapsedMillis);
+            lines.add(new Line(DashboardWidgetLayout.Widget.SESSION_TIMER, value, false, Icon.TIMER));
         }
         if (settings.showActiveProfile && !snapshot.activeProfileName.isEmpty()) {
-            lines.add(new Line(DashboardWidgetLayout.Widget.ACTIVE_PROFILE, snapshot.activeProfileName, false, Icon.PROFILE));
+            lines.add(new Line(DashboardWidgetLayout.Widget.ACTIVE_PROFILE,
+                    textVariant(DashboardWidgetLayout.Widget.ACTIVE_PROFILE, snapshot.activeProfileName),
+                    false, Icon.PROFILE));
         }
         if (settings.showCustomText && !settings.customText.isEmpty()) {
-            lines.add(new Line(DashboardWidgetLayout.Widget.CUSTOM_TEXT, settings.customText, false, Icon.TEXT));
+            lines.add(new Line(DashboardWidgetLayout.Widget.CUSTOM_TEXT,
+                    textVariant(DashboardWidgetLayout.Widget.CUSTOM_TEXT, settings.customText),
+                    false, Icon.TEXT));
         }
         if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.NETWORK)) {
             addLine(lines, DashboardWidgetLayout.Widget.NETWORK,
-                    !snapshot.networkSummary.isEmpty(), snapshot.networkSummary, Icon.NETWORK);
+                    !snapshot.networkSummary.isEmpty(),
+                    textVariant(DashboardWidgetLayout.Widget.NETWORK, snapshot.networkSummary), Icon.NETWORK);
         }
         if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.MEMORY)) {
+            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.MEMORY);
+            String value = percentVariant(snapshot.memoryPercent, variant,
+                    getResources().getString(R.string.dashboard_variant_memory));
             addLine(lines, DashboardWidgetLayout.Widget.MEMORY,
-                    snapshot.memoryPercent >= 0, snapshot.memoryPercent + "%", Icon.MEMORY);
+                    snapshot.memoryPercent >= 0, value, Icon.MEMORY);
         }
         if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.STORAGE)) {
+            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.STORAGE);
+            String value = percentVariant(snapshot.storagePercentFree, variant,
+                    getResources().getString(R.string.dashboard_variant_storage_free));
             addLine(lines, DashboardWidgetLayout.Widget.STORAGE,
-                    snapshot.storagePercentFree >= 0, snapshot.storagePercentFree + "%",
-                    Icon.STORAGE);
+                    snapshot.storagePercentFree >= 0, value, Icon.STORAGE);
         }
         if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.NOTIFICATIONS)) {
             // Nothing unread is the empty case here, not a missing reading.
             int count = NotificationWidgetState.getCount();
+            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.NOTIFICATIONS);
+            String value = variant == DashboardWidgetLayout.Variant.ALTERNATE && count > 99
+                    ? "99+" : variant == DashboardWidgetLayout.Variant.DETAILED
+                    ? count + "\n" + getResources().getString(R.string.dashboard_variant_notifications)
+                    : String.valueOf(count);
             addLine(lines, DashboardWidgetLayout.Widget.NOTIFICATIONS,
-                    count > 0, String.valueOf(count), Icon.NOTIFICATIONS);
+                    count > 0, value, Icon.NOTIFICATIONS);
         }
         if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.CALENDAR)) {
             boolean hasData = snapshot.calendarStartMillis != null;
@@ -534,12 +619,38 @@ public final class RearDashboardView extends View {
                 if (!snapshot.calendarTitle.isEmpty()) {
                     value += "  " + snapshot.calendarTitle;
                 }
+                DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.CALENDAR);
+                if (variant == DashboardWidgetLayout.Variant.ALTERNATE
+                        && !snapshot.calendarTitle.isEmpty()) {
+                    value = snapshot.calendarTitle;
+                } else if (variant == DashboardWidgetLayout.Variant.DETAILED
+                        && !snapshot.calendarTitle.isEmpty()) {
+                    value = value.replace("  ", "\n");
+                }
             }
             addLine(lines, DashboardWidgetLayout.Widget.CALENDAR, hasData, value, Icon.CALENDAR);
         }
         if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.STEPS)) {
+            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.STEPS);
+            String value = variant == DashboardWidgetLayout.Variant.ALTERNATE
+                    ? String.format(locale, "%,d", snapshot.stepsToday)
+                    : variant == DashboardWidgetLayout.Variant.DETAILED
+                    ? snapshot.stepsToday + "\n" + getResources().getString(R.string.dashboard_variant_steps)
+                    : String.valueOf(snapshot.stepsToday);
             addLine(lines, DashboardWidgetLayout.Widget.STEPS,
-                    snapshot.stepsToday >= 0, String.valueOf(snapshot.stepsToday), Icon.STEPS);
+                    snapshot.stepsToday >= 0, value, Icon.STEPS);
+        }
+        if (DashboardWidgetLayout.isExtraEnabled(
+                getContext(), DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER)) {
+            String value = weatherLine();
+            addLine(lines, DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER,
+                    true, value.isEmpty() ? "—" : value, weatherIcon(snapshot.weatherCode));
+        }
+        if (DashboardWidgetLayout.isExtraEnabled(
+                getContext(), DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA)) {
+            boolean hasMedia = !snapshot.mediaTitle.isEmpty() || !snapshot.mediaArtist.isEmpty();
+            addLine(lines, DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA, true,
+                    hasMedia ? snapshot.mediaTitle : "—", Icon.MEDIA);
         }
         DashboardWidgetLayout.sort(getContext(), lines);
         lines.removeIf(line -> !DashboardWidgetLayout.isVisible(getContext(), line.widget));
@@ -568,8 +679,15 @@ public final class RearDashboardView extends View {
             setCurrentPage(1);
             return paginateLines(source);
         } else {
-            page = (int) ((now / 8_000L) % maxPage) + 1;
-            requestPageFlip(8_000L);
+            boolean auto = DashboardWidgetLayout.isAutoPageSwitchEnabled(getContext());
+            if (lastPageInteractionMillis > 0L) {
+                page = Math.min(userPage, maxPage);
+            } else if (auto && now >= autoPageResumeMillis) {
+                page = (int) ((now / 8_000L) % maxPage) + 1;
+                requestPageFlip(8_000L);
+            } else {
+                page = Math.min(userPage, maxPage);
+            }
         }
         setCurrentPage(page);
         List<Line> result = new ArrayList<>();
@@ -722,14 +840,23 @@ public final class RearDashboardView extends View {
                     widgetSelectedListener.onWidgetSelected(hit);
                     return true;
                 }
+                if (!interactive && !swipe && handleFullscreenTap(event.getX(), event.getY())) {
+                    markPageInteraction();
+                    return true;
+                }
                 if (swipe) {
                     int maxPage = 1;
                     for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values())
                         maxPage = Math.max(maxPage, DashboardWidgetLayout.loadPage(getContext(), widget));
-                    int current = selectedPage > 0 ? selectedPage
-                            : (int) ((snapshot.timestampMillis / 8_000L) % maxPage) + 1;
-                    selectedPage = distance < 0 ? current % maxPage + 1
+                    int current = selectedPage > 0 ? selectedPage : currentPage;
+                    int next = distance < 0 ? current % maxPage + 1
                             : (current + maxPage - 2) % maxPage + 1;
+                    if (interactive) {
+                        selectedPage = next;
+                    } else {
+                        userPage = next;
+                        markPageInteraction();
+                    }
                     invalidate();
                 }
                 return true;
@@ -958,6 +1085,143 @@ public final class RearDashboardView extends View {
         return directions[index];
     }
 
+    private DashboardWidgetLayout.Variant variantOf(DashboardWidgetLayout.Widget widget) {
+        return DashboardWidgetLayout.loadVariant(getContext(), widget);
+    }
+
+    private void markPageInteraction() {
+        lastPageInteractionMillis = System.currentTimeMillis();
+        removeCallbacks(returnToFirstPage);
+        postDelayed(returnToFirstPage, 30_000L);
+    }
+
+    private boolean handleFullscreenTap(float x, float y) {
+        if (y < getHeight() * 0.52f
+                || !DashboardWidgetLayout.isWidgetEnabled(
+                getContext(), DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA)
+                || DashboardWidgetLayout.loadPage(
+                getContext(), DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA) != currentPage) {
+            return false;
+        }
+        if (x < getWidth() / 3f) return MediaNotificationListenerService.previous();
+        if (x > getWidth() * 2f / 3f) return MediaNotificationListenerService.next();
+        return MediaNotificationListenerService.playPause();
+    }
+
+    private void drawFullscreen(Canvas canvas, List<Line> lines, float density) {
+        boolean weather = false;
+        boolean media = false;
+        for (Line line : lines) {
+            weather |= line.widget == DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER;
+            media |= line.widget == DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA;
+        }
+        if (weather) {
+            drawFullscreenWeather(canvas, density);
+        } else if (media) {
+            drawFullscreenMedia(canvas, density);
+        } else {
+            drawStacked(canvas, lines, density);
+        }
+    }
+
+    private boolean containsFullscreenWidget(List<Line> lines) {
+        for (Line line : lines) {
+            if (DashboardWidgetLayout.isFullscreenWidget(line.widget)) return true;
+        }
+        return false;
+    }
+
+    private void drawFullscreenWeather(Canvas canvas, float density) {
+        float pad = Math.min(10f * density, getWidth() * 0.06f);
+        RectF panel = new RectF(pad, pad, getWidth() - pad, getHeight() - pad);
+        canvas.drawRoundRect(panel, 20f * density, 20f * density, panelPaint);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setFakeBoldText(true);
+        textPaint.setTextSize(clamp(Math.min(getWidth(), getHeight()) * 0.18f,
+                20f * density, 58f * density));
+        String current = snapshot.weatherTemperatureCelsius == null
+                ? "—" : snapshot.weatherTemperatureCelsius + "°";
+        canvas.drawText(current, panel.centerX(), panel.top + panel.height() * 0.28f, textPaint);
+        textPaint.setFakeBoldText(false);
+        textPaint.setTextSize(clamp(panel.height() * 0.08f, 9f * density, 20f * density));
+        canvas.drawText(snapshot.weatherPlace, panel.centerX(), panel.top + panel.height() * 0.42f,
+                textPaint);
+
+        WeatherForecastState.Snapshot forecast = WeatherForecastState.get();
+        int count = Math.min(4, forecast.dates.length);
+        if (count == 0) return;
+        float cell = panel.width() / count;
+        SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        SimpleDateFormat output = new SimpleDateFormat("EEE", Locale.getDefault());
+        for (int index = 0; index < count; index++) {
+            float x = panel.left + cell * (index + 0.5f);
+            String day = forecast.dates[index];
+            try { day = output.format(input.parse(day)); } catch (Exception ignored) {}
+            textPaint.setTextSize(clamp(panel.height() * 0.07f, 8f * density, 18f * density));
+            canvas.drawText(day, x, panel.top + panel.height() * 0.60f, textPaint);
+            drawIcon(canvas, weatherIcon(forecast.codes[index]), new RectF(
+                    x - cell * 0.13f, panel.top + panel.height() * 0.64f,
+                    x + cell * 0.13f, panel.top + panel.height() * 0.78f));
+            textPaint.setTextSize(clamp(panel.height() * 0.075f, 8f * density, 19f * density));
+            canvas.drawText(forecast.maximums[index] + "°/" + forecast.minimums[index] + "°",
+                    x, panel.top + panel.height() * 0.91f, textPaint);
+        }
+        textPaint.setTextAlign(Paint.Align.LEFT);
+    }
+
+    private void drawFullscreenMedia(Canvas canvas, float density) {
+        float pad = Math.min(10f * density, getWidth() * 0.06f);
+        RectF panel = new RectF(pad, pad, getWidth() - pad, getHeight() - pad);
+        canvas.drawRoundRect(panel, 20f * density, 20f * density, panelPaint);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setFakeBoldText(true);
+        textPaint.setTextSize(clamp(panel.height() * 0.16f, 14f * density, 38f * density));
+        String mediaTitle = snapshot.mediaTitle.isEmpty()
+                ? getResources().getString(R.string.dashboard_media_nothing_playing)
+                : snapshot.mediaTitle;
+        CharSequence title = TextUtils.ellipsize(mediaTitle, textPaint,
+                panel.width() * 0.84f, TextUtils.TruncateAt.END);
+        canvas.drawText(title.toString(), panel.centerX(), panel.top + panel.height() * 0.32f,
+                textPaint);
+        textPaint.setFakeBoldText(false);
+        textPaint.setTextSize(clamp(panel.height() * 0.10f, 10f * density, 24f * density));
+        CharSequence artist = TextUtils.ellipsize(snapshot.mediaArtist, textPaint,
+                panel.width() * 0.80f, TextUtils.TruncateAt.END);
+        canvas.drawText(artist.toString(), panel.centerX(), panel.top + panel.height() * 0.48f,
+                textPaint);
+        textPaint.setTextSize(clamp(panel.height() * 0.18f, 18f * density, 42f * density));
+        canvas.drawText("‹‹", panel.left + panel.width() / 6f,
+                panel.top + panel.height() * 0.78f, textPaint);
+        canvas.drawText("▶", panel.centerX(), panel.top + panel.height() * 0.78f, textPaint);
+        canvas.drawText("››", panel.right - panel.width() / 6f,
+                panel.top + panel.height() * 0.78f, textPaint);
+        textPaint.setTextAlign(Paint.Align.LEFT);
+    }
+
+    /** Visual alternatives for text whose content is supplied by the user or system. */
+    private String textVariant(DashboardWidgetLayout.Widget widget, String value) {
+        DashboardWidgetLayout.Variant variant = variantOf(widget);
+        if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
+            return value.toUpperCase(Locale.getDefault());
+        }
+        if (variant != DashboardWidgetLayout.Variant.DETAILED || value.indexOf(' ') < 0) {
+            return value;
+        }
+        int middle = value.length() / 2;
+        int before = value.lastIndexOf(' ', middle);
+        int after = value.indexOf(' ', middle);
+        int split = before < 0 ? after : after < 0 || middle - before <= after - middle
+                ? before : after;
+        return split > 0 ? value.substring(0, split) + "\n" + value.substring(split + 1) : value;
+    }
+
+    private static String percentVariant(int percent, DashboardWidgetLayout.Variant variant,
+            String detail) {
+        if (variant == DashboardWidgetLayout.Variant.ALTERNATE) return String.valueOf(percent);
+        if (variant == DashboardWidgetLayout.Variant.DETAILED) return percent + "%\n" + detail;
+        return percent + "%";
+    }
+
     private static String formatElapsed(long elapsedMillis) {
         long totalSeconds = Math.max(0L, elapsedMillis / 1_000L);
         long hours = totalSeconds / 3_600L;
@@ -966,6 +1230,12 @@ public final class RearDashboardView extends View {
         return hours > 0
                 ? String.format(Locale.ROOT, "%d:%02d:%02d", hours, minutes, seconds)
                 : String.format(Locale.ROOT, "%02d:%02d", minutes, seconds);
+    }
+
+    private static String formatElapsedDetailed(long elapsedMillis) {
+        long totalSeconds = Math.max(0L, elapsedMillis / 1_000L);
+        return String.format(Locale.ROOT, "%d:%02d:%02d", totalSeconds / 3_600L,
+                (totalSeconds % 3_600L) / 60L, totalSeconds % 60L);
     }
 
     private String weatherLine() {
@@ -1328,6 +1598,10 @@ public final class RearDashboardView extends View {
             Alignment alignment,
             boolean keepInsidePanel
     ) {
+        int canvasState = canvas.save();
+        if (line.rotation != 0) {
+            canvas.rotate(line.rotation, anchorX, baseline);
+        }
         if (line.style == DashboardWidgetLayout.Style.ACCENT) {
             textPaint.setColor(MaterialColors.getColor(this,
                     androidx.appcompat.R.attr.colorPrimary, currentPalette.text));
@@ -1337,17 +1611,21 @@ public final class RearDashboardView extends View {
         } else {
             textPaint.setColor(currentPalette.text);
         }
+        boolean multiline = line.text.indexOf('\n') >= 0;
+        if (multiline) textPaint.setTextSize(textPaint.getTextSize() * 0.58f);
         fitTextToWidth(line, width);
         float iconSize = line.icon == Icon.NONE ? 0f : textPaint.getTextSize() * 0.82f;
         float gap = line.icon == Icon.NONE ? 0f : textPaint.getTextSize() * 0.28f;
         float textSpace = Math.max(1f, width - iconSize - gap);
-        CharSequence fitted = TextUtils.ellipsize(
-                line.text,
-                textPaint,
-                textSpace,
-                TextUtils.TruncateAt.END
-        );
-        float textWidth = textPaint.measureText(fitted, 0, fitted.length());
+        String[] parts = line.text.split("\\n", -1);
+        CharSequence[] fittedParts = new CharSequence[parts.length];
+        float textWidth = 0f;
+        for (int index = 0; index < parts.length; index++) {
+            fittedParts[index] = TextUtils.ellipsize(parts[index], textPaint, textSpace,
+                    TextUtils.TruncateAt.END);
+            textWidth = Math.max(textWidth, textPaint.measureText(
+                    fittedParts[index], 0, fittedParts[index].length()));
+        }
         float totalWidth = iconSize + gap + textWidth;
         float startX;
         if (alignment == Alignment.LEFT) {
@@ -1373,20 +1651,43 @@ public final class RearDashboardView extends View {
             ));
         }
         textPaint.setTextAlign(Paint.Align.LEFT);
-        canvas.drawText(fitted.toString(), startX + iconSize + gap, baseline, textPaint);
-        line.bounds.set(
-                startX + shiftX,
-                baseline + textPaint.ascent() + shiftY,
-                startX + totalWidth + shiftX,
-                baseline + textPaint.descent() + shiftY
+        float lineHeight = textPaint.descent() - textPaint.ascent();
+        float firstBaseline = baseline - (parts.length - 1) * lineHeight * 0.52f;
+        for (int index = 0; index < fittedParts.length; index++) {
+            float partWidth = textPaint.measureText(fittedParts[index], 0,
+                    fittedParts[index].length());
+            float textX = startX + iconSize + gap;
+            if (alignment == Alignment.CENTER) textX += (textWidth - partWidth) / 2f;
+            else if (alignment == Alignment.RIGHT) textX += textWidth - partWidth;
+            canvas.drawText(fittedParts[index].toString(), textX,
+                    firstBaseline + index * lineHeight * 1.04f, textPaint);
+        }
+        RectF localBounds = new RectF(
+                startX,
+                firstBaseline + textPaint.ascent(),
+                startX + totalWidth,
+                firstBaseline + (parts.length - 1) * lineHeight * 1.04f
+                        + textPaint.descent()
         );
+        if (line.rotation != 0) {
+            Matrix rotation = new Matrix();
+            rotation.setRotate(line.rotation, anchorX, baseline);
+            rotation.mapRect(localBounds);
+        }
+        localBounds.offset(shiftX, shiftY);
+        line.bounds.set(localBounds);
         drawnLines.add(line);
+        canvas.restoreToCount(canvasState);
     }
 
     private void fitTextToWidth(Line line, float width) {
         float originalSize = textPaint.getTextSize();
         float iconSpace = line.icon == Icon.NONE ? 0f : originalSize * 1.10f;
-        float desired = textPaint.measureText(line.text) + iconSpace;
+        float desired = 0f;
+        for (String part : line.text.split("\\n", -1)) {
+            desired = Math.max(desired, textPaint.measureText(part));
+        }
+        desired += iconSpace;
         if (desired <= width || desired <= 0f) return;
         // The rear panel is only 126 px wide on the target device. A hard 40% floor
         // still forces large user-selected text to ellipsize instead of fitting it.
@@ -1740,6 +2041,7 @@ public final class RearDashboardView extends View {
         final float scale;
         final DashboardWidgetLayout.Position position;
         final DashboardWidgetLayout.Style style;
+        final int rotation;
         /**
          * Where this line landed in the last frame, in view coordinates.
          *
@@ -1754,10 +2056,12 @@ public final class RearDashboardView extends View {
             this.widget = widget;
             this.text = text;
             this.primary = primary;
-            this.icon = icon;
+            this.icon = DashboardWidgetLayout.isIconHidden(getContext(), widget)
+                    ? Icon.NONE : icon;
             this.scale = DashboardWidgetLayout.scale(getContext(), widget);
             this.position = DashboardWidgetLayout.loadPosition(getContext(), widget);
             this.style = DashboardWidgetLayout.loadStyle(getContext(), widget);
+            this.rotation = DashboardWidgetLayout.loadRotation(getContext(), widget);
         }
 
         @Override public DashboardWidgetLayout.Widget widget() { return widget; }

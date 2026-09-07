@@ -306,7 +306,9 @@ final class RearDashboardController implements
 
     private void refreshWeatherIfNeeded(boolean force) {
         String city = settings.weatherCity;
-        if (!started || !settings.showWeather || city.isEmpty() || weatherLoading) {
+        boolean weatherEnabled = settings.showWeather || DashboardWidgetLayout.isExtraEnabled(
+                context, DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER);
+        if (!started || !weatherEnabled || city.isEmpty() || weatherLoading) {
             return;
         }
         long age = System.currentTimeMillis() - weatherUpdatedAt;
@@ -337,6 +339,8 @@ final class RearDashboardController implements
                 weatherPlace = finalResult.place;
                 weatherTemperatureCelsius = finalResult.temperatureCelsius;
                 weatherCode = finalResult.weatherCode;
+                WeatherForecastState.set(finalResult.dates, finalResult.minimums,
+                        finalResult.maximums, finalResult.codes);
             }
             publish();
             mainHandler.postDelayed(() -> refreshWeatherIfNeeded(false), WEATHER_REFRESH_MILLIS);
@@ -364,13 +368,31 @@ final class RearDashboardController implements
             JSONObject forecast = requestJson(
                     "https://api.open-meteo.com/v1/forecast?latitude=" + latitude
                             + "&longitude=" + longitude
-                            + "&current=temperature_2m,weather_code&timezone=auto"
+                            + "&current=temperature_2m,weather_code"
+                            + "&daily=weather_code,temperature_2m_max,temperature_2m_min"
+                            + "&forecast_days=4&timezone=auto"
             );
             JSONObject current = forecast.getJSONObject("current");
+            JSONObject daily = forecast.getJSONObject("daily");
+            JSONArray times = daily.getJSONArray("time");
+            JSONArray minimumsJson = daily.getJSONArray("temperature_2m_min");
+            JSONArray maximumsJson = daily.getJSONArray("temperature_2m_max");
+            JSONArray codesJson = daily.getJSONArray("weather_code");
+            int count = Math.min(4, times.length());
+            String[] dates = new String[count];
+            int[] minimums = new int[count];
+            int[] maximums = new int[count];
+            int[] codes = new int[count];
+            for (int index = 0; index < count; index++) {
+                dates[index] = times.getString(index);
+                minimums[index] = (int) Math.round(minimumsJson.getDouble(index));
+                maximums[index] = (int) Math.round(maximumsJson.getDouble(index));
+                codes[index] = codesJson.getInt(index);
+            }
             return new WeatherResult(
                     displayName,
                     (int) Math.round(current.getDouble("temperature_2m")),
-                    current.getInt("weather_code")
+                    current.getInt("weather_code"), dates, minimums, maximums, codes
             );
         } catch (JSONException error) {
             throw new IOException("Invalid weather data", error);
@@ -487,11 +509,20 @@ final class RearDashboardController implements
         final String place;
         final int temperatureCelsius;
         final int weatherCode;
+        final String[] dates;
+        final int[] minimums;
+        final int[] maximums;
+        final int[] codes;
 
-        WeatherResult(String place, int temperatureCelsius, int weatherCode) {
+        WeatherResult(String place, int temperatureCelsius, int weatherCode,
+                String[] dates, int[] minimums, int[] maximums, int[] codes) {
             this.place = place;
             this.temperatureCelsius = temperatureCelsius;
             this.weatherCode = weatherCode;
+            this.dates = dates;
+            this.minimums = minimums;
+            this.maximums = maximums;
+            this.codes = codes;
         }
     }
 }

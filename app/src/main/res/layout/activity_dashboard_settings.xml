@@ -149,12 +149,36 @@
                     style="@style/HyperOS.ValueRow"
                     app:rowTitle="@string/dashboard_theme_title" />
 
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_idle_mode_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/dashboard_idle_mode_title" />
+
+                <TextView
+                    android:id="@+id/dashboard_aod_min_brightness_value"
+                    style="@style/HyperOS.SliderLabel"
+                    android:labelFor="@id/dashboard_aod_min_brightness_slider"
+                    android:text="@string/dashboard_aod_min_brightness_default" />
+
+                <com.tpkarras.mirror2rearultra.HyperSlider
+                    android:id="@+id/dashboard_aod_min_brightness_slider"
+                    style="@style/HyperOS.Slider.Row"
+                    android:contentDescription="@string/dashboard_aod_min_brightness_default"
+                    app:hyperStepSize="1"
+                    app:hyperValueFrom="1"
+                    app:hyperValueTo="30" />
+
                 <!-- The drift already existed at a fixed 3dp; this makes it a
                      choice, including off. -->
                 <com.tpkarras.mirror2rearultra.HyperValueRow
                     android:id="@+id/dashboard_burn_in_input"
                     style="@style/HyperOS.ValueRow"
                     app:rowTitle="@string/dashboard_burn_in_title" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_auto_pages_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_auto_pages" />
 
                 <TextView
                     android:id="@+id/dashboard_text_scale_value"
@@ -187,7 +211,7 @@
 
             <TextView
                 style="@style/HyperOS.GroupFootnote"
-                android:text="@string/dashboard_burn_in_help" />
+                android:text="@string/dashboard_idle_mode_help" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

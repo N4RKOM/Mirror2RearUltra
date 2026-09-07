@@ -6,6 +6,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -29,6 +30,8 @@ public class AutomationActivity extends AppCompatActivity implements AutoProfile
     private MaterialSwitch autoVisibilitySwitch;
     private TextView autoProfileStatus;
     private View usageAccessButton;
+    private TextView overlayAccessStatus;
+    private View overlayAccessButton;
     private ViewGroup content;
 
     /** Guards the listeners while the UI is being written from stored state. */
@@ -46,6 +49,8 @@ public class AutomationActivity extends AppCompatActivity implements AutoProfile
         autoVisibilitySwitch = findViewById(R.id.auto_visibility_switch);
         autoProfileStatus = findViewById(R.id.auto_profile_status);
         usageAccessButton = findViewById(R.id.usage_access_button);
+        overlayAccessStatus = findViewById(R.id.overlay_access_status);
+        overlayAccessButton = findViewById(R.id.overlay_access_button);
         content = findViewById(R.id.automation_content);
 
         SettingsLayout.constrainContentOnWideScreens(this, content);
@@ -78,6 +83,7 @@ public class AutomationActivity extends AppCompatActivity implements AutoProfile
             MirrorSettings.setAutoProfileEnabled(this, true);
         }
         updateAutoProfileUi(AutoProfileState.get());
+        updateOverlayAccessUi();
     }
 
     @Override
@@ -103,6 +109,7 @@ public class AutomationActivity extends AppCompatActivity implements AutoProfile
         });
 
         usageAccessButton.setOnClickListener(view -> openUsageAccessSettings());
+        overlayAccessButton.setOnClickListener(view -> openOverlayAccessSettings());
     }
 
     private void updateAutoProfileUi(AutoProfileState.Snapshot snapshot) {
@@ -150,6 +157,22 @@ public class AutomationActivity extends AppCompatActivity implements AutoProfile
             startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
         } catch (ActivityNotFoundException error) {
             startActivity(new Intent(Settings.ACTION_SETTINGS));
+        }
+    }
+
+    private void updateOverlayAccessUi() {
+        boolean permitted = Settings.canDrawOverlays(this);
+        overlayAccessStatus.setText(permitted
+                ? R.string.overlay_access_granted : R.string.overlay_access_required);
+        overlayAccessButton.setVisibility(permitted ? View.GONE : View.VISIBLE);
+    }
+
+    private void openOverlayAccessSettings() {
+        try {
+            startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName())));
+        } catch (ActivityNotFoundException error) {
+            startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION));
         }
     }
 }

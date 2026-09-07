@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 final class RearBrightnessController {
     interface Listener {
-        void onBrightnessApplied(boolean hardwareControlActive);
+        void onBrightnessApplied(boolean hardwareControlActive, int appliedPercent);
     }
 
     interface CapabilityCallback {
@@ -44,11 +44,11 @@ final class RearBrightnessController {
         if (closed.get()) {
             return;
         }
-        int clampedPercent = Math.max(10, Math.min(100, percent));
+        int clampedPercent = Math.max(1, Math.min(100, percent));
         executor.execute(() -> {
             boolean applied = applyHardwareBrightness(clampedPercent);
             DeviceCapabilityState.setHardwareBrightnessActive(applied);
-            listener.onBrightnessApplied(applied);
+            listener.onBrightnessApplied(applied, clampedPercent);
         });
     }
 

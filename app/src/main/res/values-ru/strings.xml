@@ -79,6 +79,7 @@
     <string name="create">Создать</string>
     <string name="create_profile_title">Новый профиль</string>
     <string name="dashboard_altitude_short">%1$d м</string>
+    <string name="dashboard_altitude_unit">м</string>
     <string name="dashboard_appearance_title">Внешний вид</string>
     <string name="dashboard_background_opacity_default">Непрозрачность фона · 55%</string>
     <string name="dashboard_background_opacity_value">Непрозрачность фона · %1$d%%</string>
@@ -207,6 +208,7 @@
     <string name="dashboard_settings_help">Выберите содержимое заднего экрана. Для погоды используется введённый город — доступ к геолокации не запрашивается.</string>
     <string name="dashboard_settings_title">Панель заднего экрана</string>
     <string name="dashboard_speed_short">%1$d км/ч</string>
+    <string name="dashboard_speed_unit">км/ч</string>
     <string name="dashboard_text_scale_default">Размер текста · 100%</string>
     <string name="dashboard_text_scale_value">Размер текста · %1$d%%</string>
     <string name="dashboard_theme_title">Цветовое оформление</string>
@@ -246,6 +248,9 @@
     <string name="dashboard_builder_choose">Выбрать виджеты</string>
     <string name="dashboard_builder_empty">Виджеты пока не включены. Выберите, что показывать на заднем экране.</string>
     <string name="dashboard_builder_pages">Страниц</string>
+    <string name="dashboard_builder_one_page">1 страница</string>
+    <string name="dashboard_builder_pages_count">%1$d страницы</string>
+    <string name="dashboard_builder_choose_value">Выбрать</string>
     <string name="dashboard_builder_pages_help">Если страниц больше одной, задний экран листает их примерно раз в восемь секунд. Свайп по панели удерживает страницу.</string>
     <string name="dashboard_builder_page_short">%1$d</string>
     <string name="dashboard_builder_presence_label">Показывать</string>
@@ -316,6 +321,15 @@
     <string name="quality_mode_help">«Чёткое» подстраивает разрешение захвата под масштаб для более чёткого текста. «Экономия» всегда использует обычный буфер и снижает нагрузку на GPU.</string>
     <string name="quality_mode_title">Качество трансляции</string>
     <string name="quicktile">Зеркало на задний экран</string>
+    <string name="dashboard_quicktile">Виджеты сзади</string>
+    <string name="dashboard_builder_rotation_label">Угол</string>
+    <string name="dashboard_builder_rotation">Угол виджета «%1$s»</string>
+    <string name="dashboard_builder_hide_icon">Скрыть иконку</string>
+    <string name="dashboard_builder_hide_icon_for">Скрыть иконку виджета «%1$s»</string>
+    <string name="dashboard_auto_pages">Автоматически переключать страницы</string>
+    <string name="dashboard_auto_pages_help">Если включено, страницы меняются каждые 8 секунд. После ручного переключения панель вернётся на первую страницу через 30 секунд бездействия.</string>
+    <string name="dashboard_widget_fullscreen_weather">Погода на весь экран</string>
+    <string name="dashboard_widget_fullscreen_media">Медиаплеер на весь экран</string>
     <string name="rear_display_missing">Задний экран недоступен.</string>
     <string name="rename_profile">Переименовать</string>
     <string name="rename_profile_title">Переименовать профиль</string>
@@ -352,4 +366,34 @@
     <string name="zoom_default">Увеличение · 100%</string>
     <string formatted="false" name="zoom_quality_warning">Важно: в режиме «Чёткое» масштаб 105–150% переключает разрешение захвата на 150%, а 155–200% — на 200%. На этих границах изображение может кратковременно мигнуть.</string>
     <string name="zoom_value">Увеличение · %1$d%%</string>
+    <string name="dashboard_builder_variant_label">Отображение</string>
+    <string name="dashboard_builder_variant">Вариант отображения «%1$s»</string>
+    <string name="dashboard_variant_clock_inline">14:35</string>
+    <string name="dashboard_variant_clock_stacked">14 / 35</string>
+    <string name="dashboard_variant_clock_seconds">С секундами</string>
+    <string name="dashboard_variant_date_text">7 сент.</string>
+    <string name="dashboard_variant_date_numeric">07.09</string>
+    <string name="dashboard_variant_date_year">С годом</string>
+    <string name="dashboard_variant_default">Обычный</string>
+    <string name="dashboard_variant_alternate">Компактный</string>
+    <string name="dashboard_variant_detailed">Подробный</string>
+    <string name="dashboard_variant_charging">зарядка</string>
+    <string name="dashboard_variant_memory">ОЗУ</string>
+    <string name="dashboard_variant_storage_free">свободно</string>
+    <string name="dashboard_variant_notifications">новых</string>
+    <string name="dashboard_variant_steps">шагов</string>
+    <string name="overlay_control_title">Плавающая кнопка трансляции</string>
+    <string name="overlay_control_help">Появляется поверх приложений, назначенных профилю. Трансляция не начнётся до нажатия и остановится после выхода из приложения.</string>
+    <string name="overlay_access_required">Нужен доступ для показа поверх других приложений</string>
+    <string name="overlay_access_granted">Доступ для плавающей кнопки предоставлен</string>
+    <string name="grant_overlay_access">Разрешить показ поверх приложений</string>
+    <string name="overlay_start_mirroring">Включить зеркалирование</string>
+    <string name="overlay_stop_mirroring">Выключить зеркалирование</string>
+    <string name="dashboard_idle_mode_title">Таймер заднего экрана</string>
+    <string name="dashboard_idle_15_seconds">15 секунд</string>
+    <string name="dashboard_idle_30_seconds">30 секунд</string>
+    <string name="dashboard_idle_always_on">Always on Display</string>
+    <string name="dashboard_aod_min_brightness_default">Минимальная яркость AOD: 8%</string>
+    <string name="dashboard_aod_min_brightness_value">Минимальная яркость AOD: %1$d%%</string>
+    <string name="dashboard_idle_mode_help">Через 15 или 30 секунд яркость плавно уменьшится, после чего сеанс заднего экрана завершится. В режиме Always on Display установленная яркость сохраняется 30 секунд, затем плавно снижается до минимальной. Касание заднего экрана возвращает яркость и перезапускает таймер. Сдвиг от выгорания продолжает работать в AOD.</string>
 </resources>

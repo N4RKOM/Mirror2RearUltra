@@ -16,7 +16,8 @@ import java.util.Set;
 final class DashboardWidgetLayout {
     enum Widget { CLOCK, DATE, BATTERY, TEMPERATURE, WEATHER, NEXT_ALARM, MEDIA,
         COMPASS, SPEED, ALTITUDE, SESSION_TIMER, ACTIVE_PROFILE, CUSTOM_TEXT,
-        NETWORK, MEMORY, STORAGE, NOTIFICATIONS, CALENDAR, STEPS }
+        NETWORK, MEMORY, STORAGE, NOTIFICATIONS, CALENDAR, STEPS,
+        FULLSCREEN_WEATHER, FULLSCREEN_MEDIA }
     enum Size { SMALL, NORMAL, LARGE }
 
     /**
@@ -37,6 +38,9 @@ final class DashboardWidgetLayout {
     enum Position { LEFT, CENTER, RIGHT }
     enum Orientation { AUTO, LANDSCAPE, PORTRAIT }
     enum Style { DEFAULT, ACCENT, MUTED }
+    enum IdleMode { TIMEOUT_15, TIMEOUT_30, ALWAYS_ON }
+    /** Widget-specific presentation: normal, compact alternative, or detailed. */
+    enum Variant { DEFAULT, ALTERNATE, DETAILED }
 
     private static final String PREFS = "dashboard_widget_layout";
     private static final String ORDER = "order";
@@ -46,6 +50,9 @@ final class DashboardWidgetLayout {
     private static final String HIDDEN = "hidden";
     private static final String PAGE_PREFIX = "page_";
     private static final String STYLE_PREFIX = "style_";
+    private static final String VARIANT_PREFIX = "variant_";
+    private static final String ROTATION_PREFIX = "rotation_";
+    private static final String ICON_HIDDEN_PREFIX = "icon_hidden_";
     private static final String EXTRA_ENABLED = "extra_enabled";
     private static final String PAGE_COUNT = "page_count";
     private static final String PRESENCE_PREFIX = "presence_";
@@ -57,6 +64,9 @@ final class DashboardWidgetLayout {
     private static final String FREE_Y_PREFIX = "free_y_";
     private static final String PAGE_LAYOUT_PREFIX = "layout_page_";
     private static final String PAGE_ORIENTATION_PREFIX = "orientation_page_";
+    private static final String IDLE_MODE = "idle_mode";
+    private static final String AOD_MIN_BRIGHTNESS = "aod_min_brightness";
+    private static final String AUTO_PAGE_SWITCH = "auto_page_switch";
 
     private DashboardWidgetLayout() {}
 
@@ -267,7 +277,11 @@ final class DashboardWidgetLayout {
     }
 
     static void savePage(Context context, Widget widget, int page) {
-        prefs(context).edit().putInt(PAGE_PREFIX + widget.name(), Math.max(1, Math.min(3, page))).apply();
+        int target = Math.max(1, Math.min(3, page));
+        prefs(context).edit().putInt(PAGE_PREFIX + widget.name(), target).apply();
+        if (isWidgetEnabled(context, widget)) {
+            enforceExclusivePage(context, widget, target);
+        }
     }
 
     /** Widgets that can have nothing to show, and so can hold a dash. */
@@ -284,6 +298,8 @@ final class DashboardWidgetLayout {
             case NOTIFICATIONS:
             case CALENDAR:
             case STEPS:
+            case FULLSCREEN_WEATHER:
+            case FULLSCREEN_MEDIA:
                 return true;
             default:
                 // The clock, the date and the session timer always have a
@@ -401,6 +417,69 @@ final class DashboardWidgetLayout {
         prefs(context).edit().putString(STYLE_PREFIX + widget.name(), style.name()).apply();
     }
 
+    static IdleMode loadIdleMode(Context context) {
+        try {
+            return IdleMode.valueOf(prefs(context).getString(
+                    IDLE_MODE, IdleMode.ALWAYS_ON.name()));
+        } catch (IllegalArgumentException error) {
+            return IdleMode.ALWAYS_ON;
+        }
+    }
+
+    static void saveIdleMode(Context context, IdleMode mode) {
+        prefs(context).edit().putString(IDLE_MODE, mode.name()).apply();
+    }
+
+    static int loadAodMinBrightnessPercent(Context context) {
+        return Math.max(1, Math.min(30,
+                prefs(context).getInt(AOD_MIN_BRIGHTNESS, 8)));
+    }
+
+    static void saveAodMinBrightnessPercent(Context context, int percent) {
+        prefs(context).edit().putInt(AOD_MIN_BRIGHTNESS,
+                Math.max(1, Math.min(30, percent))).apply();
+    }
+
+    static boolean isAutoPageSwitchEnabled(Context context) {
+        return prefs(context).getBoolean(AUTO_PAGE_SWITCH, false);
+    }
+
+    static void setAutoPageSwitchEnabled(Context context, boolean enabled) {
+        prefs(context).edit().putBoolean(AUTO_PAGE_SWITCH, enabled).apply();
+    }
+
+    static boolean supportsVariant(Widget widget) {
+        return true;
+    }
+
+    static Variant loadVariant(Context context, Widget widget) {
+        try { return Variant.valueOf(prefs(context).getString(
+                VARIANT_PREFIX + widget.name(), Variant.DEFAULT.name())); }
+        catch (IllegalArgumentException error) { return Variant.DEFAULT; }
+    }
+
+    static void saveVariant(Context context, Widget widget, Variant variant) {
+        prefs(context).edit().putString(VARIANT_PREFIX + widget.name(), variant.name()).apply();
+    }
+
+    static int loadRotation(Context context, Widget widget) {
+        int rotation = prefs(context).getInt(ROTATION_PREFIX + widget.name(), 0);
+        return ((rotation % 360) + 360) % 360;
+    }
+
+    static void saveRotation(Context context, Widget widget, int rotation) {
+        int normalized = ((rotation % 360) + 360) % 360;
+        prefs(context).edit().putInt(ROTATION_PREFIX + widget.name(), normalized).apply();
+    }
+
+    static boolean isIconHidden(Context context, Widget widget) {
+        return prefs(context).getBoolean(ICON_HIDDEN_PREFIX + widget.name(), false);
+    }
+
+    static void setIconHidden(Context context, Widget widget, boolean hidden) {
+        prefs(context).edit().putBoolean(ICON_HIDDEN_PREFIX + widget.name(), hidden).apply();
+    }
+
     static boolean hasMultiplePages(Context context) {
         for (Widget widget : Widget.values()) if (loadPage(context, widget) > 1) return true;
         return false;
@@ -441,12 +520,60 @@ final class DashboardWidgetLayout {
             MirrorSettings.saveDashboardSettings(context,
                     MirrorSettings.loadDashboardSettings(context).withWidget(widget, enabled));
         }
+        if (enabled) {
+            enforceExclusivePage(context, widget, loadPage(context, widget));
+        }
     }
 
     static boolean isExtraWidget(Widget widget) {
         return widget == Widget.NETWORK || widget == Widget.MEMORY || widget == Widget.STORAGE
                 || widget == Widget.NOTIFICATIONS || widget == Widget.CALENDAR
-                || widget == Widget.STEPS;
+                || widget == Widget.STEPS || widget == Widget.FULLSCREEN_WEATHER
+                || widget == Widget.FULLSCREEN_MEDIA;
+    }
+
+    static boolean isFullscreenWidget(Widget widget) {
+        return widget == Widget.FULLSCREEN_WEATHER || widget == Widget.FULLSCREEN_MEDIA;
+    }
+
+    private static void enforceExclusivePage(Context context, Widget changed, int requestedPage) {
+        int target = requestedPage;
+        if (isFullscreenWidget(changed)) {
+            for (int candidate = 1; candidate <= MAX_PAGES; candidate++) {
+                boolean occupied = false;
+                for (Widget widget : Widget.values()) {
+                    if (widget != changed && isWidgetEnabled(context, widget)
+                            && loadPage(context, widget) == candidate) {
+                        occupied = true;
+                        break;
+                    }
+                }
+                if (!occupied) {
+                    target = candidate;
+                    break;
+                }
+            }
+            savePageCount(context, Math.max(loadPageCount(context), target));
+            prefs(context).edit().putInt(PAGE_PREFIX + changed.name(), target).apply();
+            int fallback = target == 1 ? 2 : 1;
+            savePageCount(context, Math.max(loadPageCount(context), fallback));
+            for (Widget widget : Widget.values()) {
+                if (widget != changed && isWidgetEnabled(context, widget)
+                        && loadPage(context, widget) == target) {
+                    prefs(context).edit().putInt(PAGE_PREFIX + widget.name(), fallback).apply();
+                }
+            }
+        } else {
+            for (Widget widget : Widget.values()) {
+                if (isFullscreenWidget(widget) && isWidgetEnabled(context, widget)
+                        && loadPage(context, widget) == target) {
+                    int fallback = target == 1 ? 2 : 1;
+                    savePageCount(context, Math.max(loadPageCount(context), fallback));
+                    prefs(context).edit().putInt(PAGE_PREFIX + changed.name(), fallback).apply();
+                    break;
+                }
+            }
+        }
     }
 
     static boolean isExtraEnabled(Context context, Widget widget) {

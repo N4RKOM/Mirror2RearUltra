@@ -40,8 +40,13 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     private HyperValueRow layoutInput;
     private HyperValueRow themeInput;
     private HyperValueRow burnInInput;
+    private HyperValueRow idleModeInput;
+    private HyperSlider aodMinBrightnessSlider;
+    private TextView aodMinBrightnessValue;
     private String[] burnInLabels;
+    private String[] idleModeLabels;
     private MaterialSwitch customImageSwitch;
+    private MaterialSwitch autoPagesSwitch;
     private TextView customImageStatus;
     private View customImageChooseButton;
     private View customImageRemoveButton;
@@ -75,6 +80,7 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         layoutInput = findViewById(R.id.dashboard_layout_input);
         themeInput = findViewById(R.id.dashboard_theme_input);
         customImageSwitch = findViewById(R.id.dashboard_custom_image_switch);
+        autoPagesSwitch = findViewById(R.id.dashboard_auto_pages_switch);
         customImageStatus = findViewById(R.id.dashboard_custom_image_status);
         customImageChooseButton = findViewById(R.id.dashboard_custom_image_choose_button);
         customImageRemoveButton = findViewById(R.id.dashboard_custom_image_remove_button);
@@ -91,16 +97,25 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         layoutLabels = getResources().getStringArray(R.array.dashboard_layout_entries);
         themeLabels = getResources().getStringArray(R.array.dashboard_theme_entries);
         burnInInput = findViewById(R.id.dashboard_burn_in_input);
+        idleModeInput = findViewById(R.id.dashboard_idle_mode_input);
+        aodMinBrightnessSlider = findViewById(R.id.dashboard_aod_min_brightness_slider);
+        aodMinBrightnessValue = findViewById(R.id.dashboard_aod_min_brightness_value);
         burnInLabels = new String[]{
                 getString(R.string.dashboard_burn_in_off),
                 getString(R.string.dashboard_burn_in_small),
                 getString(R.string.dashboard_burn_in_normal),
                 getString(R.string.dashboard_burn_in_large),
         };
+        idleModeLabels = new String[]{
+                getString(R.string.dashboard_idle_15_seconds),
+                getString(R.string.dashboard_idle_30_seconds),
+                getString(R.string.dashboard_idle_always_on),
+        };
         modeInput.setEntries(modeLabels);
         layoutInput.setEntries(layoutLabels);
         themeInput.setEntries(themeLabels);
         burnInInput.setEntries(burnInLabels);
+        idleModeInput.setEntries(idleModeLabels);
 
         render(MirrorSettings.loadDashboardSettings(this));
         bindInteractions();
@@ -139,6 +154,30 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                 DashboardWidgetLayout.saveBurnInShiftDp(this, BURN_IN_SHIFTS_DP[position]);
                 // Lives outside DashboardSettings, so re-saving is what tells
                 // the running panel to pick the change up.
+                MirrorSettings.saveDashboardSettings(this,
+                        MirrorSettings.loadDashboardSettings(this));
+            }
+        });
+        idleModeInput.setOnItemSelectedListener(position -> {
+            if (position >= 0 && position < DashboardWidgetLayout.IdleMode.values().length) {
+                DashboardWidgetLayout.saveIdleMode(this,
+                        DashboardWidgetLayout.IdleMode.values()[position]);
+                MirrorSettings.saveDashboardSettings(this,
+                        MirrorSettings.loadDashboardSettings(this));
+            }
+        });
+        autoPagesSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!bindingUi) {
+                DashboardWidgetLayout.setAutoPageSwitchEnabled(this, checked);
+                MirrorSettings.saveDashboardSettings(this,
+                        MirrorSettings.loadDashboardSettings(this));
+            }
+        });
+        aodMinBrightnessSlider.addOnChangeListener((slider, value, fromUser) -> {
+            int percent = Math.round(value);
+            updateAodMinBrightnessValue(percent);
+            if (fromUser) {
+                DashboardWidgetLayout.saveAodMinBrightnessPercent(this, percent);
                 MirrorSettings.saveDashboardSettings(this,
                         MirrorSettings.loadDashboardSettings(this));
             }
@@ -208,6 +247,12 @@ public class DashboardSettingsActivity extends AppCompatActivity {
             }
         }
         burnInInput.setValue(burnInLabels[burnInIndex]);
+        DashboardWidgetLayout.IdleMode idleMode = DashboardWidgetLayout.loadIdleMode(this);
+        idleModeInput.setValue(labelAt(idleModeLabels, idleMode.ordinal()));
+        autoPagesSwitch.setChecked(DashboardWidgetLayout.isAutoPageSwitchEnabled(this));
+        int aodMinBrightness = DashboardWidgetLayout.loadAodMinBrightnessPercent(this);
+        aodMinBrightnessSlider.setValue(aodMinBrightness);
+        updateAodMinBrightnessValue(aodMinBrightness);
         customImageSwitch.setChecked(settings.showCustomImage && DashboardImageStore.exists(this));
         textScaleSlider.setValue(settings.textScalePercent);
         backgroundOpacitySlider.setValue(settings.backgroundOpacityPercent);
@@ -280,6 +325,12 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         textScaleSlider.setContentDescription(
                 getString(R.string.dashboard_text_scale_value, percent)
         );
+    }
+
+    private void updateAodMinBrightnessValue(int percent) {
+        String value = getString(R.string.dashboard_aod_min_brightness_value, percent);
+        aodMinBrightnessValue.setText(value);
+        aodMinBrightnessSlider.setContentDescription(value);
     }
 
     private void updateBackgroundOpacityValue(int percent) {

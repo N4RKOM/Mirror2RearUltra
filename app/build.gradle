@@ -10,8 +10,8 @@ android {
         applicationId "com.tpkarras.mirror2rearultra"
         minSdk 30
         targetSdk 36
-        versionCode 30
-        versionName "1.22.0"
+        versionCode 42
+        versionName "1.29.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

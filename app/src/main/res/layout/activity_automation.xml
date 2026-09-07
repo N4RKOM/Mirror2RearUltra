@@ -76,6 +76,33 @@
                     android:text="@string/grant_usage_access"
                     android:visibility="gone" />
             </LinearLayout>
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:text="@string/overlay_control_title" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <TextView
+                    style="@style/HyperOS.TextRow"
+                    android:text="@string/overlay_control_title"
+                    android:textAppearance="@style/HyperOS.Text.RowTitle" />
+
+                <TextView
+                    style="@style/HyperOS.RowSummary"
+                    android:text="@string/overlay_control_help" />
+
+                <TextView
+                    android:id="@+id/overlay_access_status"
+                    style="@style/HyperOS.TextRow"
+                    android:text="@string/overlay_access_required"
+                    android:textAppearance="@style/HyperOS.Text.RowValue" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/overlay_access_button"
+                    style="@style/HyperOS.ActionRow.Bottom"
+                    android:text="@string/grant_overlay_access" />
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

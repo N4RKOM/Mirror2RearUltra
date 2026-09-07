@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 public class DisplayActivity extends AppCompatActivity {
+    static final String EXTRA_DASHBOARD_ONLY = "dashboard_only";
     private static final String TAG = "Mirror2RearConsent";
     private static final String XIAOMI_REAR_SCREEN_PACKAGE = "com.xiaomi.misubscreenui";
 
@@ -50,8 +51,9 @@ public class DisplayActivity extends AppCompatActivity {
             return;
         }
 
-        if (!MirrorSettings.loadDashboardSettings(this).contentMode.usesProjection()) {
-            launchRearActivity(rearDisplayId, false);
+        boolean dashboardOnly = getIntent().getBooleanExtra(EXTRA_DASHBOARD_ONLY, false);
+        if (dashboardOnly || !MirrorSettings.loadDashboardSettings(this).contentMode.usesProjection()) {
+            launchRearActivity(rearDisplayId, false, dashboardOnly);
             return;
         }
 
@@ -97,7 +99,7 @@ public class DisplayActivity extends AppCompatActivity {
                     ForegroundService.createStartIntent(this, resultCode, resultData)
             );
 
-            launchRearActivity(rearDisplayId, true);
+            launchRearActivity(rearDisplayId, true, false);
         } catch (RuntimeException error) {
             Log.e(TAG, "Unable to start mirroring on display " + rearDisplayId, error);
             stopService(ForegroundService.createStopIntent(this));
@@ -105,12 +107,13 @@ public class DisplayActivity extends AppCompatActivity {
         }
     }
 
-    private void launchRearActivity(int rearDisplayId, boolean hasProjection) {
+    private void launchRearActivity(int rearDisplayId, boolean hasProjection, boolean dashboardOnly) {
         try {
             ActivityOptions options = ActivityOptions.makeBasic();
             options.setLaunchDisplayId(rearDisplayId);
             Intent mirrorIntent = new Intent(this, Mirror.class)
                     .putExtra(Mirror.EXTRA_SESSION_HAS_PROJECTION, hasProjection)
+                    .putExtra(Mirror.EXTRA_DASHBOARD_ONLY, dashboardOnly)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(mirrorIntent, options.toBundle());
             finish();

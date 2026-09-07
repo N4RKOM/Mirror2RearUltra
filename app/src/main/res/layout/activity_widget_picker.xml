@@ -160,6 +160,11 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_fullscreen_weather_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_fullscreen_weather" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_compass_switch"
                     style="@style/HyperOS.Switch"
                     android:text="@string/dashboard_widget_compass" />
@@ -208,6 +213,11 @@
                     android:id="@+id/dashboard_media_switch"
                     style="@style/HyperOS.Switch.Top"
                     android:text="@string/dashboard_widget_media" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_fullscreen_media_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_fullscreen_media" />
 
                 <TextView
                     android:id="@+id/dashboard_media_access_status"

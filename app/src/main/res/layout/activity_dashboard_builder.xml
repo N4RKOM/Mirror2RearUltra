@@ -52,15 +52,6 @@
                 android:layout_marginTop="@dimen/section_spacing"
                 android:text="@string/dashboard_builder_preview" />
 
-            <!-- Which page the preview shows, and which page the two buttons
-                 below it change. Hidden while there is only one page. Filled by
-                 DashboardBuilderActivity, because the count is a setting. -->
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/dashboard_builder_preview_pages"
-                style="@style/HyperOS.SegmentGroup"
-                android:layout_marginBottom="@dimen/spacing_sm"
-                android:visibility="gone" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -106,6 +97,25 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
             </com.google.android.material.card.MaterialCardView>
+
+            <HorizontalScrollView
+                android:id="@+id/dashboard_builder_preview_carousel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:clipToPadding="false"
+                android:fillViewport="false"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:id="@+id/dashboard_builder_preview_carousel_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
 
             <!-- Only the free layout has anywhere to snap to, so the row
                  appears with it. Shown and hidden by the activity. -->
@@ -159,49 +169,15 @@
                 android:layout_marginTop="@dimen/section_spacing"
                 android:text="@string/dashboard_presets_title" />
 
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:scrollbars="none">
+            <LinearLayout
+                style="@style/HyperOS.Group">
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/dashboard_preset_clock"
-                        style="@style/HyperOS.Button.Compact"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/dashboard_preset_clock" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/dashboard_preset_trip"
-                        style="@style/HyperOS.Button.Compact"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_sm"
-                        android:text="@string/dashboard_preset_trip" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/dashboard_preset_music"
-                        style="@style/HyperOS.Button.Compact"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_sm"
-                        android:text="@string/dashboard_preset_music" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/dashboard_preset_weather"
-                        style="@style/HyperOS.Button.Compact"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_sm"
-                        android:text="@string/dashboard_preset_weather" />
-                </LinearLayout>
-            </HorizontalScrollView>
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_builder_preset"
+                    style="@style/HyperOS.ValueRow.Single"
+                    app:rowTitle="@string/dashboard_presets_title"
+                    app:rowValue="@string/dashboard_builder_choose_value" />
+            </LinearLayout>
 
             <!-- ===================== Saved arrangements =====================
                  Two separate things, so they are two separate groups. The
@@ -277,9 +253,14 @@
                 android:layout_marginTop="@dimen/section_spacing"
                 android:text="@string/dashboard_builder_pages" />
 
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/dashboard_builder_pages_segment"
-                style="@style/HyperOS.SegmentGroup" />
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_builder_pages"
+                    style="@style/HyperOS.ValueRow.Single"
+                    app:rowTitle="@string/dashboard_builder_pages"
+                    app:rowValue="@string/dashboard_builder_one_page" />
+            </LinearLayout>
 
             <TextView
                 style="@style/HyperOS.GroupFootnote"

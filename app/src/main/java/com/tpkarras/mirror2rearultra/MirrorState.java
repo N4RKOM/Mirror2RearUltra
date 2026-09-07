@@ -15,6 +15,7 @@ final class MirrorState {
 
     private static final String TAG = "Mirror2RearState";
     private static final AtomicBoolean ACTIVE = new AtomicBoolean(false);
+    private static final AtomicBoolean DASHBOARD_ONLY = new AtomicBoolean(false);
     private static final CopyOnWriteArraySet<Listener> LISTENERS = new CopyOnWriteArraySet<>();
 
     private MirrorState() {
@@ -24,7 +25,19 @@ final class MirrorState {
         return ACTIVE.get();
     }
 
+    static boolean isDashboardOnly() {
+        return ACTIVE.get() && DASHBOARD_ONLY.get();
+    }
+
+    static void setDashboardOnly(Context context, boolean dashboardOnly) {
+        DASHBOARD_ONLY.set(dashboardOnly);
+        requestTileRefresh(context);
+    }
+
     static void setActive(Context context, boolean active) {
+        if (!active) {
+            DASHBOARD_ONLY.set(false);
+        }
         boolean changed = ACTIVE.getAndSet(active) != active;
         if (changed) {
             for (Listener listener : LISTENERS) {
@@ -32,10 +45,18 @@ final class MirrorState {
             }
         }
 
+        requestTileRefresh(context);
+    }
+
+    private static void requestTileRefresh(Context context) {
         try {
             TileService.requestListeningState(
                     context.getApplicationContext(),
                     new ComponentName(context, QuickTileService.class)
+            );
+            TileService.requestListeningState(
+                    context.getApplicationContext(),
+                    new ComponentName(context, DashboardTileService.class)
             );
         } catch (RuntimeException error) {
             Log.w(TAG, "Unable to request a Quick Settings tile refresh", error);

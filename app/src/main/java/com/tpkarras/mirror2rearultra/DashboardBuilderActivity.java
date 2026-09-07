@@ -16,6 +16,7 @@ import android.view.DragEvent;
 import android.view.View;
 import android.text.TextUtils;
 import android.widget.LinearLayout;
+import android.widget.HorizontalScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -43,11 +45,16 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private final List<DashboardWidgetLayout.Widget> widgets = new ArrayList<>();
     private LinearLayout rows;
     private RearDashboardView preview;
+    private RearDashboardView singlePreview;
     private MaterialCardView previewContainer;
     private MaterialButton orientationButton;
     private MaterialButton layoutButton;
-    private MaterialButtonToggleGroup pagesSegment;
-    private MaterialButtonToggleGroup previewPagesSegment;
+    private HyperValueRow pagesInput;
+    private HyperValueRow presetInput;
+    private HorizontalScrollView previewCarousel;
+    private LinearLayout previewCarouselContent;
+    private final List<RearDashboardView> pagePreviews = new ArrayList<>();
+    private final List<MaterialCardView> pagePreviewCards = new ArrayList<>();
     private TextView previewPageNote;
     private androidx.core.widget.NestedScrollView scroll;
     private TextView previewHint;
@@ -83,11 +90,14 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(view -> finish());
         rows = findViewById(R.id.dashboard_builder_rows);
         preview = findViewById(R.id.dashboard_builder_preview_view);
+        singlePreview = preview;
         previewContainer = findViewById(R.id.dashboard_builder_preview_container);
         orientationButton = findViewById(R.id.dashboard_builder_orientation);
         layoutButton = findViewById(R.id.dashboard_builder_layout);
-        pagesSegment = findViewById(R.id.dashboard_builder_pages_segment);
-        previewPagesSegment = findViewById(R.id.dashboard_builder_preview_pages);
+        pagesInput = findViewById(R.id.dashboard_builder_pages);
+        presetInput = findViewById(R.id.dashboard_builder_preset);
+        previewCarousel = findViewById(R.id.dashboard_builder_preview_carousel);
+        previewCarouselContent = findViewById(R.id.dashboard_builder_preview_carousel_content);
         previewPageNote = findViewById(R.id.dashboard_builder_preview_page_note);
         scroll = findViewById(R.id.dashboard_builder_scroll);
         previewHint = findViewById(R.id.dashboard_builder_preview_hint);
@@ -119,23 +129,14 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         rows.setOnDragListener(this::handleDrop);
         // The preview is the other half of the list: tapping a widget there
         // picks it here, and in the free layout dragging it moves it.
-        preview.setOnWidgetSelectedListener(new RearDashboardView.OnWidgetSelectedListener() {
-            @Override
-            public void onWidgetSelected(@Nullable DashboardWidgetLayout.Widget widget) {
-                selectWidget(widget, true);
-            }
-
-            @Override
-            public void onWidgetGrabbed(DashboardWidgetLayout.Widget widget) {
-                selectWidget(widget, false);
-            }
-
-            @Override
-            public void onWidgetChanged(DashboardWidgetLayout.Widget widget) {
-                renderRows();
-                refreshPreview();
-                selectWidget(widget, false);
-            }
+        bindPreview(singlePreview, 1);
+        String[] presetLabels = {getString(R.string.dashboard_preset_clock),
+                getString(R.string.dashboard_preset_trip), getString(R.string.dashboard_preset_music),
+                getString(R.string.dashboard_preset_weather)};
+        presetInput.setEntries(presetLabels);
+        presetInput.setValue(getString(R.string.dashboard_builder_choose_value));
+        presetInput.setOnItemSelectedListener(position -> {
+            if (position >= 0 && position < Preset.values().length) applyPreset(Preset.values()[position]);
         });
         refreshPageControls();
         addNamedTemplateButton.setOnClickListener(view -> promptForNewTemplate());
@@ -148,10 +149,6 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         showOnPanelButton.setOnClickListener(view -> showOnRearPanel());
         findViewById(R.id.dashboard_builder_done).setOnClickListener(view -> finish());
         findViewById(R.id.dashboard_builder_reset).setOnClickListener(view -> confirmReset());
-        findViewById(R.id.dashboard_preset_clock).setOnClickListener(view -> applyPreset(Preset.CLOCK));
-        findViewById(R.id.dashboard_preset_trip).setOnClickListener(view -> applyPreset(Preset.TRIP));
-        findViewById(R.id.dashboard_preset_music).setOnClickListener(view -> applyPreset(Preset.MUSIC));
-        findViewById(R.id.dashboard_preset_weather).setOnClickListener(view -> applyPreset(Preset.WEATHER));
         findViewById(R.id.dashboard_custom_template_save).setOnClickListener(view -> {
             DashboardTemplateStore.save(this);
             Toast.makeText(this, R.string.dashboard_custom_template_saved, Toast.LENGTH_SHORT).show();
@@ -321,36 +318,23 @@ public class DashboardBuilderActivity extends AppCompatActivity {
      */
     private void buildPagesSegment() {
         int current = DashboardWidgetLayout.loadPageCount(this);
-        pagesSegment.clearOnButtonCheckedListeners();
-        pagesSegment.removeAllViews();
-        int[] ids = new int[DashboardWidgetLayout.MAX_PAGES];
-        for (int index = 0; index < DashboardWidgetLayout.MAX_PAGES; index++) {
-            MaterialButton segment = (MaterialButton) getLayoutInflater()
-                    .inflate(R.layout.widget_segment_button, pagesSegment, false);
-            segment.setId(View.generateViewId());
-            segment.setText(getString(R.string.dashboard_builder_page_short, index + 1));
-            ids[index] = segment.getId();
-            pagesSegment.addView(segment, new LinearLayout.LayoutParams(0, dp(42), 1f));
-        }
-        pagesSegment.check(ids[Math.max(0, Math.min(ids.length - 1, current - 1))]);
-        pagesSegment.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (!isChecked) {
-                return;
-            }
-            for (int index = 0; index < ids.length; index++) {
-                if (ids[index] == checkedId) {
-                    DashboardWidgetLayout.savePageCount(this, index + 1);
-                    // The list is cut into one section per page, and the
-                    // preview gains or loses a page to look at, so both are
-                    // rebuilt.
-                    previewPage = Math.min(previewPage, index + 1);
-                    buildPreviewPagesSegment();
-                    renderRows();
-                    notifyDashboardChanged();
-                    return;
-                }
-            }
+        String[] labels = new String[DashboardWidgetLayout.MAX_PAGES];
+        for (int index = 0; index < labels.length; index++) labels[index] = pageCountLabel(index + 1);
+        pagesInput.setEntries(labels);
+        pagesInput.setValue(labels[Math.max(0, Math.min(labels.length - 1, current - 1))]);
+        pagesInput.setOnItemSelectedListener(index -> {
+            int count = index + 1;
+            DashboardWidgetLayout.savePageCount(this, count);
+            previewPage = Math.min(previewPage, count);
+            buildPreviewPagesSegment();
+            renderRows();
+            notifyDashboardChanged();
         });
+    }
+
+    private String pageCountLabel(int count) {
+        return count == 1 ? getString(R.string.dashboard_builder_one_page)
+                : getString(R.string.dashboard_builder_pages_count, count);
     }
 
     /**
@@ -568,6 +552,39 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     notifyDashboardChanged();
                 }));
 
+        if (DashboardWidgetLayout.supportsVariant(widget)) {
+            row.addView(segmentedRow(R.string.dashboard_builder_variant_label,
+                    variantLabels(widget),
+                    DashboardWidgetLayout.loadVariant(this, widget).ordinal(),
+                    getString(R.string.dashboard_builder_variant, label(widget)),
+                    choice -> {
+                        DashboardWidgetLayout.saveVariant(this, widget,
+                                DashboardWidgetLayout.Variant.values()[choice]);
+                        notifyDashboardChanged();
+                    }));
+        }
+
+        row.addView(segmentedRow(R.string.dashboard_builder_rotation_label,
+                new String[]{"0°", "90°", "180°", "270°"},
+                DashboardWidgetLayout.loadRotation(this, widget) / 90,
+                getString(R.string.dashboard_builder_rotation, label(widget)),
+                choice -> {
+                    DashboardWidgetLayout.saveRotation(this, widget, choice * 90);
+                    notifyDashboardChanged();
+                }));
+
+        MaterialSwitch iconSwitch = (MaterialSwitch) getLayoutInflater()
+                .inflate(R.layout.widget_switch_row, row, false);
+        iconSwitch.setText(R.string.dashboard_builder_hide_icon);
+        iconSwitch.setContentDescription(getString(
+                R.string.dashboard_builder_hide_icon_for, label(widget)));
+        iconSwitch.setChecked(DashboardWidgetLayout.isIconHidden(this, widget));
+        iconSwitch.setOnCheckedChangeListener((button, checked) -> {
+            DashboardWidgetLayout.setIconHidden(this, widget, checked);
+            notifyDashboardChanged();
+        });
+        row.addView(iconSwitch);
+
         // Only the widgets that can run out of data have anything to decide
         // here; the clock always has a value.
         if (DashboardWidgetLayout.canBeEmpty(widget)) {
@@ -599,6 +616,25 @@ public class DashboardBuilderActivity extends AppCompatActivity {
 
         card.addView(row);
         return card;
+    }
+
+    private String[] variantLabels(DashboardWidgetLayout.Widget widget) {
+        if (widget == DashboardWidgetLayout.Widget.CLOCK) {
+            return new String[]{
+                    getString(R.string.dashboard_variant_clock_inline),
+                    getString(R.string.dashboard_variant_clock_stacked),
+                    getString(R.string.dashboard_variant_clock_seconds)};
+        }
+        if (widget == DashboardWidgetLayout.Widget.DATE) {
+            return new String[]{
+                    getString(R.string.dashboard_variant_date_text),
+                    getString(R.string.dashboard_variant_date_numeric),
+                    getString(R.string.dashboard_variant_date_year)};
+        }
+        return new String[]{
+                getString(R.string.dashboard_variant_default),
+                getString(R.string.dashboard_variant_alternate),
+                getString(R.string.dashboard_variant_detailed)};
     }
 
     /**
@@ -804,15 +840,28 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         if (preview == null) return;
         DashboardSettings settings = MirrorSettings.loadDashboardSettings(this)
                 .withContentMode(RearContentMode.DASHBOARD);
-        preview.setDashboardSettings(settings, RearContentMode.DASHBOARD);
         Point panel = rearPanelSize();
-        preview.setPanelMetrics(
-                panel == null ? 0 : Math.min(panel.x, panel.y),
-                panel == null ? 0f : rearPanelDensity());
-        preview.setSnapshot(previewSnapshot());
+        RearDashboardSnapshot snapshot = previewSnapshot();
+        int pageCount = DashboardWidgetLayout.loadPageCount(this);
+        if (pageCount > 1 && pagePreviews.size() == pageCount) {
+            for (int index = 0; index < pagePreviews.size(); index++) {
+                configurePreview(pagePreviews.get(index), index + 1, settings, panel, snapshot);
+                MaterialCardView card = pagePreviewCards.get(index);
+                boolean selected = index + 1 == previewPage;
+                card.setStrokeWidth(dp(selected ? 3 : 1));
+                card.setStrokeColor(androidx.core.content.ContextCompat.getColor(this,
+                        selected ? R.color.hyper_accent : R.color.hyper_outline_subtle));
+                LinearLayout.LayoutParams cardParams = carouselPreviewSize(index + 1);
+                cardParams.setMarginEnd(index + 1 < pageCount ? dp(12) : 0);
+                card.setLayoutParams(cardParams);
+            }
+            preview = pagePreviews.get(previewPage - 1);
+        } else {
+            configurePreview(singlePreview, 0, settings, panel, snapshot);
+            preview = singlePreview;
+        }
         // Pinned rather than left to cycle: editing page two should not mean
         // waiting eight seconds for it to come round again.
-        preview.setSelectedPage(DashboardWidgetLayout.loadPageCount(this) > 1 ? previewPage : 0);
         DashboardWidgetLayout.Orientation orientation =
                 DashboardWidgetLayout.loadPageOrientation(this, previewPage);
         orientationButton.setText(orientationLabel(orientation));
@@ -837,7 +886,16 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         bindingSnap = true;
         snapSwitch.setChecked(DashboardWidgetLayout.isGridSnapEnabled(this));
         bindingSnap = false;
-        sizePreviewToPanel(orientation);
+        if (pageCount <= 1) sizePreviewToPanel(orientation);
+    }
+
+    private void configurePreview(RearDashboardView target, int page, DashboardSettings settings,
+                                  @Nullable Point panel, RearDashboardSnapshot snapshot) {
+        target.setDashboardSettings(settings, RearContentMode.DASHBOARD);
+        target.setPanelMetrics(panel == null ? 0 : Math.min(panel.x, panel.y),
+                panel == null ? 0f : rearPanelDensity());
+        target.setSnapshot(snapshot);
+        target.setSelectedPage(page);
     }
 
     /**
@@ -1038,35 +1096,89 @@ public class DashboardBuilderActivity extends AppCompatActivity {
 
     private void buildPreviewPagesSegment() {
         int pageCount = DashboardWidgetLayout.loadPageCount(this);
-        previewPagesSegment.removeAllViews();
-        previewPagesSegment.setVisibility(pageCount > 1 ? View.VISIBLE : View.GONE);
+        previewCarouselContent.removeAllViews();
+        pagePreviews.clear();
+        pagePreviewCards.clear();
+        previewContainer.setVisibility(pageCount <= 1 ? View.VISIBLE : View.GONE);
+        previewCarousel.setVisibility(pageCount > 1 ? View.VISIBLE : View.GONE);
         if (pageCount <= 1) {
             previewPage = 1;
+            preview = singlePreview;
             previewPageNote.setVisibility(View.GONE);
             return;
         }
         previewPage = Math.max(1, Math.min(pageCount, previewPage));
-        int[] ids = new int[pageCount];
         for (int index = 0; index < pageCount; index++) {
-            MaterialButton segment = (MaterialButton) getLayoutInflater()
-                    .inflate(R.layout.widget_segment_button, previewPagesSegment, false);
-            segment.setId(View.generateViewId());
-            segment.setText(getString(R.string.dashboard_builder_page_short, index + 1));
-            ids[index] = segment.getId();
-            previewPagesSegment.addView(segment, new LinearLayout.LayoutParams(0, dp(42), 1f));
+            int page = index + 1;
+            MaterialCardView card = new MaterialCardView(this);
+            card.setCardBackgroundColor(android.graphics.Color.BLACK);
+            card.setRadius(dp(18));
+            card.setStrokeWidth(dp(page == previewPage ? 3 : 1));
+            card.setStrokeColor(androidx.core.content.ContextCompat.getColor(this,
+                    page == previewPage ? R.color.hyper_accent : R.color.hyper_outline_subtle));
+            RearDashboardView pagePreview = new RearDashboardView(this);
+            // A hardware layer is useful for the single interactive preview,
+            // but several identical custom Canvas views inside a scrolling
+            // container can share a stale display-list texture on HyperOS.
+            // That makes the previous page appear in the next card until an
+            // interaction invalidates it. Give carousel cards independent
+            // software buffers; there are at most three, so the cost is small.
+            pagePreview.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            bindPreview(pagePreview, page);
+            card.addView(pagePreview, new MaterialCardView.LayoutParams(
+                    MaterialCardView.LayoutParams.MATCH_PARENT,
+                    MaterialCardView.LayoutParams.MATCH_PARENT));
+            LinearLayout.LayoutParams params = carouselPreviewSize(page);
+            params.setMarginEnd(index + 1 < pageCount ? dp(12) : 0);
+            previewCarouselContent.addView(card, params);
+            pagePreviews.add(pagePreview);
+            pagePreviewCards.add(card);
         }
-        previewPagesSegment.setContentDescription(
-                getString(R.string.dashboard_builder_preview_page));
         previewPageNote.setVisibility(View.VISIBLE);
-        previewPagesSegment.check(ids[previewPage - 1]);
-        previewPagesSegment.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (!isChecked) return;
-            for (int index = 0; index < ids.length; index++) {
-                if (ids[index] == checkedId) {
-                    previewPage = index + 1;
+        preview = pagePreviews.get(previewPage - 1);
+    }
+
+    private LinearLayout.LayoutParams carouselPreviewSize(int page) {
+        Point panel = rearPanelSize();
+        DashboardWidgetLayout.Orientation orientation =
+                DashboardWidgetLayout.loadPageOrientation(this, page);
+        boolean landscape = orientation == DashboardWidgetLayout.Orientation.LANDSCAPE;
+        float aspect = panel == null ? (landscape ? 2f : 0.6f)
+                : (landscape ? panel.y / (float) panel.x : panel.x / (float) panel.y);
+        int width = Math.max(dp(180), Math.round(previewMaxWidth() * 0.82f));
+        int height = Math.round(width / aspect);
+        if (height > dp(300)) {
+            height = dp(300);
+            width = Math.round(height * aspect);
+        }
+        return new LinearLayout.LayoutParams(width, height);
+    }
+
+    private void bindPreview(RearDashboardView target, int page) {
+        target.setContentDescription(getString(R.string.dashboard_builder_page_short, page));
+        target.setOnWidgetSelectedListener(new RearDashboardView.OnWidgetSelectedListener() {
+            private void activate() {
+                if (previewPage != page) {
+                    previewPage = page;
                     refreshPreview();
-                    return;
                 }
+            }
+
+            @Override public void onWidgetSelected(@Nullable DashboardWidgetLayout.Widget widget) {
+                activate();
+                selectWidget(widget, true);
+            }
+
+            @Override public void onWidgetGrabbed(DashboardWidgetLayout.Widget widget) {
+                activate();
+                selectWidget(widget, false);
+            }
+
+            @Override public void onWidgetChanged(DashboardWidgetLayout.Widget widget) {
+                activate();
+                renderRows();
+                refreshPreview();
+                selectWidget(widget, false);
             }
         });
     }
@@ -1261,7 +1373,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 R.string.dashboard_widget_custom_text, R.string.dashboard_widget_network,
                 R.string.dashboard_widget_memory, R.string.dashboard_widget_storage,
                 R.string.dashboard_widget_notifications, R.string.dashboard_widget_calendar,
-                R.string.dashboard_widget_steps};
+                R.string.dashboard_widget_steps, R.string.dashboard_widget_fullscreen_weather,
+                R.string.dashboard_widget_fullscreen_media};
         return getString(labels[widget.ordinal()]);
     }
 

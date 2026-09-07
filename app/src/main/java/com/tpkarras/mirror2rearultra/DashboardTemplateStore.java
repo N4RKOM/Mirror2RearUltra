@@ -89,6 +89,8 @@ final class DashboardTemplateStore {
             out.putString(prefix + "position_" + widget.name(), DashboardWidgetLayout.loadPosition(context, widget).name());
             out.putInt(prefix + "page_" + widget.name(), DashboardWidgetLayout.loadPage(context, widget));
             out.putString(prefix + "style_" + widget.name(), DashboardWidgetLayout.loadStyle(context, widget).name());
+            out.putString(prefix + "variant_" + widget.name(),
+                    DashboardWidgetLayout.loadVariant(context, widget).name());
             out.putString(prefix + "presence_" + widget.name(),
                     DashboardWidgetLayout.loadPresence(context, widget).name());
             out.putString(prefix + "gap_" + widget.name(),
@@ -163,6 +165,11 @@ final class DashboardTemplateStore {
             DashboardWidgetLayout.savePage(context, widget, in.getInt(prefix + "page_" + widget.name(), 1));
             try { DashboardWidgetLayout.saveStyle(context, widget, DashboardWidgetLayout.Style.valueOf(
                     in.getString(prefix + "style_" + widget.name(), DashboardWidgetLayout.Style.DEFAULT.name()))); }
+            catch (IllegalArgumentException ignored) {}
+            try { DashboardWidgetLayout.saveVariant(context, widget,
+                    DashboardWidgetLayout.Variant.valueOf(in.getString(
+                            prefix + "variant_" + widget.name(),
+                            DashboardWidgetLayout.Variant.DEFAULT.name()))); }
             catch (IllegalArgumentException ignored) {}
             try { DashboardWidgetLayout.savePresence(context, widget, DashboardWidgetLayout.Presence.valueOf(
                     in.getString(prefix + "presence_" + widget.name(),

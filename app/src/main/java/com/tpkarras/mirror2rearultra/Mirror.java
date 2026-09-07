@@ -15,6 +15,8 @@ import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -25,6 +27,7 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -45,7 +48,11 @@ public class Mirror extends Activity implements
     private static final String POWER_INTERFACE = "android.os.IPowerManager";
     private static final int TRANSACTION_WAKE_REAR_SCREEN = 16777210;
     private static final int TRANSACTION_SLEEP_REAR_SCREEN = 16777211;
+    private static final long AOD_DIM_DELAY_MILLIS = 30_000L;
+    private static final long IDLE_FADE_STEP_MILLIS = 16L;
+    private static final int IDLE_FADE_STEPS = 125;
     static final String EXTRA_SESSION_HAS_PROJECTION = "session_has_projection";
+    static final String EXTRA_DASHBOARD_ONLY = "dashboard_only";
 
     private TextureView textureView;
     private View brightnessOverlay;
@@ -58,6 +65,7 @@ public class Mirror extends Activity implements
     private RearBrightnessController brightnessController;
     private DeviceHealthMonitor deviceHealthMonitor;
     private ForegroundAppMonitor foregroundAppMonitor;
+    private MirrorControlOverlay mirrorControlOverlay;
     private DisplayManager displayManager;
     private SensorManager sensorManager;
     private Sensor screenDownSensor;
@@ -76,12 +84,21 @@ public class Mirror extends Activity implements
      * image, not about the panel.
      */
     private boolean appProjectionAllowed;
+    /** Profile-app mirroring is opt-in for each foreground app visit. */
+    private boolean manualProjectionEnabled;
     private boolean healthOutputAllowed = true;
     private MirrorProfile activeProfile;
     private DashboardSettings dashboardSettings;
     private RearContentMode sessionContentMode;
     private boolean sessionHasProjection;
     private String appliedDashboardProfileId;
+    private final Handler idleHandler = new Handler(Looper.getMainLooper());
+    private boolean idleDimmed;
+    private boolean idleFadeRunning;
+    private int idleFadeStep;
+    private float idleFadeStartOverlayAlpha;
+    private final Runnable idleAction = this::beginIdleFade;
+    private final Runnable idleFadeFrame = this::runIdleFadeFrame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +117,9 @@ public class Mirror extends Activity implements
         MirrorSettings.addListener(this);
         dashboardSettings = MirrorSettings.loadDashboardSettings(this);
         sessionContentMode = dashboardSettings.contentMode;
+        if (getIntent().getBooleanExtra(EXTRA_DASHBOARD_ONLY, false)) {
+            sessionContentMode = RearContentMode.DASHBOARD;
+        }
         sessionHasProjection = getIntent().getBooleanExtra(
                 EXTRA_SESSION_HAS_PROJECTION,
                 sessionContentMode.usesProjection()
@@ -114,6 +134,8 @@ public class Mirror extends Activity implements
         screenDownSensor = findScreenDownSensor(sensorManager);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        setShowWhenLocked(true);
         if (!sessionContentMode.showsDashboard()) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         } else {
@@ -130,6 +152,8 @@ public class Mirror extends Activity implements
         calibrationGrid.setClickable(false);
         dashboardView.setClickable(true);
         dashboardView.setDashboardSettings(dashboardSettings, sessionContentMode);
+        mirrorControlOverlay = new MirrorControlOverlay(this, () ->
+                runOnUiThread(() -> setManualProjectionEnabled(!manualProjectionEnabled)));
         // Each page can be turned a different way round, and the rotation is
         // applied out here because it needs the panel's own dimensions.
         dashboardView.setOnPageChangedListener(page -> {
@@ -139,8 +163,8 @@ public class Mirror extends Activity implements
         mirrorLayout.post(this::applyDashboardOrientation);
         applyAppVisibility(null);
         textureView.setVisibility(View.INVISIBLE);
-        brightnessController = new RearBrightnessController(hardwareControlActive ->
-                runOnUiThread(() -> applyBrightnessOverlay(hardwareControlActive))
+        brightnessController = new RearBrightnessController((hardwareControlActive, appliedPercent) ->
+                runOnUiThread(() -> onHardwareBrightnessApplied(hardwareControlActive, appliedPercent))
         );
         configureProjectionSurfaceSize();
         if (usesProjection()) {
@@ -164,6 +188,7 @@ public class Mirror extends Activity implements
         if (automaticOutputVisible) {
             applyProfileBrightness();
         }
+        resetIdleTimer();
     }
 
     private void configureProjectionSurfaceSize() {
@@ -190,11 +215,16 @@ public class Mirror extends Activity implements
 
     @Override
     protected void onDestroy() {
+        idleHandler.removeCallbacks(idleAction);
+        idleHandler.removeCallbacks(idleFadeFrame);
         MirrorState.removeListener(this);
         MirrorSettings.removeListener(this);
         unregisterRuntimeListeners();
         detachProjectionSurface();
         stopAutoProfileMonitoring();
+        if (mirrorControlOverlay != null) {
+            mirrorControlOverlay.close();
+        }
         if (deviceHealthMonitor != null) {
             deviceHealthMonitor.stop();
         }
@@ -267,7 +297,16 @@ public class Mirror extends Activity implements
                 applyProfileBrightness();
                 applyRotationTransform();
             }
+            resetIdleTimer();
         });
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            resetIdleTimer();
+        }
+        return super.dispatchTouchEvent(event);
     }
 
     @Override
@@ -280,7 +319,7 @@ public class Mirror extends Activity implements
             return;
         }
         configureProjectionBuffer(surfaceTexture, width, height);
-        if (automaticOutputVisible) {
+        if (shouldShowProjection()) {
             projectionSurface = new Surface(surfaceTexture);
             attachProjectionSurface(projectionBufferWidth, projectionBufferHeight);
             applyRotationTransform();
@@ -297,7 +336,7 @@ public class Mirror extends Activity implements
             return;
         }
         configureProjectionBuffer(surfaceTexture, width, height);
-        if (automaticOutputVisible) {
+        if (shouldShowProjection()) {
             attachProjectionSurface(projectionBufferWidth, projectionBufferHeight);
             applyRotationTransform();
         }
@@ -510,19 +549,94 @@ public class Mirror extends Activity implements
         if (activeProfile == null || brightnessOverlay == null) {
             return;
         }
-        applyBrightnessOverlay(false);
+        if (idleFadeRunning) {
+            return;
+        }
+        if (idleDimmed) {
+            brightnessOverlay.setAlpha(aodDimOverlayAlpha());
+            return;
+        }
+        applyBrightnessPercent(activeProfile.brightnessPercent);
+    }
+
+    private void applyBrightnessPercent(int percent) {
+        int clamped = Math.max(1, Math.min(100, percent));
+        applyBrightnessOverlay(false, clamped);
         if (brightnessController != null) {
-            brightnessController.applyPercent(activeProfile.brightnessPercent);
+            brightnessController.applyPercent(clamped);
         }
     }
 
-    private void applyBrightnessOverlay(boolean hardwareControlActive) {
-        if (activeProfile == null || brightnessOverlay == null) {
+    private void applyBrightnessOverlay(boolean hardwareControlActive, int percent) {
+        if (brightnessOverlay == null) {
             return;
         }
         brightnessOverlay.setAlpha(
-                hardwareControlActive ? 0f : 1f - activeProfile.brightnessPercent / 100f
+                hardwareControlActive ? 0f : 1f - percent / 100f
         );
+    }
+
+    private void onHardwareBrightnessApplied(boolean hardwareControlActive, int percent) {
+        // An asynchronous root response must not remove the software fade or
+        // wake an already dimmed AOD frame.
+        if (idleFadeRunning || idleDimmed) {
+            return;
+        }
+        applyBrightnessOverlay(hardwareControlActive, percent);
+    }
+
+    private void resetIdleTimer() {
+        idleHandler.removeCallbacks(idleAction);
+        idleHandler.removeCallbacks(idleFadeFrame);
+        boolean wasFading = idleFadeRunning;
+        idleFadeRunning = false;
+        boolean wasDimmed = idleDimmed;
+        idleDimmed = false;
+        if (wasDimmed || wasFading) {
+            applyProfileBrightness();
+        }
+        DashboardWidgetLayout.IdleMode mode = DashboardWidgetLayout.loadIdleMode(this);
+        long delay = mode == DashboardWidgetLayout.IdleMode.TIMEOUT_15
+                ? 15_000L : mode == DashboardWidgetLayout.IdleMode.TIMEOUT_30
+                ? 30_000L : AOD_DIM_DELAY_MILLIS;
+        idleHandler.postDelayed(idleAction, delay);
+    }
+
+    private void beginIdleFade() {
+        if (!MirrorState.isActive() || activeProfile == null) {
+            return;
+        }
+        idleFadeRunning = true;
+        idleFadeStep = 0;
+        idleFadeStartOverlayAlpha = brightnessOverlay.getAlpha();
+        idleHandler.post(idleFadeFrame);
+    }
+
+    private void runIdleFadeFrame() {
+        if (!idleFadeRunning || !MirrorState.isActive()) {
+            return;
+        }
+        idleFadeStep++;
+        float progress = idleFadeStep / (float) IDLE_FADE_STEPS;
+        DashboardWidgetLayout.IdleMode mode = DashboardWidgetLayout.loadIdleMode(this);
+        float targetAlpha = mode == DashboardWidgetLayout.IdleMode.ALWAYS_ON
+                ? aodDimOverlayAlpha() : 1f;
+        brightnessOverlay.setAlpha(idleFadeStartOverlayAlpha
+                + (targetAlpha - idleFadeStartOverlayAlpha) * progress);
+        if (idleFadeStep < IDLE_FADE_STEPS) {
+            idleHandler.postDelayed(idleFadeFrame, IDLE_FADE_STEP_MILLIS);
+            return;
+        }
+        idleFadeRunning = false;
+        idleDimmed = true;
+        if (mode != DashboardWidgetLayout.IdleMode.ALWAYS_ON) {
+            MirrorState.setActive(this, false);
+        }
+    }
+
+    private float aodDimOverlayAlpha() {
+        int percent = DashboardWidgetLayout.loadAodMinBrightnessPercent(this);
+        return 1f - percent / 100f;
     }
 
     private void configureAutoProfileMonitoring() {
@@ -562,6 +676,9 @@ public class Mirror extends Activity implements
         Log.i(TAG, "Automatic profile: package=" + packageName
                 + ", profile=" + (profileId == null ? "manual fallback" : profileId));
         AutoProfileState.set(profileId, packageName);
+        // Entering another app is a new explicit decision. Never carry an
+        // active capture into it, even when both apps use the same profile.
+        manualProjectionEnabled = false;
         if (MirrorSettings.isAutoProfileEnabled(this)) {
             activeProfile = profileId == null
                     ? MirrorSettings.loadActiveProfile(this)
@@ -572,12 +689,14 @@ public class Mirror extends Activity implements
             }
         }
         applyAppVisibility(profileId);
+        updateMirrorControl(profileId);
         updateOutputVisibility();
         if (automaticOutputVisible) {
             updateProjectionBufferFromSettings();
             applyProfileBrightness();
             applyRotationTransform();
         }
+        resetIdleTimer();
     }
 
     /**
@@ -615,6 +734,7 @@ public class Mirror extends Activity implements
     private void setAutomaticOutputVisible(boolean visible) {
         if (outputVisibilityInitialized && automaticOutputVisible == visible) {
             applyContentVisibility();
+            ensureProjectionSurface();
             updateCalibrationGridVisibility();
             return;
         }
@@ -639,30 +759,62 @@ public class Mirror extends Activity implements
         }
 
         rearScreenSwitch(true);
-        SurfaceTexture surfaceTexture = usesProjection() && appProjectionAllowed
-                ? textureView.getSurfaceTexture()
-                : null;
-        if (surfaceTexture != null && projectionSurface == null) {
-            configureProjectionBuffer(surfaceTexture, textureView.getWidth(), textureView.getHeight());
-            projectionSurface = new Surface(surfaceTexture);
-            attachProjectionSurface(projectionBufferWidth, projectionBufferHeight);
-        }
+        ensureProjectionSurface();
         updateCalibrationGridVisibility();
         Log.i(TAG, "Rear output resumed");
     }
 
     private void applyContentVisibility() {
-        boolean showProjection = automaticOutputVisible && usesProjection() && appProjectionAllowed;
+        boolean showProjection = shouldShowProjection();
         textureView.setVisibility(showProjection ? View.VISIBLE : View.INVISIBLE);
         if (dashboardView != null) {
             dashboardView.setVisibility(
-                    automaticOutputVisible && sessionContentMode.showsDashboard()
+                    automaticOutputVisible && sessionContentMode.showsDashboard() && !showProjection
                             ? View.VISIBLE
                             : View.GONE
             );
         }
         if (!showProjection) {
             detachProjectionSurface();
+        }
+    }
+
+    private boolean shouldShowProjection() {
+        return automaticOutputVisible && usesProjection() && appProjectionAllowed
+                && manualProjectionEnabled;
+    }
+
+    private void ensureProjectionSurface() {
+        if (!shouldShowProjection() || textureView == null) {
+            detachProjectionSurface();
+            return;
+        }
+        SurfaceTexture surfaceTexture = textureView.getSurfaceTexture();
+        if (surfaceTexture != null && projectionSurface == null) {
+            configureProjectionBuffer(surfaceTexture, textureView.getWidth(), textureView.getHeight());
+            projectionSurface = new Surface(surfaceTexture);
+            attachProjectionSurface(projectionBufferWidth, projectionBufferHeight);
+        }
+    }
+
+    private void setManualProjectionEnabled(boolean enabled) {
+        manualProjectionEnabled = enabled && appProjectionAllowed && usesProjection();
+        applyContentVisibility();
+        ensureProjectionSurface();
+        updateCalibrationGridVisibility();
+        updateMirrorControl(AutoProfileState.get().profileId);
+        if (manualProjectionEnabled) {
+            updateProjectionBufferFromSettings();
+            applyProfileBrightness();
+            applyRotationTransform();
+        }
+        Log.i(TAG, "Profile-app projection " + (manualProjectionEnabled ? "enabled" : "disabled"));
+        resetIdleTimer();
+    }
+
+    private void updateMirrorControl(@Nullable String profileId) {
+        if (mirrorControlOverlay != null) {
+            mirrorControlOverlay.show(profileId != null && usesProjection(), manualProjectionEnabled);
         }
     }
 
@@ -712,7 +864,7 @@ public class Mirror extends Activity implements
         if (calibrationGrid != null) {
             calibrationGrid.setVisibility(
                     automaticOutputVisible && MirrorSettings.isCalibrationGridEnabled(this)
-                            && usesProjection() && appProjectionAllowed
+                            && shouldShowProjection()
                             ? View.VISIBLE
                             : View.GONE
             );

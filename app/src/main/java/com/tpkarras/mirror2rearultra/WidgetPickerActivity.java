@@ -69,12 +69,16 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
             new WidgetRow(R.id.dashboard_network_switch, DashboardWidgetLayout.Widget.NETWORK),
             // Weather and sensors
             new WidgetRow(R.id.dashboard_weather_switch, DashboardWidgetLayout.Widget.WEATHER),
+            new WidgetRow(R.id.dashboard_fullscreen_weather_switch,
+                    DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER),
             new WidgetRow(R.id.dashboard_compass_switch, DashboardWidgetLayout.Widget.COMPASS),
             new WidgetRow(R.id.dashboard_speed_switch, DashboardWidgetLayout.Widget.SPEED),
             new WidgetRow(R.id.dashboard_altitude_switch, DashboardWidgetLayout.Widget.ALTITUDE),
             new WidgetRow(R.id.dashboard_steps_switch, DashboardWidgetLayout.Widget.STEPS),
             // Media and notifications
             new WidgetRow(R.id.dashboard_media_switch, DashboardWidgetLayout.Widget.MEDIA),
+            new WidgetRow(R.id.dashboard_fullscreen_media_switch,
+                    DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA),
             new WidgetRow(R.id.dashboard_notifications_switch,
                     DashboardWidgetLayout.Widget.NOTIFICATIONS),
             // Other
@@ -221,12 +225,16 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
     private void onWidgetToggled(DashboardWidgetLayout.Widget widget, boolean checked) {
         switch (widget) {
             case WEATHER:
-                weatherCityContainer.setEnabled(checked);
+            case FULLSCREEN_WEATHER:
+                weatherCityContainer.setEnabled(
+                        isWidgetOn(DashboardWidgetLayout.Widget.WEATHER)
+                                || isWidgetOn(DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER));
                 break;
             case CUSTOM_TEXT:
                 customTextContainer.setEnabled(checked);
                 break;
             case MEDIA:
+            case FULLSCREEN_MEDIA:
                 updatePermissionUi();
                 break;
             case SPEED:
@@ -258,7 +266,8 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
                     DashboardWidgetLayout.isWidgetEnabled(this, entry.getKey()));
         }
         weatherCityInput.setText(settings.weatherCity);
-        weatherCityContainer.setEnabled(isWidgetOn(DashboardWidgetLayout.Widget.WEATHER));
+        weatherCityContainer.setEnabled(isWidgetOn(DashboardWidgetLayout.Widget.WEATHER)
+                || isWidgetOn(DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER));
         customTextInput.setText(settings.customText);
         customTextContainer.setEnabled(isWidgetOn(DashboardWidgetLayout.Widget.CUSTOM_TEXT));
         bindingUi = false;
@@ -312,10 +321,12 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
         mediaAccessStatus.setText(mediaGranted
                 ? R.string.dashboard_media_access_granted
                 : isWidgetOn(DashboardWidgetLayout.Widget.MEDIA)
+                        || isWidgetOn(DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA)
                 ? R.string.dashboard_media_access_required
                 : R.string.dashboard_media_access_optional);
         mediaAccessButton.setVisibility(
-                isWidgetOn(DashboardWidgetLayout.Widget.MEDIA) && !mediaGranted
+                (isWidgetOn(DashboardWidgetLayout.Widget.MEDIA)
+                        || isWidgetOn(DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA)) && !mediaGranted
                         ? View.VISIBLE : View.GONE
         );
     }
