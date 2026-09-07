@@ -144,7 +144,7 @@
     <string name="dashboard_builder_preview_page">Страница в предпросмотре</string>
     <string name="dashboard_builder_preview_page_note">Ориентация и вид относятся к выбранной странице — каждая может стоять по-своему.</string>
     <string name="dashboard_profile_template_title">Панель текущего профиля</string>
-    <string name="dashboard_profile_template_help">Применяется автоматически при переключении на этот профиль.</string>
+    <string name="dashboard_profile_template_help">Применяется автоматически при переключении на этот профиль и сохраняется при уходе с него — каждый профиль возвращается к своей панели.</string>
     <string name="dashboard_named_template_add">Сохранить текущую как…</string>
     <string name="dashboard_named_template_name">Название шаблона</string>
     <string name="dashboard_named_template_required">Введите название</string>

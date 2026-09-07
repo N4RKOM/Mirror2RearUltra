@@ -76,8 +76,18 @@ final class MirrorSettings {
     static MirrorProfile selectProfile(Context context, String id) {
         SharedPreferences preferences = preferences(context);
         String selectedId = profileExists(preferences, id) ? id : MirrorProfile.CAMERA_ID;
-        boolean switched = !selectedId.equals(
-                preferences.getString(KEY_ACTIVE_PROFILE, MirrorProfile.CAMERA_ID));
+        String previousId = preferences.getString(KEY_ACTIVE_PROFILE, MirrorProfile.CAMERA_ID);
+        boolean switched = !selectedId.equals(previousId);
+        if (switched && profileExists(preferences, previousId)) {
+            // Keep what the outgoing profile was showing before the incoming
+            // one overwrites it. There is one live arrangement and a snapshot
+            // per profile, so without this an afternoon of rearranging the
+            // panel under one profile was thrown away by the next switch,
+            // with nothing to say it had happened. A profile that had no
+            // snapshot gets one here: from now on it remembers its own panel
+            // rather than inheriting whatever the last profile left behind.
+            DashboardTemplateStore.save(context, previousId);
+        }
         preferences.edit().putString(KEY_ACTIVE_PROFILE, selectedId).apply();
         if (switched) {
             // Dashboard arrangements are stored per profile but had to be

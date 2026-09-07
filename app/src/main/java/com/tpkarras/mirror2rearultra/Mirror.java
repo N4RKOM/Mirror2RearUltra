@@ -739,6 +739,12 @@ public class Mirror extends Activity implements
 
     private void applyDashboardForProfile(MirrorProfile profile) {
         if (profile == null || profile.id.equals(appliedDashboardProfileId)) return;
+        // The same keeping as on a hand-made switch: the app-based one changes
+        // profile just as thoroughly, and the panel it leaves behind is the
+        // one the outgoing profile should come back to.
+        if (appliedDashboardProfileId != null) {
+            DashboardTemplateStore.save(this, appliedDashboardProfileId);
+        }
         appliedDashboardProfileId = profile.id;
         if (!DashboardTemplateStore.apply(this, profile.id)) return;
         dashboardSettings = MirrorSettings.loadDashboardSettings(this)

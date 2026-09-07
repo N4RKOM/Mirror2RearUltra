@@ -326,7 +326,7 @@
     <string name="dashboard_builder_preview_page">Page shown in the preview</string>
     <string name="dashboard_builder_preview_page_note">Orientation and arrangement belong to the page above, so each page can sit its own way round.</string>
     <string name="dashboard_profile_template_title">Current profile panel</string>
-    <string name="dashboard_profile_template_help">Applied on its own when you switch to this profile.</string>
+    <string name="dashboard_profile_template_help">Applied on its own when you switch to this profile, and kept on its own when you switch away, so each profile comes back to its own panel.</string>
     <string name="dashboard_named_template_add">Save current as…</string>
     <string name="dashboard_named_template_name">Template name</string>
     <string name="dashboard_named_template_required">Enter a name</string>
