@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Codebase index, rebuilt on demand and large
+.codebase-memory/
