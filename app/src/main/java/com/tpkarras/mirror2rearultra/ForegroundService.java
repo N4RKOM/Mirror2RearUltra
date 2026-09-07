@@ -86,7 +86,6 @@ public class ForegroundService extends Service {
     public void onCreate() {
         super.onCreate();
         running = true;
-        startProjectionForeground();
     }
 
     @Override
@@ -98,6 +97,13 @@ public class ForegroundService extends Service {
 
         switch (intent.getAction()) {
             case ACTION_START:
+                // Going foreground belongs with the projection that justifies
+                // it. Doing it in onCreate meant that any intent which found
+                // the service gone recreated it and asked to be a media
+                // projection service without holding a projection, which
+                // targetSDK 36 answers with a SecurityException that takes the
+                // whole app down - a stop sent twice was enough.
+                startProjectionForeground();
                 startProjection(intent);
                 break;
             case ACTION_ATTACH_SURFACE:

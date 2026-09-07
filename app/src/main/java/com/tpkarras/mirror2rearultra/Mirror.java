@@ -252,11 +252,15 @@ public class Mirror extends Activity implements
             }
             boolean ownsSession = MirrorState.generation() == sessionGeneration;
             if (ownsSession) {
+                // The service is told to stop only when this activity is the
+                // one ending the session. Telling it again after whoever
+                // switched the session off had already done so recreated the
+                // service just to deliver the message.
                 if (MirrorState.isActive()) {
                     MirrorState.setActive(this, false);
-                }
-                if (sessionHasProjection && ForegroundService.isRunning()) {
-                    startService(ForegroundService.createStopIntent(this));
+                    if (sessionHasProjection && ForegroundService.isRunning()) {
+                        startService(ForegroundService.createStopIntent(this));
+                    }
                 }
                 rearScreenSwitch(false);
                 restoreXiaomiRearScreenUi();
