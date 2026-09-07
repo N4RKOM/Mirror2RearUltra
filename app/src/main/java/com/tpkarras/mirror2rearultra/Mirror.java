@@ -92,6 +92,15 @@ public class Mirror extends Activity implements
     private RearContentMode sessionContentMode;
     private boolean sessionHasProjection;
     private String appliedDashboardProfileId;
+    /**
+     * Which run of the session this activity belongs to.
+     *
+     * <p>Switching tiles stops one session and starts another in a single
+     * click. This activity's onDestroy arrives after the new session has
+     * already been armed, so without knowing whose run it is it would clear
+     * the state the new one had just set and put the panel back to sleep.
+     */
+    private int sessionGeneration;
     private final Handler idleHandler = new Handler(Looper.getMainLooper());
     private boolean idleDimmed;
     private boolean idleFadeRunning;
@@ -109,6 +118,7 @@ public class Mirror extends Activity implements
         }
 
         MirrorState.addListener(this);
+        sessionGeneration = MirrorState.generation();
         activeProfile = MirrorSettings.loadActiveProfile(this);
         appliedDashboardProfileId = activeProfile.id;
         if (DashboardTemplateStore.exists(this, activeProfile.id)) {
@@ -136,11 +146,13 @@ public class Mirror extends Activity implements
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setShowWhenLocked(true);
-        if (!sessionContentMode.showsDashboard()) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        } else {
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        }
+        // Touchable whatever the mode: the idle timer is reset by a touch on
+        // the panel, and a mirror-only session used to refuse touches, so the
+        // fifteen and thirty second timers ended the session with no way to
+        // keep it alive. Nothing in a mirror-only session reacts to a touch -
+        // the image, the overlay and the grid are all unclickable and the
+        // widgets are gone - so letting them through costs nothing else.
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         setContentView(R.layout.mirror_surface);
         textureView = findViewById(R.id.mirror);
         mirrorLayout = findViewById(R.id.mirror_layout);
@@ -161,6 +173,7 @@ public class Mirror extends Activity implements
             applyDashboardOrientation();
         });
         mirrorLayout.post(this::applyDashboardOrientation);
+        updateMirrorControl(AutoProfileState.get().profileId);
         applyAppVisibility(null);
         textureView.setVisibility(View.INVISIBLE);
         brightnessController = new RearBrightnessController((hardwareControlActive, appliedPercent) ->
@@ -237,15 +250,17 @@ public class Mirror extends Activity implements
             if (brightnessController != null) {
                 brightnessController.closeAndRestore();
             }
-            boolean wasActive = MirrorState.isActive();
-            if (wasActive) {
-                MirrorState.setActive(this, false);
+            boolean ownsSession = MirrorState.generation() == sessionGeneration;
+            if (ownsSession) {
+                if (MirrorState.isActive()) {
+                    MirrorState.setActive(this, false);
+                }
                 if (sessionHasProjection && ForegroundService.isRunning()) {
                     startService(ForegroundService.createStopIntent(this));
                 }
+                rearScreenSwitch(false);
+                restoreXiaomiRearScreenUi();
             }
-            rearScreenSwitch(false);
-            restoreXiaomiRearScreenUi();
         } else if (brightnessController != null) {
             brightnessController.closeWithoutRestore();
         }
@@ -768,8 +783,12 @@ public class Mirror extends Activity implements
         boolean showProjection = shouldShowProjection();
         textureView.setVisibility(showProjection ? View.VISIBLE : View.INVISIBLE);
         if (dashboardView != null) {
+            // Not conditioned on the projection: the hybrid mode exists to
+            // put the widgets over the mirrored image, and hiding them while
+            // it ran made that mode identical to plain mirroring. The mirror
+            // mode draws no widgets anyway, its showsDashboard() being false.
             dashboardView.setVisibility(
-                    automaticOutputVisible && sessionContentMode.showsDashboard() && !showProjection
+                    automaticOutputVisible && sessionContentMode.showsDashboard()
                             ? View.VISIBLE
                             : View.GONE
             );
@@ -781,7 +800,22 @@ public class Mirror extends Activity implements
 
     private boolean shouldShowProjection() {
         return automaticOutputVisible && usesProjection() && appProjectionAllowed
-                && manualProjectionEnabled;
+                && (manualProjectionEnabled || !requiresManualProjection());
+    }
+
+    /**
+     * Whether the image is waiting for the floating button to be pressed.
+     *
+     * <p>Only while an assigned app is in front, which is the flow the button
+     * exists for and the only flow that shows it. Demanding it everywhere left
+     * a session started from the tile with a blank panel and no control
+     * anywhere to turn the image on, and did the same whenever permission to
+     * draw over other apps was missing, since the button cannot appear at all
+     * without it.
+     */
+    private boolean requiresManualProjection() {
+        return AutoProfileState.get().profileId != null
+                && mirrorControlOverlay != null && mirrorControlOverlay.canShow();
     }
 
     private void ensureProjectionSurface() {

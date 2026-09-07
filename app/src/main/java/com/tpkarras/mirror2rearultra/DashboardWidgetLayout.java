@@ -3,6 +3,8 @@ package com.tpkarras.mirror2rearultra;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -555,11 +557,14 @@ final class DashboardWidgetLayout {
             }
             savePageCount(context, Math.max(loadPageCount(context), target));
             prefs(context).edit().putInt(PAGE_PREFIX + changed.name(), target).apply();
-            int fallback = target == 1 ? 2 : 1;
-            savePageCount(context, Math.max(loadPageCount(context), fallback));
+            // The page count grows only when somebody is actually moved. It
+            // used to grow either way, so switching a full-screen widget on
+            // added an empty second page nobody had asked for.
+            int fallback = firstSharablePage(context, changed);
             for (Widget widget : Widget.values()) {
                 if (widget != changed && isWidgetEnabled(context, widget)
                         && loadPage(context, widget) == target) {
+                    savePageCount(context, Math.max(loadPageCount(context), fallback));
                     prefs(context).edit().putInt(PAGE_PREFIX + widget.name(), fallback).apply();
                 }
             }
@@ -567,13 +572,40 @@ final class DashboardWidgetLayout {
             for (Widget widget : Widget.values()) {
                 if (isFullscreenWidget(widget) && isWidgetEnabled(context, widget)
                         && loadPage(context, widget) == target) {
-                    int fallback = target == 1 ? 2 : 1;
+                    int fallback = firstSharablePage(context, null);
                     savePageCount(context, Math.max(loadPageCount(context), fallback));
                     prefs(context).edit().putInt(PAGE_PREFIX + changed.name(), fallback).apply();
                     break;
                 }
             }
         }
+    }
+
+    /**
+     * The lowest page no full-screen widget has taken for itself.
+     *
+     * <p>Displaced widgets used to be sent to page 1 or 2 whichever the other
+     * was, without looking at who was already there, so with a full-screen
+     * widget on each of those pages an ordinary widget landed on one of them
+     * and was never drawn again - while the builder went on listing it with
+     * all of its controls.
+     *
+     * @param except a widget to ignore, for when it is the one being placed
+     */
+    private static int firstSharablePage(Context context, @Nullable Widget except) {
+        for (int page = 1; page <= MAX_PAGES; page++) {
+            boolean owned = false;
+            for (Widget widget : Widget.values()) {
+                if (widget != except && isFullscreenWidget(widget)
+                        && isWidgetEnabled(context, widget)
+                        && loadPage(context, widget) == page) {
+                    owned = true;
+                    break;
+                }
+            }
+            if (!owned) return page;
+        }
+        return MAX_PAGES;
     }
 
     static boolean isExtraEnabled(Context context, Widget widget) {

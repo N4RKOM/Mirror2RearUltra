@@ -60,8 +60,11 @@ final class MirrorControlOverlay {
                 PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.TOP | Gravity.START;
         SharedPreferences preferences = this.context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        params.x = preferences.getInt(X, dp(12));
-        params.y = preferences.getInt(Y, dp(180));
+        // Held inside the screen on the way in as well as on the way out: a
+        // position stored before this, or one stored on a larger screen, would
+        // otherwise put the button where it cannot be seen or touched.
+        params.x = clampX(preferences.getInt(X, dp(12)));
+        params.y = clampY(preferences.getInt(Y, dp(180)));
         view.setOnTouchListener(new DragTouchListener());
     }
 
@@ -90,6 +93,37 @@ final class MirrorControlOverlay {
 
     void close() { hide(); }
 
+    /** Whether the button could be put on screen if it were wanted. */
+    boolean canShow() {
+        return windowManager != null && Settings.canDrawOverlays(context);
+    }
+
+    /**
+     * Keeps the button on the screen.
+     *
+     * <p>FLAG_LAYOUT_NO_LIMITS lets a window sit outside the display, and the
+     * position is remembered, so a button dragged past an edge stayed off the
+     * screen for good - and with it the only way to turn mirroring on for an
+     * assigned app.
+     */
+    private int clampX(int value) {
+        return clamp(value, bounds().width() - params.width);
+    }
+
+    private int clampY(int value) {
+        return clamp(value, bounds().height() - params.height);
+    }
+
+    private static int clamp(int value, int highest) {
+        return highest <= 0 ? 0 : Math.max(0, Math.min(highest, value));
+    }
+
+    private android.graphics.Rect bounds() {
+        return windowManager == null
+                ? new android.graphics.Rect(0, 0, 0, 0)
+                : windowManager.getCurrentWindowMetrics().getBounds();
+    }
+
     private int dp(int value) {
         return Math.round(value * context.getResources().getDisplayMetrics().density);
     }
@@ -115,8 +149,8 @@ final class MirrorControlOverlay {
                     float dy = event.getRawY() - downRawY;
                     if (Math.hypot(dx, dy) > dp(5)) moved = true;
                     if (moved && attached) {
-                        params.x = Math.max(0, startX + Math.round(dx));
-                        params.y = Math.max(0, startY + Math.round(dy));
+                        params.x = clampX(startX + Math.round(dx));
+                        params.y = clampY(startY + Math.round(dy));
                         try { windowManager.updateViewLayout(view, params); }
                         catch (RuntimeException ignored) { }
                     }
