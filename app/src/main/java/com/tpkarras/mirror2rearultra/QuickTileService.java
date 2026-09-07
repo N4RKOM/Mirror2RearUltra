@@ -36,8 +36,7 @@ public class QuickTileService extends TileService {
             MirrorState.setActive(this, false);
         }
 
-        MirrorState.setDashboardOnly(this, false);
-        MirrorState.setActive(this, true);
+        MirrorState.armSession(this, false);
         updateTile();
 
         Intent activityIntent = new Intent(this, DisplayActivity.class)

@@ -29,6 +29,9 @@ public class DisplayActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // The launch a tile asked for has arrived, whatever happens next.
+        MirrorState.confirmLaunch();
+
         projectionPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> onProjectionPermissionResult(result.getResultCode(), result.getData())

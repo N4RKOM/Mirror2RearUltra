@@ -33,8 +33,7 @@ public class DashboardTileService extends TileService {
                 startService(ForegroundService.createStopIntent(this));
             }
         }
-        MirrorState.setDashboardOnly(this, true);
-        MirrorState.setActive(this, true);
+        MirrorState.armSession(this, true);
         updateTile();
 
         Intent intent = new Intent(this, DisplayActivity.class)

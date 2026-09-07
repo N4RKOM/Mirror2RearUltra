@@ -2,6 +2,8 @@ package com.tpkarras.mirror2rearultra;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.service.quicksettings.TileService;
 import android.util.Log;
 
@@ -25,6 +27,15 @@ final class MirrorState {
     private static final java.util.concurrent.atomic.AtomicInteger GENERATION =
             new java.util.concurrent.atomic.AtomicInteger();
     private static final CopyOnWriteArraySet<Listener> LISTENERS = new CopyOnWriteArraySet<>();
+    /**
+     * How long a session that has been armed has to actually open before it is
+     * given up on. Long enough for the shade to collapse and a cold process to
+     * start, short enough that a tile is not left lit for any noticeable time.
+     */
+    private static final long LAUNCH_TIMEOUT_MILLIS = 3_000L;
+    private static final Handler LAUNCH_HANDLER = new Handler(Looper.getMainLooper());
+    /** Main thread only: armed from a tile's click, cleared from the same thread. */
+    private static Runnable pendingLaunchCheck;
 
     private MirrorState() {
     }
@@ -47,9 +58,57 @@ final class MirrorState {
         requestTileRefresh(context);
     }
 
+    /**
+     * Switches the session on and waits to see it open.
+     *
+     * <p>A tile marks the session started and then asks for the activity that
+     * runs it. When that request is quietly dropped - a background launch the
+     * system refuses, a locked device, a cancelled pending intent - nothing
+     * used to notice: the tile stayed lit over a panel with nothing on it, and
+     * the next press switched off a session that had never existed, so it took
+     * two presses to start one. If the activity does not arrive, this puts the
+     * state back where it was.
+     */
+    static void armSession(Context context, boolean dashboardOnly) {
+        setDashboardOnly(context, dashboardOnly);
+        setActive(context, true);
+        cancelLaunchCheck();
+        Context application = context.getApplicationContext();
+        int armedGeneration = GENERATION.get();
+        Runnable check = new Runnable() {
+            @Override
+            public void run() {
+                pendingLaunchCheck = null;
+                // Only this run of the session: a later one has its own.
+                if (GENERATION.get() != armedGeneration || !ACTIVE.get()) {
+                    return;
+                }
+                Log.w(TAG, "Nothing opened the armed session; switching it back off");
+                setActive(application, false);
+            }
+        };
+        pendingLaunchCheck = check;
+        LAUNCH_HANDLER.postDelayed(check, LAUNCH_TIMEOUT_MILLIS);
+    }
+
+    /** Reports that the activity a tile asked for has arrived. */
+    static void confirmLaunch() {
+        cancelLaunchCheck();
+    }
+
+    private static void cancelLaunchCheck() {
+        if (pendingLaunchCheck != null) {
+            LAUNCH_HANDLER.removeCallbacks(pendingLaunchCheck);
+            pendingLaunchCheck = null;
+        }
+    }
+
     static void setActive(Context context, boolean active) {
         if (!active) {
             DASHBOARD_ONLY.set(false);
+            // Whoever switched it off has settled the question the wait was
+            // asking, including the tiles' own error handling.
+            cancelLaunchCheck();
         }
         boolean changed = ACTIVE.getAndSet(active) != active;
         if (active && changed) {
