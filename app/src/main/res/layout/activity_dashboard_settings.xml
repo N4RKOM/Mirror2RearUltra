@@ -150,6 +150,11 @@
                     app:rowTitle="@string/dashboard_theme_title" />
 
                 <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_font_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/dashboard_font_title" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
                     android:id="@+id/dashboard_idle_mode_input"
                     style="@style/HyperOS.ValueRow"
                     app:rowTitle="@string/dashboard_idle_mode_title" />
@@ -212,6 +217,10 @@
             <TextView
                 style="@style/HyperOS.GroupFootnote"
                 android:text="@string/dashboard_idle_mode_help" />
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/dashboard_font_help" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

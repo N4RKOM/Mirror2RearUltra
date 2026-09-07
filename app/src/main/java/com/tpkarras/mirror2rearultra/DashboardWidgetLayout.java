@@ -41,6 +41,17 @@ final class DashboardWidgetLayout {
     enum Orientation { AUTO, LANDSCAPE, PORTRAIT }
     enum Style { DEFAULT, ACCENT, MUTED }
     enum IdleMode { TIMEOUT_15, TIMEOUT_30, ALWAYS_ON }
+    /**
+     * Which typeface the panel draws with.
+     *
+     * <p>The panel draws its own text rather than using views, so it takes
+     * whatever {@code Typeface.DEFAULT} is - which a font installed through
+     * Themes replaces, but a font overlay package does not, since that changes
+     * a theme attribute instead. Naming the source makes both reachable, and
+     * leaves a way back to a plain face when a decorative one turns out to be
+     * unreadable at 126 by 294.
+     */
+    enum Font { SYSTEM, THEME, PLAIN }
     /** Widget-specific presentation: normal, compact alternative, or detailed. */
     enum Variant { DEFAULT, ALTERNATE, DETAILED }
 
@@ -60,6 +71,7 @@ final class DashboardWidgetLayout {
     private static final String PRESENCE_PREFIX = "presence_";
     private static final String GAP_PREFIX = "gap_";
     private static final String BURN_IN_SHIFT = "burn_in_shift";
+    private static final String FONT = "font";
     private static final String GRID_SNAP = "grid_snap";
     private static final String SCALE_PREFIX = "scale_";
     private static final String FREE_X_PREFIX = "free_x_";
@@ -192,6 +204,18 @@ final class DashboardWidgetLayout {
      * orientation.
      */
     static final int GRID_DIVISIONS = 8;
+
+    static Font loadFont(Context context) {
+        try {
+            return Font.valueOf(prefs(context).getString(FONT, Font.SYSTEM.name()));
+        } catch (IllegalArgumentException error) {
+            return Font.SYSTEM;
+        }
+    }
+
+    static void saveFont(Context context, Font font) {
+        prefs(context).edit().putString(FONT, font.name()).apply();
+    }
 
     static boolean isGridSnapEnabled(Context context) {
         return prefs(context).getBoolean(GRID_SNAP, false);

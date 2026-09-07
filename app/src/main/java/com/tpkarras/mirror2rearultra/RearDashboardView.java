@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.text.TextPaint;
@@ -55,6 +56,8 @@ public final class RearDashboardView extends View {
      */
     private int panelShortSidePx;
     private float panelDensity;
+    /** The font choice the paint is currently carrying, so it is resolved once. */
+    @Nullable private DashboardWidgetLayout.Font appliedFont;
 
     @Nullable private DashboardWidgetLayout.Widget draggedWidget;
     private float dragOffsetX;
@@ -235,6 +238,51 @@ public final class RearDashboardView extends View {
         }
     }
 
+    /**
+     * Puts the chosen typeface on the paint, resolving it only when it changes.
+     *
+     * <p>Text here is drawn rather than laid out in views, so nothing arrives
+     * from a theme on its own: whichever face is wanted has to be put on the
+     * paint by hand.
+     */
+    private void applyPanelTypeface() {
+        DashboardWidgetLayout.Font font = DashboardWidgetLayout.loadFont(getContext());
+        if (font == appliedFont) {
+            return;
+        }
+        appliedFont = font;
+        Typeface face;
+        if (font == DashboardWidgetLayout.Font.THEME) {
+            face = deviceThemeTypeface();
+        } else if (font == DashboardWidgetLayout.Font.PLAIN) {
+            // The family by name rather than the default: a font overlay moves
+            // what the theme asks for, not what this resolves to.
+            face = Typeface.create("sans-serif", Typeface.NORMAL);
+        } else {
+            face = Typeface.DEFAULT;
+        }
+        textPaint.setTypeface(face == null ? Typeface.DEFAULT : face);
+    }
+
+    /**
+     * The face the device's own theme asks for.
+     *
+     * <p>Read from the device-default theme rather than this app's: font
+     * overlay packages change the family that theme names, and this app's
+     * theme says nothing about it.
+     */
+    @Nullable
+    private Typeface deviceThemeTypeface() {
+        android.content.res.Resources.Theme theme = getContext().getResources().newTheme();
+        theme.applyStyle(android.R.style.Theme_DeviceDefault, true);
+        android.content.res.TypedArray attributes =
+                theme.obtainStyledAttributes(new int[]{android.R.attr.fontFamily});
+        String family = attributes.getString(0);
+        attributes.recycle();
+        return family == null || family.isEmpty()
+                ? null : Typeface.create(family, Typeface.NORMAL);
+    }
+
     /** The arrangement style in force for the page on screen. */
     private DashboardSettings.Layout currentLayout() {
         return DashboardWidgetLayout.loadPageLayout(getContext(), currentPage, settings.layout);
@@ -310,6 +358,7 @@ public final class RearDashboardView extends View {
         textPaint.setColor(palette.text);
 
         pageFlipPeriodMillis = 0L;
+        applyPanelTypeface();
         float density = contentDensity();
         float shift = burnInShift(density);
         shiftX = shift;

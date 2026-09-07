@@ -41,6 +41,8 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     private HyperValueRow themeInput;
     private HyperValueRow burnInInput;
     private HyperValueRow idleModeInput;
+    private HyperValueRow fontInput;
+    private String[] fontLabels;
     private HyperSlider aodMinBrightnessSlider;
     private TextView aodMinBrightnessValue;
     private String[] burnInLabels;
@@ -98,6 +100,7 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         themeLabels = getResources().getStringArray(R.array.dashboard_theme_entries);
         burnInInput = findViewById(R.id.dashboard_burn_in_input);
         idleModeInput = findViewById(R.id.dashboard_idle_mode_input);
+        fontInput = findViewById(R.id.dashboard_font_input);
         aodMinBrightnessSlider = findViewById(R.id.dashboard_aod_min_brightness_slider);
         aodMinBrightnessValue = findViewById(R.id.dashboard_aod_min_brightness_value);
         burnInLabels = new String[]{
@@ -116,6 +119,8 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         themeInput.setEntries(themeLabels);
         burnInInput.setEntries(burnInLabels);
         idleModeInput.setEntries(idleModeLabels);
+        fontLabels = getResources().getStringArray(R.array.dashboard_font_entries);
+        fontInput.setEntries(fontLabels);
 
         render(MirrorSettings.loadDashboardSettings(this));
         bindInteractions();
@@ -154,6 +159,14 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                 DashboardWidgetLayout.saveBurnInShiftDp(this, BURN_IN_SHIFTS_DP[position]);
                 // Lives outside DashboardSettings, so re-saving is what tells
                 // the running panel to pick the change up.
+                MirrorSettings.saveDashboardSettings(this,
+                        MirrorSettings.loadDashboardSettings(this));
+            }
+        });
+        fontInput.setOnItemSelectedListener(position -> {
+            if (position >= 0 && position < DashboardWidgetLayout.Font.values().length) {
+                DashboardWidgetLayout.saveFont(this,
+                        DashboardWidgetLayout.Font.values()[position]);
                 MirrorSettings.saveDashboardSettings(this,
                         MirrorSettings.loadDashboardSettings(this));
             }
@@ -249,6 +262,7 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         burnInInput.setValue(burnInLabels[burnInIndex]);
         DashboardWidgetLayout.IdleMode idleMode = DashboardWidgetLayout.loadIdleMode(this);
         idleModeInput.setValue(labelAt(idleModeLabels, idleMode.ordinal()));
+        fontInput.setValue(labelAt(fontLabels, DashboardWidgetLayout.loadFont(this).ordinal()));
         autoPagesSwitch.setChecked(DashboardWidgetLayout.isAutoPageSwitchEnabled(this));
         int aodMinBrightness = DashboardWidgetLayout.loadAodMinBrightnessPercent(this);
         aodMinBrightnessSlider.setValue(aodMinBrightness);

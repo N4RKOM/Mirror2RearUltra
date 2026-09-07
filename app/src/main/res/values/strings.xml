@@ -294,6 +294,11 @@
         <item>Compact</item>
         <item>Free</item>
     </string-array>
+    <string-array name="dashboard_font_entries">
+        <item>System</item>
+        <item>From the theme</item>
+        <item>Plain</item>
+    </string-array>
     <string-array name="dashboard_theme_entries">
         <item>System</item>
         <item>Light</item>
@@ -348,6 +353,8 @@
         <item quantity="other">%1$d widgets do not fit and are shown in turn. Make the text smaller, or move them to another page.</item>
     </plurals>
     <string name="dashboard_builder_sample_event">Sample event</string>
+    <string name="dashboard_font_title">Font</string>
+    <string name="dashboard_font_help">The panel draws its own text, so it follows the system font. A font installed through Themes arrives on its own; a font overlay does not, and needs the theme option. Plain keeps the panel readable when a decorative face does not survive 126 by 294.</string>
     <string name="dashboard_custom_templates_title">My templates</string>
     <string name="dashboard_custom_template_save">Save current</string>
     <string name="dashboard_custom_template_apply">Apply saved</string>
