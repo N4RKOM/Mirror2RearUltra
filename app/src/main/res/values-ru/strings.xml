@@ -174,7 +174,7 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Пример события</string>
     <string name="dashboard_font_title">Шрифт</string>
-    <string name="dashboard_font_help">Панель рисует текст сама, поэтому берёт системный шрифт. Шрифт из «Тем» подхватывается сам, а шрифт-наложение — нет, ему нужен вариант «Из темы». «Обычный» оставляет панель читаемой, когда декоративное начертание не выживает на 126 на 294.</string>
+    <string name="dashboard_font_help">Панель рисует текст сама, поэтому следует системному шрифту: шрифт из «Тем» подхватывается сам, а шрифту-наложению нужен вариант «Из темы». «Обычный» игнорирует оба и берёт шрифт, с которым устройство вышло — на случай, когда декоративное начертание не выживает на 126 на 294.</string>
     <string name="dashboard_custom_templates_title">Мои шаблоны</string>
     <string name="dashboard_custom_text_help">До 60 символов.</string>
     <string name="dashboard_custom_text_hint">Текст на заднем экране</string>

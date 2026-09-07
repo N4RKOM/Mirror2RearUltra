@@ -255,13 +255,54 @@ public final class RearDashboardView extends View {
         if (font == DashboardWidgetLayout.Font.THEME) {
             face = deviceThemeTypeface();
         } else if (font == DashboardWidgetLayout.Font.PLAIN) {
-            // The family by name rather than the default: a font overlay moves
-            // what the theme asks for, not what this resolves to.
-            face = Typeface.create("sans-serif", Typeface.NORMAL);
+            face = stockTypeface();
         } else {
             face = Typeface.DEFAULT;
         }
         textPaint.setTypeface(face == null ? Typeface.DEFAULT : face);
+    }
+
+    /**
+     * Font files a theme cannot reach, in the order they are preferred.
+     *
+     * <p>A theme installed through Themes replaces the files under
+     * /data/system/theme/fonts, which is where the sans-serif family is made
+     * to point, so asking for the family by name lands on the theme's face
+     * just as the default does. Only naming a file in /system, which is read
+     * only and left alone, gets past it. MiSans first: it is the platform's
+     * own and the panel is drawn to match the platform.
+     */
+    private static final String[] STOCK_FONT_FILES = {
+            "/system/fonts/MiSansVF.ttf",
+            "/system/fonts/Roboto-Regular.ttf",
+            "/system/fonts/NotoSans-Regular.ttf",
+            "/system/fonts/DroidSans.ttf",
+    };
+
+    /**
+     * A face from a file rather than a family.
+     *
+     * <p>One file carries no fallback chain, so a character it does not have
+     * is drawn as a box where the family would have found it elsewhere. The
+     * files chosen cover what the panel shows - digits, Latin and Cyrillic -
+     * and the custom text widget is the only place anything else can arrive.
+     */
+    private Typeface stockTypeface() {
+        for (String path : STOCK_FONT_FILES) {
+            java.io.File file = new java.io.File(path);
+            if (!file.canRead()) {
+                continue;
+            }
+            try {
+                Typeface face = Typeface.createFromFile(file);
+                if (face != null) {
+                    return face;
+                }
+            } catch (RuntimeException ignored) {
+                // Unreadable or not a font after all; try the next.
+            }
+        }
+        return Typeface.SANS_SERIF;
     }
 
     /**

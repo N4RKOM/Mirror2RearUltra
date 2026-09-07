@@ -354,7 +354,7 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Sample event</string>
     <string name="dashboard_font_title">Font</string>
-    <string name="dashboard_font_help">The panel draws its own text, so it follows the system font. A font installed through Themes arrives on its own; a font overlay does not, and needs the theme option. Plain keeps the panel readable when a decorative face does not survive 126 by 294.</string>
+    <string name="dashboard_font_help">The panel draws its own text, so it follows the system font: a font installed through Themes arrives on its own, while a font overlay needs the theme option. Plain ignores both and uses the font the device shipped with, for when a decorative face does not survive 126 by 294.</string>
     <string name="dashboard_custom_templates_title">My templates</string>
     <string name="dashboard_custom_template_save">Save current</string>
     <string name="dashboard_custom_template_apply">Apply saved</string>
