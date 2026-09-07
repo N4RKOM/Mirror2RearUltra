@@ -787,12 +787,15 @@ public class Mirror extends Activity implements
         boolean showProjection = shouldShowProjection();
         textureView.setVisibility(showProjection ? View.VISIBLE : View.INVISIBLE);
         if (dashboardView != null) {
-            // Not conditioned on the projection: the hybrid mode exists to
-            // put the widgets over the mirrored image, and hiding them while
-            // it ran made that mode identical to plain mirroring. The mirror
-            // mode draws no widgets anyway, its showsDashboard() being false.
+            // The widgets step aside for the image rather than sitting on
+            // top of it. In the mixed mode the image is usually a camera
+            // viewfinder, and something to frame a shot in is worth more than
+            // widgets over the middle of it. The mode still differs from plain
+            // mirroring: the widgets are what the panel shows whenever the
+            // image is not up.
             dashboardView.setVisibility(
                     automaticOutputVisible && sessionContentMode.showsDashboard()
+                            && !showProjection
                             ? View.VISIBLE
                             : View.GONE
             );
