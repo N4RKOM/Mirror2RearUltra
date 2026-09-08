@@ -218,20 +218,19 @@ final class DashboardWidgetLayout {
         prefs(context).edit().putString(FONT, font.name()).apply();
     }
 
-    /** The face a single widget asks for, or PANEL when it wants the page's. */
-    static PanelFont loadWidgetFont(Context context, Widget widget) {
-        try {
-            return PanelFont.valueOf(prefs(context)
-                    .getString(WIDGET_FONT_PREFIX + widget.name(), PanelFont.PANEL.name()));
-        } catch (IllegalArgumentException error) {
-            return PanelFont.PANEL;
-        }
+    /**
+     * The face a single widget asks for, or PANEL when it wants the page's.
+     *
+     * <p>An id rather than an enum: the built-in faces keep their enum names
+     * and an imported font carries its own, so both live in one list.
+     */
+    static String loadWidgetFontId(Context context, Widget widget) {
+        return prefs(context).getString(
+                WIDGET_FONT_PREFIX + widget.name(), PanelFont.PANEL.name());
     }
 
-    static void saveWidgetFont(Context context, Widget widget, PanelFont font) {
-        prefs(context).edit()
-                .putString(WIDGET_FONT_PREFIX + widget.name(), font.name())
-                .apply();
+    static void saveWidgetFontId(Context context, Widget widget, String id) {
+        prefs(context).edit().putString(WIDGET_FONT_PREFIX + widget.name(), id).apply();
     }
 
     static boolean isGridSnapEnabled(Context context) {

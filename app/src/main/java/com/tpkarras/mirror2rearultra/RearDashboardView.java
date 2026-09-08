@@ -269,11 +269,8 @@ public final class RearDashboardView extends View {
      */
     @Nullable
     private Typeface widgetTypeface(DashboardWidgetLayout.Widget widget) {
-        PanelFont font = DashboardWidgetLayout.loadWidgetFont(getContext(), widget);
-        if (font == PanelFont.PANEL) {
-            return null;
-        }
-        return font == PanelFont.SYSTEM ? Typeface.DEFAULT : font.typeface();
+        return PanelFonts.resolve(getContext(),
+                DashboardWidgetLayout.loadWidgetFontId(getContext(), widget));
     }
 
     /**

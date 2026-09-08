@@ -187,6 +187,12 @@
     <string name="dashboard_font_mitype_clock">MiType часы</string>
     <string name="dashboard_font_miui">MIUI</string>
     <string name="dashboard_font_widget_help">Виджет можно рисовать своим шрифтом. Маленькие циферблатные начертания несут почти только цифры, поэтому знак градуса или название месяца в них может не появиться вовсе — предпросмотр выше показывает ровно то, что будет на панели.</string>
+    <string name="dashboard_font_add">Добавить шрифт</string>
+    <string name="dashboard_font_added">Добавлен: %1$s</string>
+    <string name="dashboard_font_add_failed">Этот файл не читается как шрифт</string>
+    <string name="dashboard_font_remove">Удалить шрифт</string>
+    <string name="dashboard_font_remove_choose">Выбрать</string>
+    <string name="dashboard_font_removed">Удалён: %1$s</string>
     <string name="dashboard_custom_templates_title">Мои шаблоны</string>
     <string name="dashboard_custom_text_help">До 60 символов.</string>
     <string name="dashboard_custom_text_hint">Текст на заднем экране</string>

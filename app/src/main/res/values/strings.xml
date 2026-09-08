@@ -367,6 +367,12 @@
     <string name="dashboard_font_mitype_clock">MiType Clock</string>
     <string name="dashboard_font_miui">MIUI</string>
     <string name="dashboard_font_widget_help">A widget can be drawn in a face of its own. The small display faces carry little beyond digits, so a degree sign or a month name may not appear in them at all — the preview above shows exactly what the panel will show.</string>
+    <string name="dashboard_font_add">Add a font</string>
+    <string name="dashboard_font_added">Added: %1$s</string>
+    <string name="dashboard_font_add_failed">That file could not be read as a font</string>
+    <string name="dashboard_font_remove">Remove a font</string>
+    <string name="dashboard_font_remove_choose">Choose</string>
+    <string name="dashboard_font_removed">Removed: %1$s</string>
     <string name="dashboard_custom_templates_title">My templates</string>
     <string name="dashboard_custom_template_save">Save current</string>
     <string name="dashboard_custom_template_apply">Apply saved</string>

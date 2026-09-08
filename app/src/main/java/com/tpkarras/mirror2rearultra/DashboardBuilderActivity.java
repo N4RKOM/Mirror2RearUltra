@@ -570,16 +570,16 @@ public class DashboardBuilderActivity extends AppCompatActivity {
 
         // A list rather than a segmented row: there are ten faces, and the
         // panel-wide setting is the first of them.
-        List<PanelFont> fonts = PanelFont.available();
+        List<PanelFonts.Choice> fonts = PanelFonts.choices(this);
         HyperValueRow fontRow = new HyperValueRow(this);
         fontRow.setTitle(getString(R.string.dashboard_font_widget_label));
-        fontRow.setEntries(PanelFont.labels(this, fonts));
-        PanelFont chosen = DashboardWidgetLayout.loadWidgetFont(this, widget);
-        int chosenIndex = Math.max(0, fonts.indexOf(chosen));
-        fontRow.setValue(getString(fonts.get(chosenIndex).labelResource));
+        fontRow.setEntries(PanelFonts.labels(fonts));
+        int chosenIndex = PanelFonts.indexOf(fonts,
+                DashboardWidgetLayout.loadWidgetFontId(this, widget));
+        fontRow.setValue(fonts.get(chosenIndex).label);
         fontRow.setOnItemSelectedListener(position -> {
             if (position >= 0 && position < fonts.size()) {
-                DashboardWidgetLayout.saveWidgetFont(this, widget, fonts.get(position));
+                DashboardWidgetLayout.saveWidgetFontId(this, widget, fonts.get(position).id);
                 notifyDashboardChanged();
             }
         });

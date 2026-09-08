@@ -154,6 +154,17 @@
                     style="@style/HyperOS.ValueRow"
                     app:rowTitle="@string/dashboard_font_title" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/dashboard_font_add_button"
+                    style="@style/HyperOS.ActionRow"
+                    android:text="@string/dashboard_font_add" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_font_remove_input"
+                    style="@style/HyperOS.ValueRow"
+                    android:visibility="gone"
+                    app:rowTitle="@string/dashboard_font_remove" />
+
                 <com.tpkarras.mirror2rearultra.HyperValueRow
                     android:id="@+id/dashboard_idle_mode_input"
                     style="@style/HyperOS.ValueRow"

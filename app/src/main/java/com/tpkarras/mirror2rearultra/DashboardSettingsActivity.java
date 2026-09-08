@@ -18,6 +18,8 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import android.widget.Toast;
+import java.util.List;
 
 /**
  * The rear panel itself: what it shows, the background image, and appearance.
@@ -42,6 +44,9 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     private HyperValueRow burnInInput;
     private HyperValueRow idleModeInput;
     private HyperValueRow fontInput;
+    private View fontAddButton;
+    private HyperValueRow fontRemoveInput;
+    private ActivityResultLauncher<String> fontPickerLauncher;
     private String[] fontLabels;
     private HyperSlider aodMinBrightnessSlider;
     private TextView aodMinBrightnessValue;
@@ -72,6 +77,10 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Any file: a font picked from a download folder is often served with
+        // a generic type, and filtering by font/* hides it.
+        fontPickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(), this::importFont);
         imagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(), this::importImage);
         setContentView(R.layout.activity_dashboard_settings);
@@ -101,6 +110,9 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         burnInInput = findViewById(R.id.dashboard_burn_in_input);
         idleModeInput = findViewById(R.id.dashboard_idle_mode_input);
         fontInput = findViewById(R.id.dashboard_font_input);
+        fontAddButton = findViewById(R.id.dashboard_font_add_button);
+        fontRemoveInput = findViewById(R.id.dashboard_font_remove_input);
+        fontAddButton.setOnClickListener(view -> fontPickerLauncher.launch("*/*"));
         aodMinBrightnessSlider = findViewById(R.id.dashboard_aod_min_brightness_slider);
         aodMinBrightnessValue = findViewById(R.id.dashboard_aod_min_brightness_value);
         burnInLabels = new String[]{
@@ -263,6 +275,7 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         DashboardWidgetLayout.IdleMode idleMode = DashboardWidgetLayout.loadIdleMode(this);
         idleModeInput.setValue(labelAt(idleModeLabels, idleMode.ordinal()));
         fontInput.setValue(labelAt(fontLabels, DashboardWidgetLayout.loadFont(this).ordinal()));
+        renderOwnFonts();
         autoPagesSwitch.setChecked(DashboardWidgetLayout.isAutoPageSwitchEnabled(this));
         int aodMinBrightness = DashboardWidgetLayout.loadAodMinBrightnessPercent(this);
         aodMinBrightnessSlider.setValue(aodMinBrightness);
@@ -362,6 +375,58 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         customImageOpacitySlider.setContentDescription(
                 getString(R.string.dashboard_custom_image_opacity_value, percent)
         );
+    }
+
+    /**
+     * Copies a picked font in and says how it went.
+     *
+     * <p>Kept here beside the panel's own font choice rather than in the
+     * builder: a font is added once and then chosen many times, and the
+     * choosing happens per widget.
+     */
+    private void importFont(@Nullable Uri uri) {
+        if (uri == null) {
+            return;
+        }
+        try {
+            String name = PanelFontStore.importFromUri(this, uri);
+            renderOwnFonts();
+            Toast.makeText(this, getString(R.string.dashboard_font_added, name),
+                    Toast.LENGTH_SHORT).show();
+        } catch (IOException error) {
+            Toast.makeText(this, R.string.dashboard_font_add_failed, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /** The removal row exists only while there is something to remove. */
+    private void renderOwnFonts() {
+        List<PanelFontStore.Entry> entries = PanelFontStore.list(this);
+        if (entries.isEmpty()) {
+            fontRemoveInput.setVisibility(View.GONE);
+            return;
+        }
+        String[] labels = new String[entries.size()];
+        for (int index = 0; index < entries.size(); index++) {
+            labels[index] = entries.get(index).label;
+        }
+        fontRemoveInput.setVisibility(View.VISIBLE);
+        fontRemoveInput.setEntries(labels);
+        fontRemoveInput.setValue(getString(R.string.dashboard_font_remove_choose));
+        fontRemoveInput.setOnItemSelectedListener(position -> {
+            if (position < 0 || position >= entries.size()) {
+                return;
+            }
+            PanelFontStore.Entry entry = entries.get(position);
+            PanelFontStore.remove(this, entry.id);
+            PanelFonts.forget(entry.id);
+            renderOwnFonts();
+            // Widgets still naming it fall back to the panel's face on their
+            // own, so nothing else has to be rewritten.
+            MirrorSettings.saveDashboardSettings(this,
+                    MirrorSettings.loadDashboardSettings(this));
+            Toast.makeText(this, getString(R.string.dashboard_font_removed, entry.label),
+                    Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void updateImageUi() {
