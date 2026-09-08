@@ -14,7 +14,9 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import androidx.annotation.Nullable;
 
@@ -67,6 +69,17 @@ public final class RearDashboardView extends View {
     private float dragStartFractionX;
     private float dragStartFractionY;
     private boolean dragStartHadPosition;
+    /**
+     * Whether a drag has to be asked for with a long press.
+     *
+     * <p>Set for the previews inside the page carousel. There a plain swipe
+     * belongs to the carousel, and claiming it for a drag meant a swipe over a
+     * widget moved that widget instead of turning the page - so the page never
+     * changed, and the widget the finger had caught was quietly rearranged on
+     * the page the user thought they had left.
+     */
+    private boolean dragNeedsLongPress;
+    @Nullable private Runnable pendingLongPress;
     /** True from the moment a second finger lands until every finger is up. */
     private boolean pinching;
     @Nullable private DashboardWidgetLayout.Widget pinchedWidget;
@@ -178,6 +191,11 @@ public final class RearDashboardView extends View {
      */
     void setOnWidgetSelectedListener(@Nullable OnWidgetSelectedListener listener) {
         widgetSelectedListener = listener;
+    }
+
+    /** Makes a drag start on a long press, leaving plain swipes to a scroller. */
+    void setDragNeedsLongPress(boolean needed) {
+        dragNeedsLongPress = needed;
     }
 
     /**
@@ -479,6 +497,7 @@ public final class RearDashboardView extends View {
 
     @Override
     protected void onDetachedFromWindow() {
+        cancelPendingLongPress();
         removeCallbacks(pageFlip);
         removeCallbacks(returnToFirstPage);
         super.onDetachedFromWindow();
@@ -836,11 +855,24 @@ public final class RearDashboardView extends View {
                 draggedWidget = null;
                 pinching = false;
                 pinchedWidget = null;
+                cancelPendingLongPress();
                 if (interactive && currentLayout() == DashboardSettings.Layout.FREE) {
                     DashboardWidgetLayout.Widget hit = widgetAt(event.getX(), event.getY());
-                    if (hit != null) {
-                        beginDrag(hit, event.getX(), event.getY());
+                    if (hit == null) {
+                        return true;
                     }
+                    if (!dragNeedsLongPress) {
+                        beginDrag(hit, event.getX(), event.getY());
+                        return true;
+                    }
+                    float downX = event.getX();
+                    float downY = event.getY();
+                    pendingLongPress = () -> {
+                        pendingLongPress = null;
+                        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                        beginDrag(hit, downX, downY);
+                    };
+                    postDelayed(pendingLongPress, ViewConfiguration.getLongPressTimeout());
                 }
                 return true;
             }
@@ -888,6 +920,13 @@ public final class RearDashboardView extends View {
                     return true;
                 }
                 if (draggedWidget == null) {
+                    if (pendingLongPress != null && Math.hypot(event.getX() - touchStartX,
+                            event.getY() - touchStartY) > ViewConfiguration.get(getContext())
+                            .getScaledTouchSlop()) {
+                        // Moved before the press was long enough: this is the
+                        // carousel being turned, not a widget being picked up.
+                        cancelPendingLongPress();
+                    }
                     return true;
                 }
                 if (Math.hypot(event.getX() - touchStartX, event.getY() - touchStartY) > 4f) {
@@ -902,6 +941,7 @@ public final class RearDashboardView extends View {
                 return true;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
+                cancelPendingLongPress();
                 if (getParent() != null) {
                     getParent().requestDisallowInterceptTouchEvent(false);
                 }
@@ -961,6 +1001,13 @@ public final class RearDashboardView extends View {
         return (float) Math.hypot(
                 event.getX(0) - event.getX(1),
                 event.getY(0) - event.getY(1));
+    }
+
+    private void cancelPendingLongPress() {
+        if (pendingLongPress != null) {
+            removeCallbacks(pendingLongPress);
+            pendingLongPress = null;
+        }
     }
 
     private void beginDrag(DashboardWidgetLayout.Widget widget, float x, float y) {

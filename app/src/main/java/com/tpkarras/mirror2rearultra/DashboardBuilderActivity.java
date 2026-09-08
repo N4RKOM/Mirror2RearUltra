@@ -1124,6 +1124,9 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             // interaction invalidates it. Give carousel cards independent
             // software buffers; there are at most three, so the cost is small.
             pagePreview.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            // Inside a horizontal scroller a plain swipe turns the page, so a
+            // drag has to be asked for.
+            pagePreview.setDragNeedsLongPress(true);
             bindPreview(pagePreview, page);
             card.addView(pagePreview, new MaterialCardView.LayoutParams(
                     MaterialCardView.LayoutParams.MATCH_PARENT,
