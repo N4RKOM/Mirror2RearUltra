@@ -866,7 +866,11 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         bindingSnap = true;
         snapSwitch.setChecked(DashboardWidgetLayout.isGridSnapEnabled(this));
         bindingSnap = false;
-        if (pageCount <= 1) sizePreviewToPanel(orientation);
+        // Every page, not just the first. The guard here belonged to the
+        // carousel, which sized its own cards; with one preview for all pages
+        // it meant that from the second page on the preview never changed
+        // shape, so choosing an orientation looked like it did nothing.
+        sizePreviewToPanel(orientation);
     }
 
     /**
