@@ -98,24 +98,17 @@
                     android:layout_height="match_parent" />
             </com.google.android.material.card.MaterialCardView>
 
-            <HorizontalScrollView
-                android:id="@+id/dashboard_builder_preview_carousel"
+            <!-- Which page the one preview above is showing. A carousel of a
+                 live preview per page was tried here and could not be made to
+                 behave: several canvases in a scroller shared each other's
+                 drawings, and a swipe meant for the scroller was taken for a
+                 drag. One preview and a choice of page has neither problem. -->
+            <LinearLayout
+                android:id="@+id/dashboard_builder_preview_pages"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:clipToPadding="false"
-                android:fillViewport="false"
-                android:overScrollMode="never"
-                android:scrollbars="none"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:id="@+id/dashboard_builder_preview_carousel_content"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal" />
-            </HorizontalScrollView>
+                android:orientation="vertical"
+                android:visibility="gone" />
 
             <!-- Only the free layout has anywhere to snap to, so the row
                  appears with it. Shown and hidden by the activity. -->
