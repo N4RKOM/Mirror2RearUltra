@@ -120,10 +120,14 @@ public class Mirror extends Activity implements
         MirrorState.addListener(this);
         sessionGeneration = MirrorState.generation();
         activeProfile = MirrorSettings.loadActiveProfile(this);
+        // Whose panel is up, for the app-based profile switch to compare
+        // against. The profile's snapshot is deliberately not applied here:
+        // it belongs to the moment the profile changes, and the profile has
+        // not changed. Restoring it on every session start threw away
+        // everything arranged since - full-screen widgets switched on after
+        // the snapshot came back off, and widgets moved to the pages the
+        // snapshot remembered - the moment a session opened.
         appliedDashboardProfileId = activeProfile.id;
-        if (DashboardTemplateStore.exists(this, activeProfile.id)) {
-            DashboardTemplateStore.apply(this, activeProfile.id);
-        }
         MirrorSettings.addListener(this);
         dashboardSettings = MirrorSettings.loadDashboardSettings(this);
         sessionContentMode = dashboardSettings.contentMode;
