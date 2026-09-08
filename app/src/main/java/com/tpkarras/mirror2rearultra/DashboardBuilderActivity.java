@@ -17,6 +17,7 @@ import android.view.View;
 import android.text.TextUtils;
 import android.widget.LinearLayout;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,7 +54,17 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private HyperValueRow presetInput;
     private HorizontalScrollView previewCarousel;
     private LinearLayout previewCarouselContent;
-    private final List<RearDashboardView> pagePreviews = new ArrayList<>();
+    /**
+     * What sits in each carousel card: the live preview for the page being
+     * edited, and a still picture for the rest.
+     *
+     * <p>Three live canvases in one scroller shared a stale drawing on
+     * HyperOS, so a card showed the page before it until something forced it
+     * to redraw - and its widgets could be dragged there, editing a page the
+     * user thought they had left. One live view cannot share anything with
+     * anyone.
+     */
+    private final List<View> pageContents = new ArrayList<>();
     private final List<MaterialCardView> pagePreviewCards = new ArrayList<>();
     private TextView previewPageNote;
     private androidx.core.widget.NestedScrollView scroll;
@@ -843,19 +854,25 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         Point panel = rearPanelSize();
         RearDashboardSnapshot snapshot = previewSnapshot();
         int pageCount = DashboardWidgetLayout.loadPageCount(this);
-        if (pageCount > 1 && pagePreviews.size() == pageCount) {
-            for (int index = 0; index < pagePreviews.size(); index++) {
-                configurePreview(pagePreviews.get(index), index + 1, settings, panel, snapshot);
+        if (pageCount > 1 && pageContents.size() == pageCount) {
+            for (int index = 0; index < pageContents.size(); index++) {
+                int page = index + 1;
+                View content = pageContents.get(index);
+                LinearLayout.LayoutParams cardParams = carouselPreviewSize(page);
+                cardParams.setMarginEnd(page < pageCount ? dp(12) : 0);
+                if (content instanceof RearDashboardView) {
+                    configurePreview((RearDashboardView) content, page, settings, panel, snapshot);
+                } else {
+                    ((ImageView) content).setImageBitmap(renderPageStill(
+                            page, cardParams.width, cardParams.height, settings, panel, snapshot));
+                }
                 MaterialCardView card = pagePreviewCards.get(index);
-                boolean selected = index + 1 == previewPage;
+                boolean selected = page == previewPage;
                 card.setStrokeWidth(dp(selected ? 3 : 1));
                 card.setStrokeColor(androidx.core.content.ContextCompat.getColor(this,
                         selected ? R.color.hyper_accent : R.color.hyper_outline_subtle));
-                LinearLayout.LayoutParams cardParams = carouselPreviewSize(index + 1);
-                cardParams.setMarginEnd(index + 1 < pageCount ? dp(12) : 0);
                 card.setLayoutParams(cardParams);
             }
-            preview = pagePreviews.get(previewPage - 1);
         } else {
             configurePreview(singlePreview, 0, settings, panel, snapshot);
             preview = singlePreview;
@@ -887,6 +904,54 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         snapSwitch.setChecked(DashboardWidgetLayout.isGridSnapEnabled(this));
         bindingSnap = false;
         if (pageCount <= 1) sizePreviewToPanel(orientation);
+    }
+
+    /**
+     * Moves the editing to another page.
+     *
+     * <p>The carousel is rebuilt rather than reconfigured: which card is the
+     * live one changes, and that is a change of what the cards are, not of
+     * what they show.
+     */
+    private void selectPreviewPage(int page) {
+        if (page == previewPage) {
+            return;
+        }
+        previewPage = page;
+        setSelectedWidgetOnPreview(null);
+        buildPreviewPagesSegment();
+        refreshPreview();
+    }
+
+    private void setSelectedWidgetOnPreview(@Nullable DashboardWidgetLayout.Widget widget) {
+        selectedWidget = widget;
+        if (preview != null) {
+            preview.setSelectedWidget(widget);
+        }
+    }
+
+    /**
+     * Draws a page once, into a picture.
+     *
+     * <p>A card that is not being edited has nothing to gain from being a live
+     * view, and three of them together were what went wrong: a still cannot
+     * share a drawing with its neighbours, cannot be dragged by mistake, and
+     * costs one bitmap of about a megabyte while it is on screen.
+     */
+    private android.graphics.Bitmap renderPageStill(int page, int width, int height,
+            DashboardSettings settings, @Nullable Point panel, RearDashboardSnapshot snapshot) {
+        RearDashboardView offscreen = new RearDashboardView(this);
+        configurePreview(offscreen, page, settings, panel, snapshot);
+        offscreen.measure(
+                View.MeasureSpec.makeMeasureSpec(Math.max(1, width), View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(Math.max(1, height), View.MeasureSpec.EXACTLY));
+        offscreen.layout(0, 0, offscreen.getMeasuredWidth(), offscreen.getMeasuredHeight());
+        android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(
+                Math.max(1, offscreen.getMeasuredWidth()),
+                Math.max(1, offscreen.getMeasuredHeight()),
+                android.graphics.Bitmap.Config.ARGB_8888);
+        offscreen.draw(new android.graphics.Canvas(bitmap));
+        return bitmap;
     }
 
     private void configurePreview(RearDashboardView target, int page, DashboardSettings settings,
@@ -1097,7 +1162,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private void buildPreviewPagesSegment() {
         int pageCount = DashboardWidgetLayout.loadPageCount(this);
         previewCarouselContent.removeAllViews();
-        pagePreviews.clear();
+        pageContents.clear();
         pagePreviewCards.clear();
         previewContainer.setVisibility(pageCount <= 1 ? View.VISIBLE : View.GONE);
         previewCarousel.setVisibility(pageCount > 1 ? View.VISIBLE : View.GONE);
@@ -1110,35 +1175,41 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         previewPage = Math.max(1, Math.min(pageCount, previewPage));
         for (int index = 0; index < pageCount; index++) {
             int page = index + 1;
+            boolean live = page == previewPage;
             MaterialCardView card = new MaterialCardView(this);
             card.setCardBackgroundColor(android.graphics.Color.BLACK);
             card.setRadius(dp(18));
-            card.setStrokeWidth(dp(page == previewPage ? 3 : 1));
+            card.setStrokeWidth(dp(live ? 3 : 1));
             card.setStrokeColor(androidx.core.content.ContextCompat.getColor(this,
-                    page == previewPage ? R.color.hyper_accent : R.color.hyper_outline_subtle));
-            RearDashboardView pagePreview = new RearDashboardView(this);
-            // A hardware layer is useful for the single interactive preview,
-            // but several identical custom Canvas views inside a scrolling
-            // container can share a stale display-list texture on HyperOS.
-            // That makes the previous page appear in the next card until an
-            // interaction invalidates it. Give carousel cards independent
-            // software buffers; there are at most three, so the cost is small.
-            pagePreview.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-            // Inside a horizontal scroller a plain swipe turns the page, so a
-            // drag has to be asked for.
-            pagePreview.setDragNeedsLongPress(true);
-            bindPreview(pagePreview, page);
-            card.addView(pagePreview, new MaterialCardView.LayoutParams(
+                    live ? R.color.hyper_accent : R.color.hyper_outline_subtle));
+            View content;
+            if (live) {
+                RearDashboardView pagePreview = new RearDashboardView(this);
+                // Inside a horizontal scroller a plain swipe turns the page,
+                // so a drag has to be asked for.
+                pagePreview.setDragNeedsLongPress(true);
+                bindPreview(pagePreview, page);
+                preview = pagePreview;
+                content = pagePreview;
+            } else {
+                ImageView still = new ImageView(this);
+                still.setScaleType(ImageView.ScaleType.FIT_XY);
+                still.setContentDescription(getString(R.string.dashboard_builder_page_short, page));
+                // A card that is only a picture needs its own way of being
+                // chosen; the live one is chosen by touching a widget in it.
+                still.setOnClickListener(view -> selectPreviewPage(page));
+                content = still;
+            }
+            card.addView(content, new MaterialCardView.LayoutParams(
                     MaterialCardView.LayoutParams.MATCH_PARENT,
                     MaterialCardView.LayoutParams.MATCH_PARENT));
             LinearLayout.LayoutParams params = carouselPreviewSize(page);
             params.setMarginEnd(index + 1 < pageCount ? dp(12) : 0);
             previewCarouselContent.addView(card, params);
-            pagePreviews.add(pagePreview);
+            pageContents.add(content);
             pagePreviewCards.add(card);
         }
         previewPageNote.setVisibility(View.VISIBLE);
-        preview = pagePreviews.get(previewPage - 1);
     }
 
     private LinearLayout.LayoutParams carouselPreviewSize(int page) {
