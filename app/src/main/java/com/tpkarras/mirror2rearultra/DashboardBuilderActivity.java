@@ -568,6 +568,25 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     notifyDashboardChanged();
                 }));
 
+        // A list rather than a segmented row: there are ten faces, and the
+        // panel-wide setting is the first of them.
+        List<PanelFont> fonts = PanelFont.available();
+        HyperValueRow fontRow = new HyperValueRow(this);
+        fontRow.setTitle(getString(R.string.dashboard_font_widget_label));
+        fontRow.setEntries(PanelFont.labels(this, fonts));
+        PanelFont chosen = DashboardWidgetLayout.loadWidgetFont(this, widget);
+        int chosenIndex = Math.max(0, fonts.indexOf(chosen));
+        fontRow.setValue(getString(fonts.get(chosenIndex).labelResource));
+        fontRow.setOnItemSelectedListener(position -> {
+            if (position >= 0 && position < fonts.size()) {
+                DashboardWidgetLayout.saveWidgetFont(this, widget, fonts.get(position));
+                notifyDashboardChanged();
+            }
+        });
+        LinearLayout.LayoutParams fontParams = new LinearLayout.LayoutParams(-1, -2);
+        fontParams.topMargin = dp(10);
+        row.addView(fontRow, fontParams);
+
         MaterialSwitch iconSwitch = (MaterialSwitch) getLayoutInflater()
                 .inflate(R.layout.widget_switch_row, row, false);
         iconSwitch.setText(R.string.dashboard_builder_hide_icon);

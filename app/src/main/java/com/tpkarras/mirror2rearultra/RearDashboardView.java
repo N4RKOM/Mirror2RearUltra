@@ -60,6 +60,8 @@ public final class RearDashboardView extends View {
     private float panelDensity;
     /** The font choice the paint is currently carrying, so it is resolved once. */
     @Nullable private DashboardWidgetLayout.Font appliedFont;
+    /** The face the panel as a whole is drawn in, kept for lines that want it. */
+    private Typeface panelTypeface = Typeface.DEFAULT;
 
     @Nullable private DashboardWidgetLayout.Widget draggedWidget;
     private float dragOffsetX;
@@ -257,6 +259,24 @@ public final class RearDashboardView extends View {
     }
 
     /**
+     * The face a widget asked for, or null to take the panel's.
+     *
+     * <p>Some of the faces on offer are small display ones carrying little
+     * beyond digits, and a character they lack simply does not appear. That
+     * cannot be detected from here - both hasGlyph and the measured width
+     * answer for the whole system rather than for the one file - so it is left
+     * visible in the preview instead of silently second-guessed.
+     */
+    @Nullable
+    private Typeface widgetTypeface(DashboardWidgetLayout.Widget widget) {
+        PanelFont font = DashboardWidgetLayout.loadWidgetFont(getContext(), widget);
+        if (font == PanelFont.PANEL) {
+            return null;
+        }
+        return font == PanelFont.SYSTEM ? Typeface.DEFAULT : font.typeface();
+    }
+
+    /**
      * Puts the chosen typeface on the paint, resolving it only when it changes.
      *
      * <p>Text here is drawn rather than laid out in views, so nothing arrives
@@ -277,7 +297,8 @@ public final class RearDashboardView extends View {
         } else {
             face = Typeface.DEFAULT;
         }
-        textPaint.setTypeface(face == null ? Typeface.DEFAULT : face);
+        panelTypeface = face == null ? Typeface.DEFAULT : face;
+        textPaint.setTypeface(panelTypeface);
     }
 
     /**
@@ -1748,6 +1769,9 @@ public final class RearDashboardView extends View {
         } else {
             textPaint.setColor(currentPalette.text);
         }
+        // The widget's own face where it named one, and back to the panel's
+        // for the next line: the paint is shared by every line drawn.
+        textPaint.setTypeface(line.typeface != null ? line.typeface : panelTypeface);
         boolean multiline = line.text.indexOf('\n') >= 0;
         if (multiline) textPaint.setTextSize(textPaint.getTextSize() * 0.58f);
         fitTextToWidth(line, width);
@@ -2178,6 +2202,8 @@ public final class RearDashboardView extends View {
         final float scale;
         final DashboardWidgetLayout.Position position;
         final DashboardWidgetLayout.Style style;
+        /** The face this widget asked for, or null to take the panel's. */
+        @Nullable final Typeface typeface;
         final int rotation;
         /**
          * Where this line landed in the last frame, in view coordinates.
@@ -2198,6 +2224,7 @@ public final class RearDashboardView extends View {
             this.scale = DashboardWidgetLayout.scale(getContext(), widget);
             this.position = DashboardWidgetLayout.loadPosition(getContext(), widget);
             this.style = DashboardWidgetLayout.loadStyle(getContext(), widget);
+            this.typeface = widgetTypeface(widget);
             this.rotation = DashboardWidgetLayout.loadRotation(getContext(), widget);
         }
 

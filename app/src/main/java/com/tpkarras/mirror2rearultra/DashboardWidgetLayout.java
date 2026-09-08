@@ -72,6 +72,7 @@ final class DashboardWidgetLayout {
     private static final String GAP_PREFIX = "gap_";
     private static final String BURN_IN_SHIFT = "burn_in_shift";
     private static final String FONT = "font";
+    private static final String WIDGET_FONT_PREFIX = "font_";
     private static final String GRID_SNAP = "grid_snap";
     private static final String SCALE_PREFIX = "scale_";
     private static final String FREE_X_PREFIX = "free_x_";
@@ -215,6 +216,22 @@ final class DashboardWidgetLayout {
 
     static void saveFont(Context context, Font font) {
         prefs(context).edit().putString(FONT, font.name()).apply();
+    }
+
+    /** The face a single widget asks for, or PANEL when it wants the page's. */
+    static PanelFont loadWidgetFont(Context context, Widget widget) {
+        try {
+            return PanelFont.valueOf(prefs(context)
+                    .getString(WIDGET_FONT_PREFIX + widget.name(), PanelFont.PANEL.name()));
+        } catch (IllegalArgumentException error) {
+            return PanelFont.PANEL;
+        }
+    }
+
+    static void saveWidgetFont(Context context, Widget widget, PanelFont font) {
+        prefs(context).edit()
+                .putString(WIDGET_FONT_PREFIX + widget.name(), font.name())
+                .apply();
     }
 
     static boolean isGridSnapEnabled(Context context) {
