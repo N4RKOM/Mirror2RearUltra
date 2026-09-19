@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 leht</string>
     <string name="dashboard_builder_pages_count">%1$d lehte</string>
     <string name="dashboard_builder_choose_value">Vali</string>
+    <string name="panel_gestures_help">Paneelil endal: vidina puudutus vahetab selle kuvamisviisi ja pikk vajutus ükskõik kus lülitab alati sees ekraani sisse või välja.</string>
     <string name="dashboard_builder_pages_help">Rohkem kui ühe lehe korral käib tagapaneel need läbi, umbes kaheksa sekundit kumbki. Lehe kinnihoidmiseks nipsake paneelil.</string>
     <string name="dashboard_builder_presence_label">Näita</string>
     <string name="dashboard_builder_presence_always">Alati</string>

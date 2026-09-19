@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 сторінка</string>
     <string name="dashboard_builder_pages_count">%1$d сторінок</string>
     <string name="dashboard_builder_choose_value">Вибрати</string>
+    <string name="panel_gestures_help">На самій панелі: тап по віджету перемикає його подання, а довге натискання будь-де вмикає та вимикає Always on Display.</string>
     <string name="dashboard_builder_pages_help">Якщо сторінок більше однієї, задня панель гортає їх приблизно по вісім секунд кожну. Проведіть по панелі, щоб затримати сторінку.</string>
     <string name="dashboard_builder_presence_label">Показувати</string>
     <string name="dashboard_builder_presence_always">Завжди</string>

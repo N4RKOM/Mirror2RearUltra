@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 pagină</string>
     <string name="dashboard_builder_pages_count">%1$d pagini</string>
     <string name="dashboard_builder_choose_value">Alege</string>
+    <string name="panel_gestures_help">Pe panoul propriu-zis: o atingere pe un widget îi schimbă afișarea, iar o apăsare lungă oriunde pornește sau oprește ecranul mereu activ.</string>
     <string name="dashboard_builder_pages_help">Cu mai mult de o pagină, panoul din spate le parcurge, cam opt secunde fiecare. Glisați pe panou pentru a reține o pagină.</string>
     <string name="dashboard_builder_presence_label">Afișare</string>
     <string name="dashboard_builder_presence_always">Întotdeauna</string>

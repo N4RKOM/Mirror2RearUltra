@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 pagina</string>
     <string name="dashboard_builder_pages_count">%1$d pagine</string>
     <string name="dashboard_builder_choose_value">Scegli</string>
+    <string name="panel_gestures_help">Sul pannello stesso: un tocco su un widget fa avanzare la sua visualizzazione, e una pressione prolungata ovunque attiva o disattiva il display sempre attivo.</string>
     <string name="dashboard_builder_pages_help">Con più di una pagina il pannello posteriore le alterna, circa otto secondi ciascuna. Scorri sul pannello per trattenere una pagina.</string>
     <string name="dashboard_builder_presence_label">Mostra</string>
     <string name="dashboard_builder_presence_always">Sempre</string>

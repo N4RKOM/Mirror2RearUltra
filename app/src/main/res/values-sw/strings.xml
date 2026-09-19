@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">Ukurasa 1</string>
     <string name="dashboard_builder_pages_count">Kurasa %1$d</string>
     <string name="dashboard_builder_choose_value">Chagua</string>
+    <string name="panel_gestures_help">Kwenye paneli yenyewe: kugusa wijeti hubadilisha jinsi inavyoonyeshwa, na kushikilia mahali popote huwasha au huzima skrini inayowaka daima.</string>
     <string name="dashboard_builder_pages_help">Kukiwa na zaidi ya ukurasa mmoja, paneli ya nyuma huzipitia, kila moja kwa takribani sekunde nane. Telezesha kidole kwenye paneli ili kushikilia ukurasa.</string>
     <string name="dashboard_builder_presence_label">Onyesha</string>
     <string name="dashboard_builder_presence_always">Kila wakati</string>

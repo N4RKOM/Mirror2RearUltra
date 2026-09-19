@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">עמוד אחד</string>
     <string name="dashboard_builder_pages_count">%1$d עמודים</string>
     <string name="dashboard_builder_choose_value">בחירה</string>
+    <string name="panel_gestures_help">בלוח עצמו: הקשה על ווידג׳ט מקדמת את התצוגה שלו, ולחיצה ארוכה בכל מקום מפעילה או מכבה את התצוגה המתמדת.</string>
     <string name="dashboard_builder_pages_help">כשיש יותר מעמוד אחד, הלוח האחורי עובר ביניהם, כשמונה שניות לכל אחד. החלקה על הלוח מחזיקה עמוד במקומו.</string>
     <string name="dashboard_builder_presence_label">הצגה</string>
     <string name="dashboard_builder_presence_always">תמיד</string>

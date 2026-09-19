@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">۱ صفحه</string>
     <string name="dashboard_builder_pages_count">%1$d صفحه</string>
     <string name="dashboard_builder_choose_value">انتخاب</string>
+    <string name="panel_gestures_help">روی خود پنل: زدن روی یک ابزارک نحوهٔ نمایش آن را یک گام جلو می‌برد، و نگه داشتن انگشت در هر جا نمایش همیشه‌روشن را روشن یا خاموش می‌کند.</string>
     <string name="dashboard_builder_pages_help">با بیش از یک صفحه، پنل پشت آن‌ها را پشت سر هم نشان می‌دهد، هر کدام حدود هشت ثانیه. برای نگه داشتن یک صفحه، روی پنل بکشید.</string>
     <string name="dashboard_builder_presence_label">نمایش</string>
     <string name="dashboard_builder_presence_always">همیشه</string>

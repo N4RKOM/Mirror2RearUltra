@@ -287,6 +287,7 @@
     <string name="dashboard_builder_one_page">1 страница</string>
     <string name="dashboard_builder_pages_count">%1$d страницы</string>
     <string name="dashboard_builder_choose_value">Выбрать</string>
+    <string name="panel_gestures_help">На самой панели: тап по виджету переключает его отображение, а долгое нажатие в любом месте включает и выключает Always on Display.</string>
     <string name="dashboard_builder_pages_help">Если страниц больше одной, задний экран листает их примерно раз в восемь секунд. Свайп по панели удерживает страницу.</string>
     <string name="dashboard_builder_page_short">%1$d</string>
     <string name="dashboard_builder_presence_label">Показывать</string>

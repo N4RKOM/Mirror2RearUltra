@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">صفحة واحدة</string>
     <string name="dashboard_builder_pages_count">%1$d صفحات</string>
     <string name="dashboard_builder_choose_value">اختيار</string>
+    <string name="panel_gestures_help">على اللوحة نفسها: نقرة على أداة تنقل طريقة عرضها خطوة، والضغط المطوّل في أي موضع يشغّل الشاشة الدائمة أو يوقفها.</string>
     <string name="dashboard_builder_pages_help">مع أكثر من صفحة، تتنقّل اللوحة الخلفية بينها، نحو ثماني ثوانٍ لكل صفحة. مرّر على اللوحة لتثبيت صفحة.</string>
     <string name="dashboard_builder_presence_label">الإظهار</string>
     <string name="dashboard_builder_presence_always">دائمًا</string>

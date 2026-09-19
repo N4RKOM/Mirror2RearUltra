@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 stránka</string>
     <string name="dashboard_builder_pages_count">%1$d stránek</string>
     <string name="dashboard_builder_choose_value">Vybrat</string>
+    <string name="panel_gestures_help">Na samotném panelu: klepnutí na widget posune jeho podobu o krok dál a dlouhé podržení kdekoli zapne nebo vypne stále zapnutý displej.</string>
     <string name="dashboard_builder_pages_help">Při více než jedné stránce je zadní panel střídá, každou zhruba osm sekund. Přejetím po panelu stránku podržíte.</string>
     <string name="dashboard_builder_presence_label">Zobrazit</string>
     <string name="dashboard_builder_presence_always">Vždy</string>

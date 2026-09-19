@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 पेज</string>
     <string name="dashboard_builder_pages_count">%1$d पेज</string>
     <string name="dashboard_builder_choose_value">चुनें</string>
+    <string name="panel_gestures_help">पैनल पर ही: किसी विजेट पर टैप करने से उसका प्रदर्शन बदलता है, और कहीं भी देर तक दबाने से ऑलवेज़ ऑन डिस्प्ले चालू या बंद होता है।</string>
     <string name="dashboard_builder_pages_help">एक से ज़्यादा पेज होने पर पिछला पैनल उन्हें बारी-बारी दिखाता है, हर एक करीब आठ सेकंड। किसी पेज को रोके रखने के लिए पैनल पर स्वाइप करें।</string>
     <string name="dashboard_builder_presence_label">दिखाना</string>
     <string name="dashboard_builder_presence_always">हमेशा</string>

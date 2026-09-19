@@ -238,6 +238,7 @@
     <string name="dashboard_builder_one_page">1 page</string>
     <string name="dashboard_builder_pages_count">%1$d pages</string>
     <string name="dashboard_builder_choose_value">Choose</string>
+    <string name="panel_gestures_help">On the panel itself: a tap on a widget steps its display style on, and a press held anywhere turns always-on on or off again.</string>
     <string name="dashboard_builder_pages_help">With more than one page the rear panel cycles through them, about eight seconds each. Swipe on the panel to hold a page.</string>
     <string name="dashboard_builder_page_short">%1$d</string>
     <string name="dashboard_builder_presence_label">Show</string>

@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 ページ</string>
     <string name="dashboard_builder_pages_count">%1$d ページ</string>
     <string name="dashboard_builder_choose_value">選ぶ</string>
+    <string name="panel_gestures_help">パネル自体では、ウィジェットをタップすると見せ方が次に進み、どこかを長押しすると常時表示ディスプレイがオンまたはオフになります。</string>
     <string name="dashboard_builder_pages_help">ページが 2 つ以上あると、背面パネルは 1 ページあたり約 8 秒で順に表示します。パネルをスワイプするとページを固定できます。</string>
     <string name="dashboard_builder_presence_label">表示</string>
     <string name="dashboard_builder_presence_always">常に</string>

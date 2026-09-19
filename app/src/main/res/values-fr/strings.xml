@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 page</string>
     <string name="dashboard_builder_pages_count">%1$d pages</string>
     <string name="dashboard_builder_choose_value">Choisir</string>
+    <string name="panel_gestures_help">Sur le panneau lui-même : un appui sur un widget fait défiler son affichage, et un appui long n\'importe où active ou désactive l\'affichage permanent.</string>
     <string name="dashboard_builder_pages_help">Avec plus d\'une page, le panneau arrière les fait défiler, environ huit secondes chacune. Balayez le panneau pour retenir une page.</string>
     <string name="dashboard_builder_presence_label">Afficher</string>
     <string name="dashboard_builder_presence_always">Toujours</string>

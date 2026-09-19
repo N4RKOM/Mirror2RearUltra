@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 pagina</string>
     <string name="dashboard_builder_pages_count">%1$d pagina\'s</string>
     <string name="dashboard_builder_choose_value">Kiezen</string>
+    <string name="panel_gestures_help">Op het paneel zelf: een tik op een widget schakelt zijn weergave door, en lang drukken ergens zet het altijd-aan-scherm aan of uit.</string>
     <string name="dashboard_builder_pages_help">Bij meer dan één pagina loopt het achterpaneel ze langs, ongeveer acht seconden elk. Veeg over het paneel om een pagina vast te houden.</string>
     <string name="dashboard_builder_presence_label">Tonen</string>
     <string name="dashboard_builder_presence_always">Altijd</string>

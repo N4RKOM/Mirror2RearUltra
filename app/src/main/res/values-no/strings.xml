@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 side</string>
     <string name="dashboard_builder_pages_count">%1$d sider</string>
     <string name="dashboard_builder_choose_value">Velg</string>
+    <string name="panel_gestures_help">På selve panelet: et trykk på en modul går videre i visningen dens, og et langt trykk hvor som helst slår alltid på-skjermen av eller på.</string>
     <string name="dashboard_builder_pages_help">Med mer enn én side blar bakpanelet gjennom dem, omtrent åtte sekunder hver. Sveip på panelet for å holde på en side.</string>
     <string name="dashboard_builder_presence_label">Vis</string>
     <string name="dashboard_builder_presence_always">Alltid</string>

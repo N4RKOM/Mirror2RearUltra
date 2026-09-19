@@ -300,6 +300,13 @@
                 style="@style/HyperOS.GroupFootnote"
                 android:text="@string/dashboard_builder_pages_help" />
 
+            <!-- The panel's own gestures. Said here because nothing on a
+                 126x294 screen can say it, and an undiscovered gesture is
+                 the same as no gesture. -->
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/panel_gestures_help" />
+
             <!-- ===================== Widgets ===================== -->
 
             <TextView

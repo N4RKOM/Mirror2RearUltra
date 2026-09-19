@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 sivu</string>
     <string name="dashboard_builder_pages_count">%1$d sivua</string>
     <string name="dashboard_builder_choose_value">Valitse</string>
+    <string name="panel_gestures_help">Itse paneelissa: widgetin napautus vaihtaa sen esitystapaa, ja pitkä painallus missä tahansa kytkee aina päällä -näytön päälle tai pois.</string>
     <string name="dashboard_builder_pages_help">Useamman kuin yhden sivun kanssa takapaneeli kiertää niitä, noin kahdeksan sekuntia kutakin. Pyyhkäise paneelia pitääksesi sivun paikallaan.</string>
     <string name="dashboard_builder_presence_label">Näytä</string>
     <string name="dashboard_builder_presence_always">Aina</string>

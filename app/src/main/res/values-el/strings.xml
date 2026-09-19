@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 σελίδα</string>
     <string name="dashboard_builder_pages_count">%1$d σελίδες</string>
     <string name="dashboard_builder_choose_value">Επιλογή</string>
+    <string name="panel_gestures_help">Στον ίδιο τον πίνακα: ένα πάτημα σε γραφικό στοιχείο αλλάζει την παρουσίασή του, και ένα παρατεταμένο πάτημα οπουδήποτε ανάβει ή σβήνει την οθόνη πάντα σε λειτουργία.</string>
     <string name="dashboard_builder_pages_help">Με περισσότερες από μία σελίδες, ο πίσω πίνακας τις εναλλάσσει, περίπου οκτώ δευτερόλεπτα την καθεμία. Σύρετε στον πίνακα για να κρατήσετε μια σελίδα.</string>
     <string name="dashboard_builder_presence_label">Εμφάνιση</string>
     <string name="dashboard_builder_presence_always">Πάντα</string>

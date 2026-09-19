@@ -73,6 +73,7 @@ final class DashboardWidgetLayout {
     private static final String BURN_IN_SHIFT = "burn_in_shift";
     private static final String FONT = "font";
     private static final String AUTO_BRIGHTNESS = "auto_brightness";
+    private static final String IDLE_MODE_BEFORE_AOD = "idle_mode_before_aod";
     private static final String WIDGET_FONT_PREFIX = "font_";
     private static final String GRID_SNAP = "grid_snap";
     private static final String SCALE_PREFIX = "scale_";
@@ -496,6 +497,36 @@ final class DashboardWidgetLayout {
 
     static void saveIdleMode(Context context, IdleMode mode) {
         prefs(context).edit().putString(IDLE_MODE, mode.name()).apply();
+    }
+
+    /**
+     * Turns always-on on and off again, from the panel itself.
+     *
+     * <p>The timeout that was in force is remembered, so coming back out of
+     * always-on returns to fifteen or thirty seconds - whichever was chosen -
+     * rather than to whichever this code happened to prefer.
+     *
+     * @return the mode now in force
+     */
+    static IdleMode toggleAlwaysOn(Context context) {
+        IdleMode current = loadIdleMode(context);
+        if (current == IdleMode.ALWAYS_ON) {
+            IdleMode previous;
+            try {
+                previous = IdleMode.valueOf(prefs(context)
+                        .getString(IDLE_MODE_BEFORE_AOD, IdleMode.TIMEOUT_30.name()));
+            } catch (IllegalArgumentException error) {
+                previous = IdleMode.TIMEOUT_30;
+            }
+            if (previous == IdleMode.ALWAYS_ON) {
+                previous = IdleMode.TIMEOUT_30;
+            }
+            saveIdleMode(context, previous);
+            return previous;
+        }
+        prefs(context).edit().putString(IDLE_MODE_BEFORE_AOD, current.name()).apply();
+        saveIdleMode(context, IdleMode.ALWAYS_ON);
+        return IdleMode.ALWAYS_ON;
     }
 
     static int loadAodMinBrightnessPercent(Context context) {

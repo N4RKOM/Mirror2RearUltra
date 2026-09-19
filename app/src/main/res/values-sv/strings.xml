@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 sida</string>
     <string name="dashboard_builder_pages_count">%1$d sidor</string>
     <string name="dashboard_builder_choose_value">Välj</string>
+    <string name="panel_gestures_help">På själva panelen: en tryckning på en widget stegar dess visning framåt, och ett långt tryck var som helst slår på eller av alltid på-skärmen.</string>
     <string name="dashboard_builder_pages_help">Med fler än en sida bläddrar den bakre panelen genom dem, ungefär åtta sekunder var. Svep på panelen för att hålla kvar en sida.</string>
     <string name="dashboard_builder_presence_label">Visa</string>
     <string name="dashboard_builder_presence_always">Alltid</string>

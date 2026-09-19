@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 页</string>
     <string name="dashboard_builder_pages_count">%1$d 页</string>
     <string name="dashboard_builder_choose_value">选择</string>
+    <string name="panel_gestures_help">在面板本身：点按小组件会切换它的呈现方式，在任意位置长按可开启或关闭息屏显示。</string>
     <string name="dashboard_builder_pages_help">页面多于一页时，后屏面板会依次显示，每页约八秒。在面板上滑动可以停在某一页。</string>
     <string name="dashboard_builder_presence_label">显示</string>
     <string name="dashboard_builder_presence_always">始终</string>

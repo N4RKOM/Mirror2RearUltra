@@ -14,6 +14,8 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
@@ -69,6 +71,16 @@ public final class RearDashboardView extends View {
     private float dragStartFractionX;
     private float dragStartFractionY;
     private boolean dragStartHadPosition;
+    /**
+     * The panel's own long press, for the always-on toggle.
+     *
+     * <p>The builder's preview had one of these once, for a carousel that no
+     * longer exists, and it was removed when nothing set it. This one is the
+     * panel's and has a job: a press held on the panel is the only gesture
+     * there that nothing else wanted.
+     */
+    @Nullable private Runnable pendingLongPress;
+    private boolean longPressFired;
     /** True from the moment a second finger lands until every finger is up. */
     private boolean pinching;
     @Nullable private DashboardWidgetLayout.Widget pinchedWidget;
@@ -497,6 +509,7 @@ public final class RearDashboardView extends View {
 
     @Override
     protected void onDetachedFromWindow() {
+        cancelPendingLongPress();
         removeCallbacks(pageFlip);
         removeCallbacks(returnToFirstPage);
         super.onDetachedFromWindow();
@@ -878,11 +891,20 @@ public final class RearDashboardView extends View {
                 draggedWidget = null;
                 pinching = false;
                 pinchedWidget = null;
+                cancelPendingLongPress();
+                longPressFired = false;
                 if (interactive && currentLayout() == DashboardSettings.Layout.FREE) {
                     DashboardWidgetLayout.Widget hit = widgetAt(event.getX(), event.getY());
                     if (hit != null) {
                         beginDrag(hit, event.getX(), event.getY());
                     }
+                } else if (!interactive) {
+                    pendingLongPress = () -> {
+                        pendingLongPress = null;
+                        longPressFired = true;
+                        toggleAlwaysOnFromPanel();
+                    };
+                    postDelayed(pendingLongPress, ViewConfiguration.getLongPressTimeout());
                 }
                 return true;
             }
@@ -929,6 +951,11 @@ public final class RearDashboardView extends View {
                     }
                     return true;
                 }
+                if (pendingLongPress != null && Math.hypot(event.getX() - touchStartX,
+                        event.getY() - touchStartY) > ViewConfiguration.get(getContext())
+                        .getScaledTouchSlop()) {
+                    cancelPendingLongPress();
+                }
                 if (draggedWidget == null) {
                     return true;
                 }
@@ -944,6 +971,11 @@ public final class RearDashboardView extends View {
                 return true;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
+                cancelPendingLongPress();
+                if (longPressFired) {
+                    longPressFired = false;
+                    return true;
+                }
                 if (getParent() != null) {
                     getParent().requestDisallowInterceptTouchEvent(false);
                 }
@@ -976,6 +1008,10 @@ public final class RearDashboardView extends View {
                     markPageInteraction();
                     return true;
                 }
+                if (!interactive && !swipe && cycleVariantAt(event.getX(), event.getY())) {
+                    markPageInteraction();
+                    return true;
+                }
                 if (swipe) {
                     int maxPage = 1;
                     for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values())
@@ -1003,6 +1039,56 @@ public final class RearDashboardView extends View {
         return (float) Math.hypot(
                 event.getX(0) - event.getX(1),
                 event.getY(0) - event.getY(1));
+    }
+
+    private void cancelPendingLongPress() {
+        if (pendingLongPress != null) {
+            removeCallbacks(pendingLongPress);
+            pendingLongPress = null;
+        }
+    }
+
+    /**
+     * A tap on a widget steps its display style on by one.
+     *
+     * <p>The styles were reachable only from the builder, which means putting
+     * the phone down, picking it up and turning it over to ask the clock for
+     * seconds. They are a small, reversible, per-widget thing - exactly what a
+     * tap on the thing itself should do.
+     */
+    private boolean cycleVariantAt(float x, float y) {
+        DashboardWidgetLayout.Widget hit = widgetAt(x, y);
+        if (hit == null || !DashboardWidgetLayout.supportsVariant(hit)) {
+            return false;
+        }
+        DashboardWidgetLayout.Variant[] all = DashboardWidgetLayout.Variant.values();
+        DashboardWidgetLayout.Variant next =
+                all[(variantOf(hit).ordinal() + 1) % all.length];
+        DashboardWidgetLayout.saveVariant(getContext(), hit, next);
+        performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+        invalidate();
+        return true;
+    }
+
+    /**
+     * A press held on the panel turns always-on on, or back off.
+     *
+     * <p>Saving the dashboard settings unchanged is what publishes it: the
+     * timeout lives outside them, and the session reconfigures its idle timer
+     * when they are saved. Without that the panel would keep counting down
+     * against the mode it started with.
+     */
+    private void toggleAlwaysOnFromPanel() {
+        DashboardWidgetLayout.IdleMode now = DashboardWidgetLayout.toggleAlwaysOn(getContext());
+        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        MirrorSettings.saveDashboardSettings(getContext(),
+                MirrorSettings.loadDashboardSettings(getContext()));
+        markPageInteraction();
+        announceForAccessibility(getResources().getString(
+                now == DashboardWidgetLayout.IdleMode.ALWAYS_ON
+                        ? R.string.dashboard_idle_always_on
+                        : R.string.dashboard_idle_mode_title));
+        invalidate();
     }
 
     private void beginDrag(DashboardWidgetLayout.Widget widget, float x, float y) {

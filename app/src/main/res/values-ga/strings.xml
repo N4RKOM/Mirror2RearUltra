@@ -234,6 +234,7 @@
     <string name="dashboard_builder_one_page">1 leathanach</string>
     <string name="dashboard_builder_pages_count">%1$d leathanach</string>
     <string name="dashboard_builder_choose_value">Roghnaigh</string>
+    <string name="panel_gestures_help">Ar an bpainéal féin: cuireann tapa ar ghiuirléid a taispeáint ar aghaidh céim, agus cuireann brú fada áit ar bith an taispeáint bhuan ar siúl nó as.</string>
     <string name="dashboard_builder_pages_help">Le níos mó ná leathanach amháin, téann an painéal cúil tríothu, thart ar ocht soicind an ceann. Svaidhpeáil ar an bpainéal chun leathanach a choinneáil.</string>
     <string name="dashboard_builder_presence_label">Taispeáin</string>
     <string name="dashboard_builder_presence_always">I gcónaí</string>
