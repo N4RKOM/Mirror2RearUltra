@@ -14,9 +14,7 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
-import android.view.ViewConfiguration;
 
 import androidx.annotation.Nullable;
 
@@ -71,17 +69,6 @@ public final class RearDashboardView extends View {
     private float dragStartFractionX;
     private float dragStartFractionY;
     private boolean dragStartHadPosition;
-    /**
-     * Whether a drag has to be asked for with a long press.
-     *
-     * <p>Nothing sets it any more, so a drag starts on touch. It was for the
-     * previews inside the page carousel, where a plain swipe belonged to the
-     * carousel and claiming it for a drag rearranged a widget on the page the
-     * user thought they were leaving. The carousel is gone; the flag is kept
-     * because a scrolling container over the preview would need it again.
-     */
-    private boolean dragNeedsLongPress;
-    @Nullable private Runnable pendingLongPress;
     /** True from the moment a second finger lands until every finger is up. */
     private boolean pinching;
     @Nullable private DashboardWidgetLayout.Widget pinchedWidget;
@@ -193,11 +180,6 @@ public final class RearDashboardView extends View {
      */
     void setOnWidgetSelectedListener(@Nullable OnWidgetSelectedListener listener) {
         widgetSelectedListener = listener;
-    }
-
-    /** Makes a drag start on a long press, leaving plain swipes to a scroller. */
-    void setDragNeedsLongPress(boolean needed) {
-        dragNeedsLongPress = needed;
     }
 
     /**
@@ -515,7 +497,6 @@ public final class RearDashboardView extends View {
 
     @Override
     protected void onDetachedFromWindow() {
-        cancelPendingLongPress();
         removeCallbacks(pageFlip);
         removeCallbacks(returnToFirstPage);
         super.onDetachedFromWindow();
@@ -897,24 +878,11 @@ public final class RearDashboardView extends View {
                 draggedWidget = null;
                 pinching = false;
                 pinchedWidget = null;
-                cancelPendingLongPress();
                 if (interactive && currentLayout() == DashboardSettings.Layout.FREE) {
                     DashboardWidgetLayout.Widget hit = widgetAt(event.getX(), event.getY());
-                    if (hit == null) {
-                        return true;
-                    }
-                    if (!dragNeedsLongPress) {
+                    if (hit != null) {
                         beginDrag(hit, event.getX(), event.getY());
-                        return true;
                     }
-                    float downX = event.getX();
-                    float downY = event.getY();
-                    pendingLongPress = () -> {
-                        pendingLongPress = null;
-                        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                        beginDrag(hit, downX, downY);
-                    };
-                    postDelayed(pendingLongPress, ViewConfiguration.getLongPressTimeout());
                 }
                 return true;
             }
@@ -962,13 +930,6 @@ public final class RearDashboardView extends View {
                     return true;
                 }
                 if (draggedWidget == null) {
-                    if (pendingLongPress != null && Math.hypot(event.getX() - touchStartX,
-                            event.getY() - touchStartY) > ViewConfiguration.get(getContext())
-                            .getScaledTouchSlop()) {
-                        // Moved before the press was long enough: this is the
-                        // carousel being turned, not a widget being picked up.
-                        cancelPendingLongPress();
-                    }
                     return true;
                 }
                 if (Math.hypot(event.getX() - touchStartX, event.getY() - touchStartY) > 4f) {
@@ -983,7 +944,6 @@ public final class RearDashboardView extends View {
                 return true;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
-                cancelPendingLongPress();
                 if (getParent() != null) {
                     getParent().requestDisallowInterceptTouchEvent(false);
                 }
@@ -1043,13 +1003,6 @@ public final class RearDashboardView extends View {
         return (float) Math.hypot(
                 event.getX(0) - event.getX(1),
                 event.getY(0) - event.getY(1));
-    }
-
-    private void cancelPendingLongPress() {
-        if (pendingLongPress != null) {
-            removeCallbacks(pendingLongPress);
-            pendingLongPress = null;
-        }
     }
 
     private void beginDrag(DashboardWidgetLayout.Widget widget, float x, float y) {
@@ -1519,6 +1472,7 @@ public final class RearDashboardView extends View {
                     new RectF(padding, padding, getWidth() - padding, getHeight() - padding),
                     20f * density, 20f * density, panelPaint);
         }
+        float[][] fallback = freePlacement(lines, clockSize, normalSize, padding);
         for (int index = 0; index < lines.size(); index++) {
             Line line = lines.get(index);
             float size = (line.primary ? clockSize : normalSize) * line.scale;
@@ -1530,8 +1484,8 @@ public final class RearDashboardView extends View {
                 x = DashboardWidgetLayout.loadFreeX(getContext(), line.widget) * getWidth();
                 y = DashboardWidgetLayout.loadFreeY(getContext(), line.widget) * getHeight();
             } else {
-                x = getWidth() / 2f;
-                y = getHeight() * (index + 1f) / (lines.size() + 1f);
+                x = fallback[index][0];
+                y = fallback[index][1];
             }
             Alignment alignment = alignmentFor(line);
             // The whole panel, not the room left between the anchor and the
@@ -1548,6 +1502,110 @@ public final class RearDashboardView extends View {
             float baseline = clampedY - (textPaint.ascent() + textPaint.descent()) / 2f;
             drawLine(canvas, line, x, baseline, available, alignment, true);
         }
+    }
+
+    /**
+     * Where the widgets that have never been dragged should go.
+     *
+     * <p>They used to be spread down the column by their place in the list,
+     * which ignores the ones already dragged somewhere. Switching a widget on
+     * therefore dropped it onto an arrangement someone had made by hand, and
+     * it stayed there until they moved it.
+     *
+     * <p>With nothing placed by hand the even spread is still what this
+     * returns - it reads better than a corner. Once anything has a place of
+     * its own, the rest take the first free box, searched across the panel
+     * rather than down it: this panel is 294 by 126, so on a page whose rows
+     * are full the room that is left is beside them, not below.
+     */
+    private float[][] freePlacement(List<Line> lines, float clockSize, float normalSize,
+            float padding) {
+        int count = lines.size();
+        float[][] result = new float[count][2];
+        float[] widths = new float[count];
+        float[] heights = new float[count];
+        boolean anyPlaced = false;
+        for (int index = 0; index < count; index++) {
+            Line line = lines.get(index);
+            widths[index] = measuredWidth(line, clockSize, normalSize);
+            heights[index] = textPaint.descent() - textPaint.ascent();
+            anyPlaced |= DashboardWidgetLayout.hasFreePosition(getContext(), line.widget);
+            result[index][0] = getWidth() / 2f;
+            result[index][1] = getHeight() * (index + 1f) / (count + 1f);
+        }
+        if (!anyPlaced) {
+            return result;
+        }
+        List<RectF> taken = new ArrayList<>();
+        for (int index = 0; index < count; index++) {
+            if (DashboardWidgetLayout.hasFreePosition(getContext(), lines.get(index).widget)) {
+                taken.add(boxAt(
+                        DashboardWidgetLayout.loadFreeX(getContext(), lines.get(index).widget)
+                                * getWidth(),
+                        DashboardWidgetLayout.loadFreeY(getContext(), lines.get(index).widget)
+                                * getHeight(),
+                        widths[index], heights[index]));
+            }
+        }
+        for (int index = 0; index < count; index++) {
+            if (DashboardWidgetLayout.hasFreePosition(getContext(), lines.get(index).widget)) {
+                continue;
+            }
+            RectF spot = firstFreeBox(taken, widths[index], heights[index], padding);
+            if (spot != null) {
+                result[index][0] = spot.centerX();
+                result[index][1] = spot.centerY();
+            }
+            // Nothing free leaves the even-spread value, and the overflow note
+            // already says the panel has run out of room.
+            taken.add(boxAt(result[index][0], result[index][1], widths[index], heights[index]));
+        }
+        return result;
+    }
+
+    /** What drawLine will take up, near enough to keep two widgets apart. */
+    private float measuredWidth(Line line, float clockSize, float normalSize) {
+        textPaint.setTextSize((line.primary ? clockSize : normalSize) * line.scale);
+        textPaint.setFakeBoldText(line.primary);
+        if (line.text.indexOf('\n') >= 0) {
+            textPaint.setTextSize(textPaint.getTextSize() * 0.58f);
+        }
+        float icon = line.icon == Icon.NONE ? 0f : textPaint.getTextSize() * 1.10f;
+        float text = 0f;
+        for (String part : line.text.split("\\n", -1)) {
+            text = Math.max(text, textPaint.measureText(part));
+        }
+        return icon + text;
+    }
+
+    private static RectF boxAt(float centreX, float centreY, float width, float height) {
+        return new RectF(centreX - width / 2f, centreY - height / 2f,
+                centreX + width / 2f, centreY + height / 2f);
+    }
+
+    /** Scans the panel row by row for somewhere this box fits untouched. */
+    @Nullable
+    private RectF firstFreeBox(List<RectF> taken, float width, float height, float padding) {
+        float stepY = Math.max(1f, height * 0.34f);
+        float stepX = Math.max(1f, width * 0.34f);
+        for (float centreY = padding + height / 2f;
+                centreY <= getHeight() - padding - height / 2f; centreY += stepY) {
+            for (float centreX = padding + width / 2f;
+                    centreX <= getWidth() - padding - width / 2f; centreX += stepX) {
+                RectF candidate = boxAt(centreX, centreY, width, height);
+                boolean clear = true;
+                for (RectF other : taken) {
+                    if (RectF.intersects(candidate, other)) {
+                        clear = false;
+                        break;
+                    }
+                }
+                if (clear) {
+                    return candidate;
+                }
+            }
+        }
+        return null;
     }
 
     private void drawStacked(Canvas canvas, List<Line> lines, float density) {
