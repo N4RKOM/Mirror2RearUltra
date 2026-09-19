@@ -325,6 +325,13 @@
     <string name="dashboard_named_template_add">現在の配置に名前を付けて保存…</string>
     <string name="dashboard_named_template_name">テンプレート名</string>
     <string name="dashboard_named_template_required">名前を入力してください</string>
+    <string name="panel_triggers_title">トリガー</string>
+    <string name="panel_trigger_charging">充電中</string>
+    <string name="panel_trigger_time">時刻で</string>
+    <string name="panel_trigger_from">開始</string>
+    <string name="panel_trigger_to">終了</string>
+    <string name="panel_trigger_off">オフ</string>
+    <string name="panel_triggers_help">保存したテンプレートが自分から出てくるようにできます。充電は時刻より優先され、どちらも当てはまらないときはプロファイル自身のパネルに戻ります。トリガーが効いている間の変更はそのテンプレートに残ります。プロファイルが自分の分を保つのと同じです。</string>
     <string name="dashboard_named_templates_help">配置を保存しておくと、プロファイルが何をしても、あとから戻ってこられます。</string>
     <string name="dashboard_named_templates_hint">テンプレートをタップすると適用されます。</string>
     <string name="dashboard_named_template_actions">%1$s の操作</string>

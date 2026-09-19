@@ -239,6 +239,43 @@
                 style="@style/HyperOS.GroupFootnote"
                 android:text="@string/dashboard_named_templates_help" />
 
+            <!-- ===================== Triggers =====================
+                 Beside the templates on purpose: the question these answer is
+                 "when should one of these come up", and it is asked while
+                 looking at the list of them. -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/panel_triggers_title" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/panel_trigger_charging_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_charging" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/panel_trigger_time_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_time" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/panel_trigger_from_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_from" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/panel_trigger_to_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_to" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/panel_triggers_help" />
+
             <!-- ===================== Pages =====================
                  Pages used to exist only as a per-widget number, with nothing
                  saying what a page was or that the panel cycles through them.

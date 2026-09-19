@@ -325,6 +325,13 @@
     <string name="dashboard_named_template_add">将当前保存为…</string>
     <string name="dashboard_named_template_name">模板名称</string>
     <string name="dashboard_named_template_required">请输入名称</string>
+    <string name="panel_triggers_title">触发条件</string>
+    <string name="panel_trigger_charging">充电时</string>
+    <string name="panel_trigger_time">在一天中的某个时段</string>
+    <string name="panel_trigger_from">从</string>
+    <string name="panel_trigger_to">到</string>
+    <string name="panel_trigger_off">关闭</string>
+    <string name="panel_triggers_help">保存的模板可以自动出现。充电优先于时间；两者都不适用时，面板回到配置自己的那一个。触发生效期间所做的更改会留在它的模板里，就像配置保留自己的一样。</string>
     <string name="dashboard_named_templates_help">保存一种排布，以后随时可以回到它，无论配置怎么变。</string>
     <string name="dashboard_named_templates_hint">点按模板即可应用。</string>
     <string name="dashboard_named_template_actions">%1$s 的操作</string>

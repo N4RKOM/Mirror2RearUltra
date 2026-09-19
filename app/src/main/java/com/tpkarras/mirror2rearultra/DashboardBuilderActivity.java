@@ -37,6 +37,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import androidx.appcompat.app.AlertDialog;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class DashboardBuilderActivity extends AppCompatActivity {
@@ -48,6 +49,10 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private MaterialCardView previewContainer;
     private MaterialButton orientationButton;
     private MaterialButton layoutButton;
+    private HyperValueRow triggerChargingInput;
+    private HyperValueRow triggerTimeInput;
+    private HyperValueRow triggerFromInput;
+    private HyperValueRow triggerToInput;
     private HyperValueRow pagesInput;
     private HyperValueRow presetInput;
     private LinearLayout previewPages;
@@ -139,6 +144,13 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         refreshPageControls();
         addNamedTemplateButton.setOnClickListener(view -> promptForNewTemplate());
         renderNamedTemplates();
+        triggerChargingInput = findViewById(R.id.panel_trigger_charging_input);
+        triggerTimeInput = findViewById(R.id.panel_trigger_time_input);
+        triggerFromInput = findViewById(R.id.panel_trigger_from_input);
+        triggerToInput = findViewById(R.id.panel_trigger_to_input);
+        triggerFromInput.setOnClickListener(view -> pickTriggerTime(true));
+        triggerToInput.setOnClickListener(view -> pickTriggerTime(false));
+        renderTriggers();
         refreshPreview();
         renderRows();
         findViewById(R.id.dashboard_builder_choose).setOnClickListener(view ->
@@ -1208,6 +1220,78 @@ public class DashboardBuilderActivity extends AppCompatActivity {
      * <p>Tapping one applies it. The overflow beside it renames, overwrites or
      * deletes, so the row itself stays a single obvious action.
      */
+    /**
+     * The rows that say when a saved template should come up by itself.
+     *
+     * <p>Rebuilt whenever the templates are, because both rows are lists of
+     * them: one deleted there must stop being offered here. The two times are
+     * only shown once a template is chosen for them - a window with nothing
+     * to put in it is a question with no answer.
+     */
+    private void renderTriggers() {
+        List<DashboardTemplateStore.Named> named = DashboardTemplateStore.listNamed(this);
+        String off = getString(R.string.panel_trigger_off);
+        String[] labels = new String[named.size() + 1];
+        labels[0] = off;
+        for (int index = 0; index < named.size(); index++) {
+            labels[index + 1] = named.get(index).name;
+        }
+        bindTriggerRow(triggerChargingInput, labels, named,
+                PanelTriggers.chargingSlot(this), off, true);
+        bindTriggerRow(triggerTimeInput, labels, named,
+                PanelTriggers.timeSlot(this), off, false);
+        boolean timed = PanelTriggers.timeSlot(this) != null;
+        triggerFromInput.setVisibility(timed ? View.VISIBLE : View.GONE);
+        triggerToInput.setVisibility(timed ? View.VISIBLE : View.GONE);
+        triggerFromInput.setValue(clockLabel(PanelTriggers.fromMinutes(this)));
+        triggerToInput.setValue(clockLabel(PanelTriggers.toMinutes(this)));
+    }
+
+    private void bindTriggerRow(HyperValueRow row, String[] labels,
+            List<DashboardTemplateStore.Named> named, @Nullable String current,
+            String off, boolean forCharging) {
+        row.setEntries(labels);
+        String label = off;
+        for (DashboardTemplateStore.Named candidate : named) {
+            if (candidate.id.equals(current)) {
+                label = candidate.name;
+            }
+        }
+        row.setValue(label);
+        row.setOnItemSelectedListener(position -> {
+            String slot = position <= 0 || position > named.size()
+                    ? null : named.get(position - 1).id;
+            if (forCharging) {
+                PanelTriggers.setChargingSlot(this, slot);
+            } else {
+                PanelTriggers.setTimeSlot(this, slot);
+            }
+            renderTriggers();
+            notifyDashboardChanged();
+        });
+    }
+
+    /** A time of day written the way the phone writes it. */
+    private String clockLabel(int minutes) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, minutes / 60);
+        calendar.set(Calendar.MINUTE, minutes % 60);
+        return android.text.format.DateFormat.getTimeFormat(this).format(calendar.getTime());
+    }
+
+    private void pickTriggerTime(boolean start) {
+        int current = start ? PanelTriggers.fromMinutes(this) : PanelTriggers.toMinutes(this);
+        new android.app.TimePickerDialog(this, (view, hour, minute) -> {
+            int picked = hour * 60 + minute;
+            PanelTriggers.setWindow(this,
+                    start ? picked : PanelTriggers.fromMinutes(this),
+                    start ? PanelTriggers.toMinutes(this) : picked);
+            renderTriggers();
+            notifyDashboardChanged();
+        }, current / 60, current % 60,
+                android.text.format.DateFormat.is24HourFormat(this)).show();
+    }
+
     private void renderNamedTemplates() {
         List<DashboardTemplateStore.Named> saved = DashboardTemplateStore.listNamed(this);
         namedTemplates.removeAllViews();
@@ -1278,6 +1362,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                                 template.name, name -> {
                                     DashboardTemplateStore.renameNamed(this, template.id, name);
                                     renderNamedTemplates();
+                    renderTriggers();
+                                    renderTriggers();
                                 });
                     } else {
                         confirmDeleteTemplate(template);
@@ -1296,6 +1382,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.dashboard_named_template_delete, (dialog, which) -> {
                     DashboardTemplateStore.deleteNamed(this, template.id);
                     renderNamedTemplates();
+                    renderTriggers();
                 })
                 .show();
     }

@@ -2,9 +2,11 @@ package com.tpkarras.mirror2rearultra;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
@@ -12,6 +14,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
+import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -20,6 +23,8 @@ import android.os.Looper;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.SystemClock;
+
+import androidx.core.content.ContextCompat;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -95,6 +100,25 @@ public class Mirror extends Activity implements
     private RearContentMode sessionContentMode;
     private boolean sessionHasProjection;
     private String appliedDashboardProfileId;
+    /** The template the surroundings asked for, or null when none applies. */
+    private String activeTriggerSlot;
+    private boolean charging;
+    private final Handler triggerHandler = new Handler(Looper.getMainLooper());
+    private final Runnable triggerTick = new Runnable() {
+        @Override
+        public void run() {
+            refreshTriggers();
+            triggerHandler.postDelayed(this,
+                    PanelTriggers.millisUntilNextEdge(Mirror.this, System.currentTimeMillis()));
+        }
+    };
+    private final BroadcastReceiver chargingReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            charging = Intent.ACTION_POWER_CONNECTED.equals(intent.getAction());
+            refreshTriggers();
+        }
+    };
     /**
      * Which run of the session this activity belongs to.
      *
@@ -432,6 +456,16 @@ public class Mirror extends Activity implements
         if (sensorManager != null && screenDownSensor != null) {
             sensorManager.registerListener(this, screenDownSensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
+        IntentFilter power = new IntentFilter(Intent.ACTION_POWER_CONNECTED);
+        power.addAction(Intent.ACTION_POWER_DISCONNECTED);
+        ContextCompat.registerReceiver(this, chargingReceiver, power,
+                ContextCompat.RECEIVER_NOT_EXPORTED);
+        Intent sticky = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        int status = sticky == null ? -1
+                : sticky.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+        charging = status == BatteryManager.BATTERY_STATUS_CHARGING
+                || status == BatteryManager.BATTERY_STATUS_FULL;
+        triggerHandler.post(triggerTick);
         listenersRegistered = true;
     }
 
@@ -444,6 +478,12 @@ public class Mirror extends Activity implements
         }
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
+        }
+        triggerHandler.removeCallbacks(triggerTick);
+        try {
+            unregisterReceiver(chargingReceiver);
+        } catch (IllegalArgumentException ignored) {
+            // Already gone.
         }
         listenersRegistered = false;
     }
@@ -625,7 +665,16 @@ public class Mirror extends Activity implements
 
     private void applyBrightnessPercent(int percent) {
         int clamped = Math.max(1, Math.min(100, percent));
-        applyBrightnessOverlay(false, clamped);
+        // Software dimming is the fallback for a panel without root, and it
+        // used to be laid on before every root write in case that write
+        // failed. The write takes a shell to start, so the panel went dark for
+        // as long as that took and then snapped back - a flash nobody noticed
+        // while brightness only moved when a slider did, and a flicker once
+        // the light sensor started moving it. Where the hardware has already
+        // answered for itself, it is left to answer again.
+        if (!DeviceCapabilityState.get().hardwareBrightnessActive) {
+            applyBrightnessOverlay(false, clamped);
+        }
         if (brightnessController != null) {
             brightnessController.applyPercent(clamped);
         }
@@ -782,16 +831,46 @@ public class Mirror extends Activity implements
         appOutputAllowed = appProjectionAllowed || sessionContentMode.showsDashboard();
     }
 
+    /**
+     * Re-reads the triggers and moves the panel if they now say something else.
+     *
+     * <p>Charging and the clock name a saved template between them; when
+     * neither does, the panel goes back to the profile's own.
+     */
+    private void refreshTriggers() {
+        String wanted = PanelTriggers.activeSlot(this, charging, System.currentTimeMillis());
+        if (sameValue(wanted, activeTriggerSlot)) {
+            return;
+        }
+        activeTriggerSlot = wanted;
+        if (wanted != null) {
+            applyDashboardSlot(wanted);
+        } else if (activeProfile != null) {
+            applyDashboardSlot(activeProfile.id);
+        }
+    }
+
     private void applyDashboardForProfile(MirrorProfile profile) {
-        if (profile == null || profile.id.equals(appliedDashboardProfileId)) return;
+        if (profile == null) return;
+        // A trigger outranks the profile while it holds: the profile's panel
+        // is what the panel returns to, not what interrupts.
+        if (activeTriggerSlot != null) {
+            appliedDashboardProfileId = profile.id;
+            return;
+        }
+        applyDashboardSlot(profile.id);
+    }
+
+    private void applyDashboardSlot(String slot) {
+        if (slot == null || slot.equals(appliedDashboardProfileId)) return;
         // The same keeping as on a hand-made switch: the app-based one changes
         // profile just as thoroughly, and the panel it leaves behind is the
         // one the outgoing profile should come back to.
         if (appliedDashboardProfileId != null) {
             DashboardTemplateStore.save(this, appliedDashboardProfileId);
         }
-        appliedDashboardProfileId = profile.id;
-        if (!DashboardTemplateStore.apply(this, profile.id)) return;
+        appliedDashboardProfileId = slot;
+        if (!DashboardTemplateStore.apply(this, slot)) return;
         dashboardSettings = MirrorSettings.loadDashboardSettings(this)
                 .withContentMode(sessionContentMode);
         if (dashboardView != null) {

@@ -325,6 +325,13 @@
     <string name="dashboard_named_template_add">Enregistrer sous…</string>
     <string name="dashboard_named_template_name">Nom du modèle</string>
     <string name="dashboard_named_template_required">Saisissez un nom</string>
+    <string name="panel_triggers_title">Déclencheurs</string>
+    <string name="panel_trigger_charging">Sur le chargeur</string>
+    <string name="panel_trigger_time">À une heure du jour</string>
+    <string name="panel_trigger_from">De</string>
+    <string name="panel_trigger_to">À</string>
+    <string name="panel_trigger_off">Désactivé</string>
+    <string name="panel_triggers_help">Un modèle enregistré peut apparaître de lui-même. Le chargeur l\'emporte sur l\'heure, et quand aucun ne s\'applique le panneau revient à celui du profil. Les changements faits pendant qu\'un déclencheur tient sont gardés dans son modèle, comme un profil garde le sien.</string>
     <string name="dashboard_named_templates_help">Enregistrez une disposition pour y revenir plus tard, quoi que fasse le profil.</string>
     <string name="dashboard_named_templates_hint">Appuyez sur un modèle pour l\'appliquer.</string>
     <string name="dashboard_named_template_actions">Actions pour %1$s</string>

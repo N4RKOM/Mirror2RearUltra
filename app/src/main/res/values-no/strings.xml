@@ -325,6 +325,13 @@
     <string name="dashboard_named_template_add">Lagre gjeldende som…</string>
     <string name="dashboard_named_template_name">Navn på malen</string>
     <string name="dashboard_named_template_required">Skriv inn et navn</string>
+    <string name="panel_triggers_title">Utløsere</string>
+    <string name="panel_trigger_charging">På laderen</string>
+    <string name="panel_trigger_time">På et tidspunkt</string>
+    <string name="panel_trigger_from">Fra</string>
+    <string name="panel_trigger_to">Til</string>
+    <string name="panel_trigger_off">Av</string>
+    <string name="panel_triggers_help">En lagret mal kan komme opp av seg selv. Laderen går foran klokken, og når ingen av dem gjelder går panelet tilbake til profilens eget. Endringer gjort mens en utløser gjelder blir i malen dens, slik en profil beholder sin.</string>
     <string name="dashboard_named_templates_help">Lagre et oppsett for å komme tilbake til det senere, uansett hva profilen gjør.</string>
     <string name="dashboard_named_templates_hint">Trykk på en mal for å ta den i bruk.</string>
     <string name="dashboard_named_template_actions">Handlinger for %1$s</string>

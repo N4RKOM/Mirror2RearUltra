@@ -325,6 +325,13 @@
     <string name="dashboard_named_template_add">ذخیرهٔ کنونی با نام…</string>
     <string name="dashboard_named_template_name">نام الگو</string>
     <string name="dashboard_named_template_required">نامی وارد کنید</string>
+    <string name="panel_triggers_title">راه‌اندازها</string>
+    <string name="panel_trigger_charging">روی شارژر</string>
+    <string name="panel_trigger_time">در ساعتی از روز</string>
+    <string name="panel_trigger_from">از</string>
+    <string name="panel_trigger_to">تا</string>
+    <string name="panel_trigger_off">خاموش</string>
+    <string name="panel_triggers_help">یک الگوی ذخیره‌شده می‌تواند خودش بالا بیاید. شارژر بر ساعت مقدم است، و وقتی هیچ‌کدام صدق نکند پنل به الگوی نمایه برمی‌گردد. تغییرهایی که هنگام فعال بودن یک راه‌انداز انجام می‌شود در الگوی خودش می‌ماند، همان‌طور که نمایه الگوی خودش را نگه می‌دارد.</string>
     <string name="dashboard_named_templates_help">چیدمانی را ذخیره کنید تا بعداً به آن برگردید، هر کاری که نمایه بکند.</string>
     <string name="dashboard_named_templates_hint">برای اعمال، روی الگو بزنید.</string>
     <string name="dashboard_named_template_actions">کارهای %1$s</string>

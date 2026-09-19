@@ -325,6 +325,13 @@
     <string name="dashboard_named_template_add">मौजूदा को इस नाम से सेव करें…</string>
     <string name="dashboard_named_template_name">टेम्पलेट का नाम</string>
     <string name="dashboard_named_template_required">नाम डालें</string>
+    <string name="panel_triggers_title">ट्रिगर</string>
+    <string name="panel_trigger_charging">चार्जर पर</string>
+    <string name="panel_trigger_time">दिन के किसी समय</string>
+    <string name="panel_trigger_from">से</string>
+    <string name="panel_trigger_to">तक</string>
+    <string name="panel_trigger_off">बंद</string>
+    <string name="panel_triggers_help">सेव किया हुआ टेम्पलेट अपने आप आ सकता है। चार्जर घड़ी से ऊपर रहता है, और जब दोनों में से कोई लागू न हो तो पैनल प्रोफ़ाइल वाले पर लौट आता है। ट्रिगर चलने के दौरान किए गए बदलाव उसी टेम्पलेट में रहते हैं, जैसे प्रोफ़ाइल अपना रखती है।</string>
     <string name="dashboard_named_templates_help">कोई सजावट सेव कर लें ताकि बाद में उस पर लौट सकें, प्रोफ़ाइल चाहे जो करे।</string>
     <string name="dashboard_named_templates_hint">लागू करने के लिए टेम्पलेट पर टैप करें।</string>
     <string name="dashboard_named_template_actions">%1$s के लिए कार्रवाइयाँ</string>

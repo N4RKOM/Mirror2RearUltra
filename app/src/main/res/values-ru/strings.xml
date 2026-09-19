@@ -154,6 +154,13 @@
     <string name="dashboard_named_template_add">Сохранить текущую как…</string>
     <string name="dashboard_named_template_name">Название шаблона</string>
     <string name="dashboard_named_template_required">Введите название</string>
+    <string name="panel_triggers_title">Триггеры</string>
+    <string name="panel_trigger_charging">На зарядке</string>
+    <string name="panel_trigger_time">По времени суток</string>
+    <string name="panel_trigger_from">С</string>
+    <string name="panel_trigger_to">До</string>
+    <string name="panel_trigger_off">Выключено</string>
+    <string name="panel_triggers_help">Сохранённый шаблон может появляться сам. Зарядка важнее времени, а когда не подходит ни то ни другое, панель возвращается к панели профиля. Правки, сделанные пока держится триггер, сохраняются в его шаблон — так же, как профиль хранит свою.</string>
     <string name="dashboard_named_templates_help">Сохраните раскладку, чтобы вернуться к ней позже, независимо от профиля.</string>
     <string name="dashboard_named_templates_hint">Нажмите на шаблон, чтобы применить его.</string>
     <string name="dashboard_named_template_actions">Действия: %1$s</string>

@@ -325,6 +325,13 @@
     <string name="dashboard_named_template_add">Зберегти поточну як…</string>
     <string name="dashboard_named_template_name">Назва шаблону</string>
     <string name="dashboard_named_template_required">Введіть назву</string>
+    <string name="panel_triggers_title">Тригери</string>
+    <string name="panel_trigger_charging">На зарядці</string>
+    <string name="panel_trigger_time">За часом доби</string>
+    <string name="panel_trigger_from">З</string>
+    <string name="panel_trigger_to">До</string>
+    <string name="panel_trigger_off">Вимкнено</string>
+    <string name="panel_triggers_help">Збережений шаблон може з\'являтися сам. Зарядка важливіша за годинник, а коли не підходить ні те ні інше, панель повертається до панелі профілю. Зміни, зроблені поки тригер тримається, лишаються в його шаблоні — так само, як профіль береже свою.</string>
     <string name="dashboard_named_templates_help">Збережіть розташування, щоб повернутися до нього пізніше, хай що робить профіль.</string>
     <string name="dashboard_named_templates_hint">Торкніться шаблону, щоб застосувати його.</string>
     <string name="dashboard_named_template_actions">Дії для %1$s</string>

@@ -325,6 +325,13 @@
     <string name="dashboard_named_template_add">שמירת הנוכחי בשם…</string>
     <string name="dashboard_named_template_name">שם התבנית</string>
     <string name="dashboard_named_template_required">יש להזין שם</string>
+    <string name="panel_triggers_title">טריגרים</string>
+    <string name="panel_trigger_charging">במטען</string>
+    <string name="panel_trigger_time">בשעה ביום</string>
+    <string name="panel_trigger_from">מ־</string>
+    <string name="panel_trigger_to">עד</string>
+    <string name="panel_trigger_off">כבוי</string>
+    <string name="panel_triggers_help">תבנית שמורה יכולה לעלות מעצמה. המטען גובר על השעון, וכששניהם אינם חלים הלוח חוזר לזה של הפרופיל. שינויים שנעשים בזמן שטריגר פעיל נשמרים בתבנית שלו, כפי שפרופיל שומר את שלו.</string>
     <string name="dashboard_named_templates_help">כדאי לשמור סידור כדי לחזור אליו מאוחר יותר, לא משנה מה הפרופיל עושה.</string>
     <string name="dashboard_named_templates_hint">יש להקיש על תבנית כדי להחיל אותה.</string>
     <string name="dashboard_named_template_actions">פעולות עבור %1$s</string>

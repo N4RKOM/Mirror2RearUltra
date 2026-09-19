@@ -325,6 +325,13 @@
     <string name="dashboard_named_template_add">Tallenna nykyinen nimellä…</string>
     <string name="dashboard_named_template_name">Mallin nimi</string>
     <string name="dashboard_named_template_required">Anna nimi</string>
+    <string name="panel_triggers_title">Laukaisimet</string>
+    <string name="panel_trigger_charging">Laturissa</string>
+    <string name="panel_trigger_time">Kellonajan mukaan</string>
+    <string name="panel_trigger_from">Alkaen</string>
+    <string name="panel_trigger_to">Asti</string>
+    <string name="panel_trigger_off">Pois</string>
+    <string name="panel_triggers_help">Tallennettu malli voi tulla esiin itsestään. Laturi voittaa kellon, ja kun kumpikaan ei päde, paneeli palaa profiilin omaan. Laukaisimen ollessa voimassa tehdyt muutokset jäävät sen malliin, samoin kuin profiili säilyttää omansa.</string>
     <string name="dashboard_named_templates_help">Tallenna asettelu, jotta voit palata siihen myöhemmin, tekipä profiili mitä tahansa.</string>
     <string name="dashboard_named_templates_hint">Ota malli käyttöön napauttamalla sitä.</string>
     <string name="dashboard_named_template_actions">Kohteen %1$s toiminnot</string>

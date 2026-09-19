@@ -325,6 +325,13 @@
     <string name="dashboard_named_template_add">Salvează cel curent ca…</string>
     <string name="dashboard_named_template_name">Numele șablonului</string>
     <string name="dashboard_named_template_required">Introduceți un nume</string>
+    <string name="panel_triggers_title">Declanșatoare</string>
+    <string name="panel_trigger_charging">La încărcător</string>
+    <string name="panel_trigger_time">La o oră din zi</string>
+    <string name="panel_trigger_from">De la</string>
+    <string name="panel_trigger_to">Până la</string>
+    <string name="panel_trigger_off">Dezactivat</string>
+    <string name="panel_triggers_help">Un șablon salvat poate apărea singur. Încărcătorul are întâietate față de ceas, iar când nu se aplică niciunul panoul revine la cel al profilului. Modificările făcute cât timp ține un declanșator rămân în șablonul lui, așa cum un profil îl păstrează pe al său.</string>
     <string name="dashboard_named_templates_help">Salvați un aranjament pentru a reveni la el mai târziu, orice ar face profilul.</string>
     <string name="dashboard_named_templates_hint">Atingeți un șablon pentru a-l aplica.</string>
     <string name="dashboard_named_template_actions">Acțiuni pentru %1$s</string>

@@ -325,6 +325,13 @@
     <string name="dashboard_named_template_add">Uložit současný jako…</string>
     <string name="dashboard_named_template_name">Název šablony</string>
     <string name="dashboard_named_template_required">Zadejte název</string>
+    <string name="panel_triggers_title">Spouštěče</string>
+    <string name="panel_trigger_charging">Na nabíječce</string>
+    <string name="panel_trigger_time">V určitou denní dobu</string>
+    <string name="panel_trigger_from">Od</string>
+    <string name="panel_trigger_to">Do</string>
+    <string name="panel_trigger_off">Vypnuto</string>
+    <string name="panel_triggers_help">Uložená šablona se může objevit sama. Nabíječka má přednost před hodinami, a když neplatí ani jedno, panel se vrátí k tomu profilovému. Změny provedené, dokud spouštěč platí, zůstanou v jeho šabloně, stejně jako si profil drží svou.</string>
     <string name="dashboard_named_templates_help">Uložte si rozvržení, abyste se k němu mohli později vrátit, ať profil dělá cokoli.</string>
     <string name="dashboard_named_templates_hint">Klepnutím na šablonu ji použijete.</string>
     <string name="dashboard_named_template_actions">Akce pro %1$s</string>
