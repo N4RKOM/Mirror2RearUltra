@@ -1,6 +1,7 @@
 package com.tpkarras.mirror2rearultra;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Build;
@@ -11,6 +12,17 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
 public class MediaNotificationListenerService extends NotificationListenerService {
+    /**
+     * Anything the user cannot swipe away is furniture, not news.
+     *
+     * <p>FLAG_ONGOING_EVENT alone was not enough: a foreground service can
+     * post without it and still sit there forever. MIUI's own music service
+     * did exactly that and took the widget over.
+     */
+    private static final int UNDISMISSABLE = Notification.FLAG_ONGOING_EVENT
+            | Notification.FLAG_FOREGROUND_SERVICE
+            | Notification.FLAG_NO_CLEAR;
+
     private static volatile MediaController currentController;
 
     static boolean previous() { return dispatch(Transport.PREVIOUS); }
@@ -112,6 +124,7 @@ public class MediaNotificationListenerService extends NotificationListenerServic
         StatusBarNotification newest = null;
         try {
             StatusBarNotification[] active = getActiveNotifications();
+            RankingMap ranking = getCurrentRanking();
             if (active != null) for (StatusBarNotification item : active) {
                 Notification value = item.getNotification();
                 if (value == null || getPackageName().equals(item.getPackageName())
@@ -119,8 +132,9 @@ public class MediaNotificationListenerService extends NotificationListenerServic
                     continue;
                 }
                 count++;
-                if (isMediaNotification(item)
-                        || (value.flags & Notification.FLAG_ONGOING_EVENT) != 0) {
+                if (isMediaNotification(item) || (value.flags & UNDISMISSABLE) != 0
+                        || importanceOf(ranking, item)
+                        < NotificationManager.IMPORTANCE_DEFAULT) {
                     continue;
                 }
                 if (newest == null || item.getPostTime() > newest.getPostTime()) {
@@ -143,6 +157,24 @@ public class MediaNotificationListenerService extends NotificationListenerServic
         NotificationWidgetState.set(count, appLabel(newest.getPackageName()),
                 title == null ? "" : title.toString(),
                 text == null ? "" : text.toString());
+    }
+
+    /**
+     * How loudly the system itself rates this one.
+     *
+     * <p>Below IMPORTANCE_DEFAULT is what Android shows without a sound - sync
+     * chatter, background services, anything the user silenced. The widget
+     * answers "is it worth turning the phone over", so those are not it. The
+     * cost is that a chat the user deliberately muted stops appearing too,
+     * which is the same answer by a different route.
+     */
+    private int importanceOf(RankingMap map, StatusBarNotification item) {
+        if (map == null) {
+            return NotificationManager.IMPORTANCE_DEFAULT;
+        }
+        Ranking ranking = new Ranking();
+        return map.getRanking(item.getKey(), ranking)
+                ? ranking.getImportance() : NotificationManager.IMPORTANCE_DEFAULT;
     }
 
     /** The name a person would recognise, or the package name if it is gone. */
