@@ -112,12 +112,18 @@ public class MediaNotificationListenerService extends NotificationListenerServic
     /**
      * Counts what is waiting, and keeps the newest one worth reading.
      *
-     * <p>The count is unchanged: anything that is not this app's own and not a
-     * group summary. The content skips two more kinds. Media notifications
-     * have a widget of their own, and an ongoing one - a foreground service,
-     * a VPN, a headset companion - would pin itself to the panel for as long
-     * as it ran, which is exactly what a "latest" widget should not do. Both
-     * still count.
+     * <p>One rule decides both. A notification counts when the user could act
+     * on it: not this app's own, not a group summary standing in for others,
+     * dismissable, and rated at least IMPORTANCE_DEFAULT by the system. The
+     * count used to take everything, which on a real device meant fifteen
+     * where two were real - thirteen foreground services and background
+     * chatter - while the widget beside it quoted one of the two. Two widgets
+     * reading the same shade should not disagree about what is in it.
+     *
+     * <p>The content skips one thing more: a media notification has a widget
+     * of its own, and repeating the track under a bell would be saying the
+     * same thing twice. It still counts, because it is still something in the
+     * shade.
      */
     private void refreshNotifications() {
         int count = 0;
@@ -128,13 +134,14 @@ public class MediaNotificationListenerService extends NotificationListenerServic
             if (active != null) for (StatusBarNotification item : active) {
                 Notification value = item.getNotification();
                 if (value == null || getPackageName().equals(item.getPackageName())
-                        || (value.flags & Notification.FLAG_GROUP_SUMMARY) != 0) {
+                        || (value.flags & Notification.FLAG_GROUP_SUMMARY) != 0
+                        || (value.flags & UNDISMISSABLE) != 0
+                        || importanceOf(ranking, item)
+                        < NotificationManager.IMPORTANCE_DEFAULT) {
                     continue;
                 }
                 count++;
-                if (isMediaNotification(item) || (value.flags & UNDISMISSABLE) != 0
-                        || importanceOf(ranking, item)
-                        < NotificationManager.IMPORTANCE_DEFAULT) {
+                if (isMediaNotification(item)) {
                     continue;
                 }
                 if (newest == null || item.getPostTime() > newest.getPostTime()) {
