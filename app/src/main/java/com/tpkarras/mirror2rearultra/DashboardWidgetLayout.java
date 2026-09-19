@@ -72,6 +72,7 @@ final class DashboardWidgetLayout {
     private static final String GAP_PREFIX = "gap_";
     private static final String BURN_IN_SHIFT = "burn_in_shift";
     private static final String FONT = "font";
+    private static final String AUTO_BRIGHTNESS = "auto_brightness";
     private static final String WIDGET_FONT_PREFIX = "font_";
     private static final String GRID_SNAP = "grid_snap";
     private static final String SCALE_PREFIX = "scale_";
@@ -241,6 +242,20 @@ final class DashboardWidgetLayout {
 
     static void saveWidgetFontId(Context context, Widget widget, String id) {
         prefs(context).edit().putString(WIDGET_FONT_PREFIX + widget.name(), id).apply();
+    }
+
+    /**
+     * Whether the ambient light sensor may take the panel down.
+     *
+     * <p>Panel-wide rather than per profile: it answers "how dark is the
+     * room", which no profile knows better than another.
+     */
+    static boolean isAutoBrightnessEnabled(Context context) {
+        return prefs(context).getBoolean(AUTO_BRIGHTNESS, false);
+    }
+
+    static void setAutoBrightnessEnabled(Context context, boolean enabled) {
+        prefs(context).edit().putBoolean(AUTO_BRIGHTNESS, enabled).apply();
     }
 
     static boolean isGridSnapEnabled(Context context) {

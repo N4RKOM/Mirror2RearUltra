@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">左右反転</string>
     <string name="brightness_value">背面画面の明るさ · %1$d%%</string>
     <string name="brightness_accessibility">背面画面の明るさ</string>
-    <string name="brightness_mode_help">Root があれば背面の物理バックライトを使います。Root がない場合は背面の映像だけを暗くします。</string>
+    <string name="auto_brightness_title">明るさの自動調整</string>
+    <string name="brightness_mode_help">Root があれば背面の物理バックライトを使います。Root がない場合は背面の映像だけを暗くします。 明るさの自動調整では、光センサーは上で設定した明るさより暗くするだけで、それを超えて明るくすることはありません。</string>
     <string name="profile_image_title">映像とキャリブレーション</string>
     <string name="calibration_title">キャリブレーション</string>
     <string name="calibration_help">拡大縮小の方法を選んでから、このプロファイルを微調整してください。</string>

@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">Specchia orizzontalmente</string>
     <string name="brightness_value">Luminosità dello schermo posteriore · %1$d%%</string>
     <string name="brightness_accessibility">Luminosità dello schermo posteriore</string>
-    <string name="brightness_mode_help">Con il root viene usata la retroilluminazione posteriore fisica. Senza root viene attenuata solo l\'immagine posteriore.</string>
+    <string name="auto_brightness_title">Luminosità automatica</string>
+    <string name="brightness_mode_help">Con il root viene usata la retroilluminazione posteriore fisica. Senza root viene attenuata solo l\'immagine posteriore. Con la luminosità automatica il sensore di luce può solo abbassare il pannello sotto il livello impostato sopra, mai oltre.</string>
     <string name="profile_image_title">Immagine e calibrazione</string>
     <string name="calibration_title">Calibrazione</string>
     <string name="calibration_help">Metti a punto questo profilo dopo aver scelto la sua modalità di ridimensionamento.</string>

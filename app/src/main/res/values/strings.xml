@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">Mirror horizontally</string>
     <string name="brightness_value">Rear screen brightness · %1$d%%</string>
     <string name="brightness_accessibility">Rear screen brightness</string>
-    <string name="brightness_mode_help">Root uses the physical rear backlight. Without root, only the rear image is dimmed.</string>
+    <string name="auto_brightness_title">Automatic brightness</string>
+    <string name="brightness_mode_help">Root uses the physical rear backlight. Without root, only the rear image is dimmed. With automatic brightness the light sensor only takes the panel down from the level set above, never past it.</string>
     <string name="profile_image_title">Image and calibration</string>
     <string name="calibration_title">Calibration</string>
     <string name="calibration_help">Fine-tune this profile after choosing its scaling mode.</string>

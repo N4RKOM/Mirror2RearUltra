@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">水平翻转</string>
     <string name="brightness_value">后屏亮度 · %1$d%%</string>
     <string name="brightness_accessibility">后屏亮度</string>
-    <string name="brightness_mode_help">有 root 时使用后屏的物理背光。没有 root 时只调暗后屏画面。</string>
+    <string name="auto_brightness_title">自动亮度</string>
+    <string name="brightness_mode_help">有 root 时使用后屏的物理背光。没有 root 时只调暗后屏画面。 开启自动亮度后，光线传感器只会把面板调到上面所设亮度以下，绝不会超过它。</string>
     <string name="profile_image_title">画面与校准</string>
     <string name="calibration_title">校准</string>
     <string name="calibration_help">选好缩放方式后，再微调这个配置。</string>

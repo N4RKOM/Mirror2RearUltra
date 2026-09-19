@@ -100,6 +100,11 @@
                     app:hyperStepSize="5"
                     app:hyperValueFrom="10"
                     app:hyperValueTo="100" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/auto_brightness_switch"
+                    style="@style/HyperOS.Switch.Bottom"
+                    android:text="@string/auto_brightness_title" />
             </LinearLayout>
 
             <TextView

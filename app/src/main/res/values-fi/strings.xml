@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">Peilaa vaakasuunnassa</string>
     <string name="brightness_value">Takanäytön kirkkaus · %1$d%%</string>
     <string name="brightness_accessibility">Takanäytön kirkkaus</string>
-    <string name="brightness_mode_help">Rootilla käytetään fyysistä takataustavaloa. Ilman rootia himmennetään vain takakuva.</string>
+    <string name="auto_brightness_title">Automaattinen kirkkaus</string>
+    <string name="brightness_mode_help">Rootilla käytetään fyysistä takataustavaloa. Ilman rootia himmennetään vain takakuva. Automaattisessa kirkkaudessa valoanturi vain laskee paneelia yllä asetetun tason alle, ei koskaan sen yli.</string>
     <string name="profile_image_title">Kuva ja kalibrointi</string>
     <string name="calibration_title">Kalibrointi</string>
     <string name="calibration_help">Hienosäädä tätä profiilia, kun olet valinnut sen skaalaustilan.</string>

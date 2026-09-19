@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">Spegla vågrätt</string>
     <string name="brightness_value">Ljusstyrka på bakre skärmen · %1$d%%</string>
     <string name="brightness_accessibility">Ljusstyrka på bakre skärmen</string>
-    <string name="brightness_mode_help">Med root används den fysiska bakre bakgrundsbelysningen. Utan root dämpas bara den bakre bilden.</string>
+    <string name="auto_brightness_title">Automatisk ljusstyrka</string>
+    <string name="brightness_mode_help">Med root används den fysiska bakre bakgrundsbelysningen. Utan root dämpas bara den bakre bilden. Med automatisk ljusstyrka sänker ljussensorn bara panelen under nivån ovan, aldrig över den.</string>
     <string name="profile_image_title">Bild och kalibrering</string>
     <string name="calibration_title">Kalibrering</string>
     <string name="calibration_help">Finjustera profilen när du har valt dess skalningsläge.</string>

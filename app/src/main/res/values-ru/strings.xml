@@ -68,7 +68,8 @@
     <string name="battery_threshold_default">Предел заряда · 15%</string>
     <string name="battery_threshold_value">Предел заряда · %1$d%%</string>
     <string name="brightness_accessibility">Яркость заднего экрана</string>
-    <string name="brightness_mode_help">При наличии root используется подсветка задней панели. Без root затемняется только изображение.</string>
+    <string name="auto_brightness_title">Автояркость</string>
+    <string name="brightness_mode_help">При наличии root используется подсветка задней панели. Без root затемняется только изображение. При автояркости датчик освещённости только опускает панель ниже заданного выше уровня, но никогда выше него.</string>
     <string name="brightness_value">Яркость заднего экрана · %1$d%%</string>
     <string name="calibration_grid_switch">Показывать калибровочную сетку при трансляции</string>
     <string name="calibration_help">Точная настройка этого профиля после выбора режима масштабирования.</string>

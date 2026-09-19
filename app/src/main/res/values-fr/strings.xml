@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">Inverser horizontalement</string>
     <string name="brightness_value">Luminosité de l\'écran arrière · %1$d%%</string>
     <string name="brightness_accessibility">Luminosité de l\'écran arrière</string>
-    <string name="brightness_mode_help">Avec le root, le rétroéclairage arrière physique est utilisé. Sans root, seule l\'image arrière est atténuée.</string>
+    <string name="auto_brightness_title">Luminosité automatique</string>
+    <string name="brightness_mode_help">Avec le root, le rétroéclairage arrière physique est utilisé. Sans root, seule l\'image arrière est atténuée. Avec la luminosité automatique, le capteur de lumière ne fait que descendre sous le niveau réglé ci-dessus, jamais au-delà.</string>
     <string name="profile_image_title">Image et calibration</string>
     <string name="calibration_title">Calibration</string>
     <string name="calibration_help">Affinez ce profil après avoir choisi son mode de mise à l\'échelle.</string>

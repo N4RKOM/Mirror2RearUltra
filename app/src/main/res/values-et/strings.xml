@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">Peegelda horisontaalselt</string>
     <string name="brightness_value">Tagaekraani heledus · %1$d%%</string>
     <string name="brightness_accessibility">Tagaekraani heledus</string>
-    <string name="brightness_mode_help">Rootiga kasutatakse füüsilist taguse taustvalgust. Ilma rootita tumendatakse ainult tagapilti.</string>
+    <string name="auto_brightness_title">Automaatne heledus</string>
+    <string name="brightness_mode_help">Rootiga kasutatakse füüsilist taguse taustvalgust. Ilma rootita tumendatakse ainult tagapilti. Automaatse heleduse korral langetab valgusandur paneeli ainult ülal määratud tasemest allapoole, mitte kunagi üle selle.</string>
     <string name="profile_image_title">Pilt ja kalibreerimine</string>
     <string name="calibration_title">Kalibreerimine</string>
     <string name="calibration_help">Häälestage see profiil pärast skaleerimisrežiimi valimist.</string>

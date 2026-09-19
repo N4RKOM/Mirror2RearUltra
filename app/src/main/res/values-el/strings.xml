@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">Οριζόντια αντιστροφή</string>
     <string name="brightness_value">Φωτεινότητα πίσω οθόνης · %1$d%%</string>
     <string name="brightness_accessibility">Φωτεινότητα πίσω οθόνης</string>
-    <string name="brightness_mode_help">Με root χρησιμοποιείται ο φυσικός πίσω οπίσθιος φωτισμός. Χωρίς root εξασθενεί μόνο η πίσω εικόνα.</string>
+    <string name="auto_brightness_title">Αυτόματη φωτεινότητα</string>
+    <string name="brightness_mode_help">Με root χρησιμοποιείται ο φυσικός πίσω οπίσθιος φωτισμός. Χωρίς root εξασθενεί μόνο η πίσω εικόνα. Με την αυτόματη φωτεινότητα, ο αισθητήρας φωτός μόνο κατεβάζει τον πίνακα κάτω από το επίπεδο που ορίσατε παραπάνω, ποτέ πιο πάνω.</string>
     <string name="profile_image_title">Εικόνα και βαθμονόμηση</string>
     <string name="calibration_title">Βαθμονόμηση</string>
     <string name="calibration_help">Ρυθμίστε με ακρίβεια αυτό το προφίλ αφού επιλέξετε τη λειτουργία κλιμάκωσής του.</string>

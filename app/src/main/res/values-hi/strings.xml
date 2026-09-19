@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">आड़ा पलटें</string>
     <string name="brightness_value">पिछली स्क्रीन की ब्राइटनेस · %1$d%%</string>
     <string name="brightness_accessibility">पिछली स्क्रीन की ब्राइटनेस</string>
-    <string name="brightness_mode_help">Root के साथ असली पिछली बैकलाइट इस्तेमाल होती है। Root के बिना सिर्फ़ पिछली इमेज मंद होती है।</string>
+    <string name="auto_brightness_title">अपने आप ब्राइटनेस</string>
+    <string name="brightness_mode_help">Root के साथ असली पिछली बैकलाइट इस्तेमाल होती है। Root के बिना सिर्फ़ पिछली इमेज मंद होती है। अपने आप ब्राइटनेस में लाइट सेंसर पैनल को ऊपर तय किए गए स्तर से सिर्फ़ नीचे लाता है, उससे ऊपर कभी नहीं।</string>
     <string name="profile_image_title">इमेज और कैलिब्रेशन</string>
     <string name="calibration_title">कैलिब्रेशन</string>
     <string name="calibration_help">स्केलिंग मोड चुनने के बाद इस प्रोफ़ाइल को बारीकी से सेट करें।</string>

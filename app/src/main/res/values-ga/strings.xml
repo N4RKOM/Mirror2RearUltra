@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">Scáthánaigh go cothrománach</string>
     <string name="brightness_value">Gile an scáileáin chúil · %1$d%%</string>
     <string name="brightness_accessibility">Gile an scáileáin chúil</string>
-    <string name="brightness_mode_help">Le root úsáidtear an cúlsolas fisiciúil cúil. Gan root, ní mhaolaítear ach an íomhá chúil.</string>
+    <string name="auto_brightness_title">Gile uathoibríoch</string>
+    <string name="brightness_mode_help">Le root úsáidtear an cúlsolas fisiciúil cúil. Gan root, ní mhaolaítear ach an íomhá chúil. Leis an ngile uathoibríoch, ní dhéanann an braiteoir solais ach an painéal a ísliú faoin leibhéal thuas, riamh os a chionn.</string>
     <string name="profile_image_title">Íomhá agus calabrú</string>
     <string name="calibration_title">Calabrú</string>
     <string name="calibration_help">Mionchoigeartaigh an phróifíl seo tar éis duit a mód scálaithe a roghnú.</string>

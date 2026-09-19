@@ -35,6 +35,7 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
     private HyperValueRow rotationInput;
     private MaterialSwitch mirrorSwitch;
     private HyperSlider brightnessSlider;
+    private MaterialSwitch autoBrightnessSwitch;
     private TextView brightnessValue;
     private HyperValueRow qualityModeInput;
     private MaterialSwitch calibrationGridSwitch;
@@ -69,6 +70,11 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
         rotationInput = findViewById(R.id.rotation_input);
         mirrorSwitch = findViewById(R.id.mirror_switch);
         brightnessSlider = findViewById(R.id.brightness_slider);
+        autoBrightnessSwitch = findViewById(R.id.auto_brightness_switch);
+        // No sensor, no promise: the row would do nothing on a device without
+        // one, and there would be no way to tell from looking at it.
+        boolean hasLightSensor = new AutoBrightnessSensor(this, factor -> { }).isAvailable();
+        autoBrightnessSwitch.setVisibility(hasLightSensor ? View.VISIBLE : View.GONE);
         brightnessValue = findViewById(R.id.brightness_value);
         qualityModeInput = findViewById(R.id.quality_mode_input);
         calibrationGridSwitch = findViewById(R.id.calibration_grid_switch);
@@ -156,6 +162,17 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
             }
         });
 
+        autoBrightnessSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (bindingUi) {
+                return;
+            }
+            DashboardWidgetLayout.setAutoBrightnessEnabled(this, checked);
+            // The session watches the profile store, not this one, so a save
+            // is what tells a running panel that the switch moved.
+            MirrorSettings.saveDashboardSettings(this,
+                    MirrorSettings.loadDashboardSettings(this));
+        });
+
         brightnessSlider.addOnChangeListener((slider, value, fromUser) -> {
             int percent = Math.round(value);
             updateBrightnessValue(percent);
@@ -229,6 +246,7 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
         mirrorSwitch.setChecked(profile.mirrorHorizontally);
         brightnessSlider.setValue(profile.brightnessPercent);
         updateBrightnessValue(profile.brightnessPercent);
+        autoBrightnessSwitch.setChecked(DashboardWidgetLayout.isAutoBrightnessEnabled(this));
         zoomSlider.setValue(profile.zoomPercent);
         horizontalOffsetSlider.setValue(profile.horizontalOffsetPercent);
         verticalOffsetSlider.setValue(profile.verticalOffsetPercent);

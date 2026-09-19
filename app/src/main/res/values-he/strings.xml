@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">היפוך אופקי</string>
     <string name="brightness_value">בהירות המסך האחורי · %1$d%%</string>
     <string name="brightness_accessibility">בהירות המסך האחורי</string>
-    <string name="brightness_mode_help">עם root נעשה שימוש בתאורה האחורית הפיזית. בלי root מעומעמת רק התמונה האחורית.</string>
+    <string name="auto_brightness_title">בהירות אוטומטית</string>
+    <string name="brightness_mode_help">עם root נעשה שימוש בתאורה האחורית הפיזית. בלי root מעומעמת רק התמונה האחורית. בבהירות אוטומטית חיישן האור רק מוריד את הלוח מתחת לרמה שנקבעה למעלה, לעולם לא מעליה.</string>
     <string name="profile_image_title">תמונה וכיול</string>
     <string name="calibration_title">כיול</string>
     <string name="calibration_help">יש לכוונן את הפרופיל הזה אחרי בחירת מצב שינוי קנה המידה שלו.</string>

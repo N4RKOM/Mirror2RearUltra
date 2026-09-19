@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">Invertir horizontalmente</string>
     <string name="brightness_value">Brillo de la pantalla trasera · %1$d%%</string>
     <string name="brightness_accessibility">Brillo de la pantalla trasera</string>
-    <string name="brightness_mode_help">Con root se usa la retroiluminación trasera física. Sin root, solo se atenúa la imagen trasera.</string>
+    <string name="auto_brightness_title">Brillo automático</string>
+    <string name="brightness_mode_help">Con root se usa la retroiluminación trasera física. Sin root, solo se atenúa la imagen trasera. Con el brillo automático, el sensor de luz solo baja el panel por debajo del nivel fijado arriba, nunca por encima.</string>
     <string name="profile_image_title">Imagen y calibración</string>
     <string name="calibration_title">Calibración</string>
     <string name="calibration_help">Ajusta este perfil con precisión después de elegir su modo de escalado.</string>

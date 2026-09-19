@@ -63,6 +63,9 @@ public class Mirror extends Activity implements
     private FrameLayout mirrorLayout;
     private RearDashboardController dashboardController;
     private RearBrightnessController brightnessController;
+    private AutoBrightnessSensor autoBrightness;
+    /** What the room is worth, as a share of the profile's brightness. */
+    private float ambientFactor = 1f;
     private DeviceHealthMonitor deviceHealthMonitor;
     private ForegroundAppMonitor foregroundAppMonitor;
     private MirrorControlOverlay mirrorControlOverlay;
@@ -183,6 +186,11 @@ public class Mirror extends Activity implements
         brightnessController = new RearBrightnessController((hardwareControlActive, appliedPercent) ->
                 runOnUiThread(() -> onHardwareBrightnessApplied(hardwareControlActive, appliedPercent))
         );
+        autoBrightness = new AutoBrightnessSensor(this, factor -> runOnUiThread(() -> {
+            ambientFactor = factor;
+            applyProfileBrightness();
+        }));
+        startAutoBrightnessIfWanted();
         configureProjectionSurfaceSize();
         if (usesProjection()) {
             textureView.setSurfaceTextureListener(this);
@@ -248,6 +256,9 @@ public class Mirror extends Activity implements
         if (dashboardController != null) {
             dashboardController.stop();
         }
+        if (autoBrightness != null) {
+            autoBrightness.stop();
+        }
         AutoProfileState.clear();
 
         if (!isChangingConfigurations()) {
@@ -293,6 +304,9 @@ public class Mirror extends Activity implements
                 dashboardController.updateSettings(dashboardSettings);
             }
             configureAutoProfileMonitoring();
+            // The switch lives outside the profile, so a running session only
+            // learns about it here.
+            startAutoBrightnessIfWanted();
             AutoProfileState.Snapshot automatic = AutoProfileState.get();
             String automaticProfileId = automatic.packageName == null
                     ? null
@@ -579,7 +593,34 @@ public class Mirror extends Activity implements
             brightnessOverlay.setAlpha(aodDimOverlayAlpha());
             return;
         }
-        applyBrightnessPercent(activeProfile.brightnessPercent);
+        applyBrightnessPercent(ambientAdjusted(activeProfile.brightnessPercent));
+    }
+
+    /**
+     * The brightness the room asks for, never more than the profile allows.
+     *
+     * <p>The slider stays the ceiling. Automatic light only takes the panel
+     * down, which is the thing that needed fixing: one set for daylight is
+     * painful in a dark room, and nobody wants the reverse surprise of a
+     * panel that brightens itself past what they chose.
+     */
+    private int ambientAdjusted(int percent) {
+        if (autoBrightness == null || !DashboardWidgetLayout.isAutoBrightnessEnabled(this)) {
+            return percent;
+        }
+        return Math.max(1, Math.round(percent * ambientFactor));
+    }
+
+    private void startAutoBrightnessIfWanted() {
+        if (autoBrightness == null) {
+            return;
+        }
+        if (DashboardWidgetLayout.isAutoBrightnessEnabled(this) && autoBrightness.isAvailable()) {
+            autoBrightness.start();
+        } else {
+            autoBrightness.stop();
+            ambientFactor = 1f;
+        }
     }
 
     private void applyBrightnessPercent(int percent) {

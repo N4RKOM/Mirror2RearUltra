@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">قرینه‌سازی افقی</string>
     <string name="brightness_value">روشنایی صفحهٔ عقب · %1$d%%</string>
     <string name="brightness_accessibility">روشنایی صفحهٔ عقب</string>
-    <string name="brightness_mode_help">با root از نور پس‌زمینهٔ فیزیکی پشت استفاده می‌شود. بدون root تنها تصویر پشت کم‌نور می‌شود.</string>
+    <string name="auto_brightness_title">روشنایی خودکار</string>
+    <string name="brightness_mode_help">با root از نور پس‌زمینهٔ فیزیکی پشت استفاده می‌شود. بدون root تنها تصویر پشت کم‌نور می‌شود. در روشنایی خودکار، حسگر نور فقط پنل را پایین‌تر از سطح تعیین‌شده در بالا می‌برد، هرگز بالاتر از آن.</string>
     <string name="profile_image_title">تصویر و کالیبراسیون</string>
     <string name="calibration_title">کالیبراسیون</string>
     <string name="calibration_help">پس از انتخاب حالت مقیاس‌بندی، این نمایه را دقیق تنظیم کنید.</string>

@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">عكس أفقي</string>
     <string name="brightness_value">سطوع الشاشة الخلفية · %1$d%%</string>
     <string name="brightness_accessibility">سطوع الشاشة الخلفية</string>
-    <string name="brightness_mode_help">مع root تُستخدم الإضاءة الخلفية الفعلية. وبدون root يُعتَّم الإخراج الخلفي وحده.</string>
+    <string name="auto_brightness_title">السطوع التلقائي</string>
+    <string name="brightness_mode_help">مع root تُستخدم الإضاءة الخلفية الفعلية. وبدون root يُعتَّم الإخراج الخلفي وحده. مع السطوع التلقائي، لا يخفض مستشعر الضوء اللوحة إلا دون المستوى المحدد أعلاه، ولا يتجاوزه أبدًا.</string>
     <string name="profile_image_title">الصورة والمعايرة</string>
     <string name="calibration_title">المعايرة</string>
     <string name="calibration_help">اضبط هذا الملف بدقة بعد اختيار وضع التحجيم الخاص به.</string>

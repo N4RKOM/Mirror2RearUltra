@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">Speil vannrett</string>
     <string name="brightness_value">Lysstyrke på bakskjermen · %1$d%%</string>
     <string name="brightness_accessibility">Lysstyrke på bakskjermen</string>
-    <string name="brightness_mode_help">Med root brukes det fysiske baklyset bak. Uten root dempes bare bakbildet.</string>
+    <string name="auto_brightness_title">Automatisk lysstyrke</string>
+    <string name="brightness_mode_help">Med root brukes det fysiske baklyset bak. Uten root dempes bare bakbildet. Med automatisk lysstyrke senker lyssensoren bare panelet under nivået over, aldri forbi det.</string>
     <string name="profile_image_title">Bilde og kalibrering</string>
     <string name="calibration_title">Kalibrering</string>
     <string name="calibration_help">Finjuster denne profilen etter at du har valgt skaleringsmodusen.</string>

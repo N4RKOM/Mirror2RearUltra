@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">Oglindește pe orizontală</string>
     <string name="brightness_value">Luminozitatea ecranului din spate · %1$d%%</string>
     <string name="brightness_accessibility">Luminozitatea ecranului din spate</string>
-    <string name="brightness_mode_help">Cu root se folosește iluminarea fizică din spate. Fără root se atenuează doar imaginea din spate.</string>
+    <string name="auto_brightness_title">Luminozitate automată</string>
+    <string name="brightness_mode_help">Cu root se folosește iluminarea fizică din spate. Fără root se atenuează doar imaginea din spate. Cu luminozitatea automată, senzorul de lumină doar coboară panoul sub nivelul stabilit mai sus, niciodată peste.</string>
     <string name="profile_image_title">Imagine și calibrare</string>
     <string name="calibration_title">Calibrare</string>
     <string name="calibration_help">Reglați fin acest profil după ce îi alegeți modul de scalare.</string>

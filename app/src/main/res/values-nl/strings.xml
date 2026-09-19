@@ -97,7 +97,8 @@
     <string name="mirror_horizontally">Horizontaal spiegelen</string>
     <string name="brightness_value">Helderheid achterscherm · %1$d%%</string>
     <string name="brightness_accessibility">Helderheid achterscherm</string>
-    <string name="brightness_mode_help">Met root wordt de fysieke achterverlichting gebruikt. Zonder root wordt alleen het achterbeeld gedimd.</string>
+    <string name="auto_brightness_title">Automatische helderheid</string>
+    <string name="brightness_mode_help">Met root wordt de fysieke achterverlichting gebruikt. Zonder root wordt alleen het achterbeeld gedimd. Bij automatische helderheid brengt de lichtsensor het paneel alleen onder het hierboven ingestelde niveau, nooit erboven.</string>
     <string name="profile_image_title">Beeld en kalibratie</string>
     <string name="calibration_title">Kalibratie</string>
     <string name="calibration_help">Stel dit profiel bij nadat je de schaalmodus hebt gekozen.</string>
