@@ -465,6 +465,7 @@ final class RearDashboardController implements
                 nextAlarm == null ? null : nextAlarm.getTriggerTime(),
                 media.title,
                 media.artist,
+                media.playing,
                 headingDegrees,
                 speedMetersPerSecond,
                 altitudeMeters,

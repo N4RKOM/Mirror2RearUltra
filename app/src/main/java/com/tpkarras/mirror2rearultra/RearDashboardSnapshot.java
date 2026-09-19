@@ -12,6 +12,7 @@ final class RearDashboardSnapshot {
     final Long nextAlarmMillis;
     final String mediaTitle;
     final String mediaArtist;
+    final boolean mediaPlaying;
     final Float headingDegrees;
     final Float speedMetersPerSecond;
     final Double altitudeMeters;
@@ -50,6 +51,7 @@ final class RearDashboardSnapshot {
                 null,
                 "",
                 "",
+                false,
                 null,
                 null,
                 null,
@@ -70,6 +72,7 @@ final class RearDashboardSnapshot {
             Long nextAlarmMillis,
             String mediaTitle,
             String mediaArtist,
+            boolean mediaPlaying,
             Float headingDegrees,
             Float speedMetersPerSecond,
             Double altitudeMeters,
@@ -78,7 +81,8 @@ final class RearDashboardSnapshot {
     ) {
         this(timestampMillis, batteryPercent, temperatureTenthsCelsius, charging, weatherPlace,
                 weatherTemperatureCelsius, weatherCode, weatherLoading, nextAlarmMillis,
-                mediaTitle, mediaArtist, headingDegrees, speedMetersPerSecond, altitudeMeters,
+                mediaTitle, mediaArtist, mediaPlaying, headingDegrees, speedMetersPerSecond,
+                altitudeMeters,
                 sessionElapsedMillis, activeProfileName, "", -1, -1, "", null, -1,
                 "", "", "");
     }
@@ -87,7 +91,7 @@ final class RearDashboardSnapshot {
             long timestampMillis, int batteryPercent, int temperatureTenthsCelsius,
             boolean charging, String weatherPlace, Integer weatherTemperatureCelsius,
             Integer weatherCode, boolean weatherLoading, Long nextAlarmMillis,
-            String mediaTitle, String mediaArtist, Float headingDegrees,
+            String mediaTitle, String mediaArtist, boolean mediaPlaying, Float headingDegrees,
             Float speedMetersPerSecond, Double altitudeMeters, long sessionElapsedMillis,
             String activeProfileName, String networkSummary, int memoryPercent,
             int storagePercentFree, String calendarTitle, Long calendarStartMillis,
@@ -105,6 +109,7 @@ final class RearDashboardSnapshot {
         this.nextAlarmMillis = nextAlarmMillis;
         this.mediaTitle = mediaTitle == null ? "" : mediaTitle;
         this.mediaArtist = mediaArtist == null ? "" : mediaArtist;
+        this.mediaPlaying = mediaPlaying;
         this.headingDegrees = headingDegrees;
         this.speedMetersPerSecond = speedMetersPerSecond;
         this.altitudeMeters = altitudeMeters;

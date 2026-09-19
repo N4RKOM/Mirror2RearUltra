@@ -1369,12 +1369,48 @@ public final class RearDashboardView extends View {
         canvas.drawText(artist.toString(), panel.centerX(), panel.top + panel.height() * 0.48f,
                 textPaint);
         textPaint.setTextSize(clamp(panel.height() * 0.18f, 18f * density, 42f * density));
-        canvas.drawText("‹‹", panel.left + panel.width() / 6f,
-                panel.top + panel.height() * 0.78f, textPaint);
-        canvas.drawText("▶", panel.centerX(), panel.top + panel.height() * 0.78f, textPaint);
-        canvas.drawText("››", panel.right - panel.width() / 6f,
-                panel.top + panel.height() * 0.78f, textPaint);
+        float row = panel.top + panel.height() * 0.78f;
+        canvas.drawText("‹‹", panel.left + panel.width() / 6f, row, textPaint);
+        canvas.drawText("››", panel.right - panel.width() / 6f, row, textPaint);
+        // Drawn rather than typed. The glyph was a fixed triangle whatever the
+        // session was doing, and a pause pair is exactly the sort of character
+        // the small display faces on offer here turn into a box.
+        drawTransportState(canvas, panel.centerX(), row, textPaint.getTextSize(),
+                snapshot.mediaPlaying);
         textPaint.setTextAlign(Paint.Align.LEFT);
+    }
+
+    /**
+     * The middle transport control: two bars while playing, a triangle while
+     * not, sized and coloured to sit in the row with the two chevrons.
+     *
+     * <p>Baseline-aligned like the text beside it, so the box is lifted by
+     * roughly a capital height rather than centred on the baseline.
+     */
+    private void drawTransportState(Canvas canvas, float centreX, float baselineY,
+            float textSize, boolean playing) {
+        float height = textSize * 0.62f;
+        float top = baselineY - height * 1.12f;
+        iconPaint.setColor(textPaint.getColor());
+        iconPaint.setStyle(Paint.Style.FILL);
+        if (playing) {
+            float bar = height * 0.28f;
+            float gap = bar * 0.85f;
+            canvas.drawRect(centreX - gap / 2f - bar, top, centreX - gap / 2f,
+                    top + height, iconPaint);
+            canvas.drawRect(centreX + gap / 2f, top, centreX + gap / 2f + bar,
+                    top + height, iconPaint);
+        } else {
+            float half = height * 0.46f;
+            Path triangle = new Path();
+            triangle.moveTo(centreX - half, top);
+            triangle.lineTo(centreX + half, top + height / 2f);
+            triangle.lineTo(centreX - half, top + height);
+            triangle.close();
+            canvas.drawPath(triangle, iconPaint);
+        }
+        // The shared paint goes back to how the rest of the view expects it.
+        iconPaint.setStyle(Paint.Style.STROKE);
     }
 
     /** Visual alternatives for text whose content is supplied by the user or system. */

@@ -24,6 +24,8 @@ public class MediaNotificationListenerService extends NotificationListenerServic
             | Notification.FLAG_NO_CLEAR;
 
     private static volatile MediaController currentController;
+    /** Registered on whichever controller is current, so state changes arrive. */
+    private MediaController.Callback playbackCallback;
 
     static boolean previous() { return dispatch(Transport.PREVIOUS); }
     static boolean playPause() { return dispatch(Transport.PLAY_PAUSE); }
@@ -36,11 +38,8 @@ public class MediaNotificationListenerService extends NotificationListenerServic
             MediaController.TransportControls controls = controller.getTransportControls();
             if (action == Transport.PREVIOUS) controls.skipToPrevious();
             else if (action == Transport.NEXT) controls.skipToNext();
-            else {
-                PlaybackState state = controller.getPlaybackState();
-                if (state != null && state.getState() == PlaybackState.STATE_PLAYING) controls.pause();
-                else controls.play();
-            }
+            else if (isPlaying(controller.getPlaybackState())) controls.pause();
+            else controls.play();
             return true;
         } catch (RuntimeException error) { return false; }
     }
@@ -53,7 +52,7 @@ public class MediaNotificationListenerService extends NotificationListenerServic
 
     @Override
     public void onListenerDisconnected() {
-        currentController = null;
+        attachTo(null);
         NotificationWidgetState.clear();
         MediaWidgetState.clear();
         super.onListenerDisconnected();
@@ -81,7 +80,7 @@ public class MediaNotificationListenerService extends NotificationListenerServic
         try {
             notifications = getActiveNotifications();
         } catch (RuntimeException error) {
-            currentController = null;
+            attachTo(null);
             MediaWidgetState.clear();
             return;
         }
@@ -95,18 +94,61 @@ public class MediaNotificationListenerService extends NotificationListenerServic
             }
         }
         if (selected == null) {
-            currentController = null;
+            attachTo(null);
             MediaWidgetState.clear();
             return;
         }
         Bundle extras = selected.getNotification().extras;
-        currentController = controllerFrom(extras);
+        attachTo(controllerFrom(extras));
+        MediaController controller = currentController;
         CharSequence title = extras.getCharSequence(Notification.EXTRA_TITLE);
         CharSequence artist = extras.getCharSequence(Notification.EXTRA_TEXT);
         MediaWidgetState.set(
                 title == null ? "" : title.toString(),
-                artist == null ? "" : artist.toString()
+                artist == null ? "" : artist.toString(),
+                controller != null && isPlaying(controller.getPlaybackState())
         );
+    }
+
+    /**
+     * Follows one session at a time, and hears it start and stop.
+     *
+     * <p>The panel drew a play triangle whichever way round the session was,
+     * because nothing ever told it. A reposted notification would have carried
+     * the change, but whether one arrives is the playing app's business, so
+     * the state is taken from the session itself.
+     */
+    private void attachTo(MediaController controller) {
+        MediaController previous = currentController;
+        if (previous != null && playbackCallback != null) {
+            try {
+                previous.unregisterCallback(playbackCallback);
+            } catch (RuntimeException ignored) {
+                // Already gone; nothing left to detach from.
+            }
+        }
+        playbackCallback = null;
+        currentController = controller;
+        if (controller == null) {
+            return;
+        }
+        playbackCallback = new MediaController.Callback() {
+            @Override
+            public void onPlaybackStateChanged(PlaybackState state) {
+                // The words have not changed, only whether they are moving.
+                MediaWidgetState.Snapshot last = MediaWidgetState.get();
+                MediaWidgetState.set(last.title, last.artist, isPlaying(state));
+            }
+        };
+        try {
+            controller.registerCallback(playbackCallback);
+        } catch (RuntimeException ignored) {
+            playbackCallback = null;
+        }
+    }
+
+    private static boolean isPlaying(PlaybackState state) {
+        return state != null && state.getState() == PlaybackState.STATE_PLAYING;
     }
 
     /**

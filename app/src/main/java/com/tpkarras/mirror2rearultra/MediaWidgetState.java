@@ -15,10 +15,13 @@ final class MediaWidgetState {
     static final class Snapshot {
         final String title;
         final String artist;
+        /** Whether the session is actually playing, for the transport icon. */
+        final boolean playing;
 
-        Snapshot(String title, String artist) {
+        Snapshot(String title, String artist, boolean playing) {
             this.title = title == null ? "" : title;
             this.artist = artist == null ? "" : artist;
+            this.playing = playing;
         }
 
         boolean hasMedia() {
@@ -27,7 +30,7 @@ final class MediaWidgetState {
     }
 
     private static final Set<Listener> LISTENERS = new CopyOnWriteArraySet<>();
-    private static volatile Snapshot current = new Snapshot("", "");
+    private static volatile Snapshot current = new Snapshot("", "", false);
 
     private MediaWidgetState() {
     }
@@ -36,8 +39,16 @@ final class MediaWidgetState {
         return current;
     }
 
-    static void set(String title, String artist) {
-        Snapshot next = new Snapshot(title, artist);
+    static void set(String title, String artist, boolean playing) {
+        Snapshot next = new Snapshot(title, artist, playing);
+        Snapshot previous = current;
+        // A session can report its state several times a second, position and
+        // all. Only a change anyone can see is worth waking the panel for.
+        if (previous.playing == next.playing
+                && previous.title.equals(next.title)
+                && previous.artist.equals(next.artist)) {
+            return;
+        }
         current = next;
         for (Listener listener : LISTENERS) {
             listener.onMediaWidgetChanged(next);
@@ -45,7 +56,7 @@ final class MediaWidgetState {
     }
 
     static void clear() {
-        set("", "");
+        set("", "", false);
     }
 
     static void addListener(Listener listener) {

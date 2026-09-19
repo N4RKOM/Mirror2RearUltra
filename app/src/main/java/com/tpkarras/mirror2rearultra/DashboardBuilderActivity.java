@@ -125,6 +125,9 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         // The preview is the other half of the list: tapping a widget there
         // picks it here, and in the free layout dragging it moves it.
         bindPreview(singlePreview);
+        // Without this the preview keeps whatever the track was doing when it
+        // was last drawn, which is the very confusion the icon was fixed for.
+        MediaWidgetState.addListener(mediaListener);
         String[] presetLabels = {getString(R.string.dashboard_preset_clock),
                 getString(R.string.dashboard_preset_trip), getString(R.string.dashboard_preset_music),
                 getString(R.string.dashboard_preset_weather)};
@@ -970,6 +973,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 System.currentTimeMillis() + 3_600_000L,
                 playing ? media.title : getString(R.string.dashboard_builder_sample_track),
                 playing ? media.artist : "",
+                media != null && media.playing,
                 45f,
                 8.3f,
                 120.0,
@@ -1170,6 +1174,13 @@ public class DashboardBuilderActivity extends AppCompatActivity {
      * them, bound once with page one - so every touch put the builder back on
      * page one, and page two could be looked at but never edited.
      */
+    /** Redraws the preview when the session starts, stops or changes track. */
+    private final MediaWidgetState.Listener mediaListener = snapshot -> runOnUiThread(() -> {
+        if (!isFinishing() && !isDestroyed()) {
+            refreshPreview();
+        }
+    });
+
     private void bindPreview(RearDashboardView target) {
         target.setOnWidgetSelectedListener(new RearDashboardView.OnWidgetSelectedListener() {
             @Override public void onWidgetSelected(@Nullable DashboardWidgetLayout.Widget widget) {
@@ -1360,6 +1371,12 @@ public class DashboardBuilderActivity extends AppCompatActivity {
 
 
 
+
+    @Override
+    protected void onDestroy() {
+        MediaWidgetState.removeListener(mediaListener);
+        super.onDestroy();
+    }
 
     private String styleLabel(DashboardWidgetLayout.Style style) {
         return getString(style == DashboardWidgetLayout.Style.ACCENT
