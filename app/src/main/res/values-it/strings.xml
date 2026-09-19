@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Bussola</string>
     <string name="dashboard_widget_speed">Velocità</string>
     <string name="dashboard_widget_altitude">Altitudine</string>
+    <string name="dashboard_widget_timer">Timer</string>
+    <string name="dashboard_timer_duration">Durata</string>
+    <string name="dashboard_timer_stopwatch">Cronometro</string>
     <string name="dashboard_widget_session_timer">Durata della sessione posteriore</string>
     <string name="dashboard_widget_active_profile">Profilo attivo</string>
     <string name="dashboard_widget_custom_text">Testo personalizzato</string>
@@ -410,4 +413,8 @@
     <string name="dashboard_aod_min_brightness_default">Luminosità minima AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Luminosità minima AOD: %1$d%%</string>
     <string name="dashboard_idle_mode_help">Dopo 15 o 30 secondi la luminosità cala e la sessione dello schermo posteriore termina. Always on Display resta alla luminosità scelta per 30 secondi, poi scende dolcemente al minimo. Toccando lo schermo posteriore la luminosità torna e il timer riparte. La deriva anti-burn-in continua a funzionare in AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d minuto</item>
+        <item quantity="other">%1$d minuti</item>
+    </plurals>
 </resources>

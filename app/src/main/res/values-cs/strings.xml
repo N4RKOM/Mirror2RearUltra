@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Kompas</string>
     <string name="dashboard_widget_speed">Rychlost</string>
     <string name="dashboard_widget_altitude">Nadmořská výška</string>
+    <string name="dashboard_widget_timer">Časovač</string>
+    <string name="dashboard_timer_duration">Délka</string>
+    <string name="dashboard_timer_stopwatch">Stopky</string>
     <string name="dashboard_widget_session_timer">Doba relace zadního výstupu</string>
     <string name="dashboard_widget_active_profile">Aktivní profil</string>
     <string name="dashboard_widget_custom_text">Vlastní text</string>
@@ -412,4 +415,10 @@
     <string name="dashboard_aod_min_brightness_default">Minimální jas AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Minimální jas AOD: %1$d%%</string>
     <string name="dashboard_idle_mode_help">Po 15 nebo 30 sekundách jas klesne a relace zadní obrazovky skončí. Always on Display zůstane na zvoleném jasu 30 sekund a pak plynule ztlumí na minimum. Dotyk zadní obrazovky jas obnoví a časovač spustí znovu. Posun proti vypálení funguje i v AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d minuta</item>
+        <item quantity="few">%1$d minuty</item>
+        <item quantity="many">%1$d minuty</item>
+        <item quantity="other">%1$d minut</item>
+    </plurals>
 </resources>

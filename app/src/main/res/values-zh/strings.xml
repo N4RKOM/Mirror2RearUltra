@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">指南针</string>
     <string name="dashboard_widget_speed">速度</string>
     <string name="dashboard_widget_altitude">海拔</string>
+    <string name="dashboard_widget_timer">计时器</string>
+    <string name="dashboard_timer_duration">时长</string>
+    <string name="dashboard_timer_stopwatch">秒表</string>
     <string name="dashboard_widget_session_timer">后屏输出时长</string>
     <string name="dashboard_widget_active_profile">当前配置</string>
     <string name="dashboard_widget_custom_text">自定义文字</string>
@@ -409,4 +412,7 @@
     <string name="dashboard_aod_min_brightness_default">息屏显示最低亮度：8%</string>
     <string name="dashboard_aod_min_brightness_value">息屏显示最低亮度：%1$d%%</string>
     <string name="dashboard_idle_mode_help">15 或 30 秒后亮度渐暗，后屏会话随之结束。息屏显示会在所选亮度停留 30 秒，然后平滑降到最低亮度。触摸后屏会恢复亮度并重新计时。防烧屏位移在息屏显示下仍然有效。</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="other">%1$d 分钟</item>
+    </plurals>
 </resources>

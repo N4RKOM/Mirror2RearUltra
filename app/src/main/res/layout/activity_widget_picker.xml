@@ -79,6 +79,11 @@
                     android:text="@string/dashboard_widget_next_alarm" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_timer_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_timer" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_session_timer_switch"
                     style="@style/HyperOS.Switch"
                     android:text="@string/dashboard_widget_session_timer" />

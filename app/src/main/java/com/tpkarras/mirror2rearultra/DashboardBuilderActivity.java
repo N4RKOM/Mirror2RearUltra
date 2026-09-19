@@ -583,6 +583,43 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     notifyDashboardChanged();
                 }));
 
+        // The one number that decides whether this widget counts up or down,
+        // so it belongs on its own card rather than in a settings screen.
+        if (widget == DashboardWidgetLayout.Widget.TIMER) {
+            int[] choices = {0, 1, 3, 5, 10, 15, 20, 30, 45, 60, 90, 120};
+            String[] durationLabels = new String[choices.length];
+            for (int index = 0; index < choices.length; index++) {
+                durationLabels[index] = choices[index] == 0
+                        ? getString(R.string.dashboard_timer_stopwatch)
+                        : getResources().getQuantityString(
+                                R.plurals.dashboard_timer_minutes,
+                                choices[index], choices[index]);
+            }
+            HyperValueRow durationRow = new HyperValueRow(this);
+            durationRow.setTitle(getString(R.string.dashboard_timer_duration));
+            durationRow.setEntries(durationLabels);
+            int minutes = DashboardWidgetLayout.timerMinutes(this);
+            int current = 0;
+            for (int index = 0; index < choices.length; index++) {
+                if (choices[index] == minutes) {
+                    current = index;
+                }
+            }
+            durationRow.setValue(durationLabels[current]);
+            durationRow.setOnItemSelectedListener(position -> {
+                if (position >= 0 && position < choices.length) {
+                    DashboardWidgetLayout.setTimerMinutes(this, choices[position]);
+                    // Changing the length mid-count would leave a countdown
+                    // already past its new end, showing zero for no reason.
+                    TimerWidgetState.reset(this);
+                    notifyDashboardChanged();
+                }
+            });
+            LinearLayout.LayoutParams durationParams = new LinearLayout.LayoutParams(-1, -2);
+            durationParams.topMargin = dp(10);
+            row.addView(durationRow, durationParams);
+        }
+
         // A list rather than a segmented row: there are ten faces, and the
         // panel-wide setting is the first of them.
         List<PanelFonts.Choice> fonts = PanelFonts.choices(this);
@@ -1487,7 +1524,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 R.string.dashboard_widget_notifications, R.string.dashboard_widget_calendar,
                 R.string.dashboard_widget_steps, R.string.dashboard_widget_fullscreen_weather,
                 R.string.dashboard_widget_fullscreen_media,
-                R.string.dashboard_widget_last_notification};
+                R.string.dashboard_widget_last_notification,
+                R.string.dashboard_widget_timer};
         // Indexed by ordinal, so a widget added without a label here would
         // take the whole screen down rather than show a blank row.
         int index = widget.ordinal();

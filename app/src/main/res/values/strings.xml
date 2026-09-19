@@ -172,6 +172,9 @@
     <string name="dashboard_widget_compass">Compass</string>
     <string name="dashboard_widget_speed">Speed</string>
     <string name="dashboard_widget_altitude">Altitude</string>
+    <string name="dashboard_widget_timer">Timer</string>
+    <string name="dashboard_timer_duration">Length</string>
+    <string name="dashboard_timer_stopwatch">Stopwatch</string>
     <string name="dashboard_widget_session_timer">Rear-output session time</string>
     <string name="dashboard_widget_active_profile">Active profile</string>
     <string name="dashboard_widget_custom_text">Custom text</string>
@@ -430,4 +433,8 @@
     <string name="dashboard_aod_min_brightness_default">Minimum AOD brightness: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Minimum AOD brightness: %1$d%%</string>
     <string name="dashboard_idle_mode_help">After 15 or 30 seconds, brightness fades down and the rear-screen session ends. Always on Display stays at the selected brightness for 30 seconds, then smoothly dims to the minimum. Touching the rear screen restores brightness and restarts the timer. Burn-in shift continues to work in AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
 </resources>

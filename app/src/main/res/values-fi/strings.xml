@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Kompassi</string>
     <string name="dashboard_widget_speed">Nopeus</string>
     <string name="dashboard_widget_altitude">Korkeus</string>
+    <string name="dashboard_widget_timer">Ajastin</string>
+    <string name="dashboard_timer_duration">Kesto</string>
+    <string name="dashboard_timer_stopwatch">Sekuntikello</string>
     <string name="dashboard_widget_session_timer">Takatoiston istunnon kesto</string>
     <string name="dashboard_widget_active_profile">Aktiivinen profiili</string>
     <string name="dashboard_widget_custom_text">Oma teksti</string>
@@ -410,4 +413,8 @@
     <string name="dashboard_aod_min_brightness_default">AOD:n vähimmäiskirkkaus: 8%</string>
     <string name="dashboard_aod_min_brightness_value">AOD:n vähimmäiskirkkaus: %1$d%%</string>
     <string name="dashboard_idle_mode_help">15 tai 30 sekunnin kuluttua kirkkaus himmenee ja takanäytön istunto päättyy. Always on Display pysyy valitussa kirkkaudessa 30 sekuntia ja himmenee sitten pehmeästi vähimmäistasolle. Takanäytön koskettaminen palauttaa kirkkauden ja käynnistää ajastimen uudelleen. Kiinnipalamisen siirtymä toimii myös AOD-tilassa.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d minuutti</item>
+        <item quantity="other">%1$d minuuttia</item>
+    </plurals>
 </resources>

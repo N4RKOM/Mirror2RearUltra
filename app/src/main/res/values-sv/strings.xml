@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Kompass</string>
     <string name="dashboard_widget_speed">Hastighet</string>
     <string name="dashboard_widget_altitude">Höjd</string>
+    <string name="dashboard_widget_timer">Timer</string>
+    <string name="dashboard_timer_duration">Längd</string>
+    <string name="dashboard_timer_stopwatch">Tidtagarur</string>
     <string name="dashboard_widget_session_timer">Sessionstid för bakre utmatning</string>
     <string name="dashboard_widget_active_profile">Aktiv profil</string>
     <string name="dashboard_widget_custom_text">Egen text</string>
@@ -410,4 +413,8 @@
     <string name="dashboard_aod_min_brightness_default">Minsta AOD-ljusstyrka: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Minsta AOD-ljusstyrka: %1$d%%</string>
     <string name="dashboard_idle_mode_help">Efter 15 eller 30 sekunder tonas ljusstyrkan ned och sessionen på den bakre skärmen avslutas. Always on Display stannar på den valda ljusstyrkan i 30 sekunder och dämpas sedan mjukt till miniminivån. Att röra vid den bakre skärmen återställer ljusstyrkan och startar om timern. Inbränningsdriften fortsätter att fungera i AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d minut</item>
+        <item quantity="other">%1$d minuter</item>
+    </plurals>
 </resources>

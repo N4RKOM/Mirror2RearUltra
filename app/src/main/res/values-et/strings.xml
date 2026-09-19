@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Kompass</string>
     <string name="dashboard_widget_speed">Kiirus</string>
     <string name="dashboard_widget_altitude">Kõrgus</string>
+    <string name="dashboard_widget_timer">Taimer</string>
+    <string name="dashboard_timer_duration">Kestus</string>
+    <string name="dashboard_timer_stopwatch">Stopper</string>
     <string name="dashboard_widget_session_timer">Tagaväljundi seansi kestus</string>
     <string name="dashboard_widget_active_profile">Aktiivne profiil</string>
     <string name="dashboard_widget_custom_text">Oma tekst</string>
@@ -410,4 +413,8 @@
     <string name="dashboard_aod_min_brightness_default">AOD minimaalne heledus: 8%</string>
     <string name="dashboard_aod_min_brightness_value">AOD minimaalne heledus: %1$d%%</string>
     <string name="dashboard_idle_mode_help">15 või 30 sekundi pärast heledus hääbub ja tagaekraani seanss lõpeb. Always on Display püsib valitud heledusel 30 sekundit ja tumeneb siis sujuvalt miinimumini. Tagaekraani puudutamine taastab heleduse ja käivitab taimeri uuesti. Sissepõlemisnihe töötab ka AOD-režiimis.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d minut</item>
+        <item quantity="other">%1$d minutit</item>
+    </plurals>
 </resources>

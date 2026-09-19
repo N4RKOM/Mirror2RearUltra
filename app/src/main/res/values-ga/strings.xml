@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Compás</string>
     <string name="dashboard_widget_speed">Luas</string>
     <string name="dashboard_widget_altitude">Airde</string>
+    <string name="dashboard_widget_timer">Uaineadóir</string>
+    <string name="dashboard_timer_duration">Fad</string>
+    <string name="dashboard_timer_stopwatch">Stopuaireadóir</string>
     <string name="dashboard_widget_session_timer">Fad an tseisiúin chúil</string>
     <string name="dashboard_widget_active_profile">An phróifíl ghníomhach</string>
     <string name="dashboard_widget_custom_text">Téacs saincheaptha</string>
@@ -413,4 +416,11 @@
     <string name="dashboard_aod_min_brightness_default">Gile íosta AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Gile íosta AOD: %1$d%%</string>
     <string name="dashboard_idle_mode_help">Tar éis 15 nó 30 soicind, maolaíonn an ghile agus críochnaíonn seisiún an scáileáin chúil. Fanann Always on Display ag an ngile roghnaithe ar feadh 30 soicind, agus maolaíonn sé go réidh ansin go dtí an t-íosmhéid. Cuireann teagmháil leis an scáileán cúil an ghile ar ais agus atosaíonn sé an t-amadóir. Leanann an sruth in aghaidh na dó isteach ag obair in AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d nóiméad</item>
+        <item quantity="two">%1$d nóiméad</item>
+        <item quantity="few">%1$d nóiméad</item>
+        <item quantity="many">%1$d nóiméad</item>
+        <item quantity="other">%1$d nóiméad</item>
+    </plurals>
 </resources>

@@ -19,7 +19,7 @@ final class DashboardWidgetLayout {
     enum Widget { CLOCK, DATE, BATTERY, TEMPERATURE, WEATHER, NEXT_ALARM, MEDIA,
         COMPASS, SPEED, ALTITUDE, SESSION_TIMER, ACTIVE_PROFILE, CUSTOM_TEXT,
         NETWORK, MEMORY, STORAGE, NOTIFICATIONS, CALENDAR, STEPS,
-        FULLSCREEN_WEATHER, FULLSCREEN_MEDIA, LAST_NOTIFICATION }
+        FULLSCREEN_WEATHER, FULLSCREEN_MEDIA, LAST_NOTIFICATION, TIMER }
     enum Size { SMALL, NORMAL, LARGE }
 
     /**
@@ -74,6 +74,7 @@ final class DashboardWidgetLayout {
     private static final String FONT = "font";
     private static final String AUTO_BRIGHTNESS = "auto_brightness";
     private static final String IDLE_MODE_BEFORE_AOD = "idle_mode_before_aod";
+    private static final String TIMER_MINUTES = "timer_minutes";
     private static final String WIDGET_FONT_PREFIX = "font_";
     private static final String GRID_SNAP = "grid_snap";
     private static final String SCALE_PREFIX = "scale_";
@@ -259,6 +260,21 @@ final class DashboardWidgetLayout {
         prefs(context).edit().putBoolean(AUTO_BRIGHTNESS, enabled).apply();
     }
 
+    /**
+     * How long the countdown runs, in minutes; zero makes it a stopwatch.
+     *
+     * <p>The one number that decides which of the two the widget is, which is
+     * why it is a length rather than a mode: nought minutes of countdown is
+     * counting up, and there is nothing else it could sensibly mean.
+     */
+    static int timerMinutes(Context context) {
+        return Math.max(0, Math.min(180, prefs(context).getInt(TIMER_MINUTES, 0)));
+    }
+
+    static void setTimerMinutes(Context context, int minutes) {
+        prefs(context).edit().putInt(TIMER_MINUTES, Math.max(0, Math.min(180, minutes))).apply();
+    }
+
     static boolean isGridSnapEnabled(Context context) {
         return prefs(context).getBoolean(GRID_SNAP, false);
     }
@@ -365,6 +381,7 @@ final class DashboardWidgetLayout {
             case STORAGE:
             case NOTIFICATIONS:
             case LAST_NOTIFICATION:
+            case TIMER:
             case CALENDAR:
             case STEPS:
             case FULLSCREEN_WEATHER:
@@ -628,7 +645,8 @@ final class DashboardWidgetLayout {
         return widget == Widget.NETWORK || widget == Widget.MEMORY || widget == Widget.STORAGE
                 || widget == Widget.NOTIFICATIONS || widget == Widget.CALENDAR
                 || widget == Widget.STEPS || widget == Widget.FULLSCREEN_WEATHER
-                || widget == Widget.FULLSCREEN_MEDIA || widget == Widget.LAST_NOTIFICATION;
+                || widget == Widget.FULLSCREEN_MEDIA || widget == Widget.LAST_NOTIFICATION
+                || widget == Widget.TIMER;
     }
 
     static boolean isFullscreenWidget(Widget widget) {

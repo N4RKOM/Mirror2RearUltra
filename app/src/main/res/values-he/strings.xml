@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">מצפן</string>
     <string name="dashboard_widget_speed">מהירות</string>
     <string name="dashboard_widget_altitude">גובה</string>
+    <string name="dashboard_widget_timer">טיימר</string>
+    <string name="dashboard_timer_duration">משך</string>
+    <string name="dashboard_timer_stopwatch">שעון עצר</string>
     <string name="dashboard_widget_session_timer">משך ההפעלה של הפלט האחורי</string>
     <string name="dashboard_widget_active_profile">הפרופיל הפעיל</string>
     <string name="dashboard_widget_custom_text">טקסט מותאם</string>
@@ -412,4 +415,10 @@
     <string name="dashboard_aod_min_brightness_default">בהירות AOD מזערית: 8%</string>
     <string name="dashboard_aod_min_brightness_value">בהירות AOD מזערית: %1$d%%</string>
     <string name="dashboard_idle_mode_help">אחרי 15 או 30 שניות הבהירות דועכת וההפעלה של המסך האחורי מסתיימת. Always on Display נשאר בבהירות שנבחרה למשך 30 שניות, ואז מתעמעם בהדרגה עד למינימום. נגיעה במסך האחורי מחזירה את הבהירות ומאפסת את הטיימר. ההיסט נגד צריבה ממשיך לפעול גם ב‑AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">דקה אחת</item>
+        <item quantity="two">שתי דקות</item>
+        <item quantity="many">%1$d דקות</item>
+        <item quantity="other">%1$d דקות</item>
+    </plurals>
 </resources>

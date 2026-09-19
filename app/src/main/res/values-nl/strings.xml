@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Kompas</string>
     <string name="dashboard_widget_speed">Snelheid</string>
     <string name="dashboard_widget_altitude">Hoogte</string>
+    <string name="dashboard_widget_timer">Timer</string>
+    <string name="dashboard_timer_duration">Duur</string>
+    <string name="dashboard_timer_stopwatch">Stopwatch</string>
     <string name="dashboard_widget_session_timer">Duur van de achtersessie</string>
     <string name="dashboard_widget_active_profile">Actief profiel</string>
     <string name="dashboard_widget_custom_text">Eigen tekst</string>
@@ -410,4 +413,8 @@
     <string name="dashboard_aod_min_brightness_default">Minimale AOD-helderheid: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Minimale AOD-helderheid: %1$d%%</string>
     <string name="dashboard_idle_mode_help">Na 15 of 30 seconden zakt de helderheid en eindigt de sessie van het achterscherm. Always on Display blijft 30 seconden op de gekozen helderheid en dimt daarna rustig naar het minimum. Het achterscherm aanraken herstelt de helderheid en start de timer opnieuw. De inbrandverschuiving blijft in AOD werken.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d minuut</item>
+        <item quantity="other">%1$d minuten</item>
+    </plurals>
 </resources>

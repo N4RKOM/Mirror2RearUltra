@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Kompass</string>
     <string name="dashboard_widget_speed">Fart</string>
     <string name="dashboard_widget_altitude">Høyde</string>
+    <string name="dashboard_widget_timer">Nedtelling</string>
+    <string name="dashboard_timer_duration">Lengde</string>
+    <string name="dashboard_timer_stopwatch">Stoppeklokke</string>
     <string name="dashboard_widget_session_timer">Økttid for bakutgangen</string>
     <string name="dashboard_widget_active_profile">Aktiv profil</string>
     <string name="dashboard_widget_custom_text">Egen tekst</string>
@@ -410,4 +413,8 @@
     <string name="dashboard_aod_min_brightness_default">Laveste AOD-lysstyrke: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Laveste AOD-lysstyrke: %1$d%%</string>
     <string name="dashboard_idle_mode_help">Etter 15 eller 30 sekunder tones lysstyrken ned og økten på bakskjermen avsluttes. Always on Display blir stående på den valgte lysstyrken i 30 sekunder og dempes så jevnt ned til laveste nivå. Å berøre bakskjermen gjenoppretter lysstyrken og starter tidtakeren på nytt. Innbrenningsdriften fortsetter å virke i AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d minutt</item>
+        <item quantity="other">%1$d minutter</item>
+    </plurals>
 </resources>

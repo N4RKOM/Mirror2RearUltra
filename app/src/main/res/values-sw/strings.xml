@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Dira</string>
     <string name="dashboard_widget_speed">Kasi</string>
     <string name="dashboard_widget_altitude">Mwinuko</string>
+    <string name="dashboard_widget_timer">Kipima muda</string>
+    <string name="dashboard_timer_duration">Urefu</string>
+    <string name="dashboard_timer_stopwatch">Stopwatch</string>
     <string name="dashboard_widget_session_timer">Muda wa kipindi cha utoaji wa nyuma</string>
     <string name="dashboard_widget_active_profile">Wasifu unaotumika</string>
     <string name="dashboard_widget_custom_text">Maandishi yangu</string>
@@ -410,4 +413,8 @@
     <string name="dashboard_aod_min_brightness_default">Mwangaza mdogo wa AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Mwangaza mdogo wa AOD: %1$d%%</string>
     <string name="dashboard_idle_mode_help">Baada ya sekunde 15 au 30, mwangaza hufifia na kipindi cha skrini ya nyuma humalizika. Always on Display hubaki kwenye mwangaza uliochaguliwa kwa sekunde 30, kisha hufifia taratibu hadi kiwango cha chini. Kugusa skrini ya nyuma hurudisha mwangaza na huanzisha kipima muda upya. Msogeo dhidi ya kuungua huendelea kufanya kazi katika AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">dakika %1$d</item>
+        <item quantity="other">dakika %1$d</item>
+    </plurals>
 </resources>

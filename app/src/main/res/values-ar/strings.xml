@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">البوصلة</string>
     <string name="dashboard_widget_speed">السرعة</string>
     <string name="dashboard_widget_altitude">الارتفاع</string>
+    <string name="dashboard_widget_timer">مؤقّت</string>
+    <string name="dashboard_timer_duration">المدة</string>
+    <string name="dashboard_timer_stopwatch">ساعة إيقاف</string>
     <string name="dashboard_widget_session_timer">مدة جلسة الإخراج الخلفي</string>
     <string name="dashboard_widget_active_profile">الملف النشط</string>
     <string name="dashboard_widget_custom_text">نص مخصص</string>
@@ -414,4 +417,12 @@
     <string name="dashboard_aod_min_brightness_default">أدنى سطوع لـ AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">أدنى سطوع لـ AOD: %1$d%%</string>
     <string name="dashboard_idle_mode_help">بعد 15 أو 30 ثانية يخفت السطوع وتنتهي جلسة الشاشة الخلفية. ويبقى Always on Display على السطوع المختار 30 ثانية، ثم يخفت بسلاسة إلى الحد الأدنى. لمس الشاشة الخلفية يعيد السطوع ويُعيد تشغيل المؤقّت. وتظل إزاحة مقاومة الاحتراق تعمل في وضع AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="zero">بلا دقائق</item>
+        <item quantity="one">دقيقة واحدة</item>
+        <item quantity="two">دقيقتان</item>
+        <item quantity="few">%1$d دقائق</item>
+        <item quantity="many">%1$d دقيقة</item>
+        <item quantity="other">%1$d دقيقة</item>
+    </plurals>
 </resources>

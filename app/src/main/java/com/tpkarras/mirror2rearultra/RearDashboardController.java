@@ -78,7 +78,11 @@ final class RearDashboardController implements
                 return;
             }
             publish();
-            mainHandler.postDelayed(this, settings.showSessionTimer
+            // A running timer needs the second hand as much as the session
+            // timer does; without this it would step in half-minutes.
+            boolean needsSeconds = settings.showSessionTimer
+                    || TimerWidgetState.isRunning(context);
+            mainHandler.postDelayed(this, needsSeconds
                     ? CLOCK_REFRESH_MILLIS : 30_000L);
         }
     };

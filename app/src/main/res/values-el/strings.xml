@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Πυξίδα</string>
     <string name="dashboard_widget_speed">Ταχύτητα</string>
     <string name="dashboard_widget_altitude">Υψόμετρο</string>
+    <string name="dashboard_widget_timer">Χρονόμετρο</string>
+    <string name="dashboard_timer_duration">Διάρκεια</string>
+    <string name="dashboard_timer_stopwatch">Χρονόμετρο μέτρησης</string>
     <string name="dashboard_widget_session_timer">Διάρκεια συνεδρίας πίσω εξόδου</string>
     <string name="dashboard_widget_active_profile">Ενεργό προφίλ</string>
     <string name="dashboard_widget_custom_text">Προσαρμοσμένο κείμενο</string>
@@ -410,4 +413,8 @@
     <string name="dashboard_aod_min_brightness_default">Ελάχιστη φωτεινότητα AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Ελάχιστη φωτεινότητα AOD: %1$d%%</string>
     <string name="dashboard_idle_mode_help">Μετά από 15 ή 30 δευτερόλεπτα, η φωτεινότητα σβήνει σταδιακά και η συνεδρία της πίσω οθόνης τελειώνει. Το Always on Display μένει στην επιλεγμένη φωτεινότητα για 30 δευτερόλεπτα και έπειτα χαμηλώνει ομαλά στο ελάχιστο. Το άγγιγμα της πίσω οθόνης επαναφέρει τη φωτεινότητα και ξεκινά ξανά τον χρονομετρητή. Η μετατόπιση κατά του αποτυπώματος συνεχίζει να λειτουργεί στο AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d λεπτό</item>
+        <item quantity="other">%1$d λεπτά</item>
+    </plurals>
 </resources>

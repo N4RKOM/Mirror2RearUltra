@@ -268,6 +268,9 @@
     <string name="dashboard_widget_last_notification">Последнее уведомление</string>
     <string name="dashboard_builder_sample_notification_app">Мессенджер</string>
     <string name="dashboard_builder_sample_notification">Новое сообщение</string>
+    <string name="dashboard_widget_timer">Таймер</string>
+    <string name="dashboard_timer_duration">Длительность</string>
+    <string name="dashboard_timer_stopwatch">Секундомер</string>
     <string name="dashboard_widget_session_timer">Время текущего сеанса</string>
     <string name="dashboard_widget_speed">Скорость</string>
     <string name="dashboard_widget_steps">Шаги сегодня</string>
@@ -433,4 +436,10 @@
     <string name="dashboard_aod_min_brightness_default">Минимальная яркость AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Минимальная яркость AOD: %1$d%%</string>
     <string name="dashboard_idle_mode_help">Через 15 или 30 секунд яркость плавно уменьшится, после чего сеанс заднего экрана завершится. В режиме Always on Display установленная яркость сохраняется 30 секунд, затем плавно снижается до минимальной. Касание заднего экрана возвращает яркость и перезапускает таймер. Сдвиг от выгорания продолжает работать в AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d минута</item>
+        <item quantity="few">%1$d минуты</item>
+        <item quantity="many">%1$d минут</item>
+        <item quantity="other">%1$d минуты</item>
+    </plurals>
 </resources>

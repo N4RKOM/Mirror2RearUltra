@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Busolă</string>
     <string name="dashboard_widget_speed">Viteză</string>
     <string name="dashboard_widget_altitude">Altitudine</string>
+    <string name="dashboard_widget_timer">Cronometru invers</string>
+    <string name="dashboard_timer_duration">Durată</string>
+    <string name="dashboard_timer_stopwatch">Cronometru</string>
     <string name="dashboard_widget_session_timer">Durata sesiunii din spate</string>
     <string name="dashboard_widget_active_profile">Profil activ</string>
     <string name="dashboard_widget_custom_text">Text personalizat</string>
@@ -411,4 +414,9 @@
     <string name="dashboard_aod_min_brightness_default">Luminozitate minimă AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Luminozitate minimă AOD: %1$d%%</string>
     <string name="dashboard_idle_mode_help">După 15 sau 30 de secunde, luminozitatea scade și sesiunea ecranului din spate se încheie. Always on Display rămâne la luminozitatea aleasă timp de 30 de secunde, apoi coboară lin până la minim. Atingerea ecranului din spate restabilește luminozitatea și repornește cronometrul. Deplasarea anti-ardere continuă să funcționeze în AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d minut</item>
+        <item quantity="few">%1$d minute</item>
+        <item quantity="other">%1$d de minute</item>
+    </plurals>
 </resources>

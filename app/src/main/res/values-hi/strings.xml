@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">कम्पास</string>
     <string name="dashboard_widget_speed">रफ़्तार</string>
     <string name="dashboard_widget_altitude">ऊँचाई</string>
+    <string name="dashboard_widget_timer">टाइमर</string>
+    <string name="dashboard_timer_duration">अवधि</string>
+    <string name="dashboard_timer_stopwatch">स्टॉपवॉच</string>
     <string name="dashboard_widget_session_timer">पिछले आउटपुट के सेशन का समय</string>
     <string name="dashboard_widget_active_profile">चालू प्रोफ़ाइल</string>
     <string name="dashboard_widget_custom_text">अपना टेक्स्ट</string>
@@ -410,4 +413,8 @@
     <string name="dashboard_aod_min_brightness_default">कम से कम AOD ब्राइटनेस: 8%</string>
     <string name="dashboard_aod_min_brightness_value">कम से कम AOD ब्राइटनेस: %1$d%%</string>
     <string name="dashboard_idle_mode_help">15 या 30 सेकंड बाद ब्राइटनेस घटती जाती है और पिछली स्क्रीन का सेशन खत्म हो जाता है। Always on Display चुनी हुई ब्राइटनेस पर 30 सेकंड रहता है, फिर धीरे-धीरे कम से कम स्तर तक मंद हो जाता है। पिछली स्क्रीन छूते ही ब्राइटनेस लौट आती है और टाइमर फिर से शुरू हो जाता है। AOD में भी बर्न-इन से बचाव का खिसकाव चलता रहता है।</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d मिनट</item>
+        <item quantity="other">%1$d मिनट</item>
+    </plurals>
 </resources>

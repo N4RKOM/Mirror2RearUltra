@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">قطب‌نما</string>
     <string name="dashboard_widget_speed">سرعت</string>
     <string name="dashboard_widget_altitude">ارتفاع</string>
+    <string name="dashboard_widget_timer">زمان‌سنج</string>
+    <string name="dashboard_timer_duration">مدت</string>
+    <string name="dashboard_timer_stopwatch">کرنومتر</string>
     <string name="dashboard_widget_session_timer">مدت نشست خروجی پشت</string>
     <string name="dashboard_widget_active_profile">نمایهٔ فعال</string>
     <string name="dashboard_widget_custom_text">متن دلخواه</string>
@@ -410,4 +413,8 @@
     <string name="dashboard_aod_min_brightness_default">کمترین روشنایی AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">کمترین روشنایی AOD: %1$d%%</string>
     <string name="dashboard_idle_mode_help">پس از ۱۵ یا ۳۰ ثانیه روشنایی کم می‌شود و نشست صفحهٔ عقب پایان می‌یابد. Always on Display به مدت ۳۰ ثانیه روی روشنایی انتخابی می‌ماند و سپس به‌نرمی تا کمترین حد کم‌نور می‌شود. لمس صفحهٔ عقب روشنایی را برمی‌گرداند و زمان‌سنج را از نو آغاز می‌کند. جابه‌جایی ضدسوختگی در AOD هم کار می‌کند.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d دقیقه</item>
+        <item quantity="other">%1$d دقیقه</item>
+    </plurals>
 </resources>

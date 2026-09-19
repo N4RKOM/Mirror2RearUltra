@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Brújula</string>
     <string name="dashboard_widget_speed">Velocidad</string>
     <string name="dashboard_widget_altitude">Altitud</string>
+    <string name="dashboard_widget_timer">Temporizador</string>
+    <string name="dashboard_timer_duration">Duración</string>
+    <string name="dashboard_timer_stopwatch">Cronómetro</string>
     <string name="dashboard_widget_session_timer">Duración de la sesión trasera</string>
     <string name="dashboard_widget_active_profile">Perfil activo</string>
     <string name="dashboard_widget_custom_text">Texto personalizado</string>
@@ -410,4 +413,8 @@
     <string name="dashboard_aod_min_brightness_default">Brillo mínimo del AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Brillo mínimo del AOD: %1$d%%</string>
     <string name="dashboard_idle_mode_help">Pasados 15 o 30 segundos, el brillo baja y la sesión de la pantalla trasera termina. Always on Display se mantiene en el brillo elegido durante 30 segundos y luego se atenúa suavemente hasta el mínimo. Al tocar la pantalla trasera se recupera el brillo y el temporizador vuelve a empezar. La deriva antiquemado sigue funcionando en AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d minuto</item>
+        <item quantity="other">%1$d minutos</item>
+    </plurals>
 </resources>

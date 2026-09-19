@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Компас</string>
     <string name="dashboard_widget_speed">Швидкість</string>
     <string name="dashboard_widget_altitude">Висота</string>
+    <string name="dashboard_widget_timer">Таймер</string>
+    <string name="dashboard_timer_duration">Тривалість</string>
+    <string name="dashboard_timer_stopwatch">Секундомір</string>
     <string name="dashboard_widget_session_timer">Тривалість сеансу заднього виведення</string>
     <string name="dashboard_widget_active_profile">Активний профіль</string>
     <string name="dashboard_widget_custom_text">Власний текст</string>
@@ -412,4 +415,10 @@
     <string name="dashboard_aod_min_brightness_default">Мінімальна яскравість AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Мінімальна яскравість AOD: %1$d%%</string>
     <string name="dashboard_idle_mode_help">Через 15 або 30 секунд яскравість згасає, і сеанс заднього екрана завершується. Always on Display тримає вибрану яскравість 30 секунд, а потім плавно знижує її до мінімуму. Дотик до заднього екрана відновлює яскравість і перезапускає таймер. Зсув проти вигоряння продовжує працювати в AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d хвилина</item>
+        <item quantity="few">%1$d хвилини</item>
+        <item quantity="many">%1$d хвилин</item>
+        <item quantity="other">%1$d хвилини</item>
+    </plurals>
 </resources>

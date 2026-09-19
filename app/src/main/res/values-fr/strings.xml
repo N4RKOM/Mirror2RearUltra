@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">Boussole</string>
     <string name="dashboard_widget_speed">Vitesse</string>
     <string name="dashboard_widget_altitude">Altitude</string>
+    <string name="dashboard_widget_timer">Minuteur</string>
+    <string name="dashboard_timer_duration">Durée</string>
+    <string name="dashboard_timer_stopwatch">Chronomètre</string>
     <string name="dashboard_widget_session_timer">Durée de la session arrière</string>
     <string name="dashboard_widget_active_profile">Profil actif</string>
     <string name="dashboard_widget_custom_text">Texte personnalisé</string>
@@ -410,4 +413,8 @@
     <string name="dashboard_aod_min_brightness_default">Luminosité AOD minimale : 8%</string>
     <string name="dashboard_aod_min_brightness_value">Luminosité AOD minimale : %1$d%%</string>
     <string name="dashboard_idle_mode_help">Au bout de 15 ou 30 secondes, la luminosité baisse et la session de l\'écran arrière se termine. Always on Display reste à la luminosité choisie pendant 30 secondes, puis s\'atténue progressivement jusqu\'au minimum. Toucher l\'écran arrière rétablit la luminosité et relance le minuteur. La dérive anti-marquage continue de fonctionner en AOD.</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
 </resources>

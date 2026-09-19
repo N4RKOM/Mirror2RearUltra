@@ -59,6 +59,7 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
             new WidgetRow(R.id.dashboard_next_alarm_switch, DashboardWidgetLayout.Widget.NEXT_ALARM),
             new WidgetRow(R.id.dashboard_session_timer_switch,
                     DashboardWidgetLayout.Widget.SESSION_TIMER),
+            new WidgetRow(R.id.dashboard_timer_switch, DashboardWidgetLayout.Widget.TIMER),
             new WidgetRow(R.id.dashboard_calendar_switch, DashboardWidgetLayout.Widget.CALENDAR),
             // Device
             new WidgetRow(R.id.dashboard_battery_switch, DashboardWidgetLayout.Widget.BATTERY),

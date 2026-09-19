@@ -168,6 +168,9 @@
     <string name="dashboard_widget_compass">コンパス</string>
     <string name="dashboard_widget_speed">速度</string>
     <string name="dashboard_widget_altitude">高度</string>
+    <string name="dashboard_widget_timer">タイマー</string>
+    <string name="dashboard_timer_duration">長さ</string>
+    <string name="dashboard_timer_stopwatch">ストップウォッチ</string>
     <string name="dashboard_widget_session_timer">背面出力のセッション時間</string>
     <string name="dashboard_widget_active_profile">使用中のプロファイル</string>
     <string name="dashboard_widget_custom_text">カスタムテキスト</string>
@@ -409,4 +412,7 @@
     <string name="dashboard_aod_min_brightness_default">常時表示の最小輝度: 8%</string>
     <string name="dashboard_aod_min_brightness_value">常時表示の最小輝度: %1$d%%</string>
     <string name="dashboard_idle_mode_help">15 秒または 30 秒で明るさが落ち、背面画面のセッションが終わります。常時表示ディスプレイは選んだ明るさを 30 秒保ったあと、なめらかに最小まで暗くなります。背面画面に触れると明るさが戻り、タイマーが再び始まります。焼き付き対策のずらしは常時表示中も働き続けます。</string>
+    <plurals name="dashboard_timer_minutes">
+        <item quantity="other">%1$d 分</item>
+    </plurals>
 </resources>

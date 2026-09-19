@@ -730,6 +730,26 @@ public final class RearDashboardView extends View {
                     count > 0, value, Icon.NOTIFICATIONS);
         }
         if (DashboardWidgetLayout.isExtraEnabled(
+                getContext(), DashboardWidgetLayout.Widget.TIMER)) {
+            long duration = DashboardWidgetLayout.timerMinutes(getContext()) * 60_000L;
+            if (TimerWidgetState.finishIfElapsed(getContext(), duration)) {
+                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            }
+            long shown = duration > 0
+                    ? Math.max(0L, duration - TimerWidgetState.elapsedMillis(getContext()))
+                    : TimerWidgetState.elapsedMillis(getContext());
+            String value = formatElapsed(shown);
+            DashboardWidgetLayout.Variant variant =
+                    variantOf(DashboardWidgetLayout.Widget.TIMER);
+            if (variant == DashboardWidgetLayout.Variant.DETAILED) {
+                value = formatElapsedDetailed(shown);
+            }
+            // A stopped countdown at zero has finished; a stopped stopwatch at
+            // zero has not started. Both are worth a row, so this one is
+            // always drawn rather than dropping out when there is no reading.
+            addLine(lines, DashboardWidgetLayout.Widget.TIMER, true, value, Icon.TIMER);
+        }
+        if (DashboardWidgetLayout.isExtraEnabled(
                 getContext(), DashboardWidgetLayout.Widget.LAST_NOTIFICATION)) {
             // Three ways to say the same arrival, from least to most told.
             // ALTERNATE names only the app on purpose: the panel points away
@@ -899,9 +919,17 @@ public final class RearDashboardView extends View {
                         beginDrag(hit, event.getX(), event.getY());
                     }
                 } else if (!interactive) {
+                    float downX = event.getX();
+                    float downY = event.getY();
                     pendingLongPress = () -> {
                         pendingLongPress = null;
                         longPressFired = true;
+                        if (widgetAt(downX, downY) == DashboardWidgetLayout.Widget.TIMER) {
+                            TimerWidgetState.reset(getContext());
+                            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                            invalidate();
+                            return;
+                        }
                         toggleAlwaysOnFromPanel();
                     };
                     postDelayed(pendingLongPress, ViewConfiguration.getLongPressTimeout());
@@ -1060,6 +1088,18 @@ public final class RearDashboardView extends View {
         DashboardWidgetLayout.Widget hit = widgetAt(x, y);
         if (hit == null || !DashboardWidgetLayout.supportsVariant(hit)) {
             return false;
+        }
+        // The timer is a control, not a readout: a tap on it should do the
+        // thing it is for rather than restyle it.
+        if (hit == DashboardWidgetLayout.Widget.TIMER) {
+            TimerWidgetState.toggle(getContext());
+            performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+            // The panel redraws every second only while something is counting,
+            // so the session has to be told the answer changed.
+            MirrorSettings.saveDashboardSettings(getContext(),
+                    MirrorSettings.loadDashboardSettings(getContext()));
+            invalidate();
+            return true;
         }
         DashboardWidgetLayout.Variant[] all = DashboardWidgetLayout.Variant.values();
         DashboardWidgetLayout.Variant next =
