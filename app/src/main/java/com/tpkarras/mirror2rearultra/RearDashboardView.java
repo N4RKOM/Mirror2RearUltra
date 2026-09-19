@@ -1522,19 +1522,26 @@ public final class RearDashboardView extends View {
             float padding) {
         int count = lines.size();
         float[][] result = new float[count][2];
-        float[] widths = new float[count];
-        float[] heights = new float[count];
         boolean anyPlaced = false;
+        boolean anyLoose = false;
         for (int index = 0; index < count; index++) {
-            Line line = lines.get(index);
-            widths[index] = measuredWidth(line, clockSize, normalSize);
-            heights[index] = textPaint.descent() - textPaint.ascent();
-            anyPlaced |= DashboardWidgetLayout.hasFreePosition(getContext(), line.widget);
+            boolean placed = DashboardWidgetLayout.hasFreePosition(
+                    getContext(), lines.get(index).widget);
+            anyPlaced |= placed;
+            anyLoose |= !placed;
             result[index][0] = getWidth() / 2f;
             result[index][1] = getHeight() * (index + 1f) / (count + 1f);
         }
-        if (!anyPlaced) {
+        // The usual case, and the one a drag spends every frame in: everything
+        // has a place, so nothing needs measuring to find it one.
+        if (!anyPlaced || !anyLoose) {
             return result;
+        }
+        float[] widths = new float[count];
+        float[] heights = new float[count];
+        for (int index = 0; index < count; index++) {
+            widths[index] = measuredWidth(lines.get(index), clockSize, normalSize);
+            heights[index] = textPaint.descent() - textPaint.ascent();
         }
         List<RectF> taken = new ArrayList<>();
         for (int index = 0; index < count; index++) {

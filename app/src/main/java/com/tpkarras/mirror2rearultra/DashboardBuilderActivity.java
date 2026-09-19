@@ -1192,7 +1192,10 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             }
 
             @Override public void onWidgetChanged(DashboardWidgetLayout.Widget widget) {
-                renderRows();
+                // Not renderRows(): this arrives when a widget has been moved
+                // or resized, and no card shows either. Rebuilding every card
+                // - nine segmented controls apiece - held the main thread just
+                // long enough that the next drag began late.
                 refreshPreview();
                 selectWidget(widget, false);
             }

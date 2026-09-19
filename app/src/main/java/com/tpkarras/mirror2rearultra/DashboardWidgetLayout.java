@@ -185,9 +185,19 @@ final class DashboardWidgetLayout {
     }
 
     static void saveFreePosition(Context context, Widget widget, float x, float y) {
-        prefs(context).edit()
-                .putInt(FREE_X_PREFIX + widget.name(), Math.round(clampFraction(x) * 1000f))
-                .putInt(FREE_Y_PREFIX + widget.name(), Math.round(clampFraction(y) * 1000f))
+        int nextX = Math.round(clampFraction(x) * 1000f);
+        int nextY = Math.round(clampFraction(y) * 1000f);
+        SharedPreferences prefs = prefs(context);
+        // A finger reports far more often than a thousandth of the panel
+        // changes, and every one of those reports used to build an editor and
+        // schedule a write.
+        if (prefs.getInt(FREE_X_PREFIX + widget.name(), -1) == nextX
+                && prefs.getInt(FREE_Y_PREFIX + widget.name(), -1) == nextY) {
+            return;
+        }
+        prefs.edit()
+                .putInt(FREE_X_PREFIX + widget.name(), nextX)
+                .putInt(FREE_Y_PREFIX + widget.name(), nextY)
                 .apply();
     }
 
