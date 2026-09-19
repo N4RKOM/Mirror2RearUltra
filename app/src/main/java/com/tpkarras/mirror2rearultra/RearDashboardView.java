@@ -74,11 +74,11 @@ public final class RearDashboardView extends View {
     /**
      * Whether a drag has to be asked for with a long press.
      *
-     * <p>Set for the previews inside the page carousel. There a plain swipe
-     * belongs to the carousel, and claiming it for a drag meant a swipe over a
-     * widget moved that widget instead of turning the page - so the page never
-     * changed, and the widget the finger had caught was quietly rearranged on
-     * the page the user thought they had left.
+     * <p>Nothing sets it any more, so a drag starts on touch. It was for the
+     * previews inside the page carousel, where a plain swipe belonged to the
+     * carousel and claiming it for a drag rearranged a widget on the page the
+     * user thought they were leaving. The carousel is gone; the flag is kept
+     * because a scrolling container over the preview would need it again.
      */
     private boolean dragNeedsLongPress;
     @Nullable private Runnable pendingLongPress;

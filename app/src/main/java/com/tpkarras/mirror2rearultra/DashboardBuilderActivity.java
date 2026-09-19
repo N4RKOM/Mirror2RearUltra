@@ -124,7 +124,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         rows.setOnDragListener(this::handleDrop);
         // The preview is the other half of the list: tapping a widget there
         // picks it here, and in the free layout dragging it moves it.
-        bindPreview(singlePreview, 1);
+        bindPreview(singlePreview);
         String[] presetLabels = {getString(R.string.dashboard_preset_clock),
                 getString(R.string.dashboard_preset_trip), getString(R.string.dashboard_preset_music),
                 getString(R.string.dashboard_preset_weather)};
@@ -895,9 +895,10 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     /**
      * Moves the editing to another page.
      *
-     * <p>The carousel is rebuilt rather than reconfigured: which card is the
-     * live one changes, and that is a change of what the cards are, not of
-     * what they show.
+     * <p>This is the only thing that changes the page. The preview reads
+     * previewPage and shows it; it does not have a page of its own to put
+     * back, and the selection is dropped because the widget that was picked
+     * belongs to the page being left.
      */
     private void selectPreviewPage(int page) {
         if (page == previewPage) {
@@ -918,6 +919,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 panel == null ? 0f : rearPanelDensity());
         target.setSnapshot(snapshot);
         target.setSelectedPage(page);
+        target.setContentDescription(getString(R.string.dashboard_builder_page_short,
+                page == 0 ? 1 : page));
     }
 
     /**
@@ -1157,28 +1160,27 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     }
 
 
-    private void bindPreview(RearDashboardView target, int page) {
-        target.setContentDescription(getString(R.string.dashboard_builder_page_short, page));
+    /**
+     * Wires the preview back into the list: a tap there picks the widget here,
+     * and in the free layout a drag moves it.
+     *
+     * <p>The listener has no page of its own to assert. It used to: with the
+     * carousel every page had a view, so a touch meant "this is the page now",
+     * and the view was bound with the page it stood for. One preview replaced
+     * them, bound once with page one - so every touch put the builder back on
+     * page one, and page two could be looked at but never edited.
+     */
+    private void bindPreview(RearDashboardView target) {
         target.setOnWidgetSelectedListener(new RearDashboardView.OnWidgetSelectedListener() {
-            private void activate() {
-                if (previewPage != page) {
-                    previewPage = page;
-                    refreshPreview();
-                }
-            }
-
             @Override public void onWidgetSelected(@Nullable DashboardWidgetLayout.Widget widget) {
-                activate();
                 selectWidget(widget, true);
             }
 
             @Override public void onWidgetGrabbed(DashboardWidgetLayout.Widget widget) {
-                activate();
                 selectWidget(widget, false);
             }
 
             @Override public void onWidgetChanged(DashboardWidgetLayout.Widget widget) {
-                activate();
                 renderRows();
                 refreshPreview();
                 selectWidget(widget, false);
