@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">Upp till 60 tecken.</string>
     <string name="dashboard_media_access_label">Åtkomst till medieinformation</string>
     <string name="dashboard_media_access_granted">Medieåtkomsten är påslagen</string>
-    <string name="dashboard_media_access_required">Aviseringsåtkomst krävs för att läsa det aktuella spåret</string>
-    <string name="dashboard_media_access_optional">Aviseringsåtkomst används bara när mediewidgeten är påslagen</string>
+    <string name="dashboard_media_access_required">Widgetarna du slagit på kräver aviseringsåtkomst</string>
+    <string name="dashboard_media_access_optional">Aviseringsåtkomst används bara av medie- och aviseringswidgetarna</string>
     <string name="dashboard_grant_media_access">Öppna aviseringsåtkomsten</string>
     <string name="dashboard_media_nothing_playing">Inget spelas upp</string>
     <string name="dashboard_media_previous">Föregående</string>
@@ -365,6 +365,9 @@
     <string name="dashboard_widget_memory">Minnesanvändning</string>
     <string name="dashboard_widget_storage">Ledigt lagringsutrymme</string>
     <string name="dashboard_widget_notifications">Aviseringar</string>
+    <string name="dashboard_widget_last_notification">Senaste aviseringen</string>
+    <string name="dashboard_builder_sample_notification_app">Meddelanden</string>
+    <string name="dashboard_builder_sample_notification">Nytt meddelande</string>
     <string name="dashboard_widget_calendar">Nästa händelse</string>
     <string name="dashboard_widget_steps">Steg i dag</string>
     <string name="dashboard_network_offline">Offline</string>

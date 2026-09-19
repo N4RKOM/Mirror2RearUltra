@@ -178,8 +178,8 @@
     <string name="dashboard_custom_text_help">Up to 60 characters.</string>
     <string name="dashboard_media_access_label">Media information access</string>
     <string name="dashboard_media_access_granted">Media access is enabled</string>
-    <string name="dashboard_media_access_required">Notification access is required to read the current track</string>
-    <string name="dashboard_media_access_optional">Notification access is used only when the media widget is enabled</string>
+    <string name="dashboard_media_access_required">Notification access is required for the widgets you switched on</string>
+    <string name="dashboard_media_access_optional">Notification access is used only by the media and notification widgets</string>
     <string name="dashboard_grant_media_access">Open notification access</string>
     <string name="dashboard_media_nothing_playing">Nothing is playing</string>
     <string name="dashboard_media_previous">Previous</string>
@@ -382,6 +382,9 @@
     <string name="dashboard_widget_memory">Memory usage</string>
     <string name="dashboard_widget_storage">Storage free</string>
     <string name="dashboard_widget_notifications">Notifications</string>
+    <string name="dashboard_widget_last_notification">Latest notification</string>
+    <string name="dashboard_builder_sample_notification_app">Messenger</string>
+    <string name="dashboard_builder_sample_notification">New message</string>
     <string name="dashboard_widget_calendar">Next calendar event</string>
     <string name="dashboard_widget_steps">Steps today</string>
     <string name="dashboard_network_offline">Offline</string>

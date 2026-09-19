@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">Maximaal 60 tekens.</string>
     <string name="dashboard_media_access_label">Toegang tot media-informatie</string>
     <string name="dashboard_media_access_granted">Mediatoegang staat aan</string>
-    <string name="dashboard_media_access_required">Toegang tot meldingen is nodig om het huidige nummer te lezen</string>
-    <string name="dashboard_media_access_optional">Toegang tot meldingen wordt alleen gebruikt als de mediawidget aanstaat</string>
+    <string name="dashboard_media_access_required">De ingeschakelde widgets hebben toegang tot meldingen nodig</string>
+    <string name="dashboard_media_access_optional">Toegang tot meldingen wordt alleen gebruikt door de media- en meldingswidgets</string>
     <string name="dashboard_grant_media_access">Toegang tot meldingen openen</string>
     <string name="dashboard_media_nothing_playing">Er speelt niets</string>
     <string name="dashboard_media_previous">Vorige</string>
@@ -365,6 +365,9 @@
     <string name="dashboard_widget_memory">Geheugengebruik</string>
     <string name="dashboard_widget_storage">Vrije opslag</string>
     <string name="dashboard_widget_notifications">Meldingen</string>
+    <string name="dashboard_widget_last_notification">Laatste melding</string>
+    <string name="dashboard_builder_sample_notification_app">Berichten</string>
+    <string name="dashboard_builder_sample_notification">Nieuw bericht</string>
     <string name="dashboard_widget_calendar">Volgende afspraak</string>
     <string name="dashboard_widget_steps">Stappen vandaag</string>
     <string name="dashboard_network_offline">Offline</string>

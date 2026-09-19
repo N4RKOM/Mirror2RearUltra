@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">Kuni 60 tähemärki.</string>
     <string name="dashboard_media_access_label">Juurdepääs meediateabele</string>
     <string name="dashboard_media_access_granted">Meediajuurdepääs on sees</string>
-    <string name="dashboard_media_access_required">Praeguse loo lugemiseks on vaja teavituste juurdepääsu</string>
-    <string name="dashboard_media_access_optional">Teavituste juurdepääsu kasutatakse ainult siis, kui meediavidin on sees</string>
+    <string name="dashboard_media_access_required">Sisselülitatud vidinad vajavad teavituste juurdepääsu</string>
+    <string name="dashboard_media_access_optional">Teavituste juurdepääsu kasutavad ainult meedia- ja teavitusvidinad</string>
     <string name="dashboard_grant_media_access">Ava teavituste juurdepääs</string>
     <string name="dashboard_media_nothing_playing">Midagi ei esitata</string>
     <string name="dashboard_media_previous">Eelmine</string>
@@ -365,6 +365,9 @@
     <string name="dashboard_widget_memory">Mälukasutus</string>
     <string name="dashboard_widget_storage">Vaba mäluruum</string>
     <string name="dashboard_widget_notifications">Teavitused</string>
+    <string name="dashboard_widget_last_notification">Viimane teavitus</string>
+    <string name="dashboard_builder_sample_notification_app">Sõnumid</string>
+    <string name="dashboard_builder_sample_notification">Uus sõnum</string>
     <string name="dashboard_widget_calendar">Järgmine sündmus</string>
     <string name="dashboard_widget_steps">Tänased sammud</string>
     <string name="dashboard_network_offline">Ühenduseta</string>

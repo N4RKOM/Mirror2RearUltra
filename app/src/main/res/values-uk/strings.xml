@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">До 60 символів.</string>
     <string name="dashboard_media_access_label">Доступ до даних про медіа</string>
     <string name="dashboard_media_access_granted">Доступ до медіа увімкнено</string>
-    <string name="dashboard_media_access_required">Щоб читати поточний трек, потрібен доступ до сповіщень</string>
-    <string name="dashboard_media_access_optional">Доступ до сповіщень використовується лише тоді, коли увімкнено медіавіджет</string>
+    <string name="dashboard_media_access_required">Увімкненим віджетам потрібен доступ до сповіщень</string>
+    <string name="dashboard_media_access_optional">Доступ до сповіщень потрібен лише віджетам медіа та сповіщень</string>
     <string name="dashboard_grant_media_access">Відкрити доступ до сповіщень</string>
     <string name="dashboard_media_nothing_playing">Нічого не відтворюється</string>
     <string name="dashboard_media_previous">Попередній</string>
@@ -367,6 +367,9 @@
     <string name="dashboard_widget_memory">Використання пам\'яті</string>
     <string name="dashboard_widget_storage">Вільне сховище</string>
     <string name="dashboard_widget_notifications">Сповіщення</string>
+    <string name="dashboard_widget_last_notification">Останнє сповіщення</string>
+    <string name="dashboard_builder_sample_notification_app">Месенджер</string>
+    <string name="dashboard_builder_sample_notification">Нове повідомлення</string>
     <string name="dashboard_widget_calendar">Наступна подія</string>
     <string name="dashboard_widget_steps">Кроки сьогодні</string>
     <string name="dashboard_network_offline">Без мережі</string>

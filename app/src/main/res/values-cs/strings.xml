@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">Nejvýše 60 znaků.</string>
     <string name="dashboard_media_access_label">Přístup k informacím o přehrávání</string>
     <string name="dashboard_media_access_granted">Přístup k médiím je zapnutý</string>
-    <string name="dashboard_media_access_required">Ke čtení aktuální skladby je potřeba přístup k oznámením</string>
-    <string name="dashboard_media_access_optional">Přístup k oznámením se používá jen tehdy, když je widget přehrávání zapnutý</string>
+    <string name="dashboard_media_access_required">Zapnuté widgety potřebují přístup k oznámením</string>
+    <string name="dashboard_media_access_optional">Přístup k oznámením využívají jen widgety médií a oznámení</string>
     <string name="dashboard_grant_media_access">Otevřít přístup k oznámením</string>
     <string name="dashboard_media_nothing_playing">Nic se nepřehrává</string>
     <string name="dashboard_media_previous">Předchozí</string>
@@ -367,6 +367,9 @@
     <string name="dashboard_widget_memory">Využití paměti</string>
     <string name="dashboard_widget_storage">Volné úložiště</string>
     <string name="dashboard_widget_notifications">Oznámení</string>
+    <string name="dashboard_widget_last_notification">Poslední oznámení</string>
+    <string name="dashboard_builder_sample_notification_app">Zprávy</string>
+    <string name="dashboard_builder_sample_notification">Nová zpráva</string>
     <string name="dashboard_widget_calendar">Další událost</string>
     <string name="dashboard_widget_steps">Dnešní kroky</string>
     <string name="dashboard_network_offline">Offline</string>

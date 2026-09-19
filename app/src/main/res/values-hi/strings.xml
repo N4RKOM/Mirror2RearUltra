@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">ज़्यादा से ज़्यादा 60 अक्षर।</string>
     <string name="dashboard_media_access_label">मीडिया जानकारी तक पहुँच</string>
     <string name="dashboard_media_access_granted">मीडिया तक पहुँच चालू है</string>
-    <string name="dashboard_media_access_required">अभी चल रहा ट्रैक पढ़ने के लिए नोटिफ़िकेशन तक पहुँच चाहिए</string>
-    <string name="dashboard_media_access_optional">नोटिफ़िकेशन तक पहुँच सिर्फ़ तब इस्तेमाल होती है जब मीडिया विजेट चालू हो</string>
+    <string name="dashboard_media_access_required">चालू किए गए विजेट के लिए नोटिफ़िकेशन तक पहुँच चाहिए</string>
+    <string name="dashboard_media_access_optional">नोटिफ़िकेशन तक पहुँच सिर्फ़ मीडिया और नोटिफ़िकेशन विजेट इस्तेमाल करते हैं</string>
     <string name="dashboard_grant_media_access">नोटिफ़िकेशन तक पहुँच खोलें</string>
     <string name="dashboard_media_nothing_playing">कुछ नहीं चल रहा</string>
     <string name="dashboard_media_previous">पिछला</string>
@@ -365,6 +365,9 @@
     <string name="dashboard_widget_memory">मेमोरी का इस्तेमाल</string>
     <string name="dashboard_widget_storage">खाली स्टोरेज</string>
     <string name="dashboard_widget_notifications">नोटिफ़िकेशन</string>
+    <string name="dashboard_widget_last_notification">नवीनतम नोटिफ़िकेशन</string>
+    <string name="dashboard_builder_sample_notification_app">मैसेंजर</string>
+    <string name="dashboard_builder_sample_notification">नया मैसेज</string>
     <string name="dashboard_widget_calendar">अगला इवेंट</string>
     <string name="dashboard_widget_steps">आज के कदम</string>
     <string name="dashboard_network_offline">ऑफ़लाइन</string>

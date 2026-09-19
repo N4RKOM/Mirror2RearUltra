@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">Cel mult 60 de caractere.</string>
     <string name="dashboard_media_access_label">Acces la informațiile media</string>
     <string name="dashboard_media_access_granted">Accesul la media este activat</string>
-    <string name="dashboard_media_access_required">Pentru a citi piesa curentă este necesar accesul la notificări</string>
-    <string name="dashboard_media_access_optional">Accesul la notificări este folosit doar când widgetul media este activat</string>
+    <string name="dashboard_media_access_required">Widgeturile activate au nevoie de acces la notificări</string>
+    <string name="dashboard_media_access_optional">Accesul la notificări este folosit doar de widgeturile media și de notificări</string>
     <string name="dashboard_grant_media_access">Deschide accesul la notificări</string>
     <string name="dashboard_media_nothing_playing">Nu se redă nimic</string>
     <string name="dashboard_media_previous">Anterior</string>
@@ -366,6 +366,9 @@
     <string name="dashboard_widget_memory">Utilizarea memoriei</string>
     <string name="dashboard_widget_storage">Spațiu liber</string>
     <string name="dashboard_widget_notifications">Notificări</string>
+    <string name="dashboard_widget_last_notification">Ultima notificare</string>
+    <string name="dashboard_builder_sample_notification_app">Mesagerie</string>
+    <string name="dashboard_builder_sample_notification">Mesaj nou</string>
     <string name="dashboard_widget_calendar">Următorul eveniment</string>
     <string name="dashboard_widget_steps">Pași astăzi</string>
     <string name="dashboard_network_offline">Fără conexiune</string>

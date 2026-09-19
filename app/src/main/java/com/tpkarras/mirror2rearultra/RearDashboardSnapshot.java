@@ -23,6 +23,10 @@ final class RearDashboardSnapshot {
     final String calendarTitle;
     final Long calendarStartMillis;
     final int stepsToday;
+    /** The newest notification worth reading, empty when there is none. */
+    final String notificationApp;
+    final String notificationTitle;
+    final String notificationText;
 
     RearDashboardSnapshot(
             long timestampMillis,
@@ -50,7 +54,7 @@ final class RearDashboardSnapshot {
                 null,
                 null,
                 0L,
-                "", "", -1, -1, "", null, -1
+                "", "", -1, -1, "", null, -1, "", "", ""
         );
     }
 
@@ -75,7 +79,8 @@ final class RearDashboardSnapshot {
         this(timestampMillis, batteryPercent, temperatureTenthsCelsius, charging, weatherPlace,
                 weatherTemperatureCelsius, weatherCode, weatherLoading, nextAlarmMillis,
                 mediaTitle, mediaArtist, headingDegrees, speedMetersPerSecond, altitudeMeters,
-                sessionElapsedMillis, activeProfileName, "", -1, -1, "", null, -1);
+                sessionElapsedMillis, activeProfileName, "", -1, -1, "", null, -1,
+                "", "", "");
     }
 
     RearDashboardSnapshot(
@@ -86,7 +91,8 @@ final class RearDashboardSnapshot {
             Float speedMetersPerSecond, Double altitudeMeters, long sessionElapsedMillis,
             String activeProfileName, String networkSummary, int memoryPercent,
             int storagePercentFree, String calendarTitle, Long calendarStartMillis,
-            int stepsToday
+            int stepsToday, String notificationApp, String notificationTitle,
+            String notificationText
     ) {
         this.timestampMillis = timestampMillis;
         this.batteryPercent = batteryPercent;
@@ -110,5 +116,8 @@ final class RearDashboardSnapshot {
         this.calendarTitle = calendarTitle == null ? "" : calendarTitle;
         this.calendarStartMillis = calendarStartMillis;
         this.stepsToday = stepsToday;
+        this.notificationApp = notificationApp == null ? "" : notificationApp;
+        this.notificationTitle = notificationTitle == null ? "" : notificationTitle;
+        this.notificationText = notificationText == null ? "" : notificationText;
     }
 }

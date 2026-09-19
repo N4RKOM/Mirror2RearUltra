@@ -46,7 +46,8 @@ import androidx.core.content.ContextCompat;
 final class RearDashboardController implements
         SensorEventListener,
         LocationListener,
-        MediaWidgetState.Listener {
+        MediaWidgetState.Listener,
+        NotificationWidgetState.Listener {
     interface Listener {
         void onDashboardDataChanged(RearDashboardSnapshot snapshot);
     }
@@ -134,6 +135,7 @@ final class RearDashboardController implements
         }
         readBattery(sticky);
         MediaWidgetState.addListener(this);
+        NotificationWidgetState.addListener(this);
         configureDynamicSources();
         publish();
         mainHandler.post(clockTick);
@@ -169,6 +171,7 @@ final class RearDashboardController implements
         started = false;
         mainHandler.removeCallbacksAndMessages(null);
         MediaWidgetState.removeListener(this);
+        NotificationWidgetState.removeListener(this);
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
         }
@@ -301,6 +304,17 @@ final class RearDashboardController implements
 
     @Override
     public void onMediaWidgetChanged(MediaWidgetState.Snapshot snapshot) {
+        mainHandler.post(this::publish);
+    }
+
+    /**
+     * Redraws as soon as something arrives.
+     *
+     * <p>Without this the panel would catch up on its own schedule, which is
+     * every thirty seconds unless the session timer happens to be on.
+     */
+    @Override
+    public void onNotificationWidgetChanged(NotificationWidgetState.Snapshot snapshot) {
         mainHandler.post(this::publish);
     }
 
@@ -438,6 +452,7 @@ final class RearDashboardController implements
                 ? alarmManager.getNextAlarmClock()
                 : null;
         MediaWidgetState.Snapshot media = MediaWidgetState.get();
+        NotificationWidgetState.Snapshot notifications = NotificationWidgetState.get();
         listener.onDashboardDataChanged(new RearDashboardSnapshot(
                 System.currentTimeMillis(),
                 batteryPercent,
@@ -460,7 +475,10 @@ final class RearDashboardController implements
                 storagePercentFree,
                 calendarTitle,
                 calendarStartMillis,
-                stepsToday
+                stepsToday,
+                notifications.app,
+                notifications.title,
+                notifications.text
         ));
     }
 

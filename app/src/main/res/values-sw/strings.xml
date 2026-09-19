@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">Hadi herufi 60.</string>
     <string name="dashboard_media_access_label">Ufikiaji wa taarifa za media</string>
     <string name="dashboard_media_access_granted">Ufikiaji wa media umewashwa</string>
-    <string name="dashboard_media_access_required">Ili kusoma wimbo unaocheza, ufikiaji wa arifa unahitajika</string>
-    <string name="dashboard_media_access_optional">Ufikiaji wa arifa hutumika tu wijeti ya media ikiwa imewashwa</string>
+    <string name="dashboard_media_access_required">Wijeti ulizowasha zinahitaji ufikiaji wa arifa</string>
+    <string name="dashboard_media_access_optional">Ufikiaji wa arifa hutumiwa tu na wijeti za media na arifa</string>
     <string name="dashboard_grant_media_access">Fungua ufikiaji wa arifa</string>
     <string name="dashboard_media_nothing_playing">Hakuna kinachochezwa</string>
     <string name="dashboard_media_previous">Iliyotangulia</string>
@@ -365,6 +365,9 @@
     <string name="dashboard_widget_memory">Matumizi ya kumbukumbu</string>
     <string name="dashboard_widget_storage">Hifadhi iliyosalia</string>
     <string name="dashboard_widget_notifications">Arifa</string>
+    <string name="dashboard_widget_last_notification">Arifa ya mwisho</string>
+    <string name="dashboard_builder_sample_notification_app">Ujumbe</string>
+    <string name="dashboard_builder_sample_notification">Ujumbe mpya</string>
     <string name="dashboard_widget_calendar">Tukio linalofuata</string>
     <string name="dashboard_widget_steps">Hatua za leo</string>
     <string name="dashboard_network_offline">Nje ya mtandao</string>

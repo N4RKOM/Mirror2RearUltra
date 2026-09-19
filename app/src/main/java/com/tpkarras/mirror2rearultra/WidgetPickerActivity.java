@@ -81,6 +81,8 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
                     DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA),
             new WidgetRow(R.id.dashboard_notifications_switch,
                     DashboardWidgetLayout.Widget.NOTIFICATIONS),
+            new WidgetRow(R.id.dashboard_last_notification_switch,
+                    DashboardWidgetLayout.Widget.LAST_NOTIFICATION),
             // Other
             new WidgetRow(R.id.dashboard_active_profile_switch,
                     DashboardWidgetLayout.Widget.ACTIVE_PROFILE),
@@ -235,6 +237,8 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
                 break;
             case MEDIA:
             case FULLSCREEN_MEDIA:
+            case NOTIFICATIONS:
+            case LAST_NOTIFICATION:
                 updatePermissionUi();
                 break;
             case SPEED:
@@ -318,17 +322,20 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
         );
 
         boolean mediaGranted = MediaWidgetState.hasNotificationAccess(this);
+        // Four widgets read the shade, not two. The counter had been left out
+        // of this since it was added, so switching it on alone offered no way
+        // to grant the access it needs and it simply stayed at zero.
+        boolean needsShade = isWidgetOn(DashboardWidgetLayout.Widget.MEDIA)
+                || isWidgetOn(DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA)
+                || isWidgetOn(DashboardWidgetLayout.Widget.NOTIFICATIONS)
+                || isWidgetOn(DashboardWidgetLayout.Widget.LAST_NOTIFICATION);
         mediaAccessStatus.setText(mediaGranted
                 ? R.string.dashboard_media_access_granted
-                : isWidgetOn(DashboardWidgetLayout.Widget.MEDIA)
-                        || isWidgetOn(DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA)
+                : needsShade
                 ? R.string.dashboard_media_access_required
                 : R.string.dashboard_media_access_optional);
         mediaAccessButton.setVisibility(
-                (isWidgetOn(DashboardWidgetLayout.Widget.MEDIA)
-                        || isWidgetOn(DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA)) && !mediaGranted
-                        ? View.VISIBLE : View.GONE
-        );
+                needsShade && !mediaGranted ? View.VISIBLE : View.GONE);
     }
 
     private void updateMediaControls(MediaWidgetState.Snapshot snapshot) {

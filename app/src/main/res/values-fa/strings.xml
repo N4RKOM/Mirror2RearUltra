@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">حداکثر ۶۰ نویسه.</string>
     <string name="dashboard_media_access_label">دسترسی به اطلاعات رسانه</string>
     <string name="dashboard_media_access_granted">دسترسی به رسانه روشن است</string>
-    <string name="dashboard_media_access_required">برای خواندن قطعهٔ در حال پخش، دسترسی به اعلان‌ها لازم است</string>
-    <string name="dashboard_media_access_optional">دسترسی به اعلان‌ها تنها وقتی به کار می‌رود که ابزارک رسانه روشن باشد</string>
+    <string name="dashboard_media_access_required">ابزارک‌های روشن به دسترسی به اعلان‌ها نیاز دارند</string>
+    <string name="dashboard_media_access_optional">دسترسی به اعلان‌ها را تنها ابزارک‌های رسانه و اعلان به کار می‌برند</string>
     <string name="dashboard_grant_media_access">باز کردن دسترسی به اعلان‌ها</string>
     <string name="dashboard_media_nothing_playing">چیزی پخش نمی‌شود</string>
     <string name="dashboard_media_previous">قبلی</string>
@@ -365,6 +365,9 @@
     <string name="dashboard_widget_memory">مصرف حافظه</string>
     <string name="dashboard_widget_storage">فضای خالی</string>
     <string name="dashboard_widget_notifications">اعلان‌ها</string>
+    <string name="dashboard_widget_last_notification">آخرین اعلان</string>
+    <string name="dashboard_builder_sample_notification_app">پیام‌رسان</string>
+    <string name="dashboard_builder_sample_notification">پیام جدید</string>
     <string name="dashboard_widget_calendar">رویداد بعدی</string>
     <string name="dashboard_widget_steps">گام‌های امروز</string>
     <string name="dashboard_network_offline">آفلاین</string>

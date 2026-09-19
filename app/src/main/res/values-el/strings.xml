@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">Έως 60 χαρακτήρες.</string>
     <string name="dashboard_media_access_label">Πρόσβαση στις πληροφορίες πολυμέσων</string>
     <string name="dashboard_media_access_granted">Η πρόσβαση στα πολυμέσα είναι ενεργή</string>
-    <string name="dashboard_media_access_required">Για την ανάγνωση του τρέχοντος κομματιού απαιτείται πρόσβαση στις ειδοποιήσεις</string>
-    <string name="dashboard_media_access_optional">Η πρόσβαση στις ειδοποιήσεις χρησιμοποιείται μόνο όταν το γραφικό στοιχείο πολυμέσων είναι ενεργό</string>
+    <string name="dashboard_media_access_required">Τα γραφικά στοιχεία που ενεργοποιήσατε χρειάζονται πρόσβαση στις ειδοποιήσεις</string>
+    <string name="dashboard_media_access_optional">Η πρόσβαση στις ειδοποιήσεις χρησιμοποιείται μόνο από τα γραφικά στοιχεία πολυμέσων και ειδοποιήσεων</string>
     <string name="dashboard_grant_media_access">Άνοιγμα πρόσβασης στις ειδοποιήσεις</string>
     <string name="dashboard_media_nothing_playing">Δεν αναπαράγεται τίποτα</string>
     <string name="dashboard_media_previous">Προηγούμενο</string>
@@ -365,6 +365,9 @@
     <string name="dashboard_widget_memory">Χρήση μνήμης</string>
     <string name="dashboard_widget_storage">Ελεύθερος χώρος</string>
     <string name="dashboard_widget_notifications">Ειδοποιήσεις</string>
+    <string name="dashboard_widget_last_notification">Τελευταία ειδοποίηση</string>
+    <string name="dashboard_builder_sample_notification_app">Μηνύματα</string>
+    <string name="dashboard_builder_sample_notification">Νέο μήνυμα</string>
     <string name="dashboard_widget_calendar">Επόμενο συμβάν</string>
     <string name="dashboard_widget_steps">Βήματα σήμερα</string>
     <string name="dashboard_network_offline">Εκτός σύνδεσης</string>

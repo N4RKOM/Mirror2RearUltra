@@ -1,6 +1,7 @@
 package com.tpkarras.mirror2rearultra;
 
 import android.app.Notification;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Build;
 import android.media.session.MediaController;
@@ -34,21 +35,21 @@ public class MediaNotificationListenerService extends NotificationListenerServic
     @Override
     public void onListenerConnected() {
         super.onListenerConnected();
-        refreshNotificationCount();
+        refreshNotifications();
         refreshMedia();
     }
 
     @Override
     public void onListenerDisconnected() {
         currentController = null;
-        NotificationWidgetState.setCount(0);
+        NotificationWidgetState.clear();
         MediaWidgetState.clear();
         super.onListenerDisconnected();
     }
 
     @Override
     public void onNotificationPosted(StatusBarNotification notification) {
-        refreshNotificationCount();
+        refreshNotifications();
         if (isMediaNotification(notification)) {
             refreshMedia();
         }
@@ -56,7 +57,7 @@ public class MediaNotificationListenerService extends NotificationListenerServic
 
     @Override
     public void onNotificationRemoved(StatusBarNotification notification) {
-        refreshNotificationCount();
+        refreshNotifications();
         if (isMediaNotification(notification)) {
             refreshMedia();
         }
@@ -96,17 +97,66 @@ public class MediaNotificationListenerService extends NotificationListenerServic
         );
     }
 
-    private void refreshNotificationCount() {
+    /**
+     * Counts what is waiting, and keeps the newest one worth reading.
+     *
+     * <p>The count is unchanged: anything that is not this app's own and not a
+     * group summary. The content skips two more kinds. Media notifications
+     * have a widget of their own, and an ongoing one - a foreground service,
+     * a VPN, a headset companion - would pin itself to the panel for as long
+     * as it ran, which is exactly what a "latest" widget should not do. Both
+     * still count.
+     */
+    private void refreshNotifications() {
+        int count = 0;
+        StatusBarNotification newest = null;
         try {
-            int count = 0;
             StatusBarNotification[] active = getActiveNotifications();
             if (active != null) for (StatusBarNotification item : active) {
                 Notification value = item.getNotification();
-                if (!getPackageName().equals(item.getPackageName())
-                        && value != null && (value.flags & Notification.FLAG_GROUP_SUMMARY) == 0) count++;
+                if (value == null || getPackageName().equals(item.getPackageName())
+                        || (value.flags & Notification.FLAG_GROUP_SUMMARY) != 0) {
+                    continue;
+                }
+                count++;
+                if (isMediaNotification(item)
+                        || (value.flags & Notification.FLAG_ONGOING_EVENT) != 0) {
+                    continue;
+                }
+                if (newest == null || item.getPostTime() > newest.getPostTime()) {
+                    newest = item;
+                }
             }
-            NotificationWidgetState.setCount(count);
-        } catch (RuntimeException ignored) { NotificationWidgetState.setCount(0); }
+        } catch (RuntimeException ignored) {
+            NotificationWidgetState.clear();
+            return;
+        }
+        if (newest == null) {
+            NotificationWidgetState.set(count, "", "", "");
+            return;
+        }
+        Bundle extras = newest.getNotification().extras;
+        CharSequence title = extras == null
+                ? null : extras.getCharSequence(Notification.EXTRA_TITLE);
+        CharSequence text = extras == null
+                ? null : extras.getCharSequence(Notification.EXTRA_TEXT);
+        NotificationWidgetState.set(count, appLabel(newest.getPackageName()),
+                title == null ? "" : title.toString(),
+                text == null ? "" : text.toString());
+    }
+
+    /** The name a person would recognise, or the package name if it is gone. */
+    private String appLabel(String packageName) {
+        if (packageName == null) {
+            return "";
+        }
+        try {
+            PackageManager packages = getPackageManager();
+            return packages.getApplicationLabel(
+                    packages.getApplicationInfo(packageName, 0)).toString();
+        } catch (PackageManager.NameNotFoundException | RuntimeException error) {
+            return packageName;
+        }
     }
 
     private MediaController controllerFrom(Bundle extras) {

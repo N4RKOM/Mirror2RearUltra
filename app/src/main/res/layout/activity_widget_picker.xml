@@ -281,8 +281,13 @@
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_notifications_switch"
-                    style="@style/HyperOS.Switch.Bottom"
+                    style="@style/HyperOS.Switch"
                     android:text="@string/dashboard_widget_notifications" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_last_notification_switch"
+                    style="@style/HyperOS.Switch.Bottom"
+                    android:text="@string/dashboard_widget_last_notification" />
             </LinearLayout>
 
             <!-- ===================== Other ===================== -->

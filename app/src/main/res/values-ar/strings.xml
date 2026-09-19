@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">حتى 60 حرفًا.</string>
     <string name="dashboard_media_access_label">الوصول إلى معلومات الوسائط</string>
     <string name="dashboard_media_access_granted">الوصول إلى الوسائط مفعّل</string>
-    <string name="dashboard_media_access_required">لقراءة المقطع الجاري يلزم الوصول إلى الإشعارات</string>
-    <string name="dashboard_media_access_optional">لا يُستخدم الوصول إلى الإشعارات إلا عند تفعيل أداة الوسائط</string>
+    <string name="dashboard_media_access_required">الأدوات التي شغّلتها تحتاج إلى الوصول إلى الإشعارات</string>
+    <string name="dashboard_media_access_optional">لا يستخدم الوصول إلى الإشعارات إلا أدوات الوسائط والإشعارات</string>
     <string name="dashboard_grant_media_access">فتح الوصول إلى الإشعارات</string>
     <string name="dashboard_media_nothing_playing">لا شيء قيد التشغيل</string>
     <string name="dashboard_media_previous">السابق</string>
@@ -369,6 +369,9 @@
     <string name="dashboard_widget_memory">استخدام الذاكرة</string>
     <string name="dashboard_widget_storage">المساحة الحرة</string>
     <string name="dashboard_widget_notifications">الإشعارات</string>
+    <string name="dashboard_widget_last_notification">أحدث إشعار</string>
+    <string name="dashboard_builder_sample_notification_app">المراسلة</string>
+    <string name="dashboard_builder_sample_notification">رسالة جديدة</string>
     <string name="dashboard_widget_calendar">الحدث التالي</string>
     <string name="dashboard_widget_steps">خطوات اليوم</string>
     <string name="dashboard_network_offline">غير متصل</string>

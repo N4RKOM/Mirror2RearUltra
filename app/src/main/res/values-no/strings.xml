@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">Opptil 60 tegn.</string>
     <string name="dashboard_media_access_label">Tilgang til medieinformasjon</string>
     <string name="dashboard_media_access_granted">Medietilgangen er på</string>
-    <string name="dashboard_media_access_required">Varseltilgang kreves for å lese sporet som spilles</string>
-    <string name="dashboard_media_access_optional">Varseltilgang brukes bare når mediemodulen er på</string>
+    <string name="dashboard_media_access_required">Modulene du har slått på krever varseltilgang</string>
+    <string name="dashboard_media_access_optional">Varseltilgang brukes bare av medie- og varselmodulene</string>
     <string name="dashboard_grant_media_access">Åpne varseltilgangen</string>
     <string name="dashboard_media_nothing_playing">Ingenting spilles av</string>
     <string name="dashboard_media_previous">Forrige</string>
@@ -365,6 +365,9 @@
     <string name="dashboard_widget_memory">Minnebruk</string>
     <string name="dashboard_widget_storage">Ledig lagring</string>
     <string name="dashboard_widget_notifications">Varsler</string>
+    <string name="dashboard_widget_last_notification">Siste varsel</string>
+    <string name="dashboard_builder_sample_notification_app">Meldinger</string>
+    <string name="dashboard_builder_sample_notification">Ny melding</string>
     <string name="dashboard_widget_calendar">Neste hendelse</string>
     <string name="dashboard_widget_steps">Skritt i dag</string>
     <string name="dashboard_network_offline">Frakoblet</string>

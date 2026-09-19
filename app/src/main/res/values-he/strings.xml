@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">עד 60 תווים.</string>
     <string name="dashboard_media_access_label">גישה למידע על מדיה</string>
     <string name="dashboard_media_access_granted">הגישה למדיה פעילה</string>
-    <string name="dashboard_media_access_required">כדי לקרוא את הרצועה הנוכחית נדרשת גישה להתראות</string>
-    <string name="dashboard_media_access_optional">הגישה להתראות משמשת רק כשווידג׳ט המדיה פעיל</string>
+    <string name="dashboard_media_access_required">הווידג׳טים שהפעלת זקוקים לגישה להתראות</string>
+    <string name="dashboard_media_access_optional">הגישה להתראות משמשת רק את ווידג׳טי המדיה וההתראות</string>
     <string name="dashboard_grant_media_access">פתיחת הגישה להתראות</string>
     <string name="dashboard_media_nothing_playing">לא מתנגן דבר</string>
     <string name="dashboard_media_previous">הקודם</string>
@@ -367,6 +367,9 @@
     <string name="dashboard_widget_memory">שימוש בזיכרון</string>
     <string name="dashboard_widget_storage">אחסון פנוי</string>
     <string name="dashboard_widget_notifications">התראות</string>
+    <string name="dashboard_widget_last_notification">ההתראה האחרונה</string>
+    <string name="dashboard_builder_sample_notification_app">הודעות</string>
+    <string name="dashboard_builder_sample_notification">הודעה חדשה</string>
     <string name="dashboard_widget_calendar">האירוע הבא</string>
     <string name="dashboard_widget_steps">צעדים היום</string>
     <string name="dashboard_network_offline">לא מקוון</string>

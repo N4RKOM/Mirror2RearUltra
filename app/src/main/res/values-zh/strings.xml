@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">最多 60 个字符。</string>
     <string name="dashboard_media_access_label">媒体信息访问权限</string>
     <string name="dashboard_media_access_granted">媒体访问权限已开启</string>
-    <string name="dashboard_media_access_required">读取当前曲目需要通知使用权</string>
-    <string name="dashboard_media_access_optional">只有启用媒体小组件时才会使用通知使用权</string>
+    <string name="dashboard_media_access_required">已开启的小组件需要通知使用权</string>
+    <string name="dashboard_media_access_optional">通知使用权仅由媒体和通知小组件使用</string>
     <string name="dashboard_grant_media_access">打开通知使用权</string>
     <string name="dashboard_media_nothing_playing">当前没有播放内容</string>
     <string name="dashboard_media_previous">上一首</string>
@@ -364,6 +364,9 @@
     <string name="dashboard_widget_memory">内存占用</string>
     <string name="dashboard_widget_storage">可用存储</string>
     <string name="dashboard_widget_notifications">通知</string>
+    <string name="dashboard_widget_last_notification">最新通知</string>
+    <string name="dashboard_builder_sample_notification_app">消息</string>
+    <string name="dashboard_builder_sample_notification">新消息</string>
     <string name="dashboard_widget_calendar">下一个日程</string>
     <string name="dashboard_widget_steps">今日步数</string>
     <string name="dashboard_network_offline">已断开</string>

@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">Enintään 60 merkkiä.</string>
     <string name="dashboard_media_access_label">Mediatietojen käyttöoikeus</string>
     <string name="dashboard_media_access_granted">Median käyttöoikeus on käytössä</string>
-    <string name="dashboard_media_access_required">Nykyisen kappaleen lukeminen vaatii ilmoitusten käyttöoikeuden</string>
-    <string name="dashboard_media_access_optional">Ilmoitusten käyttöoikeutta käytetään vain, kun mediawidget on käytössä</string>
+    <string name="dashboard_media_access_required">Käyttöön otetut widgetit vaativat ilmoitusten käyttöoikeuden</string>
+    <string name="dashboard_media_access_optional">Ilmoitusten käyttöoikeutta käyttävät vain media- ja ilmoituswidgetit</string>
     <string name="dashboard_grant_media_access">Avaa ilmoitusten käyttöoikeus</string>
     <string name="dashboard_media_nothing_playing">Mitään ei toisteta</string>
     <string name="dashboard_media_previous">Edellinen</string>
@@ -365,6 +365,9 @@
     <string name="dashboard_widget_memory">Muistin käyttö</string>
     <string name="dashboard_widget_storage">Vapaa tallennustila</string>
     <string name="dashboard_widget_notifications">Ilmoitukset</string>
+    <string name="dashboard_widget_last_notification">Viimeisin ilmoitus</string>
+    <string name="dashboard_builder_sample_notification_app">Viestit</string>
+    <string name="dashboard_builder_sample_notification">Uusi viesti</string>
     <string name="dashboard_widget_calendar">Seuraava tapahtuma</string>
     <string name="dashboard_widget_steps">Askeleet tänään</string>
     <string name="dashboard_network_offline">Ei yhteyttä</string>

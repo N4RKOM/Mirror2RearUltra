@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">Suas le 60 carachtar.</string>
     <string name="dashboard_media_access_label">Rochtain ar eolas na meán</string>
     <string name="dashboard_media_access_granted">Tá rochtain ar na meáin ar siúl</string>
-    <string name="dashboard_media_access_required">Tá rochtain ar fhógraí ag teastáil chun an rian reatha a léamh</string>
-    <string name="dashboard_media_access_optional">Ní úsáidtear rochtain ar fhógraí ach nuair atá giuirléid na meán ar siúl</string>
+    <string name="dashboard_media_access_required">Teastaíonn rochtain ar fhógraí ó na giuirléidí atá ar siúl agat</string>
+    <string name="dashboard_media_access_optional">Ní úsáideann ach giuirléidí na meán agus na bhfógraí an rochtain ar fhógraí</string>
     <string name="dashboard_grant_media_access">Oscail an rochtain ar fhógraí</string>
     <string name="dashboard_media_nothing_playing">Níl aon rud á sheinm</string>
     <string name="dashboard_media_previous">Roimhe seo</string>
@@ -368,6 +368,9 @@
     <string name="dashboard_widget_memory">Úsáid cuimhne</string>
     <string name="dashboard_widget_storage">Stóras saor</string>
     <string name="dashboard_widget_notifications">Fógraí</string>
+    <string name="dashboard_widget_last_notification">An fógra is déanaí</string>
+    <string name="dashboard_builder_sample_notification_app">Teachtaireachtaí</string>
+    <string name="dashboard_builder_sample_notification">Teachtaireacht nua</string>
     <string name="dashboard_widget_calendar">An chéad imeacht eile</string>
     <string name="dashboard_widget_steps">Céimeanna inniu</string>
     <string name="dashboard_network_offline">As líne</string>

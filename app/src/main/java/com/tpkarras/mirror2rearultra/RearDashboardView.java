@@ -735,6 +735,30 @@ public final class RearDashboardView extends View {
             addLine(lines, DashboardWidgetLayout.Widget.NOTIFICATIONS,
                     count > 0, value, Icon.NOTIFICATIONS);
         }
+        if (DashboardWidgetLayout.isExtraEnabled(
+                getContext(), DashboardWidgetLayout.Widget.LAST_NOTIFICATION)) {
+            // Three ways to say the same arrival, from least to most told.
+            // ALTERNATE names only the app on purpose: the panel points away
+            // from its owner, and "Telegram" answers "is it worth picking the
+            // phone up" without putting the message in front of the room.
+            DashboardWidgetLayout.Variant variant =
+                    variantOf(DashboardWidgetLayout.Widget.LAST_NOTIFICATION);
+            String app = snapshot.notificationApp;
+            String title = snapshot.notificationTitle;
+            String text = snapshot.notificationText;
+            String value;
+            if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
+                value = app.isEmpty() ? title : app;
+            } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
+                String head = app.isEmpty() ? title
+                        : title.isEmpty() ? app : app + " · " + title;
+                value = text.isEmpty() ? head : head.isEmpty() ? text : head + "\n" + text;
+            } else {
+                value = title.isEmpty() ? app.isEmpty() ? text : app : title;
+            }
+            addLine(lines, DashboardWidgetLayout.Widget.LAST_NOTIFICATION,
+                    !value.isEmpty(), value, Icon.MESSAGE);
+        }
         if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.CALENDAR)) {
             boolean hasData = snapshot.calendarStartMillis != null;
             String value = "";
@@ -1985,6 +2009,18 @@ public final class RearDashboardView extends View {
                 canvas.drawLine(body.left + body.width() * .16f, body.bottom - body.height() * .22f,
                         body.right - body.width() * .16f, body.bottom - body.height() * .22f, iconPaint);
                 break;
+            case MESSAGE:
+                // A bubble with a tail, to tell it apart from the bell the
+                // counter already uses.
+                canvas.drawRoundRect(new RectF(body.left, body.top,
+                                body.right, body.bottom - body.height() * .22f),
+                        body.width() * .18f, body.width() * .18f, iconPaint);
+                Path tail = new Path();
+                tail.moveTo(body.left + body.width() * .28f, body.bottom - body.height() * .24f);
+                tail.lineTo(body.left + body.width() * .28f, body.bottom);
+                tail.lineTo(body.left + body.width() * .52f, body.bottom - body.height() * .24f);
+                canvas.drawPath(tail, iconPaint);
+                break;
             case CALENDAR:
                 canvas.drawRoundRect(body, body.width() * .1f, body.width() * .1f, iconPaint);
                 canvas.drawLine(body.left, body.top + body.height() * .3f,
@@ -2253,7 +2289,7 @@ public final class RearDashboardView extends View {
         TIMER,
         PROFILE,
         TEXT
-        ,NETWORK, MEMORY, STORAGE, NOTIFICATIONS, CALENDAR, STEPS
+        ,NETWORK, MEMORY, STORAGE, NOTIFICATIONS, MESSAGE, CALENDAR, STEPS
     }
 
     private static final class Palette {

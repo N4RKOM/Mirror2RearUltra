@@ -954,6 +954,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         boolean charging = status == BatteryManager.BATTERY_STATUS_CHARGING
                 || status == BatteryManager.BATTERY_STATUS_FULL;
         SystemStats stats = SystemStats.read(this);
+        NotificationWidgetState.Snapshot notification = NotificationWidgetState.get();
         return new RearDashboardSnapshot(
                 System.currentTimeMillis(),
                 batteryPercent,
@@ -976,7 +977,12 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 stats.storagePercentFree,
                 getString(R.string.dashboard_builder_sample_event),
                 System.currentTimeMillis() + 5_400_000L,
-                4_820);
+                4_820,
+                notification.hasContent() ? notification.app
+                        : getString(R.string.dashboard_builder_sample_notification_app),
+                notification.hasContent() ? notification.title
+                        : getString(R.string.dashboard_builder_sample_notification),
+                notification.hasContent() ? notification.text : "");
     }
 
     /**
@@ -1371,8 +1377,12 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 R.string.dashboard_widget_memory, R.string.dashboard_widget_storage,
                 R.string.dashboard_widget_notifications, R.string.dashboard_widget_calendar,
                 R.string.dashboard_widget_steps, R.string.dashboard_widget_fullscreen_weather,
-                R.string.dashboard_widget_fullscreen_media};
-        return getString(labels[widget.ordinal()]);
+                R.string.dashboard_widget_fullscreen_media,
+                R.string.dashboard_widget_last_notification};
+        // Indexed by ordinal, so a widget added without a label here would
+        // take the whole screen down rather than show a blank row.
+        int index = widget.ordinal();
+        return getString(index < labels.length ? labels[index] : R.string.dashboard_widgets_title);
     }
 
 

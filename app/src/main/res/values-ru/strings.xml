@@ -206,8 +206,8 @@
     <string name="dashboard_location_access_required">Для скорости и высоты нужно точное местоположение</string>
     <string name="dashboard_media_access_granted">Доступ к мультимедиа включён</string>
     <string name="dashboard_media_access_label">Доступ к информации о мультимедиа</string>
-    <string name="dashboard_media_access_optional">Доступ к уведомлениям используется только для виджета текущего трека</string>
-    <string name="dashboard_media_access_required">Для текущего трека нужен доступ к уведомлениям</string>
+    <string name="dashboard_media_access_optional">Доступ к уведомлениям нужен только виджетам медиа и уведомлений</string>
+    <string name="dashboard_media_access_required">Для включённых виджетов нужен доступ к уведомлениям</string>
     <string name="dashboard_media_next">Вперёд</string>
     <string name="dashboard_media_nothing_playing">Сейчас ничего не играет</string>
     <string name="dashboard_media_play_pause">Пуск / пауза</string>
@@ -257,6 +257,9 @@
     <string name="dashboard_widget_network">Сеть</string>
     <string name="dashboard_widget_next_alarm">Следующий будильник</string>
     <string name="dashboard_widget_notifications">Уведомления</string>
+    <string name="dashboard_widget_last_notification">Последнее уведомление</string>
+    <string name="dashboard_builder_sample_notification_app">Мессенджер</string>
+    <string name="dashboard_builder_sample_notification">Новое сообщение</string>
     <string name="dashboard_widget_session_timer">Время текущего сеанса</string>
     <string name="dashboard_widget_speed">Скорость</string>
     <string name="dashboard_widget_steps">Шаги сегодня</string>

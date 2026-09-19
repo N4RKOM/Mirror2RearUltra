@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">Hasta 60 caracteres.</string>
     <string name="dashboard_media_access_label">Acceso a la información multimedia</string>
     <string name="dashboard_media_access_granted">El acceso multimedia está activado</string>
-    <string name="dashboard_media_access_required">Se necesita acceso a las notificaciones para leer la pista actual</string>
-    <string name="dashboard_media_access_optional">El acceso a las notificaciones solo se usa cuando el widget multimedia está activado</string>
+    <string name="dashboard_media_access_required">Los widgets que has activado necesitan acceso a las notificaciones</string>
+    <string name="dashboard_media_access_optional">El acceso a las notificaciones solo lo usan los widgets multimedia y de notificaciones</string>
     <string name="dashboard_grant_media_access">Abrir el acceso a las notificaciones</string>
     <string name="dashboard_media_nothing_playing">No se está reproduciendo nada</string>
     <string name="dashboard_media_previous">Anterior</string>
@@ -365,6 +365,9 @@
     <string name="dashboard_widget_memory">Uso de memoria</string>
     <string name="dashboard_widget_storage">Almacenamiento libre</string>
     <string name="dashboard_widget_notifications">Notificaciones</string>
+    <string name="dashboard_widget_last_notification">Última notificación</string>
+    <string name="dashboard_builder_sample_notification_app">Mensajería</string>
+    <string name="dashboard_builder_sample_notification">Mensaje nuevo</string>
     <string name="dashboard_widget_calendar">Próximo evento</string>
     <string name="dashboard_widget_steps">Pasos de hoy</string>
     <string name="dashboard_network_offline">Sin conexión</string>

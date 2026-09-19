@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">60 文字まで。</string>
     <string name="dashboard_media_access_label">メディア情報へのアクセス</string>
     <string name="dashboard_media_access_granted">メディアへのアクセスは有効です</string>
-    <string name="dashboard_media_access_required">再生中の曲を読み取るには通知へのアクセスが必要です</string>
-    <string name="dashboard_media_access_optional">通知へのアクセスはメディアウィジェットがオンのときだけ使われます</string>
+    <string name="dashboard_media_access_required">オンにしたウィジェットには通知へのアクセスが必要です</string>
+    <string name="dashboard_media_access_optional">通知へのアクセスはメディアと通知のウィジェットだけが使います</string>
     <string name="dashboard_grant_media_access">通知へのアクセスを開く</string>
     <string name="dashboard_media_nothing_playing">再生中のものはありません</string>
     <string name="dashboard_media_previous">前へ</string>
@@ -364,6 +364,9 @@
     <string name="dashboard_widget_memory">メモリ使用量</string>
     <string name="dashboard_widget_storage">空き容量</string>
     <string name="dashboard_widget_notifications">通知</string>
+    <string name="dashboard_widget_last_notification">最新の通知</string>
+    <string name="dashboard_builder_sample_notification_app">メッセージ</string>
+    <string name="dashboard_builder_sample_notification">新着メッセージ</string>
     <string name="dashboard_widget_calendar">次の予定</string>
     <string name="dashboard_widget_steps">今日の歩数</string>
     <string name="dashboard_network_offline">オフライン</string>

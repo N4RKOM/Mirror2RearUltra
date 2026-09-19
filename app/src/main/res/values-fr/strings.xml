@@ -174,8 +174,8 @@
     <string name="dashboard_custom_text_help">60 caractères maximum.</string>
     <string name="dashboard_media_access_label">Accès aux informations multimédias</string>
     <string name="dashboard_media_access_granted">L\'accès aux médias est activé</string>
-    <string name="dashboard_media_access_required">L\'accès aux notifications est nécessaire pour lire la piste en cours</string>
-    <string name="dashboard_media_access_optional">L\'accès aux notifications n\'est utilisé que lorsque le widget média est activé</string>
+    <string name="dashboard_media_access_required">Les widgets activés nécessitent l\'accès aux notifications</string>
+    <string name="dashboard_media_access_optional">L\'accès aux notifications ne sert qu\'aux widgets multimédias et de notifications</string>
     <string name="dashboard_grant_media_access">Ouvrir l\'accès aux notifications</string>
     <string name="dashboard_media_nothing_playing">Aucune lecture en cours</string>
     <string name="dashboard_media_previous">Précédent</string>
@@ -365,6 +365,9 @@
     <string name="dashboard_widget_memory">Utilisation de la mémoire</string>
     <string name="dashboard_widget_storage">Stockage libre</string>
     <string name="dashboard_widget_notifications">Notifications</string>
+    <string name="dashboard_widget_last_notification">Dernière notification</string>
+    <string name="dashboard_builder_sample_notification_app">Messagerie</string>
+    <string name="dashboard_builder_sample_notification">Nouveau message</string>
     <string name="dashboard_widget_calendar">Prochain événement</string>
     <string name="dashboard_widget_steps">Pas aujourd\'hui</string>
     <string name="dashboard_network_offline">Hors ligne</string>
