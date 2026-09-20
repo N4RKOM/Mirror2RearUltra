@@ -397,6 +397,7 @@
     <string name="dashboard_variant_alternate">צפופה</string>
     <string name="dashboard_variant_detailed">מפורטת</string>
     <string name="dashboard_variant_charging">בטעינה</string>
+    <string name="dashboard_variant_battery">טעינה</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">פנוי</string>
     <string name="dashboard_variant_notifications">חדשות</string>

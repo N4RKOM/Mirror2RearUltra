@@ -418,6 +418,7 @@
     <string name="dashboard_variant_alternate">Компактный</string>
     <string name="dashboard_variant_detailed">Подробный</string>
     <string name="dashboard_variant_charging">зарядка</string>
+    <string name="dashboard_variant_battery">заряд</string>
     <string name="dashboard_variant_memory">ОЗУ</string>
     <string name="dashboard_variant_storage_free">свободно</string>
     <string name="dashboard_variant_notifications">новых</string>

@@ -395,6 +395,7 @@
     <string name="dashboard_variant_alternate">Συμπαγής</string>
     <string name="dashboard_variant_detailed">Αναλυτική</string>
     <string name="dashboard_variant_charging">φορτίζει</string>
+    <string name="dashboard_variant_battery">φόρτιση</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">ελεύθερα</string>
     <string name="dashboard_variant_notifications">νέες</string>

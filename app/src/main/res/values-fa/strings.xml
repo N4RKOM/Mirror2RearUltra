@@ -395,6 +395,7 @@
     <string name="dashboard_variant_alternate">فشرده</string>
     <string name="dashboard_variant_detailed">مفصل</string>
     <string name="dashboard_variant_charging">در حال شارژ</string>
+    <string name="dashboard_variant_battery">شارژ</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">خالی</string>
     <string name="dashboard_variant_notifications">تازه</string>

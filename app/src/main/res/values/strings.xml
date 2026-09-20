@@ -415,6 +415,7 @@
     <string name="dashboard_variant_alternate">Compact</string>
     <string name="dashboard_variant_detailed">Detailed</string>
     <string name="dashboard_variant_charging">charging</string>
+    <string name="dashboard_variant_battery">charge</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">free</string>
     <string name="dashboard_variant_notifications">new</string>

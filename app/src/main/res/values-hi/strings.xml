@@ -395,6 +395,7 @@
     <string name="dashboard_variant_alternate">सघन</string>
     <string name="dashboard_variant_detailed">विस्तृत</string>
     <string name="dashboard_variant_charging">चार्ज हो रही</string>
+    <string name="dashboard_variant_battery">चार्ज</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">खाली</string>
     <string name="dashboard_variant_notifications">नए</string>

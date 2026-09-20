@@ -397,6 +397,7 @@
     <string name="dashboard_variant_alternate">Kompaktní</string>
     <string name="dashboard_variant_detailed">Podrobná</string>
     <string name="dashboard_variant_charging">nabíjí se</string>
+    <string name="dashboard_variant_battery">nabití</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">volné</string>
     <string name="dashboard_variant_notifications">nových</string>

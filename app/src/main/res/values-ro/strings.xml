@@ -396,6 +396,7 @@
     <string name="dashboard_variant_alternate">Compact</string>
     <string name="dashboard_variant_detailed">Detaliat</string>
     <string name="dashboard_variant_charging">se încarcă</string>
+    <string name="dashboard_variant_battery">încărcare</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">liber</string>
     <string name="dashboard_variant_notifications">noi</string>

@@ -399,6 +399,7 @@
     <string name="dashboard_variant_alternate">مضغوط</string>
     <string name="dashboard_variant_detailed">مفصّل</string>
     <string name="dashboard_variant_charging">قيد الشحن</string>
+    <string name="dashboard_variant_battery">الشحن</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">حرة</string>
     <string name="dashboard_variant_notifications">جديدة</string>

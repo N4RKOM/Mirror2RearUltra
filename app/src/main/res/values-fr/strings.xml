@@ -395,6 +395,7 @@
     <string name="dashboard_variant_alternate">Compact</string>
     <string name="dashboard_variant_detailed">Détaillé</string>
     <string name="dashboard_variant_charging">en charge</string>
+    <string name="dashboard_variant_battery">charge</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">libre</string>
     <string name="dashboard_variant_notifications">nouv.</string>

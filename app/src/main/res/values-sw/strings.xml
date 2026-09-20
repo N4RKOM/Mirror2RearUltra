@@ -395,6 +395,7 @@
     <string name="dashboard_variant_alternate">Fupi</string>
     <string name="dashboard_variant_detailed">Yenye maelezo</string>
     <string name="dashboard_variant_charging">inachaji</string>
+    <string name="dashboard_variant_battery">chaji</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">imesalia</string>
     <string name="dashboard_variant_notifications">mpya</string>

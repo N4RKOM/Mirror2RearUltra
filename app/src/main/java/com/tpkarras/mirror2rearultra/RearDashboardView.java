@@ -656,8 +656,13 @@ public final class RearDashboardView extends View {
             DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.BATTERY);
             if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
                 value = snapshot.batteryPercent + "\n%";
-            } else if (variant == DashboardWidgetLayout.Variant.DETAILED && snapshot.charging) {
-                value += "\n" + getResources().getString(R.string.dashboard_variant_charging);
+            } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
+                // A word either way. With only the charging one to offer, the
+                // detailed form was the ordinary form whenever the phone was
+                // off the charger, which is most of the time.
+                value += "\n" + getResources().getString(snapshot.charging
+                        ? R.string.dashboard_variant_charging
+                        : R.string.dashboard_variant_battery);
             }
             lines.add(new Line(DashboardWidgetLayout.Widget.BATTERY, value, false,
                     snapshot.charging ? Icon.BATTERY_CHARGING : Icon.BATTERY));
@@ -853,8 +858,18 @@ public final class RearDashboardView extends View {
         }
         if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.STEPS)) {
             DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.STEPS);
+            // Stacked on the thousands, which is what compact means
+            // everywhere else here - the battery's figure over its sign, the
+            // clock's hours over its minutes. Grouping the digits, as this
+            // did, made the compact form the widest of the three.
+            //
+            // The separator is whatever the locale groups with, so it is found
+            // by keeping the digits rather than by naming it. Not \D, which
+            // counts only nought to nine: Persian and Arabic number in their
+            // own digits, and the whole count came back as empty lines.
             String value = variant == DashboardWidgetLayout.Variant.ALTERNATE
                     ? String.format(locale, "%,d", snapshot.stepsToday)
+                            .replaceAll("[^\\p{N}]", "\n")
                     : variant == DashboardWidgetLayout.Variant.DETAILED
                     ? snapshot.stepsToday + "\n" + getResources().getString(R.string.dashboard_variant_steps)
                     : String.valueOf(snapshot.stepsToday);

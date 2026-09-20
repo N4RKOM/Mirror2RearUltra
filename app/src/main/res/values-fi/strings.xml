@@ -395,6 +395,7 @@
     <string name="dashboard_variant_alternate">Tiivis</string>
     <string name="dashboard_variant_detailed">Yksityiskohtainen</string>
     <string name="dashboard_variant_charging">latautuu</string>
+    <string name="dashboard_variant_battery">lataus</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">vapaana</string>
     <string name="dashboard_variant_notifications">uutta</string>

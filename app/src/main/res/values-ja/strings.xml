@@ -394,6 +394,7 @@
     <string name="dashboard_variant_alternate">コンパクト</string>
     <string name="dashboard_variant_detailed">詳細</string>
     <string name="dashboard_variant_charging">充電中</string>
+    <string name="dashboard_variant_battery">残量</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">空き</string>
     <string name="dashboard_variant_notifications">件</string>

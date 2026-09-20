@@ -398,6 +398,7 @@
     <string name="dashboard_variant_alternate">Dlúth</string>
     <string name="dashboard_variant_detailed">Mionsonraithe</string>
     <string name="dashboard_variant_charging">á luchtú</string>
+    <string name="dashboard_variant_battery">luchtú</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">saor</string>
     <string name="dashboard_variant_notifications">nua</string>

@@ -395,6 +395,7 @@
     <string name="dashboard_variant_alternate">Kompakt</string>
     <string name="dashboard_variant_detailed">Detaljert</string>
     <string name="dashboard_variant_charging">lader</string>
+    <string name="dashboard_variant_battery">lading</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">ledig</string>
     <string name="dashboard_variant_notifications">nye</string>

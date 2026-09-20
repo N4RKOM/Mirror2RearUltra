@@ -395,6 +395,7 @@
     <string name="dashboard_variant_alternate">Kompaktne</string>
     <string name="dashboard_variant_detailed">Üksikasjalik</string>
     <string name="dashboard_variant_charging">laeb</string>
+    <string name="dashboard_variant_battery">aku</string>
     <string name="dashboard_variant_memory">RAM</string>
     <string name="dashboard_variant_storage_free">vaba</string>
     <string name="dashboard_variant_notifications">uut</string>
