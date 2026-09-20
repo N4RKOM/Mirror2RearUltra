@@ -161,6 +161,14 @@
     <string name="dashboard_speed_unit">km/h</string>
     <string name="dashboard_altitude_short">%1$d m</string>
     <string name="dashboard_altitude_unit">m</string>
+    <string name="dashboard_speed_short_imperial">%1$d mph</string>
+    <string name="dashboard_speed_unit_imperial">mph</string>
+    <string name="dashboard_altitude_short_imperial">%1$d ft</string>
+    <string name="dashboard_altitude_unit_imperial">ft</string>
+    <string name="dashboard_units_imperial">Brittiska enheter</string>
+    <string name="dashboard_call_incoming">Inkommande samtal</string>
+    <string name="panel_pocket_lock">Lås pekning i fickan</string>
+    <string name="panel_face_down_off">Släck när panelen vänds nedåt</string>
     <string name="dashboard_more_widgets_title">Fler widgetar</string>
     <string name="dashboard_more_widgets_help">När fler än fem poster är påslagna växlar den bakre skärmen mellan dem automatiskt.</string>
     <string name="dashboard_widget_next_alarm">Nästa alarm</string>

@@ -161,6 +161,14 @@
     <string name="dashboard_speed_unit">km/h</string>
     <string name="dashboard_altitude_short">%1$d m</string>
     <string name="dashboard_altitude_unit">m</string>
+    <string name="dashboard_speed_short_imperial">%1$d mph</string>
+    <string name="dashboard_speed_unit_imperial">mph</string>
+    <string name="dashboard_altitude_short_imperial">%1$d ft</string>
+    <string name="dashboard_altitude_unit_imperial">ft</string>
+    <string name="dashboard_units_imperial">ヤード・ポンド法</string>
+    <string name="dashboard_call_incoming">着信</string>
+    <string name="panel_pocket_lock">ポケット内ではタッチを無効</string>
+    <string name="panel_face_down_off">下向きのときは消灯</string>
     <string name="dashboard_more_widgets_title">その他のウィジェット</string>
     <string name="dashboard_more_widgets_help">6 つ以上の項目をオンにすると、背面画面が自動的に切り替えて表示します。</string>
     <string name="dashboard_widget_next_alarm">次のアラーム</string>

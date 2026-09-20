@@ -142,7 +142,13 @@ public final class RearDashboardView extends View {
      * frame is drawn.
      */
     private long pageFlipPeriodMillis;
+    /** How many pages the arrangement is actually showing, for the dots. */
+    private int pagesOnPanel = 1;
     private final Runnable pageFlip = this::invalidate;
+    /** Moves the progress along while a track is playing, and no oftener. */
+    private final Runnable progressTick = this::invalidate;
+    /** A call cannot wait for the next snapshot: the panel is redrawn at once. */
+    private final CallWidgetState.Listener callListener = snapshot -> postInvalidate();
     private int userPage = 1;
     private long lastPageInteractionMillis;
     private long autoPageResumeMillis;
@@ -473,7 +479,31 @@ public final class RearDashboardView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (!contentMode.showsDashboard() || getWidth() <= 0 || getHeight() <= 0) {
+        if (getWidth() <= 0 || getHeight() <= 0) {
+            return;
+        }
+        // Ahead of the mode: a call is worth showing even on a panel that was
+        // set to mirror the screen and nothing else. Not in the builder
+        // though - a preview being edited is no place to be interrupted.
+        CallWidgetState.Snapshot call = ringingCall();
+        if (call != null) {
+            currentPalette = resolvePalette();
+            backgroundPaint.setColor(currentPalette.surface);
+            canvas.drawRect(0, 0, getWidth(), getHeight(), backgroundPaint);
+            panelPaint.setColor(Color.argb(
+                    Math.round(settings.backgroundOpacityPercent * 2.55f),
+                    Color.red(currentPalette.surface),
+                    Color.green(currentPalette.surface),
+                    Color.blue(currentPalette.surface)));
+            textPaint.setColor(currentPalette.text);
+            applyPanelTypeface();
+            // Nothing from the page underneath is on screen any more, so
+            // nothing from it should answer to a finger either.
+            drawnLines.clear();
+            drawIncomingCall(canvas, call, contentDensity());
+            return;
+        }
+        if (!contentMode.showsDashboard()) {
             return;
         }
 
@@ -530,9 +560,39 @@ public final class RearDashboardView extends View {
         } else {
             drawStacked(canvas, lines, density);
         }
+        drawPageDots(canvas, density);
         canvas.restore();
         drawSelection(canvas, getResources().getDisplayMetrics().density);
         schedulePageFlip();
+    }
+
+    /**
+     * A dot for each page, the one on screen filled in.
+     *
+     * <p>The panel turns pages on a swipe and on a timer, and said nothing
+     * about how many there were or which one this was - so a page that
+     * happened to be empty looked like a fault, and a swipe that did nothing
+     * looked the same as one that had reached the end.
+     *
+     * <p>They sit in the margin the layouts leave below them, and they are
+     * drawn inside the burn-in shift so they wander with everything else
+     * rather than marking the same pixels all day.
+     */
+    private void drawPageDots(Canvas canvas, float density) {
+        if (pagesOnPanel <= 1 || getWidth() <= 0 || getHeight() <= 0) {
+            return;
+        }
+        float radius = Math.max(1f, density * 0.9f);
+        float step = radius * 3.4f;
+        float y = getHeight() - Math.max(3f, density * 3.2f) - radius;
+        float x = (getWidth() - step * (pagesOnPanel - 1)) / 2f;
+        iconPaint.setStyle(Paint.Style.FILL);
+        for (int page = 1; page <= pagesOnPanel; page++) {
+            iconPaint.setColor(page == currentPage ? currentPalette.text : mutedColour());
+            canvas.drawCircle(x, y, page == currentPage ? radius : radius * 0.78f, iconPaint);
+            x += step;
+        }
+        iconPaint.setStyle(Paint.Style.STROKE);
     }
 
     /** Outlines the picked widget, so the preview says what is being edited. */
@@ -582,9 +642,17 @@ public final class RearDashboardView extends View {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        CallWidgetState.addListener(callListener);
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
+        CallWidgetState.removeListener(callListener);
         cancelPendingLongPress();
         removeCallbacks(pageFlip);
+        removeCallbacks(progressTick);
         removeCallbacks(returnToFirstPage);
         super.onDetachedFromWindow();
     }
@@ -679,12 +747,12 @@ public final class RearDashboardView extends View {
         }
         if (settings.showTemperature && snapshot.temperatureTenthsCelsius >= 0) {
             DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.TEMPERATURE);
+            float degrees = inDegrees(snapshot.temperatureTenthsCelsius / 10f);
             String value = variant == DashboardWidgetLayout.Variant.ALTERNATE
-                    ? Math.round(snapshot.temperatureTenthsCelsius / 10f) + "°"
+                    ? Math.round(degrees) + "°"
                     : variant == DashboardWidgetLayout.Variant.DETAILED
-                    ? String.format(locale, "%.1f °C", snapshot.temperatureTenthsCelsius / 10f)
-                    : getResources().getString(R.string.dashboard_device_temperature,
-                            snapshot.temperatureTenthsCelsius / 10f);
+                    ? String.format(locale, "%.1f %s", degrees, degreeName())
+                    : getResources().getString(R.string.dashboard_device_temperature, degrees);
             lines.add(new Line(DashboardWidgetLayout.Widget.TEMPERATURE, value, false, Icon.TEMPERATURE));
         }
         if (settings.showWeather) {
@@ -728,22 +796,34 @@ public final class RearDashboardView extends View {
         }
         if (settings.showSpeed) {
             boolean hasData = snapshot.speedMetersPerSecond != null;
-            int speed = hasData ? Math.round(snapshot.speedMetersPerSecond * 3.6f) : 0;
+            boolean imperial = imperialUnits();
+            int speed = !hasData ? 0 : Math.round(snapshot.speedMetersPerSecond
+                    * (imperial ? 2.236936f : 3.6f));
             DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.SPEED);
             String value = !hasData ? "" : variant == DashboardWidgetLayout.Variant.ALTERNATE
                     ? String.valueOf(speed) : variant == DashboardWidgetLayout.Variant.DETAILED
-                    ? speed + "\n" + getResources().getString(R.string.dashboard_speed_unit)
-                    : getResources().getString(R.string.dashboard_speed_short, speed);
+                    ? speed + "\n" + getResources().getString(imperial
+                            ? R.string.dashboard_speed_unit_imperial
+                            : R.string.dashboard_speed_unit)
+                    : getResources().getString(imperial
+                            ? R.string.dashboard_speed_short_imperial
+                            : R.string.dashboard_speed_short, speed);
             addLine(lines, DashboardWidgetLayout.Widget.SPEED, hasData, value, Icon.SPEED);
         }
         if (settings.showAltitude) {
             boolean hasData = snapshot.altitudeMeters != null;
-            long altitude = hasData ? Math.round(snapshot.altitudeMeters) : 0L;
+            boolean imperial = imperialUnits();
+            long altitude = !hasData ? 0L : Math.round(snapshot.altitudeMeters
+                    * (imperial ? 3.280840d : 1d));
             DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.ALTITUDE);
             String value = !hasData ? "" : variant == DashboardWidgetLayout.Variant.ALTERNATE
                     ? String.valueOf(altitude) : variant == DashboardWidgetLayout.Variant.DETAILED
-                    ? altitude + "\n" + getResources().getString(R.string.dashboard_altitude_unit)
-                    : getResources().getString(R.string.dashboard_altitude_short, altitude);
+                    ? altitude + "\n" + getResources().getString(imperial
+                            ? R.string.dashboard_altitude_unit_imperial
+                            : R.string.dashboard_altitude_unit)
+                    : getResources().getString(imperial
+                            ? R.string.dashboard_altitude_short_imperial
+                            : R.string.dashboard_altitude_short, altitude);
             addLine(lines, DashboardWidgetLayout.Widget.ALTITUDE, hasData, value, Icon.ALTITUDE);
         }
         if (settings.showSessionTimer) {
@@ -908,6 +988,7 @@ public final class RearDashboardView extends View {
         int maxPage = 1;
         for (Line line : source) maxPage = Math.max(maxPage,
                 DashboardWidgetLayout.loadPage(getContext(), line.widget));
+        pagesOnPanel = maxPage;
         // The wall clock rather than the snapshot: the snapshot only arrives
         // every thirty seconds unless the session timer is on, so a page that
         // turned with it sat still for half a minute at a time whatever the
@@ -985,6 +1066,12 @@ public final class RearDashboardView extends View {
      */
     @Override public boolean onTouchEvent(MotionEvent event) {
         boolean interactive = widgetSelectedListener != null;
+        // The call card has nothing to press. Letting a touch through would
+        // reach the page underneath it - cycling a widget nobody can see, or
+        // on a long press turning AOD on or off.
+        if (ringingCall() != null) {
+            return true;
+        }
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 touchStartX = event.getX();
@@ -1149,6 +1236,22 @@ public final class RearDashboardView extends View {
         return (float) Math.hypot(
                 event.getX(0) - event.getX(1),
                 event.getY(0) - event.getY(1));
+    }
+
+    /**
+     * Drops whatever gesture was under way.
+     *
+     * <p>Called when the panel stops taking touches part-way through one. The
+     * finger's release then never arrives, so nothing cancels the long press
+     * that the press had armed - and on this panel a long press turns AOD on
+     * or off, which is a settings change nobody asked for.
+     */
+    void cancelTouchInProgress() {
+        cancelPendingLongPress();
+        longPressFired = false;
+        draggedWidget = null;
+        pinching = false;
+        pinchedWidget = null;
     }
 
     private void cancelPendingLongPress() {
@@ -1523,6 +1626,14 @@ public final class RearDashboardView extends View {
             canvas.drawLine(ahead.left + ahead.width() * 0.12f, ahead.top,
                     ahead.right - ahead.width() * 0.12f, ahead.top, iconPaint);
         }
+        // Whether any day has a chance of rain to report decides the height
+        // every column is laid out in, not just the ones that have one: sized
+        // each on its own, a column with the extra line shrank while the one
+        // beside it did not, and the two stopped lining up.
+        boolean rainAnyDay = false;
+        for (int index = 0; index < days; index++) {
+            rainAnyDay |= !rainChance(forecast, index).isEmpty();
+        }
         for (int index = 0; index < days; index++) {
             RectF cell = wide
                     ? new RectF(ahead.left + ahead.width() * index / days, ahead.top,
@@ -1530,7 +1641,7 @@ public final class RearDashboardView extends View {
                     : new RectF(ahead.left, ahead.top + ahead.height() * index / days,
                             ahead.right, ahead.top + ahead.height() * (index + 1) / days);
             if (wide) {
-                drawForecastColumn(canvas, cell, forecast, index, density);
+                drawForecastColumn(canvas, cell, forecast, index, density, rainAnyDay);
             } else {
                 drawForecastRow(canvas, cell, forecast, index, density);
             }
@@ -1541,7 +1652,7 @@ public final class RearDashboardView extends View {
     /** The condition, the temperature and the place, centred in what is left. */
     private void drawWeatherNow(Canvas canvas, RectF area, float density) {
         String temperature = snapshot.weatherTemperatureCelsius == null
-                ? "—" : snapshot.weatherTemperatureCelsius + "°";
+                ? "—" : inDegrees(snapshot.weatherTemperatureCelsius) + "°";
         String place = snapshot.weatherPlace;
         float iconSize = clamp(Math.min(area.width(), area.height()) * 0.26f,
                 11f * density, 30f * density);
@@ -1596,18 +1707,36 @@ public final class RearDashboardView extends View {
 
     /** One day of the forecast, stacked, for a panel lying on its side. */
     private void drawForecastColumn(Canvas canvas, RectF cell,
-            WeatherForecastState.Snapshot forecast, int index, float density) {
+            WeatherForecastState.Snapshot forecast, int index, float density,
+            boolean roomForRain) {
         float labelSize = clamp(cell.height() * 0.15f, 7f * density, 13f * density);
         float iconSize = clamp(Math.min(cell.width() * 0.52f, cell.height() * 0.26f),
                 9f * density, 24f * density);
         float valueSize = clamp(cell.height() * 0.17f, 8f * density, 15f * density);
         float gap = iconSize * 0.2f;
+        String rain = rainChance(forecast, index);
 
         textPaint.setTextSize(labelSize);
         float labelHeight = textPaint.descent() - textPaint.ascent();
         textPaint.setTextSize(valueSize);
         float valueHeight = textPaint.descent() - textPaint.ascent();
-        float total = labelHeight + gap + iconSize + gap + valueHeight * 2f;
+        float total = labelHeight + gap + iconSize + gap + valueHeight * 2f
+                + (roomForRain ? labelHeight : 0f);
+        // The four rows already all but filled the cell, so a fifth has to be
+        // made room for rather than simply drawn - it fell off the bottom
+        // edge otherwise. Font metrics go up and down with the size, so the
+        // heights measured above can be squeezed by the same fraction.
+        float room = cell.height() * 0.96f;
+        if (total > room) {
+            float squeeze = room / total;
+            labelSize *= squeeze;
+            iconSize *= squeeze;
+            valueSize *= squeeze;
+            gap *= squeeze;
+            labelHeight *= squeeze;
+            valueHeight *= squeeze;
+            total = room;
+        }
 
         float centreX = cell.centerX();
         float y = cell.centerY() - total / 2f;
@@ -1623,11 +1752,35 @@ public final class RearDashboardView extends View {
         y += iconSize + gap;
 
         textPaint.setTextSize(valueSize);
-        canvas.drawText(forecast.maximums[index] + "°", centreX, y - textPaint.ascent(), textPaint);
+        canvas.drawText(inDegrees(forecast.maximums[index]) + "°", centreX,
+                y - textPaint.ascent(), textPaint);
         y += valueHeight;
         textPaint.setColor(mutedColour());
-        canvas.drawText(forecast.minimums[index] + "°", centreX, y - textPaint.ascent(), textPaint);
+        canvas.drawText(inDegrees(forecast.minimums[index]) + "°", centreX,
+                y - textPaint.ascent(), textPaint);
+        if (!rain.isEmpty()) {
+            y += valueHeight;
+            textPaint.setTextSize(labelSize);
+            canvas.drawText(rain, centreX, y - textPaint.ascent(), textPaint);
+        }
         textPaint.setColor(currentPalette.text);
+    }
+
+    /**
+     * The chance of rain, where it is worth saying.
+     *
+     * <p>Under a fifth it is noise on a panel this size, and the row it would
+     * take is better left to the temperatures. A day drawn with a drizzle
+     * icon came in at twenty-nine per cent, so the cut cannot sit much above
+     * that or it would contradict the picture beside it. Not every place and
+     * season has the figure at all.
+     */
+    private String rainChance(WeatherForecastState.Snapshot forecast, int index) {
+        if (index >= forecast.rainChances.length) {
+            return "";
+        }
+        int chance = forecast.rainChances[index];
+        return chance < 20 ? "" : chance + "%";
     }
 
     /** One day of the forecast, in a line, for a panel standing upright. */
@@ -1642,7 +1795,16 @@ public final class RearDashboardView extends View {
         textPaint.setTextSize(size);
         textPaint.setTextAlign(Paint.Align.LEFT);
         textPaint.setColor(mutedColour());
-        canvas.drawText(dayName(forecast.dates[index]), cell.left + pad, baseline, textPaint);
+        String day = dayName(forecast.dates[index]);
+        canvas.drawText(day, cell.left + pad, baseline, textPaint);
+        String rain = rainChance(forecast, index);
+        if (!rain.isEmpty()) {
+            float from = cell.left + pad + textPaint.measureText(day) + size * 0.45f;
+            float until = cell.centerX() - iconSize * 0.6f;
+            if (until - from >= textPaint.measureText(rain)) {
+                canvas.drawText(rain, from, baseline, textPaint);
+            }
+        }
 
         textPaint.setColor(currentPalette.text);
         drawIcon(canvas, weatherIcon(forecast.codes[index]), new RectF(
@@ -1650,10 +1812,10 @@ public final class RearDashboardView extends View {
                 cell.centerX() + iconSize / 2f, cell.centerY() + iconSize / 2f));
 
         textPaint.setTextAlign(Paint.Align.RIGHT);
-        String maximum = forecast.maximums[index] + "°";
+        String maximum = inDegrees(forecast.maximums[index]) + "°";
         canvas.drawText(maximum, cell.right - pad, baseline, textPaint);
         textPaint.setColor(mutedColour());
-        canvas.drawText(forecast.minimums[index] + "°",
+        canvas.drawText(inDegrees(forecast.minimums[index]) + "°",
                 cell.right - pad - textPaint.measureText(maximum) - size * 0.35f,
                 baseline, textPaint);
         textPaint.setColor(currentPalette.text);
@@ -1700,11 +1862,29 @@ public final class RearDashboardView extends View {
         float controlsCentre = panel.bottom - controlSize * 0.58f;
         float rule = controlsCentre - controlSize * 0.72f;
 
+        // The rule above the controls doubles as the track's own progress: on
+        // a panel this short there is no room for a bar of its own, and a line
+        // that fills as the track plays says the same thing in the same place.
+        MediaWidgetState.Snapshot media = MediaWidgetState.get();
+        float ruleLeft = panel.left + panel.width() * 0.06f;
+        float ruleRight = panel.right - panel.width() * 0.06f;
         iconPaint.setColor(mutedColour());
         iconPaint.setStyle(Paint.Style.STROKE);
         iconPaint.setStrokeWidth(Math.max(1f, density * 0.7f));
-        canvas.drawLine(panel.left + panel.width() * 0.06f, rule,
-                panel.right - panel.width() * 0.06f, rule, iconPaint);
+        canvas.drawLine(ruleLeft, rule, ruleRight, rule, iconPaint);
+        if (live && media.durationMillis > 0L) {
+            float through = clamp(media.positionNow() / (float) media.durationMillis, 0f, 1f);
+            iconPaint.setColor(currentPalette.text);
+            iconPaint.setStrokeWidth(Math.max(1f, density * 1.4f));
+            canvas.drawLine(ruleLeft, rule,
+                    ruleLeft + (ruleRight - ruleLeft) * through, rule, iconPaint);
+            if (media.playing) {
+                // Nothing else on the panel moves this often, so the redraw is
+                // asked for only while there is something to move.
+                removeCallbacks(progressTick);
+                postDelayed(progressTick, 1_000L);
+            }
+        }
 
         RectF above = new RectF(panel.left, panel.top, panel.right, rule);
         if (live) {
@@ -1734,18 +1914,36 @@ public final class RearDashboardView extends View {
 
     /** The icon on the left, the words beside it, a rule between the two. */
     private void drawNowPlaying(Canvas canvas, RectF area, float density) {
-        String title = snapshot.mediaTitle.isEmpty() ? snapshot.mediaArtist : snapshot.mediaTitle;
-        String artist = snapshot.mediaTitle.isEmpty() ? "" : snapshot.mediaArtist;
-        float iconSize = clamp(Math.min(area.width() * 0.22f, area.height() * 0.76f),
-                13f * density, 38f * density);
         // The track's own picture where the player offers one; failing that,
         // the icon of whoever is playing, which at least says where it is from.
         MediaWidgetState.Snapshot media = MediaWidgetState.get();
-        Bitmap icon = media.artwork;
+        drawIconAndLines(canvas, area, media.artwork, media.packageName,
+                snapshot.mediaTitle.isEmpty() ? snapshot.mediaArtist : snapshot.mediaTitle,
+                snapshot.mediaTitle.isEmpty() ? "" : snapshot.mediaArtist,
+                density);
+    }
+
+    /**
+     * A picture on the left, two lines beside it, a rule between the two.
+     *
+     * <p>Shared by the media card and the call card, which are the same
+     * arrangement holding different news - and which drifted apart the moment
+     * they were written twice.
+     *
+     * @param picture what to show, already a bitmap, or null to fall back on
+     *     the icon of {@code packageName}. A picture is given corners; an app
+     *     icon arrives with its own shape already cut.
+     */
+    private void drawIconAndLines(Canvas canvas, RectF area, @Nullable Bitmap picture,
+            String packageName, String title, String subtitle, float density) {
+        float iconSize = clamp(Math.min(area.width() * 0.22f, area.height() * 0.76f),
+                13f * density, 38f * density);
+        Bitmap icon = picture;
         boolean artwork = icon != null;
         if (icon == null) {
-            icon = appIcon(media.packageName, Math.round(iconSize));
+            icon = appIcon(packageName, Math.round(iconSize));
         }
+        String artist = subtitle;
         float margin = area.width() * 0.05f;
         float left = area.left + margin;
         float textLeft = left;
@@ -1801,6 +1999,38 @@ public final class RearDashboardView extends View {
                     TextUtils.TruncateAt.END).toString(), textLeft, y - artistTop, textPaint);
             textPaint.setColor(currentPalette.text);
         }
+    }
+
+    /**
+     * The call to put on the panel, or null when there is none to show.
+     *
+     * <p>Null in the builder as well as when nothing is ringing: the preview
+     * is where an arrangement is being edited, and a call arriving there
+     * would take the editing surface away rather than tell anyone anything.
+     */
+    @Nullable
+    private CallWidgetState.Snapshot ringingCall() {
+        if (widgetSelectedListener != null) {
+            return null;
+        }
+        CallWidgetState.Snapshot call = CallWidgetState.get();
+        return call.ringing ? call : null;
+    }
+
+    /**
+     * Whoever is ringing, across the whole panel.
+     *
+     * <p>It pre-empts the page that was showing and the mirrored image alike:
+     * the one question a panel facing away from its owner is well placed to
+     * answer is whether this call is worth turning the phone over for.
+     */
+    private void drawIncomingCall(Canvas canvas, CallWidgetState.Snapshot call, float density) {
+        RectF panel = fullscreenPanel(canvas, density);
+        String caller = call.caller.isEmpty()
+                ? getResources().getString(R.string.dashboard_call_incoming) : call.caller;
+        String label = call.caller.isEmpty() ? "" : call.label;
+        drawIconAndLines(canvas, panel, null, call.packageName, caller, label, density);
+        textPaint.setTextAlign(Paint.Align.LEFT);
     }
 
     /**
@@ -1928,6 +2158,24 @@ public final class RearDashboardView extends View {
         iconPaint.setStyle(Paint.Style.STROKE);
     }
 
+    private boolean imperialUnits() {
+        return DashboardWidgetLayout.isImperialUnits(getContext());
+    }
+
+    /** A reading in whichever degrees the panel has been told to show. */
+    private int inDegrees(int celsius) {
+        return imperialUnits() ? Math.round(celsius * 9f / 5f + 32f) : celsius;
+    }
+
+    private float inDegrees(float celsius) {
+        return imperialUnits() ? celsius * 9f / 5f + 32f : celsius;
+    }
+
+    /** What to call them, for the one reading that spells the unit out. */
+    private String degreeName() {
+        return imperialUnits() ? "°F" : "°C";
+    }
+
     /**
      * The weather as a widget's variant asks for it.
      *
@@ -1943,7 +2191,7 @@ public final class RearDashboardView extends View {
         DashboardWidgetLayout.Variant variant = variantOf(widget);
         if (variant == DashboardWidgetLayout.Variant.ALTERNATE
                 && snapshot.weatherTemperatureCelsius != null) {
-            return snapshot.weatherTemperatureCelsius + "\n°C";
+            return inDegrees(snapshot.weatherTemperatureCelsius) + "\n" + degreeName();
         }
         if (variant == DashboardWidgetLayout.Variant.DETAILED
                 && !snapshot.weatherPlace.isEmpty()) {
@@ -2017,7 +2265,7 @@ public final class RearDashboardView extends View {
         if (snapshot.weatherTemperatureCelsius != null && snapshot.weatherCode != null) {
             return getResources().getString(
                     R.string.dashboard_weather_short,
-                    snapshot.weatherTemperatureCelsius
+                    inDegrees(snapshot.weatherTemperatureCelsius)
             );
         }
         if (snapshot.weatherLoading) {

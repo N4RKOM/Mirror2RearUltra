@@ -196,6 +196,21 @@
                     style="@style/HyperOS.Switch"
                     android:text="@string/dashboard_auto_pages" />
 
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_imperial_units_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_units_imperial" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_pocket_lock_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/panel_pocket_lock" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_face_down_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/panel_face_down_off" />
+
                 <TextView
                     android:id="@+id/dashboard_text_scale_value"
                     style="@style/HyperOS.SliderLabel"

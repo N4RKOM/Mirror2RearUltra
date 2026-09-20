@@ -113,6 +113,35 @@ final class RearBrightnessController {
             value = Math.max(1, Math.round(
                     maximumBrightness * PerceptualBrightness.toLinear(percent)));
         }
+        boolean success = write(value);
+        if (success) {
+            Log.i(TAG, "Rear-panel hardware brightness applied: " + percent + "%");
+        }
+        return success;
+    }
+
+    /**
+     * Puts the panel out, leaving the display itself alone.
+     *
+     * <p>Sleeping the display would do it too, but this panel's display is
+     * where the session's own activity lives: putting it out that way stops
+     * the activity, the activity starts again and wakes the display, and the
+     * two take turns - which is a flicker, not a panel that is off.
+     */
+    void blank() {
+        if (closed.get()) {
+            return;
+        }
+        executor.execute(() -> {
+            boolean applied = ensureHardwareState() && write(0);
+            DeviceCapabilityState.setHardwareBrightnessActive(applied);
+            // Nought reaches the listener as well, so a panel without root
+            // still goes dark - under the software overlay instead.
+            listener.onBrightnessApplied(applied, 0);
+        });
+    }
+
+    private boolean write(int value) {
         CommandResult result = runRootCommand(
                 "printf %d " + value + " > " + BRIGHTNESS_PATH
         );
@@ -121,8 +150,6 @@ final class RearBrightnessController {
         if (!success) {
             Log.w(TAG, "Root brightness write failed; using software dimming: "
                     + result.describe());
-        } else {
-            Log.i(TAG, "Rear-panel hardware brightness applied: " + percent + "%");
         }
         return success;
     }

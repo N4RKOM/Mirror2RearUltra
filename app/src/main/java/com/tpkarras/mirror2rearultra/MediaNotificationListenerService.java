@@ -130,6 +130,7 @@ public class MediaNotificationListenerService extends NotificationListenerServic
         // This runs on every notification anywhere, and cutting the art down
         // makes a new bitmap each time - which the panel would then take for
         // a change and redraw for. The same track keeps the picture it had.
+        PlaybackState state = controller == null ? null : controller.getPlaybackState();
         MediaWidgetState.Snapshot last = MediaWidgetState.get();
         boolean sameTrack = last.artwork != null
                 && last.packageName.equals(packageName)
@@ -138,9 +139,13 @@ public class MediaNotificationListenerService extends NotificationListenerServic
         MediaWidgetState.set(
                 titleText,
                 artistText,
-                controller != null && isPlaying(controller.getPlaybackState()),
+                isPlaying(state),
                 packageName,
-                sameTrack ? last.artwork : artworkOf(controller, selected)
+                sameTrack ? last.artwork : artworkOf(controller, selected),
+                state == null ? 0L : state.getPosition(),
+                state == null ? 0L : state.getLastPositionUpdateTime(),
+                state == null ? 1f : state.getPlaybackSpeed(),
+                durationOf(controller)
         );
     }
 
@@ -172,7 +177,11 @@ public class MediaNotificationListenerService extends NotificationListenerServic
                 // The words have not changed, only whether they are moving.
                 MediaWidgetState.Snapshot last = MediaWidgetState.get();
                 MediaWidgetState.set(last.title, last.artist, isPlaying(state),
-                        last.packageName, last.artwork);
+                        last.packageName, last.artwork,
+                        state == null ? last.positionMillis : state.getPosition(),
+                        state == null ? 0L : state.getLastPositionUpdateTime(),
+                        state == null ? 1f : state.getPlaybackSpeed(),
+                        last.durationMillis);
             }
 
             @Override
@@ -181,7 +190,10 @@ public class MediaNotificationListenerService extends NotificationListenerServic
                 // track, so it is taken again rather than waited for.
                 MediaWidgetState.Snapshot last = MediaWidgetState.get();
                 MediaWidgetState.set(last.title, last.artist, last.playing,
-                        last.packageName, cutDown(bitmapFrom(metadata)));
+                        last.packageName, cutDown(bitmapFrom(metadata)),
+                        last.positionMillis, last.positionAtMillis, last.speed,
+                        metadata == null ? 0L
+                                : metadata.getLong(MediaMetadata.METADATA_KEY_DURATION));
             }
         };
         try {
@@ -270,6 +282,40 @@ public class MediaNotificationListenerService extends NotificationListenerServic
         }
     }
 
+    /** How long the track runs, where the session bothers to say. */
+    private static long durationOf(@Nullable MediaController controller) {
+        MediaMetadata metadata = controller == null ? null : controller.getMetadata();
+        return metadata == null ? 0L : metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+    }
+
+    /**
+     * Whether a notification is a call that has not been picked up.
+     *
+     * <p>A call in progress carries the same category, so the full-screen
+     * intent is what tells them apart: it is the request to take the screen
+     * over, which only a ringing one makes.
+     */
+    private static boolean isRingingCall(Notification value) {
+        return Notification.CATEGORY_CALL.equals(value.category)
+                && value.fullScreenIntent != null;
+    }
+
+    private void publishCall(StatusBarNotification ringing) {
+        if (ringing == null) {
+            CallWidgetState.clear();
+            return;
+        }
+        Bundle extras = ringing.getNotification().extras;
+        CharSequence caller = extras == null ? null
+                : extras.getCharSequence(Notification.EXTRA_TITLE);
+        CharSequence label = extras == null ? null
+                : extras.getCharSequence(Notification.EXTRA_TEXT);
+        CallWidgetState.set(true,
+                caller == null ? "" : caller.toString(),
+                label == null ? getString(R.string.dashboard_call_incoming) : label.toString(),
+                ringing.getPackageName());
+    }
+
     private static boolean isPlaying(PlaybackState state) {
         return state != null && state.getState() == PlaybackState.STATE_PLAYING;
     }
@@ -296,11 +342,21 @@ public class MediaNotificationListenerService extends NotificationListenerServic
         try {
             StatusBarNotification[] active = getActiveNotifications();
             RankingMap ranking = getCurrentRanking();
+            StatusBarNotification ringing = null;
             if (active != null) for (StatusBarNotification item : active) {
                 Notification value = item.getNotification();
                 if (value == null || getPackageName().equals(item.getPackageName())
-                        || (value.flags & Notification.FLAG_GROUP_SUMMARY) != 0
-                        || (value.flags & UNDISMISSABLE) != 0
+                        || (value.flags & Notification.FLAG_GROUP_SUMMARY) != 0) {
+                    continue;
+                }
+                // Looked for ahead of the filter below, which would drop it:
+                // a call that is ringing is an ongoing notification like any
+                // other, and that filter is there to throw those away.
+                if (isRingingCall(value)) {
+                    ringing = item;
+                    continue;
+                }
+                if ((value.flags & UNDISMISSABLE) != 0
                         || importanceOf(ranking, item)
                         < NotificationManager.IMPORTANCE_DEFAULT) {
                     continue;
@@ -313,8 +369,10 @@ public class MediaNotificationListenerService extends NotificationListenerServic
                     newest = item;
                 }
             }
+            publishCall(ringing);
         } catch (RuntimeException ignored) {
             NotificationWidgetState.clear();
+            CallWidgetState.clear();
             return;
         }
         if (newest == null) {

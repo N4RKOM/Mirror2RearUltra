@@ -161,6 +161,14 @@
     <string name="dashboard_speed_unit">km/h</string>
     <string name="dashboard_altitude_short">%1$d m</string>
     <string name="dashboard_altitude_unit">m</string>
+    <string name="dashboard_speed_short_imperial">%1$d mph</string>
+    <string name="dashboard_speed_unit_imperial">mph</string>
+    <string name="dashboard_altitude_short_imperial">%1$d ft</string>
+    <string name="dashboard_altitude_unit_imperial">ft</string>
+    <string name="dashboard_units_imperial">Vipimo vya kifalme</string>
+    <string name="dashboard_call_incoming">Simu inayoingia</string>
+    <string name="panel_pocket_lock">Zuia mguso mfukoni</string>
+    <string name="panel_face_down_off">Zima panel inapoelekea chini</string>
     <string name="dashboard_more_widgets_title">Wijeti zaidi</string>
     <string name="dashboard_more_widgets_help">Vipengee zaidi ya vitano vikiwashwa, skrini ya nyuma huvipokezanya kiotomatiki.</string>
     <string name="dashboard_widget_next_alarm">Kengele inayofuata</string>

@@ -358,7 +358,8 @@ final class RearDashboardController implements
                 weatherTemperatureCelsius = finalResult.temperatureCelsius;
                 weatherCode = finalResult.weatherCode;
                 WeatherForecastState.set(finalResult.dates, finalResult.minimums,
-                        finalResult.maximums, finalResult.codes);
+                        finalResult.maximums, finalResult.codes,
+                        finalResult.rainChances);
             }
             publish();
             mainHandler.postDelayed(() -> refreshWeatherIfNeeded(false), WEATHER_REFRESH_MILLIS);
@@ -388,6 +389,7 @@ final class RearDashboardController implements
                             + "&longitude=" + longitude
                             + "&current=temperature_2m,weather_code"
                             + "&daily=weather_code,temperature_2m_max,temperature_2m_min"
+                            + ",precipitation_probability_max"
                             + "&forecast_days=4&timezone=auto"
             );
             JSONObject current = forecast.getJSONObject("current");
@@ -396,21 +398,26 @@ final class RearDashboardController implements
             JSONArray minimumsJson = daily.getJSONArray("temperature_2m_min");
             JSONArray maximumsJson = daily.getJSONArray("temperature_2m_max");
             JSONArray codesJson = daily.getJSONArray("weather_code");
+            // Not every place and season has this to give, so it is optional.
+            JSONArray rainJson = daily.optJSONArray("precipitation_probability_max");
             int count = Math.min(4, times.length());
             String[] dates = new String[count];
             int[] minimums = new int[count];
             int[] maximums = new int[count];
             int[] codes = new int[count];
+            int[] rainChances = new int[count];
             for (int index = 0; index < count; index++) {
                 dates[index] = times.getString(index);
                 minimums[index] = (int) Math.round(minimumsJson.getDouble(index));
                 maximums[index] = (int) Math.round(maximumsJson.getDouble(index));
                 codes[index] = codesJson.getInt(index);
+                rainChances[index] = rainJson == null ? -1 : rainJson.optInt(index, -1);
             }
             return new WeatherResult(
                     displayName,
                     (int) Math.round(current.getDouble("temperature_2m")),
-                    current.getInt("weather_code"), dates, minimums, maximums, codes
+                    current.getInt("weather_code"), dates, minimums, maximums, codes,
+                    rainChances
             );
         } catch (JSONException error) {
             throw new IOException("Invalid weather data", error);
@@ -536,9 +543,11 @@ final class RearDashboardController implements
         final int[] minimums;
         final int[] maximums;
         final int[] codes;
+        final int[] rainChances;
 
         WeatherResult(String place, int temperatureCelsius, int weatherCode,
-                String[] dates, int[] minimums, int[] maximums, int[] codes) {
+                String[] dates, int[] minimums, int[] maximums, int[] codes,
+                int[] rainChances) {
             this.place = place;
             this.temperatureCelsius = temperatureCelsius;
             this.weatherCode = weatherCode;
@@ -546,6 +555,7 @@ final class RearDashboardController implements
             this.minimums = minimums;
             this.maximums = maximums;
             this.codes = codes;
+            this.rainChances = rainChances;
         }
     }
 }

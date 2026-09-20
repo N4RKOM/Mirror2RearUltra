@@ -161,6 +161,14 @@
     <string name="dashboard_speed_unit">קמ״ש</string>
     <string name="dashboard_altitude_short">%1$d מ׳</string>
     <string name="dashboard_altitude_unit">מ׳</string>
+    <string name="dashboard_speed_short_imperial">%1$d mph</string>
+    <string name="dashboard_speed_unit_imperial">mph</string>
+    <string name="dashboard_altitude_short_imperial">%1$d ft</string>
+    <string name="dashboard_altitude_unit_imperial">ft</string>
+    <string name="dashboard_units_imperial">יחידות אימפריאליות</string>
+    <string name="dashboard_call_incoming">שיחה נכנסת</string>
+    <string name="panel_pocket_lock">נעילת מגע בכיס</string>
+    <string name="panel_face_down_off">כיבוי כשהפאנל פונה למטה</string>
     <string name="dashboard_more_widgets_title">ווידג׳טים נוספים</string>
     <string name="dashboard_more_widgets_help">כשמופעלים יותר מחמישה פריטים, המסך האחורי מחליף ביניהם אוטומטית.</string>
     <string name="dashboard_widget_next_alarm">ההתראה הבאה</string>

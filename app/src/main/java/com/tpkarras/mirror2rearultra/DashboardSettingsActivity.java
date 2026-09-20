@@ -54,6 +54,9 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     private String[] idleModeLabels;
     private MaterialSwitch customImageSwitch;
     private MaterialSwitch autoPagesSwitch;
+    private MaterialSwitch imperialUnitsSwitch;
+    private MaterialSwitch pocketLockSwitch;
+    private MaterialSwitch faceDownSwitch;
     private TextView customImageStatus;
     private View customImageChooseButton;
     private View customImageRemoveButton;
@@ -92,6 +95,9 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         themeInput = findViewById(R.id.dashboard_theme_input);
         customImageSwitch = findViewById(R.id.dashboard_custom_image_switch);
         autoPagesSwitch = findViewById(R.id.dashboard_auto_pages_switch);
+        imperialUnitsSwitch = findViewById(R.id.dashboard_imperial_units_switch);
+        pocketLockSwitch = findViewById(R.id.dashboard_pocket_lock_switch);
+        faceDownSwitch = findViewById(R.id.dashboard_face_down_switch);
         customImageStatus = findViewById(R.id.dashboard_custom_image_status);
         customImageChooseButton = findViewById(R.id.dashboard_custom_image_choose_button);
         customImageRemoveButton = findViewById(R.id.dashboard_custom_image_remove_button);
@@ -191,6 +197,27 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                         MirrorSettings.loadDashboardSettings(this));
             }
         });
+        pocketLockSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!bindingUi) {
+                DashboardWidgetLayout.setPocketLockEnabled(this, checked);
+                MirrorSettings.saveDashboardSettings(this,
+                        MirrorSettings.loadDashboardSettings(this));
+            }
+        });
+        faceDownSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!bindingUi) {
+                DashboardWidgetLayout.setFaceDownOffEnabled(this, checked);
+                MirrorSettings.saveDashboardSettings(this,
+                        MirrorSettings.loadDashboardSettings(this));
+            }
+        });
+        imperialUnitsSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!bindingUi) {
+                DashboardWidgetLayout.setImperialUnits(this, checked);
+                MirrorSettings.saveDashboardSettings(this,
+                        MirrorSettings.loadDashboardSettings(this));
+            }
+        });
         autoPagesSwitch.setOnCheckedChangeListener((button, checked) -> {
             if (!bindingUi) {
                 DashboardWidgetLayout.setAutoPageSwitchEnabled(this, checked);
@@ -277,6 +304,9 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         fontInput.setValue(labelAt(fontLabels, DashboardWidgetLayout.loadFont(this).ordinal()));
         renderOwnFonts();
         autoPagesSwitch.setChecked(DashboardWidgetLayout.isAutoPageSwitchEnabled(this));
+        imperialUnitsSwitch.setChecked(DashboardWidgetLayout.isImperialUnits(this));
+        pocketLockSwitch.setChecked(DashboardWidgetLayout.isPocketLockEnabled(this));
+        faceDownSwitch.setChecked(DashboardWidgetLayout.isFaceDownOffEnabled(this));
         int aodMinBrightness = DashboardWidgetLayout.loadAodMinBrightnessPercent(this);
         aodMinBrightnessSlider.setValue(aodMinBrightness);
         updateAodMinBrightnessValue(aodMinBrightness);

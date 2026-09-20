@@ -73,6 +73,7 @@ final class DashboardWidgetLayout {
     private static final String BURN_IN_SHIFT = "burn_in_shift";
     private static final String FONT = "font";
     private static final String AUTO_BRIGHTNESS = "auto_brightness";
+    private static final String IMPERIAL_UNITS = "imperial_units";
     private static final String IDLE_MODE_BEFORE_AOD = "idle_mode_before_aod";
     private static final String TIMER_MINUTES = "timer_minutes";
     private static final String WIDGET_FONT_PREFIX = "font_";
@@ -85,6 +86,8 @@ final class DashboardWidgetLayout {
     private static final String IDLE_MODE = "idle_mode";
     private static final String AOD_MIN_BRIGHTNESS = "aod_min_brightness";
     private static final String AUTO_PAGE_SWITCH = "auto_page_switch";
+    private static final String POCKET_LOCK = "pocket_lock";
+    private static final String FACE_DOWN_OFF = "face_down_off";
 
     private DashboardWidgetLayout() {}
 
@@ -244,6 +247,34 @@ final class DashboardWidgetLayout {
 
     static void saveWidgetFontId(Context context, Widget widget, String id) {
         prefs(context).edit().putString(WIDGET_FONT_PREFIX + widget.name(), id).apply();
+    }
+
+    /**
+     * Whether to read in miles, feet and Fahrenheit.
+     *
+     * <p>Taken from the language the phone is set to until somebody says
+     * otherwise, because that is where the answer is kept - and overridable,
+     * because a language is not a country: an English phone in Almaty would
+     * otherwise report its speed in miles. Only the United States counts as
+     * imperial here; Britain buys petrol by the litre and reads the weather
+     * in Celsius, so it is left to the switch.
+     */
+    static boolean isImperialUnits(Context context) {
+        SharedPreferences preferences = prefs(context);
+        if (preferences.contains(IMPERIAL_UNITS)) {
+            return preferences.getBoolean(IMPERIAL_UNITS, false);
+        }
+        try {
+            return android.icu.util.LocaleData.getMeasurementSystem(
+                    android.icu.util.ULocale.getDefault())
+                    == android.icu.util.LocaleData.MeasurementSystem.US;
+        } catch (RuntimeException ignored) {
+            return false;
+        }
+    }
+
+    static void setImperialUnits(Context context, boolean imperial) {
+        prefs(context).edit().putBoolean(IMPERIAL_UNITS, imperial).apply();
     }
 
     /**
@@ -554,6 +585,24 @@ final class DashboardWidgetLayout {
     static void saveAodMinBrightnessPercent(Context context, int percent) {
         prefs(context).edit().putInt(AOD_MIN_BRIGHTNESS,
                 Math.max(1, Math.min(30, percent))).apply();
+    }
+
+    /** Whether a touch counts while something is up against the phone's face. */
+    static boolean isPocketLockEnabled(Context context) {
+        return prefs(context).getBoolean(POCKET_LOCK, true);
+    }
+
+    static void setPocketLockEnabled(Context context, boolean enabled) {
+        prefs(context).edit().putBoolean(POCKET_LOCK, enabled).apply();
+    }
+
+    /** Whether the panel goes dark while it is the side lying on the table. */
+    static boolean isFaceDownOffEnabled(Context context) {
+        return prefs(context).getBoolean(FACE_DOWN_OFF, true);
+    }
+
+    static void setFaceDownOffEnabled(Context context, boolean enabled) {
+        prefs(context).edit().putBoolean(FACE_DOWN_OFF, enabled).apply();
     }
 
     static boolean isAutoPageSwitchEnabled(Context context) {

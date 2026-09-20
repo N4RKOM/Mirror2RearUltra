@@ -161,6 +161,14 @@
     <string name="dashboard_speed_unit">km/h</string>
     <string name="dashboard_altitude_short">%1$d m</string>
     <string name="dashboard_altitude_unit">m</string>
+    <string name="dashboard_speed_short_imperial">%1$d mph</string>
+    <string name="dashboard_speed_unit_imperial">mph</string>
+    <string name="dashboard_altitude_short_imperial">%1$d ft</string>
+    <string name="dashboard_altitude_unit_imperial">ft</string>
+    <string name="dashboard_units_imperial">Imperiální jednotky</string>
+    <string name="dashboard_call_incoming">Příchozí hovor</string>
+    <string name="panel_pocket_lock">Blokovat dotyky v kapse</string>
+    <string name="panel_face_down_off">Zhasnout, když panel míří dolů</string>
     <string name="dashboard_more_widgets_title">Další widgety</string>
     <string name="dashboard_more_widgets_help">Když je zapnuto více než pět položek, zadní obrazovka je automaticky střídá.</string>
     <string name="dashboard_widget_next_alarm">Další budík</string>

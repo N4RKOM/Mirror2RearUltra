@@ -161,6 +161,14 @@
     <string name="dashboard_speed_unit">km/u</string>
     <string name="dashboard_altitude_short">%1$d m</string>
     <string name="dashboard_altitude_unit">m</string>
+    <string name="dashboard_speed_short_imperial">%1$d mph</string>
+    <string name="dashboard_speed_unit_imperial">mph</string>
+    <string name="dashboard_altitude_short_imperial">%1$d ft</string>
+    <string name="dashboard_altitude_unit_imperial">ft</string>
+    <string name="dashboard_units_imperial">Imperiale eenheden</string>
+    <string name="dashboard_call_incoming">Inkomende oproep</string>
+    <string name="panel_pocket_lock">Aanraking vergrendelen in zak</string>
+    <string name="panel_face_down_off">Uitschakelen als het naar beneden wijst</string>
     <string name="dashboard_more_widgets_title">Meer widgets</string>
     <string name="dashboard_more_widgets_help">Bij meer dan vijf ingeschakelde onderdelen wisselt het achterscherm ze automatisch af.</string>
     <string name="dashboard_widget_next_alarm">Volgende wekker</string>

@@ -165,6 +165,14 @@
     <string name="dashboard_speed_unit">km/h</string>
     <string name="dashboard_altitude_short">%1$d m</string>
     <string name="dashboard_altitude_unit">m</string>
+    <string name="dashboard_speed_short_imperial">%1$d mph</string>
+    <string name="dashboard_speed_unit_imperial">mph</string>
+    <string name="dashboard_altitude_short_imperial">%1$d ft</string>
+    <string name="dashboard_altitude_unit_imperial">ft</string>
+    <string name="dashboard_units_imperial">Imperial units</string>
+    <string name="dashboard_call_incoming">Incoming call</string>
+    <string name="panel_pocket_lock">Lock touches in a pocket</string>
+    <string name="panel_face_down_off">Turn off when facing down</string>
     <string name="dashboard_more_widgets_title">More widgets</string>
     <string name="dashboard_more_widgets_help">When more than five items are enabled, the rear screen rotates them automatically.</string>
     <string name="dashboard_widget_next_alarm">Next alarm</string>

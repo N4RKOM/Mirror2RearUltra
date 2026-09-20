@@ -161,6 +161,14 @@
     <string name="dashboard_speed_unit">公里/小时</string>
     <string name="dashboard_altitude_short">%1$d 米</string>
     <string name="dashboard_altitude_unit">米</string>
+    <string name="dashboard_speed_short_imperial">%1$d 英里/时</string>
+    <string name="dashboard_speed_unit_imperial">英里/时</string>
+    <string name="dashboard_altitude_short_imperial">%1$d 英尺</string>
+    <string name="dashboard_altitude_unit_imperial">英尺</string>
+    <string name="dashboard_units_imperial">英制单位</string>
+    <string name="dashboard_call_incoming">来电</string>
+    <string name="panel_pocket_lock">口袋中锁定触摸</string>
+    <string name="panel_face_down_off">面朝下时熄灭</string>
     <string name="dashboard_more_widgets_title">更多小组件</string>
     <string name="dashboard_more_widgets_help">启用超过五项时，后屏会自动轮流显示它们。</string>
     <string name="dashboard_widget_next_alarm">下一个闹钟</string>

@@ -161,6 +161,14 @@
     <string name="dashboard_speed_unit">χλμ/ώ</string>
     <string name="dashboard_altitude_short">%1$d μ</string>
     <string name="dashboard_altitude_unit">μ</string>
+    <string name="dashboard_speed_short_imperial">%1$d mph</string>
+    <string name="dashboard_speed_unit_imperial">mph</string>
+    <string name="dashboard_altitude_short_imperial">%1$d ft</string>
+    <string name="dashboard_altitude_unit_imperial">ft</string>
+    <string name="dashboard_units_imperial">Αγγλοσαξονικές μονάδες</string>
+    <string name="dashboard_call_incoming">Εισερχόμενη κλήση</string>
+    <string name="panel_pocket_lock">Κλείδωμα αφής στην τσέπη</string>
+    <string name="panel_face_down_off">Σβήσιμο όταν κοιτά προς τα κάτω</string>
     <string name="dashboard_more_widgets_title">Περισσότερα γραφικά στοιχεία</string>
     <string name="dashboard_more_widgets_help">Όταν είναι ενεργά περισσότερα από πέντε στοιχεία, η πίσω οθόνη τα εναλλάσσει αυτόματα.</string>
     <string name="dashboard_widget_next_alarm">Επόμενο ξυπνητήρι</string>

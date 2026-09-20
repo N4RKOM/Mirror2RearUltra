@@ -161,6 +161,14 @@
     <string name="dashboard_speed_unit">км/год</string>
     <string name="dashboard_altitude_short">%1$d м</string>
     <string name="dashboard_altitude_unit">м</string>
+    <string name="dashboard_speed_short_imperial">%1$d миль/год</string>
+    <string name="dashboard_speed_unit_imperial">миль/год</string>
+    <string name="dashboard_altitude_short_imperial">%1$d фут</string>
+    <string name="dashboard_altitude_unit_imperial">фут</string>
+    <string name="dashboard_units_imperial">Імперські одиниці</string>
+    <string name="dashboard_call_incoming">Вхідний виклик</string>
+    <string name="panel_pocket_lock">Блокувати дотики в кишені</string>
+    <string name="panel_face_down_off">Гасити, коли панель дивиться вниз</string>
     <string name="dashboard_more_widgets_title">Більше віджетів</string>
     <string name="dashboard_more_widgets_help">Коли увімкнено понад п\'ять елементів, задній екран чергує їх автоматично.</string>
     <string name="dashboard_widget_next_alarm">Наступний будильник</string>

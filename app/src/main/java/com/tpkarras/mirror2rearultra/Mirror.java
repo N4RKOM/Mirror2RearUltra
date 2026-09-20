@@ -87,6 +87,18 @@ public class Mirror extends Activity implements
     private DisplayManager displayManager;
     private SensorManager sensorManager;
     private Sensor screenDownSensor;
+    private PanelPostureSensor postureSensor;
+    /** Set while the phone is in a pocket: every touch is the lining. */
+    private boolean touchLocked;
+    /** Set while the panel is the side lying on the table. */
+    private boolean panelFacingDown;
+    /**
+     * Which way up the phone is being held, in quarter turns clockwise.
+     *
+     * <p>A landscape page has two ways round it could be drawn, and which one
+     * reads the right way up depends on which edge the phone is leaning on.
+     */
+    private int deviceQuarterTurn = PanelPostureSensor.TURN_UNKNOWN;
     private Surface projectionSurface;
     private int projectionBufferWidth;
     private int projectionBufferHeight;
@@ -122,6 +134,19 @@ public class Mirror extends Activity implements
                     PanelTriggers.millisUntilNextEdge(Mirror.this, System.currentTimeMillis()));
         }
     };
+    /**
+     * A ringing call brings the panel back and puts itself on it.
+     *
+     * <p>It has to reach past the idle timer, which may have dimmed the panel
+     * to its AOD level, and past the content mode, which may have given the
+     * whole panel over to the mirrored image.
+     */
+    private final CallWidgetState.Listener callListener = snapshot -> runOnUiThread(() -> {
+        if (snapshot.ringing) {
+            resetIdleTimer();
+        }
+        applyContentVisibility();
+    });
     private final BroadcastReceiver chargingReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -183,6 +208,8 @@ public class Mirror extends Activity implements
         displayManager = getSystemService(DisplayManager.class);
         sensorManager = getSystemService(SensorManager.class);
         screenDownSensor = findScreenDownSensor(sensorManager);
+        postureSensor = new PanelPostureSensor(this, (pocketed, facingDown, quarterTurn) ->
+                runOnUiThread(() -> applyPosture(pocketed, facingDown, quarterTurn)));
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -374,10 +401,53 @@ public class Mirror extends Activity implements
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
+        // Swallowed rather than passed on: in a pocket every one of these is
+        // the lining, and letting them through would wake the panel, turn its
+        // pages and restyle its widgets all the way to the shops.
+        if (touchLocked) {
+            return true;
+        }
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             resetIdleTimer();
         }
         return super.dispatchTouchEvent(event);
+    }
+
+    /**
+     * Acts on which way the panel is facing and what is in front of the phone.
+     *
+     * <p>Either half can be switched off, so the sensor's opinion is asked for
+     * only where it is wanted.
+     */
+    private void applyPosture(boolean pocketed, boolean facingDown, int quarterTurn) {
+        if (quarterTurn != deviceQuarterTurn) {
+            deviceQuarterTurn = quarterTurn;
+            applyDashboardOrientation();
+        }
+        boolean lock = pocketed && DashboardWidgetLayout.isPocketLockEnabled(this);
+        if (lock && !touchLocked && dashboardView != null) {
+            // The lock may have come down mid-gesture, and the release that
+            // would have ended it is about to be swallowed.
+            dashboardView.cancelTouchInProgress();
+        }
+        touchLocked = lock;
+        boolean dark = facingDown && DashboardWidgetLayout.isFaceDownOffEnabled(this);
+        if (dark == panelFacingDown) {
+            return;
+        }
+        panelFacingDown = dark;
+        if (dark) {
+            // By the backlight, not by the display's power: this panel's
+            // display carries the session's own activity, and sleeping it
+            // stops the activity, which starts again and wakes the display.
+            Log.i(TAG, "Panel is face down; putting it out");
+            if (brightnessController != null) {
+                brightnessController.blank();
+            }
+            return;
+        }
+        Log.i(TAG, "Panel is up again");
+        applyProfileBrightness();
     }
 
     @Override
@@ -427,7 +497,9 @@ public class Mirror extends Activity implements
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (automaticOutputVisible) {
+        // Xiaomi's own screen-down sensor, which means the panel is the side
+        // facing up. It must not argue with the posture reading below it.
+        if (automaticOutputVisible && !panelFacingDown) {
             rearScreenSwitch(true);
             applyProfileBrightness();
         }
@@ -476,6 +548,10 @@ public class Mirror extends Activity implements
         charging = status == BatteryManager.BATTERY_STATUS_CHARGING
                 || status == BatteryManager.BATTERY_STATUS_FULL;
         triggerHandler.post(triggerTick);
+        if (postureSensor != null) {
+            postureSensor.start();
+        }
+        CallWidgetState.addListener(callListener);
         listenersRegistered = true;
     }
 
@@ -490,6 +566,16 @@ public class Mirror extends Activity implements
             sensorManager.unregisterListener(this);
         }
         triggerHandler.removeCallbacks(triggerTick);
+        if (postureSensor != null) {
+            postureSensor.stop();
+        }
+        // What the sensor last said is kept rather than dropped. Clearing it
+        // used to leave the backlight at nought with nothing left to say so,
+        // and the sensor's next word - "not face down" - then matched the
+        // cleared flag and did no work. The first reading after every start
+        // is sent whether or not it has changed, so a stale answer here is
+        // corrected within the second rather than believed.
+        CallWidgetState.removeListener(callListener);
         try {
             unregisterReceiver(chargingReceiver);
         } catch (IllegalArgumentException ignored) {
@@ -636,6 +722,11 @@ public class Mirror extends Activity implements
         if (activeProfile == null || brightnessOverlay == null) {
             return;
         }
+        // Out on purpose. Everything that moves the brightness comes through
+        // here, so this is the one place that has to know.
+        if (panelFacingDown) {
+            return;
+        }
         if (idleFadeRunning) {
             return;
         }
@@ -695,9 +786,7 @@ public class Mirror extends Activity implements
         if (!DeviceCapabilityState.get().hardwareBrightnessActive) {
             applyBrightnessOverlay(false, clamped);
         }
-        if (brightnessController != null) {
-            brightnessController.applyPercent(clamped);
-        }
+        setPanelBacklight(clamped);
     }
 
     private void applyBrightnessOverlay(boolean hardwareControlActive, int percent) {
@@ -788,10 +877,23 @@ public class Mirror extends Activity implements
     }
 
     private void applyAodBacklight() {
-        if (brightnessController != null) {
-            brightnessController.applyPercent(
-                    DashboardWidgetLayout.loadAodMinBrightnessPercent(this));
+        setPanelBacklight(DashboardWidgetLayout.loadAodMinBrightnessPercent(this));
+    }
+
+    /**
+     * The one door to the panel's backlight.
+     *
+     * <p>Three callers reached past it before - the profile, the AOD level
+     * and the fade between them - and each would have needed its own copy of
+     * the guard below. The fade did not get one, so a panel put out for lying
+     * face down was lit again thirty seconds later by a dimming it could not
+     * be seen through.
+     */
+    private void setPanelBacklight(int percent) {
+        if (panelFacingDown || brightnessController == null) {
+            return;
         }
+        brightnessController.applyPercent(percent);
     }
 
     /** Walks the panel down to the AOD level on a beat a root shell can keep. */
@@ -800,12 +902,12 @@ public class Mirror extends Activity implements
         if (idleFadeStep % framesPerMove != 0 && idleFadeStep != IDLE_FADE_STEPS) {
             return;
         }
-        if (brightnessController == null || activeProfile == null) {
+        if (activeProfile == null) {
             return;
         }
         int from = ambientAdjusted(activeProfile.brightnessPercent);
         int to = DashboardWidgetLayout.loadAodMinBrightnessPercent(this);
-        brightnessController.applyPercent(Math.round(from + (to - from) * progress));
+        setPanelBacklight(Math.round(from + (to - from) * progress));
     }
 
     /**
@@ -988,7 +1090,11 @@ public class Mirror extends Activity implements
 
     private void applyContentVisibility() {
         boolean showProjection = shouldShowProjection();
-        textureView.setVisibility(showProjection ? View.VISIBLE : View.INVISIBLE);
+        // A ringing call stands in front of whatever the panel was showing,
+        // the mirrored image included: it is the one thing on here worth
+        // interrupting for.
+        boolean ringing = CallWidgetState.get().ringing;
+        textureView.setVisibility(showProjection && !ringing ? View.VISIBLE : View.INVISIBLE);
         if (dashboardView != null) {
             // The widgets step aside for the image rather than sitting on
             // top of it. In the mixed mode the image is usually a camera
@@ -997,8 +1103,8 @@ public class Mirror extends Activity implements
             // mirroring: the widgets are what the panel shows whenever the
             // image is not up.
             dashboardView.setVisibility(
-                    automaticOutputVisible && sessionContentMode.showsDashboard()
-                            && !showProjection
+                    ringing || (automaticOutputVisible && sessionContentMode.showsDashboard()
+                            && !showProjection)
                             ? View.VISIBLE
                             : View.GONE
             );
@@ -1084,7 +1190,13 @@ public class Mirror extends Activity implements
         dashboardView.setLayoutParams(params);
         dashboardView.setPivotX(params.width > 0 ? params.width / 2f : dashboardView.getWidth() / 2f);
         dashboardView.setPivotY(params.height > 0 ? params.height / 2f : dashboardView.getHeight() / 2f);
-        dashboardView.setRotation(rotate ? 90f : 0f);
+        // Which way round a rotated page is drawn follows the phone. Leaning
+        // on its right edge turns the page the other way, so it still reads
+        // the right way up; lying flat the phone leans no way at all, and the
+        // last answer stands rather than the page spinning under the reader.
+        dashboardView.setRotation(rotate
+                ? (deviceQuarterTurn == 3 ? 270f : 90f)
+                : 0f);
     }
 
     private boolean usesProjection() {
