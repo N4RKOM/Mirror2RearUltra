@@ -1,15 +1,22 @@
 package com.tpkarras.mirror2rearultra;
 
 import android.app.Notification;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.app.NotificationManager;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Build;
+import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+
+import androidx.annotation.Nullable;
 
 public class MediaNotificationListenerService extends NotificationListenerService {
     /**
@@ -22,6 +29,20 @@ public class MediaNotificationListenerService extends NotificationListenerServic
     private static final int UNDISMISSABLE = Notification.FLAG_ONGOING_EVENT
             | Notification.FLAG_FOREGROUND_SERVICE
             | Notification.FLAG_NO_CLEAR;
+
+    /**
+     * Where players keep the track's picture, in the order worth trying.
+     *
+     * <p>The display icon is the one meant for showing; the other two are the
+     * full-size artwork, which some players set instead.
+     */
+    private static final String[] ARTWORK_KEYS = {
+            MediaMetadata.METADATA_KEY_DISPLAY_ICON,
+            MediaMetadata.METADATA_KEY_ALBUM_ART,
+            MediaMetadata.METADATA_KEY_ART,
+    };
+    /** Kept at a size the panel can use: the art arrives far larger. */
+    private static final int ARTWORK_PIXELS = 192;
 
     private static volatile MediaController currentController;
     /** Registered on whichever controller is current, so state changes arrive. */
@@ -103,10 +124,23 @@ public class MediaNotificationListenerService extends NotificationListenerServic
         MediaController controller = currentController;
         CharSequence title = extras.getCharSequence(Notification.EXTRA_TITLE);
         CharSequence artist = extras.getCharSequence(Notification.EXTRA_TEXT);
+        String titleText = title == null ? "" : title.toString();
+        String artistText = artist == null ? "" : artist.toString();
+        String packageName = selected.getPackageName();
+        // This runs on every notification anywhere, and cutting the art down
+        // makes a new bitmap each time - which the panel would then take for
+        // a change and redraw for. The same track keeps the picture it had.
+        MediaWidgetState.Snapshot last = MediaWidgetState.get();
+        boolean sameTrack = last.artwork != null
+                && last.packageName.equals(packageName)
+                && last.title.equals(titleText)
+                && last.artist.equals(artistText);
         MediaWidgetState.set(
-                title == null ? "" : title.toString(),
-                artist == null ? "" : artist.toString(),
-                controller != null && isPlaying(controller.getPlaybackState())
+                titleText,
+                artistText,
+                controller != null && isPlaying(controller.getPlaybackState()),
+                packageName,
+                sameTrack ? last.artwork : artworkOf(controller, selected)
         );
     }
 
@@ -137,13 +171,102 @@ public class MediaNotificationListenerService extends NotificationListenerServic
             public void onPlaybackStateChanged(PlaybackState state) {
                 // The words have not changed, only whether they are moving.
                 MediaWidgetState.Snapshot last = MediaWidgetState.get();
-                MediaWidgetState.set(last.title, last.artist, isPlaying(state));
+                MediaWidgetState.set(last.title, last.artist, isPlaying(state),
+                        last.packageName, last.artwork);
+            }
+
+            @Override
+            public void onMetadataChanged(MediaMetadata metadata) {
+                // The picture can arrive after the notification that named the
+                // track, so it is taken again rather than waited for.
+                MediaWidgetState.Snapshot last = MediaWidgetState.get();
+                MediaWidgetState.set(last.title, last.artist, last.playing,
+                        last.packageName, cutDown(bitmapFrom(metadata)));
             }
         };
         try {
             controller.registerCallback(playbackCallback);
         } catch (RuntimeException ignored) {
             playbackCallback = null;
+        }
+    }
+
+    /**
+     * The track's picture: the session's, or the notification's, or none.
+     *
+     * <p>A player that sets neither leaves the panel to fall back on the app's
+     * own icon, which at least says who is playing.
+     */
+    @Nullable
+    private Bitmap artworkOf(@Nullable MediaController controller,
+            StatusBarNotification notification) {
+        Bitmap art = controller == null ? null : bitmapFrom(controller.getMetadata());
+        if (art == null) {
+            art = largeIconOf(notification);
+        }
+        return cutDown(art);
+    }
+
+    @Nullable
+    private static Bitmap bitmapFrom(@Nullable MediaMetadata metadata) {
+        if (metadata == null) {
+            return null;
+        }
+        for (String key : ARTWORK_KEYS) {
+            Bitmap art = metadata.getBitmap(key);
+            if (art != null) {
+                return art;
+            }
+        }
+        return null;
+    }
+
+    /** Some players put the art in the notification instead of the session. */
+    @Nullable
+    private Bitmap largeIconOf(StatusBarNotification notification) {
+        Icon icon = notification.getNotification().getLargeIcon();
+        if (icon == null) {
+            return null;
+        }
+        try {
+            Drawable drawable = icon.loadDrawable(this);
+            if (drawable == null) {
+                return null;
+            }
+            int width = Math.max(1, drawable.getIntrinsicWidth());
+            int height = Math.max(1, drawable.getIntrinsicHeight());
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            drawable.setBounds(0, 0, width, height);
+            drawable.draw(new Canvas(bitmap));
+            return bitmap;
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    /**
+     * The middle of the picture, at a size worth holding on to.
+     *
+     * <p>Art comes at whatever size the player felt like - a thousand pixels
+     * square is ordinary - and the panel shows it forty across. Nothing is
+     * recycled here: the crop can come back as the player's own bitmap.
+     */
+    @Nullable
+    private static Bitmap cutDown(@Nullable Bitmap source) {
+        if (source == null) {
+            return null;
+        }
+        try {
+            int side = Math.min(source.getWidth(), source.getHeight());
+            if (side <= 0) {
+                return null;
+            }
+            Bitmap square = Bitmap.createBitmap(source,
+                    (source.getWidth() - side) / 2, (source.getHeight() - side) / 2, side, side);
+            return side <= ARTWORK_PIXELS ? square
+                    : Bitmap.createScaledBitmap(square, ARTWORK_PIXELS, ARTWORK_PIXELS, true);
+        } catch (RuntimeException ignored) {
+            return null;
         }
     }
 

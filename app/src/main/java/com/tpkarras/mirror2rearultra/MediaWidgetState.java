@@ -1,7 +1,9 @@
 package com.tpkarras.mirror2rearultra;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationManagerCompat;
 
 import java.util.Set;
@@ -17,11 +19,18 @@ final class MediaWidgetState {
         final String artist;
         /** Whether the session is actually playing, for the transport icon. */
         final boolean playing;
+        /** Who is playing it, so the panel can show whose icon it is. */
+        final String packageName;
+        /** The track's own picture, already cut down, or null if it has none. */
+        @Nullable final Bitmap artwork;
 
-        Snapshot(String title, String artist, boolean playing) {
+        Snapshot(String title, String artist, boolean playing, String packageName,
+                @Nullable Bitmap artwork) {
             this.title = title == null ? "" : title;
             this.artist = artist == null ? "" : artist;
             this.playing = playing;
+            this.packageName = packageName == null ? "" : packageName;
+            this.artwork = artwork;
         }
 
         boolean hasMedia() {
@@ -30,7 +39,7 @@ final class MediaWidgetState {
     }
 
     private static final Set<Listener> LISTENERS = new CopyOnWriteArraySet<>();
-    private static volatile Snapshot current = new Snapshot("", "", false);
+    private static volatile Snapshot current = new Snapshot("", "", false, "", null);
 
     private MediaWidgetState() {
     }
@@ -39,14 +48,17 @@ final class MediaWidgetState {
         return current;
     }
 
-    static void set(String title, String artist, boolean playing) {
-        Snapshot next = new Snapshot(title, artist, playing);
+    static void set(String title, String artist, boolean playing, String packageName,
+            @Nullable Bitmap artwork) {
+        Snapshot next = new Snapshot(title, artist, playing, packageName, artwork);
         Snapshot previous = current;
         // A session can report its state several times a second, position and
         // all. Only a change anyone can see is worth waking the panel for.
         if (previous.playing == next.playing
                 && previous.title.equals(next.title)
-                && previous.artist.equals(next.artist)) {
+                && previous.artist.equals(next.artist)
+                && previous.packageName.equals(next.packageName)
+                && previous.artwork == next.artwork) {
             return;
         }
         current = next;
@@ -56,7 +68,7 @@ final class MediaWidgetState {
     }
 
     static void clear() {
-        set("", "", false);
+        set("", "", false, "", null);
     }
 
     static void addListener(Listener listener) {

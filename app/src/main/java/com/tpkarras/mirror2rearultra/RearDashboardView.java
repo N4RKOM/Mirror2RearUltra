@@ -1,16 +1,20 @@
 package com.tpkarras.mirror2rearultra;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -58,6 +62,12 @@ public final class RearDashboardView extends View {
     private static final float MINIMUM_TOUCH_TARGET_DP = 24f;
     /** Reused while measuring: this runs for every line of every frame. */
     private final Rect inkBounds = new Rect();
+    private final Paint picturePaint = new Paint(
+            Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+    /** The playing app's icon, and what it was loaded for. */
+    @Nullable private Bitmap appIcon;
+    @Nullable private String appIconPackage;
+    private int appIconSize;
     /**
      * Where each widget landed last frame, kept across the clear below.
      *
@@ -1461,88 +1471,421 @@ public final class RearDashboardView extends View {
         return false;
     }
 
-    private void drawFullscreenWeather(Canvas canvas, float density) {
+    /** The rounded card both full-screen widgets stand on. */
+    private RectF fullscreenPanel(Canvas canvas, float density) {
         float pad = Math.min(10f * density, getWidth() * 0.06f);
         RectF panel = new RectF(pad, pad, getWidth() - pad, getHeight() - pad);
         canvas.drawRoundRect(panel, 20f * density, 20f * density, panelPaint);
-        textPaint.setTextAlign(Paint.Align.CENTER);
-        textPaint.setFakeBoldText(true);
-        textPaint.setTextSize(clamp(Math.min(getWidth(), getHeight()) * 0.18f,
-                20f * density, 58f * density));
-        String current = snapshot.weatherTemperatureCelsius == null
-                ? "—" : snapshot.weatherTemperatureCelsius + "°";
-        canvas.drawText(current, panel.centerX(), panel.top + panel.height() * 0.28f, textPaint);
-        textPaint.setFakeBoldText(false);
-        textPaint.setTextSize(clamp(panel.height() * 0.08f, 9f * density, 20f * density));
-        canvas.drawText(snapshot.weatherPlace, panel.centerX(), panel.top + panel.height() * 0.42f,
-                textPaint);
+        return panel;
+    }
 
+    /** The text colour, softened, for the parts that are not the reading. */
+    private int mutedColour() {
+        int colour = currentPalette.text;
+        return Color.argb(150, Color.red(colour), Color.green(colour), Color.blue(colour));
+    }
+
+    /**
+     * Today beside the days ahead, or above them on a panel standing upright.
+     *
+     * <p>It used to stack every row down the panel whichever way round it was,
+     * which on a landscape page spent the width on nothing and left the rows
+     * almost touching. The reading that matters now takes a block of its own,
+     * with the condition drawn beside the number rather than only in the
+     * forecast, and a rule between the two so the eye knows which is which.
+     */
+    private void drawFullscreenWeather(Canvas canvas, float density) {
+        RectF panel = fullscreenPanel(canvas, density);
         WeatherForecastState.Snapshot forecast = WeatherForecastState.get();
-        int count = Math.min(4, forecast.dates.length);
-        if (count == 0) return;
-        float cell = panel.width() / count;
-        SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        SimpleDateFormat output = new SimpleDateFormat("EEE", Locale.getDefault());
-        for (int index = 0; index < count; index++) {
-            float x = panel.left + cell * (index + 0.5f);
-            String day = forecast.dates[index];
-            try { day = output.format(input.parse(day)); } catch (Exception ignored) {}
-            textPaint.setTextSize(clamp(panel.height() * 0.07f, 8f * density, 18f * density));
-            canvas.drawText(day, x, panel.top + panel.height() * 0.60f, textPaint);
-            drawIcon(canvas, weatherIcon(forecast.codes[index]), new RectF(
-                    x - cell * 0.13f, panel.top + panel.height() * 0.64f,
-                    x + cell * 0.13f, panel.top + panel.height() * 0.78f));
-            textPaint.setTextSize(clamp(panel.height() * 0.075f, 8f * density, 19f * density));
-            canvas.drawText(forecast.maximums[index] + "°/" + forecast.minimums[index] + "°",
-                    x, panel.top + panel.height() * 0.91f, textPaint);
+        int days = Math.min(4, forecast.dates.length);
+        boolean wide = panel.width() >= panel.height() * 1.35f;
+        float share = days == 0 ? 1f : wide ? 0.36f : 0.40f;
+        RectF now = wide
+                ? new RectF(panel.left, panel.top,
+                        panel.left + panel.width() * share, panel.bottom)
+                : new RectF(panel.left, panel.top,
+                        panel.right, panel.top + panel.height() * share);
+        drawWeatherNow(canvas, now, density);
+        if (days == 0) {
+            textPaint.setTextAlign(Paint.Align.LEFT);
+            return;
+        }
+        RectF ahead = wide
+                ? new RectF(now.right, panel.top, panel.right, panel.bottom)
+                : new RectF(panel.left, now.bottom, panel.right, panel.bottom);
+        iconPaint.setColor(mutedColour());
+        iconPaint.setStyle(Paint.Style.STROKE);
+        iconPaint.setStrokeWidth(Math.max(1f, density * 0.7f));
+        if (wide) {
+            canvas.drawLine(ahead.left, ahead.top + ahead.height() * 0.18f,
+                    ahead.left, ahead.bottom - ahead.height() * 0.18f, iconPaint);
+        } else {
+            canvas.drawLine(ahead.left + ahead.width() * 0.12f, ahead.top,
+                    ahead.right - ahead.width() * 0.12f, ahead.top, iconPaint);
+        }
+        for (int index = 0; index < days; index++) {
+            RectF cell = wide
+                    ? new RectF(ahead.left + ahead.width() * index / days, ahead.top,
+                            ahead.left + ahead.width() * (index + 1) / days, ahead.bottom)
+                    : new RectF(ahead.left, ahead.top + ahead.height() * index / days,
+                            ahead.right, ahead.top + ahead.height() * (index + 1) / days);
+            if (wide) {
+                drawForecastColumn(canvas, cell, forecast, index, density);
+            } else {
+                drawForecastRow(canvas, cell, forecast, index, density);
+            }
         }
         textPaint.setTextAlign(Paint.Align.LEFT);
     }
 
-    private void drawFullscreenMedia(Canvas canvas, float density) {
-        float pad = Math.min(10f * density, getWidth() * 0.06f);
-        RectF panel = new RectF(pad, pad, getWidth() - pad, getHeight() - pad);
-        canvas.drawRoundRect(panel, 20f * density, 20f * density, panelPaint);
+    /** The condition, the temperature and the place, centred in what is left. */
+    private void drawWeatherNow(Canvas canvas, RectF area, float density) {
+        String temperature = snapshot.weatherTemperatureCelsius == null
+                ? "—" : snapshot.weatherTemperatureCelsius + "°";
+        String place = snapshot.weatherPlace;
+        float iconSize = clamp(Math.min(area.width(), area.height()) * 0.26f,
+                11f * density, 30f * density);
+        float temperatureSize = clamp(Math.min(area.width() * 0.44f, area.height() * 0.36f),
+                15f * density, 50f * density);
+        float placeSize = clamp(temperatureSize * 0.30f, 7f * density, 14f * density);
+        float gap = iconSize * 0.22f;
+
+        textPaint.setFakeBoldText(true);
+        textPaint.setTextSize(temperatureSize);
+        textPaint.getTextBounds(temperature, 0, temperature.length(), inkBounds);
+        float temperatureTop = inkBounds.top;
+        float temperatureHeight = inkBounds.height();
+        textPaint.setFakeBoldText(false);
+        textPaint.setTextSize(placeSize);
+        float placeTop = 0f;
+        float placeHeight = 0f;
+        if (!place.isEmpty()) {
+            textPaint.getTextBounds(place, 0, place.length(), inkBounds);
+            placeTop = inkBounds.top;
+            placeHeight = inkBounds.height();
+        }
+        float total = iconSize + gap + temperatureHeight
+                + (place.isEmpty() ? 0f : gap * 0.6f + placeHeight);
+
+        float centreX = area.centerX();
+        float y = area.centerY() - total / 2f;
+        textPaint.setColor(currentPalette.text);
+        drawIcon(canvas, weatherIcon(snapshot.weatherCode), new RectF(
+                centreX - iconSize / 2f, y, centreX + iconSize / 2f, y + iconSize));
+        y += iconSize + gap;
+
+        // Placed by the ink rather than by the line box: the box stands clear
+        // of the glyphs, so gaps measured from it read half again as wide.
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setFakeBoldText(true);
-        textPaint.setTextSize(clamp(panel.height() * 0.16f, 14f * density, 38f * density));
-        String mediaTitle = snapshot.mediaTitle.isEmpty()
-                ? getResources().getString(R.string.dashboard_media_nothing_playing)
-                : snapshot.mediaTitle;
-        CharSequence title = TextUtils.ellipsize(mediaTitle, textPaint,
-                panel.width() * 0.84f, TextUtils.TruncateAt.END);
-        canvas.drawText(title.toString(), panel.centerX(), panel.top + panel.height() * 0.32f,
-                textPaint);
+        textPaint.setTextSize(temperatureSize);
+        canvas.drawText(temperature, centreX, y - temperatureTop, textPaint);
         textPaint.setFakeBoldText(false);
-        textPaint.setTextSize(clamp(panel.height() * 0.10f, 10f * density, 24f * density));
-        CharSequence artist = TextUtils.ellipsize(snapshot.mediaArtist, textPaint,
-                panel.width() * 0.80f, TextUtils.TruncateAt.END);
-        canvas.drawText(artist.toString(), panel.centerX(), panel.top + panel.height() * 0.48f,
-                textPaint);
-        textPaint.setTextSize(clamp(panel.height() * 0.18f, 18f * density, 42f * density));
-        float row = panel.top + panel.height() * 0.78f;
-        canvas.drawText("‹‹", panel.left + panel.width() / 6f, row, textPaint);
-        canvas.drawText("››", panel.right - panel.width() / 6f, row, textPaint);
-        // Drawn rather than typed. The glyph was a fixed triangle whatever the
-        // session was doing, and a pause pair is exactly the sort of character
-        // the small display faces on offer here turn into a box.
-        drawTransportState(canvas, panel.centerX(), row, textPaint.getTextSize(),
-                snapshot.mediaPlaying);
+        y += temperatureHeight;
+
+        if (!place.isEmpty()) {
+            y += gap * 0.6f;
+            textPaint.setTextSize(placeSize);
+            textPaint.setColor(mutedColour());
+            CharSequence fitted = TextUtils.ellipsize(place, textPaint,
+                    area.width() * 0.92f, TextUtils.TruncateAt.END);
+            canvas.drawText(fitted.toString(), centreX, y - placeTop, textPaint);
+            textPaint.setColor(currentPalette.text);
+        }
+    }
+
+    /** One day of the forecast, stacked, for a panel lying on its side. */
+    private void drawForecastColumn(Canvas canvas, RectF cell,
+            WeatherForecastState.Snapshot forecast, int index, float density) {
+        float labelSize = clamp(cell.height() * 0.15f, 7f * density, 13f * density);
+        float iconSize = clamp(Math.min(cell.width() * 0.52f, cell.height() * 0.26f),
+                9f * density, 24f * density);
+        float valueSize = clamp(cell.height() * 0.17f, 8f * density, 15f * density);
+        float gap = iconSize * 0.2f;
+
+        textPaint.setTextSize(labelSize);
+        float labelHeight = textPaint.descent() - textPaint.ascent();
+        textPaint.setTextSize(valueSize);
+        float valueHeight = textPaint.descent() - textPaint.ascent();
+        float total = labelHeight + gap + iconSize + gap + valueHeight * 2f;
+
+        float centreX = cell.centerX();
+        float y = cell.centerY() - total / 2f;
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setTextSize(labelSize);
+        textPaint.setColor(mutedColour());
+        canvas.drawText(dayName(forecast.dates[index]), centreX, y - textPaint.ascent(), textPaint);
+        y += labelHeight + gap;
+
+        textPaint.setColor(currentPalette.text);
+        drawIcon(canvas, weatherIcon(forecast.codes[index]), new RectF(
+                centreX - iconSize / 2f, y, centreX + iconSize / 2f, y + iconSize));
+        y += iconSize + gap;
+
+        textPaint.setTextSize(valueSize);
+        canvas.drawText(forecast.maximums[index] + "°", centreX, y - textPaint.ascent(), textPaint);
+        y += valueHeight;
+        textPaint.setColor(mutedColour());
+        canvas.drawText(forecast.minimums[index] + "°", centreX, y - textPaint.ascent(), textPaint);
+        textPaint.setColor(currentPalette.text);
+    }
+
+    /** One day of the forecast, in a line, for a panel standing upright. */
+    private void drawForecastRow(Canvas canvas, RectF cell,
+            WeatherForecastState.Snapshot forecast, int index, float density) {
+        float size = clamp(cell.height() * 0.42f, 7f * density, 15f * density);
+        float iconSize = clamp(Math.min(cell.width() * 0.2f, cell.height() * 0.7f),
+                9f * density, 22f * density);
+        float pad = cell.width() * 0.06f;
+        float baseline = cell.centerY() - (textPaint.descent() + textPaint.ascent()) / 2f;
+
+        textPaint.setTextSize(size);
         textPaint.setTextAlign(Paint.Align.LEFT);
+        textPaint.setColor(mutedColour());
+        canvas.drawText(dayName(forecast.dates[index]), cell.left + pad, baseline, textPaint);
+
+        textPaint.setColor(currentPalette.text);
+        drawIcon(canvas, weatherIcon(forecast.codes[index]), new RectF(
+                cell.centerX() - iconSize / 2f, cell.centerY() - iconSize / 2f,
+                cell.centerX() + iconSize / 2f, cell.centerY() + iconSize / 2f));
+
+        textPaint.setTextAlign(Paint.Align.RIGHT);
+        String maximum = forecast.maximums[index] + "°";
+        canvas.drawText(maximum, cell.right - pad, baseline, textPaint);
+        textPaint.setColor(mutedColour());
+        canvas.drawText(forecast.minimums[index] + "°",
+                cell.right - pad - textPaint.measureText(maximum) - size * 0.35f,
+                baseline, textPaint);
+        textPaint.setColor(currentPalette.text);
+    }
+
+    /** The weekday a forecast entry falls on, or the raw date if it will not parse. */
+    private String dayName(String isoDate) {
+        try {
+            return new SimpleDateFormat("EEE", Locale.getDefault()).format(
+                    new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(isoDate));
+        } catch (Exception ignored) {
+            return isoDate;
+        }
     }
 
     /**
-     * The middle transport control: two bars while playing, a triangle while
-     * not, sized and coloured to sit in the row with the two chevrons.
+     * What is playing, and the three controls for it.
      *
-     * <p>Baseline-aligned like the text beside it, so the box is lifted by
-     * roughly a capital height rather than centred on the baseline.
+     * <p>The title used to be set at a size the panel could not hold and then
+     * cut off mid-word - "Nothing playing" itself did not fit - so it is
+     * brought down to a size that fits before it is cut at all. The skip
+     * controls were the characters for a double chevron, which the faces this
+     * panel can offer draw thin or not at all; they are shapes now, like the
+     * play mark beside them, and they go quiet when there is no session for
+     * them to talk to.
      */
-    private void drawTransportState(Canvas canvas, float centreX, float baselineY,
-            float textSize, boolean playing) {
-        float height = textSize * 0.62f;
-        float top = baselineY - height * 1.12f;
-        iconPaint.setColor(textPaint.getColor());
+    /**
+     * What is playing, whose it is, and the three controls for it.
+     *
+     * <p>Laid out as a card rather than as a column: the app's own icon on the
+     * left, the track and the artist beside it, and the controls below a rule.
+     * The title used to be set at a size the panel could not hold and then cut
+     * off mid-word - "Nothing playing" itself did not fit - so it is brought
+     * down to a size that fits before it is cut at all. The skip controls were
+     * the characters for a double chevron, which the faces this panel can
+     * offer draw thin or not at all; they are shapes now, like the play mark
+     * beside them, and all three go quiet when there is no session to talk to.
+     */
+    private void drawFullscreenMedia(Canvas canvas, float density) {
+        RectF panel = fullscreenPanel(canvas, density);
+        boolean live = !snapshot.mediaTitle.isEmpty() || !snapshot.mediaArtist.isEmpty();
+        float controlSize = clamp(Math.min(panel.width() * 0.14f, panel.height() * 0.3f),
+                11f * density, 30f * density);
+        float controlsCentre = panel.bottom - controlSize * 0.58f;
+        float rule = controlsCentre - controlSize * 0.72f;
+
+        iconPaint.setColor(mutedColour());
+        iconPaint.setStyle(Paint.Style.STROKE);
+        iconPaint.setStrokeWidth(Math.max(1f, density * 0.7f));
+        canvas.drawLine(panel.left + panel.width() * 0.06f, rule,
+                panel.right - panel.width() * 0.06f, rule, iconPaint);
+
+        RectF above = new RectF(panel.left, panel.top, panel.right, rule);
+        if (live) {
+            drawNowPlaying(canvas, above, density);
+        } else {
+            String nothing = getResources().getString(R.string.dashboard_media_nothing_playing);
+            float available = above.width() * 0.88f;
+            textPaint.setTextAlign(Paint.Align.CENTER);
+            textPaint.setColor(mutedColour());
+            textPaint.setTextSize(fitTextSize(nothing, available,
+                    clamp(above.height() * 0.4f, 10f * density, 22f * density), 8f * density));
+            canvas.drawText(TextUtils.ellipsize(nothing, textPaint, available,
+                            TextUtils.TruncateAt.END).toString(), above.centerX(),
+                    above.centerY() - (textPaint.descent() + textPaint.ascent()) / 2f, textPaint);
+            textPaint.setColor(currentPalette.text);
+        }
+
+        int colour = live ? currentPalette.text : mutedColour();
+        drawSkip(canvas, panel.left + panel.width() / 6f, controlsCentre, controlSize,
+                false, colour);
+        drawTransportState(canvas, panel.centerX(), controlsCentre, controlSize,
+                snapshot.mediaPlaying, colour);
+        drawSkip(canvas, panel.right - panel.width() / 6f, controlsCentre, controlSize,
+                true, colour);
+        textPaint.setTextAlign(Paint.Align.LEFT);
+    }
+
+    /** The icon on the left, the words beside it, a rule between the two. */
+    private void drawNowPlaying(Canvas canvas, RectF area, float density) {
+        String title = snapshot.mediaTitle.isEmpty() ? snapshot.mediaArtist : snapshot.mediaTitle;
+        String artist = snapshot.mediaTitle.isEmpty() ? "" : snapshot.mediaArtist;
+        float iconSize = clamp(Math.min(area.width() * 0.22f, area.height() * 0.76f),
+                13f * density, 38f * density);
+        // The track's own picture where the player offers one; failing that,
+        // the icon of whoever is playing, which at least says where it is from.
+        MediaWidgetState.Snapshot media = MediaWidgetState.get();
+        Bitmap icon = media.artwork;
+        boolean artwork = icon != null;
+        if (icon == null) {
+            icon = appIcon(media.packageName, Math.round(iconSize));
+        }
+        float margin = area.width() * 0.05f;
+        float left = area.left + margin;
+        float textLeft = left;
+        if (icon != null) {
+            drawPicture(canvas, icon, new RectF(left, area.centerY() - iconSize / 2f,
+                    left + iconSize, area.centerY() + iconSize / 2f), artwork);
+            float divider = left + iconSize * 1.42f;
+            iconPaint.setColor(mutedColour());
+            iconPaint.setStyle(Paint.Style.STROKE);
+            canvas.drawLine(divider, area.top + area.height() * 0.18f,
+                    divider, area.bottom - area.height() * 0.18f, iconPaint);
+            textLeft = divider + iconSize * 0.42f;
+        }
+        float available = Math.max(1f, area.right - margin - textLeft);
+
+        textPaint.setTextAlign(Paint.Align.LEFT);
+        textPaint.setFakeBoldText(true);
+        float titleSize = fitTextSize(title, available,
+                clamp(Math.min(area.height() * 0.42f, area.width() * 0.13f),
+                        11f * density, 30f * density), 8f * density);
+        textPaint.setTextSize(titleSize);
+        textPaint.getTextBounds(title, 0, title.length(), inkBounds);
+        float titleTop = inkBounds.top;
+        float titleHeight = inkBounds.height();
+        textPaint.setFakeBoldText(false);
+
+        // Given the same chance to fit as the title, and a lower floor: it is
+        // the second line, so it may go smaller before it is cut.
+        float artistSize = artist.isEmpty() ? 0f : fitTextSize(artist, available,
+                clamp(titleSize * 0.66f, 7f * density, 20f * density), 6f * density);
+        float artistTop = 0f;
+        float artistHeight = 0f;
+        if (!artist.isEmpty()) {
+            textPaint.setTextSize(artistSize);
+            textPaint.getTextBounds(artist, 0, artist.length(), inkBounds);
+            artistTop = inkBounds.top;
+            artistHeight = inkBounds.height();
+        }
+        float gap = titleSize * 0.42f;
+        float y = area.centerY()
+                - (titleHeight + (artist.isEmpty() ? 0f : gap + artistHeight)) / 2f;
+
+        textPaint.setFakeBoldText(true);
+        textPaint.setTextSize(titleSize);
+        canvas.drawText(TextUtils.ellipsize(title, textPaint, available,
+                TextUtils.TruncateAt.END).toString(), textLeft, y - titleTop, textPaint);
+        textPaint.setFakeBoldText(false);
+        if (!artist.isEmpty()) {
+            y += titleHeight + gap;
+            textPaint.setTextSize(artistSize);
+            textPaint.setColor(mutedColour());
+            canvas.drawText(TextUtils.ellipsize(artist, textPaint, available,
+                    TextUtils.TruncateAt.END).toString(), textLeft, y - artistTop, textPaint);
+            textPaint.setColor(currentPalette.text);
+        }
+    }
+
+    /**
+     * A square of picture in the box given.
+     *
+     * <p>An app icon arrives with its own shape already cut; a piece of album
+     * art is a bare square, so it is given corners to match rather than left
+     * as the one hard rectangle on a panel of rounded ones.
+     */
+    private void drawPicture(Canvas canvas, Bitmap picture, RectF box, boolean round) {
+        if (!round) {
+            canvas.drawBitmap(picture, null, box, null);
+            return;
+        }
+        Matrix fit = new Matrix();
+        fit.setRectToRect(new RectF(0f, 0f, picture.getWidth(), picture.getHeight()), box,
+                Matrix.ScaleToFit.CENTER);
+        BitmapShader shader = new BitmapShader(picture, Shader.TileMode.CLAMP,
+                Shader.TileMode.CLAMP);
+        shader.setLocalMatrix(fit);
+        picturePaint.setShader(shader);
+        float radius = box.width() * 0.17f;
+        canvas.drawRoundRect(box, radius, radius, picturePaint);
+        picturePaint.setShader(null);
+    }
+
+    /**
+     * The playing app's icon, drawn once into a bitmap and kept until it
+     * changes.
+     *
+     * <p>Loading it asks the package manager to open somebody else's
+     * resources, which is far too much to do sixty times a second. A package
+     * that has no icon to give is remembered as such, so the asking stops.
+     */
+    @Nullable
+    private Bitmap appIcon(String packageName, int size) {
+        if (packageName == null || packageName.isEmpty() || size <= 0) {
+            return null;
+        }
+        if (packageName.equals(appIconPackage) && appIconSize == size) {
+            return appIcon;
+        }
+        appIconPackage = packageName;
+        appIconSize = size;
+        appIcon = null;
+        try {
+            Drawable drawable = getContext().getPackageManager().getApplicationIcon(packageName);
+            Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+            drawable.setBounds(0, 0, size, size);
+            drawable.draw(new Canvas(bitmap));
+            appIcon = bitmap;
+        } catch (PackageManager.NameNotFoundException | RuntimeException ignored) {
+            // Nothing to show for it; the words stand on their own.
+        }
+        return appIcon;
+    }
+
+    /**
+     * The largest size at or under {@code wanted} that fits, down to a floor.
+     *
+     * <p>Cutting a title off is a last resort, not the first thing to try:
+     * most of them fit whole once the size gives a little.
+     */
+    private float fitTextSize(String value, float available, float wanted, float floor) {
+        float size = wanted;
+        textPaint.setTextSize(size);
+        while (size > floor && textPaint.measureText(value) > available) {
+            size = Math.max(floor, size - Math.max(0.5f, size * 0.06f));
+            textPaint.setTextSize(size);
+        }
+        return size;
+    }
+
+    /**
+     * Play or pause, drawn rather than typed.
+     *
+     * <p>The glyph was a fixed triangle whatever the session was doing, and a
+     * pause pair is exactly the sort of character the small faces on offer
+     * here turn into a box.
+     */
+    private void drawTransportState(Canvas canvas, float centreX, float centreY,
+            float size, boolean playing, int colour) {
+        float height = size * 0.62f;
+        float top = centreY - height / 2f;
+        iconPaint.setColor(colour);
         iconPaint.setStyle(Paint.Style.FILL);
         if (playing) {
             float bar = height * 0.28f;
@@ -1561,6 +1904,27 @@ public final class RearDashboardView extends View {
             canvas.drawPath(triangle, iconPaint);
         }
         // The shared paint goes back to how the rest of the view expects it.
+        iconPaint.setStyle(Paint.Style.STROKE);
+    }
+
+    /** Skip back or on: two marks pointing the way, to match the play mark. */
+    private void drawSkip(Canvas canvas, float centreX, float centreY, float size,
+            boolean forward, int colour) {
+        float height = size * 0.5f;
+        float half = height * 0.46f;
+        iconPaint.setColor(colour);
+        iconPaint.setStyle(Paint.Style.FILL);
+        for (int mark = 0; mark < 2; mark++) {
+            float shift = (mark == 0 ? -1f : 1f) * half * 1.15f;
+            float tip = forward ? centreX + shift + half : centreX + shift - half;
+            float back = forward ? centreX + shift - half : centreX + shift + half;
+            Path triangle = new Path();
+            triangle.moveTo(back, centreY - height / 2f);
+            triangle.lineTo(tip, centreY);
+            triangle.lineTo(back, centreY + height / 2f);
+            triangle.close();
+            canvas.drawPath(triangle, iconPaint);
+        }
         iconPaint.setStyle(Paint.Style.STROKE);
     }
 
