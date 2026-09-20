@@ -627,7 +627,7 @@ final class MirrorSettings {
         switch (id) {
             case MirrorProfile.NAVIGATION_ID:
                 return new MirrorProfile(MirrorProfile.Id.NAVIGATION,
-                        MirrorProfile.ScaleMode.FIT, 0, false, 96);
+                        MirrorProfile.ScaleMode.FIT, 0, false, 95);
             case MirrorProfile.VIDEO_ID:
                 return new MirrorProfile(MirrorProfile.Id.VIDEO,
                         MirrorProfile.ScaleMode.FIT, 90, false, 93);

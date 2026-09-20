@@ -56,6 +56,16 @@ public class Mirror extends Activity implements
     private static final long AOD_DIM_DELAY_MILLIS = 30_000L;
     private static final long IDLE_FADE_STEP_MILLIS = 16L;
     private static final int IDLE_FADE_STEPS = 125;
+    /**
+     * How many moves the backlight makes on its way into AOD.
+     *
+     * <p>Every one of them is a root shell, which takes about a tenth of a
+     * second to start, so the panel cannot follow the overlay's sixty frames a
+     * second. Ten moves across the fade is one every fifth of a second: still
+     * a fade rather than a snap, and slow enough that each shell finishes
+     * before the next is asked for.
+     */
+    private static final int AOD_BACKLIGHT_FADE_STEPS = 10;
     static final String EXTRA_SESSION_HAS_PROJECTION = "session_has_projection";
     static final String EXTRA_DASHBOARD_ONLY = "dashboard_only";
 
@@ -630,7 +640,12 @@ public class Mirror extends Activity implements
             return;
         }
         if (idleDimmed) {
-            brightnessOverlay.setAlpha(aodDimOverlayAlpha());
+            if (dimsAodWithBacklight(DashboardWidgetLayout.loadIdleMode(this))) {
+                brightnessOverlay.setAlpha(aodVeilAlpha());
+                applyAodBacklight();
+            } else {
+                brightnessOverlay.setAlpha(aodDimOverlayAlpha());
+            }
             return;
         }
         applyBrightnessPercent(ambientAdjusted(activeProfile.brightnessPercent));
@@ -737,10 +752,18 @@ public class Mirror extends Activity implements
         idleFadeStep++;
         float progress = idleFadeStep / (float) IDLE_FADE_STEPS;
         DashboardWidgetLayout.IdleMode mode = DashboardWidgetLayout.loadIdleMode(this);
-        float targetAlpha = mode == DashboardWidgetLayout.IdleMode.ALWAYS_ON
-                ? aodDimOverlayAlpha() : 1f;
+        boolean backlit = dimsAodWithBacklight(mode);
+        float targetAlpha;
+        if (mode != DashboardWidgetLayout.IdleMode.ALWAYS_ON) {
+            targetAlpha = 1f;
+        } else {
+            targetAlpha = backlit ? aodVeilAlpha() : aodDimOverlayAlpha();
+        }
         brightnessOverlay.setAlpha(idleFadeStartOverlayAlpha
                 + (targetAlpha - idleFadeStartOverlayAlpha) * progress);
+        if (backlit) {
+            stepAodBacklight(progress);
+        }
         if (idleFadeStep < IDLE_FADE_STEPS) {
             idleHandler.postDelayed(idleFadeFrame, IDLE_FADE_STEP_MILLIS);
             return;
@@ -755,6 +778,51 @@ public class Mirror extends Activity implements
     private float aodDimOverlayAlpha() {
         int percent = DashboardWidgetLayout.loadAodMinBrightnessPercent(this);
         return 1f - percent / 100f;
+    }
+
+    /** Whether AOD can dim the panel itself instead of veiling what it shows. */
+    private boolean dimsAodWithBacklight(DashboardWidgetLayout.IdleMode mode) {
+        return mode == DashboardWidgetLayout.IdleMode.ALWAYS_ON
+                && brightnessController != null
+                && DeviceCapabilityState.get().hardwareBrightnessActive;
+    }
+
+    private void applyAodBacklight() {
+        if (brightnessController != null) {
+            brightnessController.applyPercent(
+                    DashboardWidgetLayout.loadAodMinBrightnessPercent(this));
+        }
+    }
+
+    /** Walks the panel down to the AOD level on a beat a root shell can keep. */
+    private void stepAodBacklight(float progress) {
+        int framesPerMove = IDLE_FADE_STEPS / AOD_BACKLIGHT_FADE_STEPS;
+        if (idleFadeStep % framesPerMove != 0 && idleFadeStep != IDLE_FADE_STEPS) {
+            return;
+        }
+        if (brightnessController == null || activeProfile == null) {
+            return;
+        }
+        int from = ambientAdjusted(activeProfile.brightnessPercent);
+        int to = DashboardWidgetLayout.loadAodMinBrightnessPercent(this);
+        brightnessController.applyPercent(Math.round(from + (to - from) * progress));
+    }
+
+    /**
+     * What the overlay still has to hide once the panel is as dim as it goes.
+     *
+     * <p>AOD asks for far less light than the panel will give on its own, so
+     * the panel goes down to its floor and the rest comes out of the picture.
+     * The panel still does most of the work - it drops from three quarters of
+     * full output to a tenth - and what the overlay is left holding is a
+     * fraction of what it used to.
+     */
+    private float aodVeilAlpha() {
+        int percent = DashboardWidgetLayout.loadAodMinBrightnessPercent(this);
+        return PerceptualBrightness.veilAlpha(
+                PerceptualBrightness.toRequestedShare(percent),
+                PerceptualBrightness.toLinear(percent)
+        );
     }
 
     private void configureAutoProfileMonitoring() {
