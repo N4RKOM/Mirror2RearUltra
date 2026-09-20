@@ -1677,7 +1677,14 @@ public final class RearDashboardView extends View {
                 x = fallback[index][0];
                 y = fallback[index][1];
             }
-            Alignment alignment = alignmentFor(line);
+            // Always centred on the stored point, whatever alignment the
+            // widget carries from a flowed layout. Everything else here
+            // already treats that point as the widget's middle - the drag
+            // stores it, the drag holds it inside the panel by half a width,
+            // the fallback placement hands back the middle of a free box -
+            // so honouring an edge alignment drew the widget half its width
+            // away from where it had been dropped. The builder leaves the
+            // alignment row off a free page for the same reason.
             // The whole panel, not the room left between the anchor and the
             // nearer edge. Measuring from the anchor made the widget shrink as
             // it was dragged towards an edge - down to a fifth of its size,
@@ -1691,7 +1698,7 @@ public final class RearDashboardView extends View {
             float clampedY = Math.max(padding + half,
                     Math.min(getHeight() - padding - half, y));
             float baseline = clampedY - (textPaint.ascent() + textPaint.descent()) / 2f;
-            drawLine(canvas, line, x, baseline, available, alignment, true);
+            drawLine(canvas, line, x, baseline, available, Alignment.CENTER, true);
         }
     }
 
