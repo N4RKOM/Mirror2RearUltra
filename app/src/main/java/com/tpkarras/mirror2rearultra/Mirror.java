@@ -648,7 +648,12 @@ public class Mirror extends Activity implements
         if (autoBrightness == null || !DashboardWidgetLayout.isAutoBrightnessEnabled(this)) {
             return percent;
         }
-        return Math.max(1, Math.round(percent * ambientFactor));
+        // The sensor's factor is a share of the light the panel puts out, not
+        // of the slider's travel, so it is applied on that side of the curve.
+        // Scaling the position instead would make the same factor mean a far
+        // darker panel than it did when it was tuned against the room.
+        return Math.max(1, PerceptualBrightness.toPercent(
+                PerceptualBrightness.toLinear(percent) * ambientFactor));
     }
 
     private void startAutoBrightnessIfWanted() {

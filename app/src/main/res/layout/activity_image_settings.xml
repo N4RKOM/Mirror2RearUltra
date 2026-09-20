@@ -97,7 +97,7 @@
                     android:id="@+id/brightness_slider"
                     style="@style/HyperOS.Slider.Row"
                     android:contentDescription="@string/brightness_accessibility"
-                    app:hyperStepSize="5"
+                    app:hyperStepSize="1"
                     app:hyperValueFrom="10"
                     app:hyperValueTo="100" />
 

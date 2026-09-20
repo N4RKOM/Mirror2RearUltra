@@ -107,7 +107,11 @@ final class RearBrightnessController {
         }
         int value;
         synchronized (HARDWARE_STATE_LOCK) {
-            value = Math.max(1, Math.round(maximumBrightness * percent / 100f));
+            // The sysfs value is a share of the panel's output, and the
+            // percentage is a share of what the eye reads, so the two are not
+            // the same number.
+            value = Math.max(1, Math.round(
+                    maximumBrightness * PerceptualBrightness.toLinear(percent)));
         }
         CommandResult result = runRootCommand(
                 "printf %d " + value + " > " + BRIGHTNESS_PATH

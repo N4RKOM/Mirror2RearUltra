@@ -14,7 +14,9 @@ import java.util.Properties;
 import java.util.Set;
 
 final class SettingsBackupCodec {
-    static final int SCHEMA_VERSION = 1;
+    static final int SCHEMA_VERSION = 2;
+    /** The last schema that wrote brightness as a share of the panel's output. */
+    private static final int SCHEMA_LINEAR_BRIGHTNESS = 1;
     static final int MAX_BACKUP_BYTES = 1_048_576;
     private static final String FORMAT = "Mirror2RearUltra settings";
     private static final int MAX_PROFILES = 50;
@@ -233,7 +235,10 @@ final class SettingsBackupCodec {
         if (!FORMAT.equals(required(properties, "format"))) {
             throw new BackupException("wrong_format");
         }
-        if (integer(properties, "schema", 1, SCHEMA_VERSION) != SCHEMA_VERSION) {
+        // Older files are read on the scale they were written in; a newer one
+        // is refused, because there is no knowing what it changed.
+        int schema = integer(properties, "schema", 1, Integer.MAX_VALUE);
+        if (schema > SCHEMA_VERSION) {
             throw new BackupException("unsupported_schema");
         }
 
@@ -270,7 +275,7 @@ final class SettingsBackupCodec {
                     scaleMode,
                     rotation,
                     bool(properties, prefix + "mirror"),
-                    integer(properties, prefix + "brightness", 10, 100),
+                    brightness(properties, prefix + "brightness", schema),
                     integer(properties, prefix + "zoom", 100, 200),
                     integer(properties, prefix + "offsetX", -50, 50),
                     integer(properties, prefix + "offsetY", -50, 50)
@@ -447,6 +452,22 @@ final class SettingsBackupCodec {
             boolean fallback
     ) throws BackupException {
         return properties.containsKey(key) ? bool(properties, key) : fallback;
+    }
+
+    /**
+     * Reads a saved brightness on the scale the file was written in.
+     *
+     * <p>A file from before {@link PerceptualBrightness} holds a share of the
+     * panel's output, so restoring one has the same conversion to do as an
+     * upgrade does - otherwise the restored profiles would come back a
+     * fraction of the brightness the backup was taken at.
+     */
+    private static int brightness(Properties properties, String key, int schema)
+            throws BackupException {
+        int stored = integer(properties, key, 10, 100);
+        return schema <= SCHEMA_LINEAR_BRIGHTNESS
+                ? PerceptualBrightness.toPercent(stored / 100f)
+                : stored;
     }
 
     private static int integer(Properties properties, String key, int minimum, int maximum)

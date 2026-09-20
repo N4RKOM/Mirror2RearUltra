@@ -35,6 +35,51 @@ public class SettingsBackupCodecTest {
     }
 
     @Test
+    public void readsBrightnessFromAnOlderFileOnItsOwnScale() throws Exception {
+        // A file written before the slider became perceptual holds a share of
+        // the panel's output, and has to come back as the position that asks
+        // for the same light.
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        SettingsBackupCodec.write(sampleData(true), output);
+        String older = output.toString(StandardCharsets.UTF_8).replace(
+                "<entry key=\"schema\">" + SettingsBackupCodec.SCHEMA_VERSION + "</entry>",
+                "<entry key=\"schema\">1</entry>"
+        );
+        assertTrue("the schema entry was not rewritten",
+                older.contains("<entry key=\"schema\">1</entry>"));
+
+        SettingsBackupCodec.Data restored = SettingsBackupCodec.read(
+                new ByteArrayInputStream(older.getBytes(StandardCharsets.UTF_8))
+        );
+
+        assertEquals(PerceptualBrightness.toPercent(0.80f),
+                profile(restored, MirrorProfile.NAVIGATION_ID).brightnessPercent);
+        assertEquals(PerceptualBrightness.toPercent(0.70f),
+                profile(restored, MirrorProfile.VIDEO_ID).brightnessPercent);
+    }
+
+    @Test
+    public void readsBrightnessFromTheCurrentFileUnchanged() throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        SettingsBackupCodec.write(sampleData(true), output);
+
+        SettingsBackupCodec.Data restored = SettingsBackupCodec.read(
+                new ByteArrayInputStream(output.toByteArray())
+        );
+
+        assertEquals(80, profile(restored, MirrorProfile.NAVIGATION_ID).brightnessPercent);
+    }
+
+    private static MirrorProfile profile(SettingsBackupCodec.Data data, String id) {
+        for (MirrorProfile profile : data.profiles) {
+            if (profile.id.equals(id)) {
+                return profile;
+            }
+        }
+        throw new AssertionError("no profile " + id);
+    }
+
+    @Test
     public void rejectsBackupWithoutAllBuiltInProfiles() throws Exception {
         SettingsBackupCodec.Data source = sampleData(false);
         ByteArrayOutputStream output = new ByteArrayOutputStream();

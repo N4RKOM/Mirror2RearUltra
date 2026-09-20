@@ -58,7 +58,12 @@ final class MirrorSettings {
     private static final String KEY_DASHBOARD_CUSTOM_IMAGE_OPACITY = "dashboard_custom_image_opacity";
     private static final String KEY_CUSTOM_PROFILES = "custom_profiles";
     private static final String KEY_ASSIGNMENTS_INITIALIZED = "assignments_initialized";
+    private static final String KEY_BRIGHTNESS_SCALE = "brightness_scale";
+    /** Slider positions stopped being a share of output and became a perceived one. */
+    private static final int BRIGHTNESS_SCALE_PERCEPTUAL = 2;
     private static final String APP_ASSIGNMENT_PREFIX = "app_assignment_";
+    /** Main-thread or not, the conversion below is wanted exactly once. */
+    private static volatile boolean brightnessScaleChecked;
     private static final Set<Listener> LISTENERS = new CopyOnWriteArraySet<>();
 
     private MirrorSettings() {
@@ -525,7 +530,45 @@ final class MirrorSettings {
     }
 
     private static SharedPreferences preferences(Context context) {
-        return context.getApplicationContext().getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences preferences = context.getApplicationContext()
+                .getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        migrateBrightnessScale(preferences);
+        return preferences;
+    }
+
+    /**
+     * Re-reads saved brightnesses on the scale they are now written in.
+     *
+     * <p>A profile saved before {@link PerceptualBrightness} existed holds a
+     * share of the panel's output. Left alone, the same number read as a
+     * slider position would leave every profile a fraction of the brightness
+     * its owner chose, so each one is converted to the position that asks for
+     * the light it already had. Nothing on the panel changes; only where the
+     * slider's handle sits.
+     */
+    private static void migrateBrightnessScale(SharedPreferences preferences) {
+        if (brightnessScaleChecked) {
+            return;
+        }
+        synchronized (MirrorSettings.class) {
+            if (brightnessScaleChecked) {
+                return;
+            }
+            brightnessScaleChecked = true;
+            if (preferences.getInt(KEY_BRIGHTNESS_SCALE, 1) >= BRIGHTNESS_SCALE_PERCEPTUAL) {
+                return;
+            }
+            SharedPreferences.Editor editor = preferences.edit();
+            for (Map.Entry<String, ?> entry : preferences.getAll().entrySet()) {
+                if (!entry.getKey().endsWith("_brightness")
+                        || !(entry.getValue() instanceof Integer)) {
+                    continue;
+                }
+                editor.putInt(entry.getKey(),
+                        PerceptualBrightness.toPercent((Integer) entry.getValue() / 100f));
+            }
+            editor.putInt(KEY_BRIGHTNESS_SCALE, BRIGHTNESS_SCALE_PERCEPTUAL).apply();
+        }
     }
 
     private static SharedPreferences.Editor writeDashboardSettings(
@@ -584,10 +627,10 @@ final class MirrorSettings {
         switch (id) {
             case MirrorProfile.NAVIGATION_ID:
                 return new MirrorProfile(MirrorProfile.Id.NAVIGATION,
-                        MirrorProfile.ScaleMode.FIT, 0, false, 80);
+                        MirrorProfile.ScaleMode.FIT, 0, false, 96);
             case MirrorProfile.VIDEO_ID:
                 return new MirrorProfile(MirrorProfile.Id.VIDEO,
-                        MirrorProfile.ScaleMode.FIT, 90, false, 70);
+                        MirrorProfile.ScaleMode.FIT, 90, false, 93);
             case MirrorProfile.CAMERA_ID:
                 return new MirrorProfile(MirrorProfile.Id.CAMERA,
                         MirrorProfile.ScaleMode.FILL, 0, true, 100);
