@@ -673,16 +673,8 @@ public final class RearDashboardView extends View {
             lines.add(new Line(DashboardWidgetLayout.Widget.TEMPERATURE, value, false, Icon.TEMPERATURE));
         }
         if (settings.showWeather) {
-            String weather = weatherLine();
+            String weather = weatherVariant(DashboardWidgetLayout.Widget.WEATHER);
             if (!weather.isEmpty()) {
-                DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.WEATHER);
-                if (variant == DashboardWidgetLayout.Variant.ALTERNATE
-                        && snapshot.weatherTemperatureCelsius != null) {
-                    weather = snapshot.weatherTemperatureCelsius + "\n°C";
-                } else if (variant == DashboardWidgetLayout.Variant.DETAILED
-                        && !snapshot.weatherPlace.isEmpty()) {
-                    weather += "\n" + snapshot.weatherPlace;
-                }
                 lines.add(new Line(DashboardWidgetLayout.Widget.WEATHER, weather, false, weatherIcon(snapshot.weatherCode)));
             }
         }
@@ -703,15 +695,8 @@ public final class RearDashboardView extends View {
         }
         if (settings.showMedia) {
             boolean hasData = !snapshot.mediaTitle.isEmpty() || !snapshot.mediaArtist.isEmpty();
-            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.MEDIA);
-            String value = !snapshot.mediaTitle.isEmpty() ? snapshot.mediaTitle : snapshot.mediaArtist;
-            if (variant == DashboardWidgetLayout.Variant.ALTERNATE && !snapshot.mediaArtist.isEmpty()) {
-                value = snapshot.mediaArtist;
-            } else if (variant == DashboardWidgetLayout.Variant.DETAILED
-                    && !snapshot.mediaTitle.isEmpty() && !snapshot.mediaArtist.isEmpty()) {
-                value = snapshot.mediaTitle + "\n" + snapshot.mediaArtist;
-            }
-            addLine(lines, DashboardWidgetLayout.Widget.MEDIA, hasData, value, Icon.MEDIA);
+            addLine(lines, DashboardWidgetLayout.Widget.MEDIA, hasData,
+                    mediaVariant(DashboardWidgetLayout.Widget.MEDIA), Icon.MEDIA);
         }
         if (settings.showCompass) {
             boolean hasData = snapshot.headingDegrees != null;
@@ -786,8 +771,12 @@ public final class RearDashboardView extends View {
             // Nothing unread is the empty case here, not a missing reading.
             int count = NotificationWidgetState.getCount();
             DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.NOTIFICATIONS);
-            String value = variant == DashboardWidgetLayout.Variant.ALTERNATE && count > 99
-                    ? "99+" : variant == DashboardWidgetLayout.Variant.DETAILED
+            // Capped at nine rather than ninety-nine: the compact form is
+            // there to hold its width on a 126 pixel panel, and a cap that
+            // only bit past a hundred unread never did.
+            String value = variant == DashboardWidgetLayout.Variant.ALTERNATE
+                    ? (count > 9 ? "9+" : String.valueOf(count))
+                    : variant == DashboardWidgetLayout.Variant.DETAILED
                     ? count + "\n" + getResources().getString(R.string.dashboard_variant_notifications)
                     : String.valueOf(count);
             addLine(lines, DashboardWidgetLayout.Widget.NOTIFICATIONS,
@@ -805,7 +794,10 @@ public final class RearDashboardView extends View {
             String value = formatElapsed(shown);
             DashboardWidgetLayout.Variant variant =
                     variantOf(DashboardWidgetLayout.Widget.TIMER);
-            if (variant == DashboardWidgetLayout.Variant.DETAILED) {
+            if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
+                // Stacked, the way the session timer's compact form reads.
+                value = value.replace(":", "\n");
+            } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
                 value = formatElapsedDetailed(shown);
             }
             // A stopped countdown at zero has finished; a stopped stopwatch at
@@ -871,7 +863,7 @@ public final class RearDashboardView extends View {
         }
         if (DashboardWidgetLayout.isExtraEnabled(
                 getContext(), DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER)) {
-            String value = weatherLine();
+            String value = weatherVariant(DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER);
             addLine(lines, DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER,
                     true, value.isEmpty() ? "—" : value, weatherIcon(snapshot.weatherCode));
         }
@@ -879,7 +871,8 @@ public final class RearDashboardView extends View {
                 getContext(), DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA)) {
             boolean hasMedia = !snapshot.mediaTitle.isEmpty() || !snapshot.mediaArtist.isEmpty();
             addLine(lines, DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA, true,
-                    hasMedia ? snapshot.mediaTitle : "—", Icon.MEDIA);
+                    hasMedia ? mediaVariant(DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA) : "—",
+                    Icon.MEDIA);
         }
         DashboardWidgetLayout.sort(getContext(), lines);
         lines.removeIf(line -> !DashboardWidgetLayout.isVisible(getContext(), line.widget));
@@ -1554,6 +1547,51 @@ public final class RearDashboardView extends View {
         }
         // The shared paint goes back to how the rest of the view expects it.
         iconPaint.setStyle(Paint.Style.STROKE);
+    }
+
+    /**
+     * The weather as a widget's variant asks for it.
+     *
+     * <p>Shared with the full-screen weather widget, which read no variant at
+     * all: all three of its choices drew the same line, while the row
+     * offering them said otherwise.
+     */
+    private String weatherVariant(DashboardWidgetLayout.Widget widget) {
+        String weather = weatherLine();
+        if (weather.isEmpty()) {
+            return weather;
+        }
+        DashboardWidgetLayout.Variant variant = variantOf(widget);
+        if (variant == DashboardWidgetLayout.Variant.ALTERNATE
+                && snapshot.weatherTemperatureCelsius != null) {
+            return snapshot.weatherTemperatureCelsius + "\n°C";
+        }
+        if (variant == DashboardWidgetLayout.Variant.DETAILED
+                && !snapshot.weatherPlace.isEmpty()) {
+            return weather + "\n" + snapshot.weatherPlace;
+        }
+        return weather;
+    }
+
+    /**
+     * What is playing, as a widget's variant asks for it.
+     *
+     * <p>Shared with the full-screen media widget for the same reason. That
+     * one also showed the title and nothing else, so a station that names
+     * only its artist left it blank.
+     */
+    private String mediaVariant(DashboardWidgetLayout.Widget widget) {
+        String title = snapshot.mediaTitle;
+        String artist = snapshot.mediaArtist;
+        DashboardWidgetLayout.Variant variant = variantOf(widget);
+        if (variant == DashboardWidgetLayout.Variant.ALTERNATE && !artist.isEmpty()) {
+            return artist;
+        }
+        if (variant == DashboardWidgetLayout.Variant.DETAILED
+                && !title.isEmpty() && !artist.isEmpty()) {
+            return title + "\n" + artist;
+        }
+        return title.isEmpty() ? artist : title;
     }
 
     /** Visual alternatives for text whose content is supplied by the user or system. */
