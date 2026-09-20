@@ -363,6 +363,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private void renderRows() {
         rows.removeAllViews();
         List<List<DashboardWidgetLayout.Widget>> pages = currentPages();
+        DashboardSettings.Layout firstPageLayout =
+                MirrorSettings.loadDashboardSettings(this).layout;
         int total = 0;
         for (List<DashboardWidgetLayout.Widget> page : pages) {
             total += page.size();
@@ -389,8 +391,12 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 boolean canMoveUp = page > 0 || index > 0;
                 boolean canMoveDown = page < pages.size() - 1
                         || index < pages.get(page).size() - 1;
+                // The free layout places and sizes a widget by hand, so a
+                // card on such a page leaves those two out; see widgetCard.
+                boolean freeLayout = DashboardWidgetLayout.loadPageLayout(
+                        this, page + 1, firstPageLayout) == DashboardSettings.Layout.FREE;
                 MaterialCardView card = widgetCard(
-                        pages.get(page).get(index), canMoveUp, canMoveDown);
+                        pages.get(page).get(index), canMoveUp, canMoveDown, freeLayout);
                 LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(-1, -2);
                 cardParams.bottomMargin = dp(8);
                 rows.addView(card, cardParams);
@@ -465,8 +471,15 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         return hint;
     }
 
+    /**
+     * @param freeLayout the page places widgets by hand. Alignment and size
+     *     are then the drag and the pinch, which the hint over the preview
+     *     already says, and the two rows here would be a second way of
+     *     saying the same thing - a worse one, since alignment shifts a
+     *     widget off the point it was dropped on.
+     */
     private MaterialCardView widgetCard(DashboardWidgetLayout.Widget widget,
-            boolean canMoveUp, boolean canMoveDown) {
+            boolean canMoveUp, boolean canMoveDown, boolean freeLayout) {
         MaterialCardView card = new MaterialCardView(this);
         card.setTag(widget);
         card.setCardBackgroundColor(androidx.core.content.ContextCompat.getColor(
@@ -523,31 +536,33 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         header.addView(drag, new LinearLayout.LayoutParams(dp(56), dp(48)));
         row.addView(header, new LinearLayout.LayoutParams(-1, -2));
 
-        row.addView(segmentedRow(R.string.dashboard_builder_position_label,
-                new String[]{
-                        getString(R.string.dashboard_builder_left),
-                        getString(R.string.dashboard_builder_center),
-                        getString(R.string.dashboard_builder_right)},
-                DashboardWidgetLayout.loadPosition(this, widget).ordinal(),
-                getString(R.string.dashboard_builder_position, label(widget)),
-                choice -> {
-                    DashboardWidgetLayout.savePosition(this, widget,
-                            DashboardWidgetLayout.Position.values()[choice]);
-                    notifyDashboardChanged();
-                }));
+        if (!freeLayout) {
+            row.addView(segmentedRow(R.string.dashboard_builder_position_label,
+                    new String[]{
+                            getString(R.string.dashboard_builder_left),
+                            getString(R.string.dashboard_builder_center),
+                            getString(R.string.dashboard_builder_right)},
+                    DashboardWidgetLayout.loadPosition(this, widget).ordinal(),
+                    getString(R.string.dashboard_builder_position, label(widget)),
+                    choice -> {
+                        DashboardWidgetLayout.savePosition(this, widget,
+                                DashboardWidgetLayout.Position.values()[choice]);
+                        notifyDashboardChanged();
+                    }));
 
-        row.addView(segmentedRow(R.string.dashboard_builder_size_label,
-                new String[]{
-                        getString(R.string.dashboard_builder_small),
-                        getString(R.string.dashboard_builder_normal),
-                        getString(R.string.dashboard_builder_large)},
-                DashboardWidgetLayout.loadSize(this, widget).ordinal(),
-                getString(R.string.dashboard_builder_size, label(widget)),
-                choice -> {
-                    DashboardWidgetLayout.saveSize(this, widget,
-                            DashboardWidgetLayout.Size.values()[choice]);
-                    notifyDashboardChanged();
-                }));
+            row.addView(segmentedRow(R.string.dashboard_builder_size_label,
+                    new String[]{
+                            getString(R.string.dashboard_builder_small),
+                            getString(R.string.dashboard_builder_normal),
+                            getString(R.string.dashboard_builder_large)},
+                    DashboardWidgetLayout.loadSize(this, widget).ordinal(),
+                    getString(R.string.dashboard_builder_size, label(widget)),
+                    choice -> {
+                        DashboardWidgetLayout.saveSize(this, widget,
+                                DashboardWidgetLayout.Size.values()[choice]);
+                        notifyDashboardChanged();
+                    }));
+        }
 
         row.addView(segmentedRow(R.string.dashboard_builder_style_label,
                 new String[]{
@@ -1166,6 +1181,9 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             DashboardWidgetLayout.savePageLayout(this, previewPage, next);
             notifyDashboardChanged();
         }
+        // The cards carry rows that only some layouts have a use for, so the
+        // list is rebuilt rather than left showing the last layout's.
+        renderRows();
     }
 
     /**
