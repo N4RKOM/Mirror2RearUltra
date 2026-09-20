@@ -9,6 +9,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -26,6 +27,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Locale;
 
 public final class RearDashboardView extends View {
@@ -46,6 +49,23 @@ public final class RearDashboardView extends View {
     private float touchStartX;
     private float touchStartY;
     /** The lines of the last frame, for hit testing. */
+    /**
+     * The smallest a widget answers to a touch at.
+     *
+     * <p>Material's floor for a dense control. A whole 48dp would be a
+     * quarter of this panel's height, which is too much to give one line.
+     */
+    private static final float MINIMUM_TOUCH_TARGET_DP = 24f;
+    /** Reused while measuring: this runs for every line of every frame. */
+    private final Rect inkBounds = new Rect();
+    /**
+     * Where each widget landed last frame, kept across the clear below.
+     *
+     * <p>A widget is held inside the panel by how much of it there is, and
+     * the drawing needs that figure before it has drawn anything - so it
+     * uses what the same widget covered the frame before.
+     */
+    private final Map<DashboardWidgetLayout.Widget, RectF> previousBounds = new HashMap<>();
     private final List<Line> drawnLines = new ArrayList<>();
     @Nullable private DashboardWidgetLayout.Widget selectedWidget;
     @Nullable private OnWidgetSelectedListener widgetSelectedListener;
@@ -371,6 +391,26 @@ public final class RearDashboardView extends View {
         return selectedWidget;
     }
 
+    /**
+     * Half the height a widget covers, for holding it inside the panel.
+     *
+     * <p>The drawing and the drag have to agree on this. When they do not,
+     * the widget stops at the edge while the finger and the stored position
+     * carry on past it, and dragging back does nothing until they catch up -
+     * so both ask here rather than each measuring for itself.
+     *
+     * <p>It is the ink, not the font's line box: the line box stands taller
+     * than the glyphs in it and would stop a widget short of an edge it
+     * plainly still has room to reach.
+     */
+    private float halfHeightOf(DashboardWidgetLayout.Widget widget, float fallback) {
+        RectF box = boundsOf(widget);
+        if (box == null) {
+            box = previousBounds.get(widget);
+        }
+        return box == null ? fallback : box.height() / 2f;
+    }
+
     /** Where a widget was drawn last frame, or null if it was not on it. */
     @Nullable
     private RectF boundsOf(DashboardWidgetLayout.Widget widget) {
@@ -387,21 +427,37 @@ public final class RearDashboardView extends View {
         return high <= low ? low : Math.max(low, Math.min(high, value));
     }
 
-    /** The widget under a point, or null. Topmost first, so later lines win. */
+    /**
+     * The widget under a point, or null.
+     *
+     * <p>A point inside a widget belongs to it, and where widgets overlap the
+     * topmost one takes it. A point outside them all goes to whichever comes
+     * nearest, and only if it comes near enough - see {@link TouchTargets}.
+     */
     @Nullable
     private DashboardWidgetLayout.Widget widgetAt(float x, float y) {
+        // Sized off the density the content is drawn with rather than the
+        // view's own, so the allowance grows with the drawing in a preview
+        // that stands several times larger than the panel.
+        float minimum = MINIMUM_TOUCH_TARGET_DP * contentDensity();
+        Line nearest = null;
+        float nearestMiss = Float.MAX_VALUE;
         for (int index = drawnLines.size() - 1; index >= 0; index--) {
             Line line = drawnLines.get(index);
-            // A 126px-wide panel makes for small targets, so the strip is
-            // widened to something a finger can actually land on.
-            float slack = Math.max(10f * getResources().getDisplayMetrics().density * 0.5f,
-                    line.bounds.height() * 0.4f);
-            if (x >= line.bounds.left - slack && x <= line.bounds.right + slack
-                    && y >= line.bounds.top - slack && y <= line.bounds.bottom + slack) {
+            float miss = TouchTargets.missDistance(
+                    line.bounds.left, line.bounds.top,
+                    line.bounds.right, line.bounds.bottom,
+                    x, y, minimum
+            );
+            if (miss == 0f) {
                 return line.widget;
             }
+            if (miss > 0f && miss < nearestMiss) {
+                nearestMiss = miss;
+                nearest = line;
+            }
         }
-        return null;
+        return nearest == null ? null : nearest.widget;
     }
 
     @Override
@@ -434,6 +490,14 @@ public final class RearDashboardView extends View {
         float shift = burnInShift(density);
         shiftX = shift;
         shiftY = -shift;
+        for (Line line : drawnLines) {
+            RectF remembered = previousBounds.get(line.widget);
+            if (remembered == null) {
+                remembered = new RectF();
+                previousBounds.put(line.widget, remembered);
+            }
+            remembered.set(line.bounds);
+        }
         drawnLines.clear();
         canvas.save();
         canvas.translate(shift, -shift);
@@ -1231,7 +1295,7 @@ public final class RearDashboardView extends View {
         float edge = Math.min(6f * getResources().getDisplayMetrics().density, getWidth() * 0.04f);
         RectF box = boundsOf(draggedWidget);
         float halfWidth = box == null ? 0f : box.width() / 2f;
-        float halfHeight = box == null ? 0f : box.height() / 2f;
+        float halfHeight = halfHeightOf(draggedWidget, 0f);
         float placedX = clampBetween(x + dragOffsetX, edge + halfWidth, getWidth() - edge - halfWidth);
         float placedY = clampBetween(y + dragOffsetY, edge + halfHeight, getHeight() - edge - halfHeight);
         if (DashboardWidgetLayout.isGridSnapEnabled(getContext())) {
@@ -1622,7 +1686,8 @@ public final class RearDashboardView extends View {
             float available = Math.max(1f, getWidth() - padding * 2f);
             // The stored point is the middle of the widget; text is drawn from
             // its baseline, so the two have to be reconciled here.
-            float half = (textPaint.descent() - textPaint.ascent()) / 2f;
+            float half = halfHeightOf(line.widget,
+                    (textPaint.descent() - textPaint.ascent()) / 2f);
             float clampedY = Math.max(padding + half,
                     Math.min(getHeight() - padding - half, y));
             float baseline = clampedY - (textPaint.ascent() + textPaint.descent()) / 2f;
@@ -2071,13 +2136,44 @@ public final class RearDashboardView extends View {
             canvas.drawText(fittedParts[index].toString(), textX,
                     firstBaseline + index * lineHeight * 1.04f, textPaint);
         }
-        RectF localBounds = new RectF(
-                startX,
-                firstBaseline + textPaint.ascent(),
-                startX + totalWidth,
-                firstBaseline + (parts.length - 1) * lineHeight * 1.04f
-                        + textPaint.descent()
-        );
+        // A font's line box stands well clear of the glyphs inside it - the
+        // clock's is half again the height of its digits - and this rectangle
+        // is three things at once: what a finger has to hit, what the
+        // selection draws around, and what holds a dragged widget inside the
+        // panel. Measured off the ascent it made the clock answer to touches
+        // well above and below itself, drew a box around empty space, and
+        // stopped short of the edges it looked like it could still reach. So
+        // it follows the ink instead.
+        float inkTop = Float.MAX_VALUE;
+        float inkBottom = -Float.MAX_VALUE;
+        boolean anyInk = false;
+        for (int index = 0; index < fittedParts.length; index++) {
+            int length = fittedParts[index].length();
+            if (length == 0) {
+                continue;
+            }
+            textPaint.getTextBounds(fittedParts[index], 0, length, inkBounds);
+            if (inkBounds.isEmpty()) {
+                continue;
+            }
+            anyInk = true;
+            float partBaseline = firstBaseline + index * lineHeight * 1.04f;
+            inkTop = Math.min(inkTop, partBaseline + inkBounds.top);
+            inkBottom = Math.max(inkBottom, partBaseline + inkBounds.bottom);
+        }
+        if (line.icon != Icon.NONE) {
+            float iconCentreY = baseline + (textPaint.ascent() + textPaint.descent()) / 2f;
+            inkTop = Math.min(inkTop, iconCentreY - iconSize / 2f);
+            inkBottom = Math.max(inkBottom, iconCentreY + iconSize / 2f);
+            anyInk = true;
+        }
+        if (!anyInk) {
+            // Nothing was drawn: an empty line, or one ellipsised to nothing.
+            inkTop = firstBaseline + textPaint.ascent();
+            inkBottom = firstBaseline + (parts.length - 1) * lineHeight * 1.04f
+                    + textPaint.descent();
+        }
+        RectF localBounds = new RectF(startX, inkTop, startX + totalWidth, inkBottom);
         if (line.rotation != 0) {
             Matrix rotation = new Matrix();
             rotation.setRotate(line.rotation, anchorX, baseline);
