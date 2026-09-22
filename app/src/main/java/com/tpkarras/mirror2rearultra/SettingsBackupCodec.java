@@ -1,5 +1,7 @@
 package com.tpkarras.mirror2rearultra;
 
+import androidx.annotation.Nullable;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -211,6 +213,14 @@ final class SettingsBackupCodec {
             properties.setProperty(prefix + "zoom", String.valueOf(profile.zoomPercent));
             properties.setProperty(prefix + "offsetX", String.valueOf(profile.horizontalOffsetPercent));
             properties.setProperty(prefix + "offsetY", String.valueOf(profile.verticalOffsetPercent));
+            if (profile.crop != null) {
+                // One line rather than five keys: a frame is read and written
+                // whole, and an older file simply has no line at all.
+                properties.setProperty(prefix + "crop", String.format(
+                        java.util.Locale.ROOT, "%f,%f,%f,%f,%d",
+                        profile.crop.left, profile.crop.top,
+                        profile.crop.right, profile.crop.bottom, profile.crop.rotation));
+            }
         }
 
         properties.setProperty("assignment.count", String.valueOf(data.assignments.size()));
@@ -278,7 +288,8 @@ final class SettingsBackupCodec {
                     brightness(properties, prefix + "brightness", schema),
                     integer(properties, prefix + "zoom", 100, 200),
                     integer(properties, prefix + "offsetX", -50, 50),
-                    integer(properties, prefix + "offsetY", -50, 50)
+                    integer(properties, prefix + "offsetY", -50, 50),
+                    crop(properties, prefix + "crop")
             );
             profiles.add(profile);
         }
@@ -436,6 +447,34 @@ final class SettingsBackupCodec {
             throw new BackupException("missing_" + key);
         }
         return value;
+    }
+
+    /** A frame, when the file has one: four fractions and a rotation. */
+    @Nullable
+    private static MirrorProfile.Crop crop(Properties properties, String key)
+            throws BackupException {
+        String value = properties.getProperty(key);
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        String[] parts = value.split(",");
+        if (parts.length != 5) {
+            throw new BackupException("invalid_crop");
+        }
+        try {
+            float left = Float.parseFloat(parts[0]);
+            float top = Float.parseFloat(parts[1]);
+            float right = Float.parseFloat(parts[2]);
+            float bottom = Float.parseFloat(parts[3]);
+            int rotation = Integer.parseInt(parts[4]);
+            if (left < 0f || top < 0f || right > 1f || bottom > 1f
+                    || right <= left || bottom <= top || rotation < 0 || rotation > 3) {
+                throw new BackupException("invalid_crop");
+            }
+            return new MirrorProfile.Crop(left, top, right, bottom, rotation);
+        } catch (NumberFormatException error) {
+            throw new BackupException("invalid_crop", error);
+        }
     }
 
     private static boolean bool(Properties properties, String key) throws BackupException {

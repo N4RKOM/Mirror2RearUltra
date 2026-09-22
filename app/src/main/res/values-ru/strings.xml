@@ -93,6 +93,13 @@
     <string name="dashboard_units_imperial">Имперские единицы</string>
     <string name="dashboard_call_incoming">Входящий вызов</string>
     <string name="panel_pocket_lock">Блокировать касания в кармане</string>
+    <string name="shutter_service_title">Доступ для спуска</string>
+    <string name="shutter_service_summary">Позволяет касанием панели нажимать спуск камеры</string>
+    <string name="shutter_service_description">Пока панель показывает камеру, касание по ней нажимает кнопку спуска в этом приложении камеры. В остальное время ничего не читается и не нажимается. Без этого спуск идёт через root.</string>
+    <string name="shutter_service_on">Включено · панель нажимает саму кнопку спуска</string>
+    <string name="shutter_service_off">Выключено · спуск идёт через root</string>
+    <string name="shutter_service_open">Настройки спец. возможностей</string>
+    <string name="panel_shutter_on_tap">Снимок по касанию панели</string>
     <string name="panel_face_down_off">Гасить, когда панель смотрит вниз</string>
     <string name="dashboard_appearance_title">Внешний вид</string>
     <string name="dashboard_background_opacity_default">Непрозрачность фона · 55%</string>
@@ -451,4 +458,15 @@
         <item quantity="many">%1$d минут</item>
         <item quantity="other">%1$d минуты</item>
     </plurals>
+    <string name="crop_frame_title">Кадр для панели</string>
+    <string name="crop_frame_cancel">Отмена</string>
+    <string name="crop_frame_done">Готово</string>
+    <string name="crop_frame_larger">Увеличить рамку</string>
+    <string name="crop_frame_smaller">Уменьшить рамку</string>
+    <string name="overlay_frame_help">Удерживайте плавающую кнопку трансляции поверх приложения, чтобы рамкой выбрать часть экрана для панели — например, видоискатель камеры без её кнопок.</string>
+    <string name="crop_frame_hint">Перетащите рамку на то, что должна показывать панель. Размер — за стороны и углы; у формы панели рамка примагничивается и заполняет её целиком.</string>
+    <string name="crop_frame_values">Кадр %1$d × %2$d · на панели %3$d × %4$d</string>
+    <string name="crop_frame_whole">Весь экран</string>
+    <string name="crop_frame_fill">Во всю панель</string>
+    <string name="calibration_framed_notice">Обрезкой профиля управляет рамка, выставленная поверх приложения, поэтому ползунки ниже ничего не меняют. «Сбросить калибровку» вернёт их в дело.</string>
 </resources>

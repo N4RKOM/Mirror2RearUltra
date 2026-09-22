@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">Imperiální jednotky</string>
     <string name="dashboard_call_incoming">Příchozí hovor</string>
     <string name="panel_pocket_lock">Blokovat dotyky v kapse</string>
+    <string name="shutter_service_title">Přístup ke spoušti</string>
+    <string name="shutter_service_summary">Umožní klepnutím na panel spustit závěrku</string>
+    <string name="shutter_service_description">Dokud panel zobrazuje fotoaparát, klepnutí na něj stiskne tlačítko spouště v této aplikaci. Jindy se nic nečte ani nemačká. Bez toho jde spoušť přes root.</string>
+    <string name="shutter_service_on">Zapnuto · panel mačká tlačítko spouště sám</string>
+    <string name="shutter_service_off">Vypnuto · spoušť jde přes root</string>
+    <string name="shutter_service_open">Nastavení přístupnosti</string>
+    <string name="panel_shutter_on_tap">Klepnutím na panel pořídit snímek</string>
     <string name="panel_face_down_off">Zhasnout, když panel míří dolů</string>
     <string name="dashboard_more_widgets_title">Další widgety</string>
     <string name="dashboard_more_widgets_help">Když je zapnuto více než pět položek, zadní obrazovka je automaticky střídá.</string>
@@ -430,4 +437,15 @@
         <item quantity="many">%1$d minuty</item>
         <item quantity="other">%1$d minut</item>
     </plurals>
+    <string name="crop_frame_title">Výřez pro panel</string>
+    <string name="crop_frame_cancel">Zrušit</string>
+    <string name="crop_frame_done">Hotovo</string>
+    <string name="crop_frame_larger">Zvětšit rámeček</string>
+    <string name="crop_frame_smaller">Zmenšit rámeček</string>
+    <string name="overlay_frame_help">Podržením plovoucího tlačítka nad aplikací vyberete rámečkem část obrazovky, kterou panel zobrazí – třeba hledáček fotoaparátu bez jeho tlačítek.</string>
+    <string name="crop_frame_hint">Přetáhněte rámeček na to, co má panel zobrazit. Strany a rohy mění jeho velikost a poblíž tvaru panelu na něj přiskočí a vyplní ho.</string>
+    <string name="crop_frame_values">Rámeček %1$d × %2$d · na panelu %3$d × %4$d</string>
+    <string name="crop_frame_whole">Celá obrazovka</string>
+    <string name="crop_frame_fill">Vyplnit panel</string>
+    <string name="calibration_framed_notice">Výřez tohoto profilu určuje rámeček nakreslený nad aplikací, takže posuvníky níže nic nedělají. Obnovením kalibrace je vrátíte do hry.</string>
 </resources>

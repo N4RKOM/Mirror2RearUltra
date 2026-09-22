@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">واحدهای امپریال</string>
     <string name="dashboard_call_incoming">تماس ورودی</string>
     <string name="panel_pocket_lock">قفل لمس در جیب</string>
+    <string name="shutter_service_title">دسترسی برای شاتر</string>
+    <string name="shutter_service_summary">می‌گذارد زدن روی پنل شاتر دوربین را بفشارد</string>
+    <string name="shutter_service_description">تا وقتی پنل دوربین را نشان می‌دهد، زدن روی آن دکمهٔ شاتر همان برنامه را می‌فشارد. در بقیهٔ اوقات چیزی خوانده یا فشرده نمی‌شود. بدون این، شاتر از راه root کار می‌کند.</string>
+    <string name="shutter_service_on">روشن · پنل خودش دکمهٔ شاتر را می‌فشارد</string>
+    <string name="shutter_service_off">خاموش · شاتر از راه root کار می‌کند</string>
+    <string name="shutter_service_open">تنظیمات دسترس‌پذیری</string>
+    <string name="panel_shutter_on_tap">برای عکس گرفتن روی پنل بزنید</string>
     <string name="panel_face_down_off">خاموش کردن وقتی رو به پایین است</string>
     <string name="dashboard_more_widgets_title">ابزارک‌های بیشتر</string>
     <string name="dashboard_more_widgets_help">وقتی بیش از پنج مورد روشن باشد، صفحهٔ عقب آن‌ها را خودکار می‌چرخاند.</string>
@@ -426,4 +433,15 @@
         <item quantity="one">%1$d دقیقه</item>
         <item quantity="other">%1$d دقیقه</item>
     </plurals>
+    <string name="crop_frame_title">کادر برای پنل</string>
+    <string name="crop_frame_cancel">لغو</string>
+    <string name="crop_frame_done">تمام</string>
+    <string name="crop_frame_larger">بزرگ‌تر کردن کادر</string>
+    <string name="crop_frame_smaller">کوچک‌تر کردن کادر</string>
+    <string name="overlay_frame_help">دکمهٔ شناور را روی یک برنامه نگه دارید تا با کادر بخشی از صفحه را که پنل نشان می‌دهد انتخاب کنید – مثلاً منظره‌یاب دوربین بدون دکمه‌هایش.</string>
+    <string name="crop_frame_hint">کادر را روی چیزی که پنل باید نشان دهد بکشید. اندازه با لبه‌ها و گوشه‌ها تغییر می‌کند و نزدیک شکل پنل، کادر به آن می‌چسبد و تمام آن را پر می‌کند.</string>
+    <string name="crop_frame_values">کادر %1$d × %2$d · روی پنل %3$d × %4$d</string>
+    <string name="crop_frame_whole">کل صفحه</string>
+    <string name="crop_frame_fill">پر کردن پنل</string>
+    <string name="calibration_framed_notice">برش این نمایه را کادری تعیین می‌کند که روی یک برنامه کشیده شده است، پس لغزنده‌های زیر کاری نمی‌کنند. با بازنشانی کالیبراسیون دوباره به آن‌ها سپرده می‌شود.</string>
 </resources>

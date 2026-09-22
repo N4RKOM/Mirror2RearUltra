@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">Brittiska enheter</string>
     <string name="dashboard_call_incoming">Inkommande samtal</string>
     <string name="panel_pocket_lock">Lås pekning i fickan</string>
+    <string name="shutter_service_title">Åtkomst till avtryckaren</string>
+    <string name="shutter_service_summary">Låter en tryckning på panelen utlösa kameran</string>
+    <string name="shutter_service_description">Medan panelen visar en kamera trycker en tryckning på den appens avtryckare. I övrigt läses och trycks ingenting. Utan detta går utlösningen via root.</string>
+    <string name="shutter_service_on">På · panelen trycker på avtryckaren själv</string>
+    <string name="shutter_service_off">Av · utlösningen går via root</string>
+    <string name="shutter_service_open">Tillgänglighetsinställningar</string>
+    <string name="panel_shutter_on_tap">Tryck på panelen för att ta ett foto</string>
     <string name="panel_face_down_off">Släck när panelen vänds nedåt</string>
     <string name="dashboard_more_widgets_title">Fler widgetar</string>
     <string name="dashboard_more_widgets_help">När fler än fem poster är påslagna växlar den bakre skärmen mellan dem automatiskt.</string>
@@ -426,4 +433,15 @@
         <item quantity="one">%1$d minut</item>
         <item quantity="other">%1$d minuter</item>
     </plurals>
+    <string name="crop_frame_title">Bildutsnitt för panelen</string>
+    <string name="crop_frame_cancel">Avbryt</string>
+    <string name="crop_frame_done">Klar</string>
+    <string name="crop_frame_larger">Förstora ramen</string>
+    <string name="crop_frame_smaller">Förminska ramen</string>
+    <string name="overlay_frame_help">Håll in den flytande knappen över en app för att med en ram välja den del av skärmen som panelen visar – till exempel en kameras sökare utan dess knappar.</string>
+    <string name="crop_frame_hint">Dra ramen över det panelen ska visa. Sidor och hörn ändrar storleken, och nära panelens form fäster den och fyller den.</string>
+    <string name="crop_frame_values">Ram %1$d × %2$d · på panelen %3$d × %4$d</string>
+    <string name="crop_frame_whole">Hela skärmen</string>
+    <string name="crop_frame_fill">Fyll panelen</string>
+    <string name="calibration_framed_notice">Profilens beskärning bestäms av en ram som dragits över en app, så reglagen nedan gör ingenting. Återställ kalibreringen för att lämna tillbaka den till dem.</string>
 </resources>

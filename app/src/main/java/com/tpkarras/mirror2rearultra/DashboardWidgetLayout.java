@@ -88,6 +88,7 @@ final class DashboardWidgetLayout {
     private static final String AUTO_PAGE_SWITCH = "auto_page_switch";
     private static final String POCKET_LOCK = "pocket_lock";
     private static final String FACE_DOWN_OFF = "face_down_off";
+    private static final String SHUTTER_ON_TAP = "shutter_on_tap";
 
     private DashboardWidgetLayout() {}
 
@@ -597,6 +598,21 @@ final class DashboardWidgetLayout {
     }
 
     /** Whether the panel goes dark while it is the side lying on the table. */
+    /**
+     * Whether a tap on the panel presses a camera app's shutter.
+     *
+     * <p>On by default: while the image is up the panel answers to nothing
+     * else, and the one thing worth doing with a viewfinder on the back of a
+     * phone is taking the picture.
+     */
+    static boolean isShutterOnTapEnabled(Context context) {
+        return prefs(context).getBoolean(SHUTTER_ON_TAP, true);
+    }
+
+    static void setShutterOnTapEnabled(Context context, boolean enabled) {
+        prefs(context).edit().putBoolean(SHUTTER_ON_TAP, enabled).apply();
+    }
+
     static boolean isFaceDownOffEnabled(Context context) {
         return prefs(context).getBoolean(FACE_DOWN_OFF, true);
     }

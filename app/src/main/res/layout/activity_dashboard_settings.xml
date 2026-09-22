@@ -207,6 +207,21 @@
                     android:text="@string/panel_pocket_lock" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_shutter_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/panel_shutter_on_tap" />
+
+                <TextView
+                    android:id="@+id/dashboard_shutter_access_status"
+                    style="@style/HyperOS.RowSummary"
+                    android:text="@string/shutter_service_off" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/dashboard_shutter_access_button"
+                    style="@style/HyperOS.ActionRow"
+                    android:text="@string/shutter_service_open" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_face_down_switch"
                     style="@style/HyperOS.Switch"
                     android:text="@string/panel_face_down_off" />

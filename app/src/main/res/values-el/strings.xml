@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">Αγγλοσαξονικές μονάδες</string>
     <string name="dashboard_call_incoming">Εισερχόμενη κλήση</string>
     <string name="panel_pocket_lock">Κλείδωμα αφής στην τσέπη</string>
+    <string name="shutter_service_title">Πρόσβαση για λήψη</string>
+    <string name="shutter_service_summary">Επιτρέπει σε ένα πάτημα στον πίνακα να τραβήξει φωτογραφία</string>
+    <string name="shutter_service_description">Όσο ο πίνακας δείχνει κάμερα, ένα πάτημα πάνω του πατά το κουμπί λήψης εκείνης της εφαρμογής. Τον υπόλοιπο χρόνο δεν διαβάζεται και δεν πατιέται τίποτα. Χωρίς αυτό, η λήψη περνά από root.</string>
+    <string name="shutter_service_on">Ενεργό · ο πίνακας πατά ο ίδιος το κουμπί λήψης</string>
+    <string name="shutter_service_off">Ανενεργό · η λήψη περνά από root</string>
+    <string name="shutter_service_open">Ρυθμίσεις προσβασιμότητας</string>
+    <string name="panel_shutter_on_tap">Πάτημα στον πίνακα για λήψη φωτογραφίας</string>
     <string name="panel_face_down_off">Σβήσιμο όταν κοιτά προς τα κάτω</string>
     <string name="dashboard_more_widgets_title">Περισσότερα γραφικά στοιχεία</string>
     <string name="dashboard_more_widgets_help">Όταν είναι ενεργά περισσότερα από πέντε στοιχεία, η πίσω οθόνη τα εναλλάσσει αυτόματα.</string>
@@ -426,4 +433,15 @@
         <item quantity="one">%1$d λεπτό</item>
         <item quantity="other">%1$d λεπτά</item>
     </plurals>
+    <string name="crop_frame_title">Κάδρο για τον πίνακα</string>
+    <string name="crop_frame_cancel">Ακύρωση</string>
+    <string name="crop_frame_done">Τέλος</string>
+    <string name="crop_frame_larger">Μεγαλύτερο πλαίσιο</string>
+    <string name="crop_frame_smaller">Μικρότερο πλαίσιο</string>
+    <string name="overlay_frame_help">Κρατήστε πατημένο το αιωρούμενο κουμπί πάνω από μια εφαρμογή για να επιλέξετε με πλαίσιο το τμήμα της οθόνης που δείχνει ο πίνακας – για παράδειγμα, το σκόπευτρο μιας κάμερας χωρίς τα κουμπιά της.</string>
+    <string name="crop_frame_hint">Σύρετε το πλαίσιο πάνω σε ό,τι πρέπει να δείχνει ο πίνακας. Οι πλευρές και οι γωνίες αλλάζουν το μέγεθος, και κοντά στο σχήμα του πίνακα το πλαίσιο κουμπώνει και τον γεμίζει.</string>
+    <string name="crop_frame_values">Πλαίσιο %1$d × %2$d · στον πίνακα %3$d × %4$d</string>
+    <string name="crop_frame_whole">Όλη η οθόνη</string>
+    <string name="crop_frame_fill">Γέμισμα του πίνακα</string>
+    <string name="calibration_framed_notice">Την περικοπή αυτού του προφίλ την ορίζει ένα πλαίσιο πάνω από μια εφαρμογή, οπότε τα ρυθμιστικά παρακάτω δεν κάνουν τίποτα. Επαναφέρετε τη βαθμονόμηση για να τους τη δώσετε πίσω.</string>
 </resources>

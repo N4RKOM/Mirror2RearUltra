@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">Aonaid impiriúla</string>
     <string name="dashboard_call_incoming">Glao isteach</string>
     <string name="panel_pocket_lock">Cuir an tadhall faoi ghlas i bpóca</string>
+    <string name="shutter_service_title">Rochtain an chomhla</string>
+    <string name="shutter_service_summary">Ligeann do thapáil ar an bpainéal grianghraf a thógáil</string>
+    <string name="shutter_service_description">Fad is atá ceamara ar an bpainéal, brúnn tapáil air cnaipe an chomhla san aip sin. Ní léitear ná ní bhrúitear aon rud ag aon am eile. Gan é seo, téann an comhla trí root.</string>
+    <string name="shutter_service_on">Ar siúl · brúnn an painéal an cnaipe é féin</string>
+    <string name="shutter_service_off">As · téann an comhla trí root</string>
+    <string name="shutter_service_open">Socruithe inrochtaineachta</string>
+    <string name="panel_shutter_on_tap">Tapáil an painéal chun grianghraf a thógáil</string>
     <string name="panel_face_down_off">Múch nuair a bhíonn sé bun os cionn</string>
     <string name="dashboard_more_widgets_title">Tuilleadh giuirléidí</string>
     <string name="dashboard_more_widgets_help">Nuair atá níos mó ná cúig mhír ar siúl, rothlaíonn an scáileán cúil iad go huathoibríoch.</string>
@@ -432,4 +439,15 @@
         <item quantity="many">%1$d nóiméad</item>
         <item quantity="other">%1$d nóiméad</item>
     </plurals>
+    <string name="crop_frame_title">Fráma don phainéal</string>
+    <string name="crop_frame_cancel">Cealaigh</string>
+    <string name="crop_frame_done">Déanta</string>
+    <string name="crop_frame_larger">Fráma níos mó</string>
+    <string name="crop_frame_smaller">Fráma níos lú</string>
+    <string name="overlay_frame_help">Coinnigh an cnaipe ar snámh os cionn aipe chun an chuid den scáileán a thaispeánann an painéal a roghnú le fráma – aimsitheoir ceamara gan a chnaipí, mar shampla.</string>
+    <string name="crop_frame_hint">Tarraing an fráma ar an méid ba chóir don phainéal a thaispeáint. Athraíonn na taobhanna agus na cúinní a mhéid, agus in aice le cruth an phainéil gabhann sé leis agus líonann é.</string>
+    <string name="crop_frame_values">Fráma %1$d × %2$d · ar an bpainéal %3$d × %4$d</string>
+    <string name="crop_frame_whole">An scáileán ar fad</string>
+    <string name="crop_frame_fill">Líon an painéal</string>
+    <string name="calibration_framed_notice">Is fráma a tarraingíodh os cionn aipe a shocraíonn bearradh na próifíle seo, mar sin ní dhéanann na sleamhnáin thíos faic. Athshocraigh an calabrú chun é a thabhairt ar ais dóibh.</string>
 </resources>

@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">الوحدات الإمبراطورية</string>
     <string name="dashboard_call_incoming">مكالمة واردة</string>
     <string name="panel_pocket_lock">قفل اللمس في الجيب</string>
+    <string name="shutter_service_title">وصول الالتقاط</string>
+    <string name="shutter_service_summary">يتيح للمسة على اللوحة أن تضغط زر الالتقاط</string>
+    <string name="shutter_service_description">ما دامت اللوحة تعرض كاميرا، تضغط اللمسة عليها زر الالتقاط في ذلك التطبيق. وفي غير ذلك لا يُقرأ شيء ولا يُضغط شيء. بدون هذا يمر الالتقاط عبر root.</string>
+    <string name="shutter_service_on">مفعّل · اللوحة تضغط زر الالتقاط بنفسها</string>
+    <string name="shutter_service_off">متوقف · الالتقاط يمر عبر root</string>
+    <string name="shutter_service_open">إعدادات إمكانية الوصول</string>
+    <string name="panel_shutter_on_tap">انقر على اللوحة لالتقاط صورة</string>
     <string name="panel_face_down_off">إطفاء عندما تكون اللوحة للأسفل</string>
     <string name="dashboard_more_widgets_title">أدوات أخرى</string>
     <string name="dashboard_more_widgets_help">عند تفعيل أكثر من خمسة عناصر، تتنقّل الشاشة الخلفية بينها تلقائيًا.</string>
@@ -434,4 +441,15 @@
         <item quantity="many">%1$d دقيقة</item>
         <item quantity="other">%1$d دقيقة</item>
     </plurals>
+    <string name="crop_frame_title">إطار للوحة</string>
+    <string name="crop_frame_cancel">إلغاء</string>
+    <string name="crop_frame_done">تم</string>
+    <string name="crop_frame_larger">تكبير الإطار</string>
+    <string name="crop_frame_smaller">تصغير الإطار</string>
+    <string name="overlay_frame_help">اضغط مطولًا على الزر العائم فوق تطبيق لتختار بإطار جزء الشاشة الذي تعرضه اللوحة – مثل محدد المنظر في الكاميرا دون أزرارها.</string>
+    <string name="crop_frame_hint">اسحب الإطار فوق ما يجب أن تعرضه اللوحة. تغيّر الجوانب والزوايا حجمه، وقرب شكل اللوحة ينجذب إليه ويملؤها.</string>
+    <string name="crop_frame_values">الإطار %1$d × %2$d · على اللوحة %3$d × %4$d</string>
+    <string name="crop_frame_whole">الشاشة كاملة</string>
+    <string name="crop_frame_fill">ملء اللوحة</string>
+    <string name="calibration_framed_notice">يحدّد اقتصاص هذا الملف إطار رُسم فوق تطبيق، لذا لا تفعل أشرطة التمرير أدناه شيئًا. أعد ضبط المعايرة لتعود إليها.</string>
 </resources>

@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">इंपीरियल इकाइयाँ</string>
     <string name="dashboard_call_incoming">इनकमिंग कॉल</string>
     <string name="panel_pocket_lock">जेब में स्पर्श लॉक करें</string>
+    <string name="shutter_service_title">शटर एक्सेस</string>
+    <string name="shutter_service_summary">पैनल पर टैप से कैमरे का शटर दबाने देता है</string>
+    <string name="shutter_service_description">जब पैनल कैमरा दिखा रहा हो, उस पर टैप करने से उसी ऐप का शटर बटन दबता है। बाकी समय कुछ नहीं पढ़ा या दबाया जाता। इसके बिना शटर root के ज़रिये चलता है।</string>
+    <string name="shutter_service_on">चालू · पैनल खुद शटर बटन दबाता है</string>
+    <string name="shutter_service_off">बंद · शटर root के ज़रिये चलता है</string>
+    <string name="shutter_service_open">सुलभता सेटिंग</string>
+    <string name="panel_shutter_on_tap">फ़ोटो लेने के लिए पैनल पर टैप करें</string>
     <string name="panel_face_down_off">नीचे की ओर होने पर बंद करें</string>
     <string name="dashboard_more_widgets_title">और विजेट</string>
     <string name="dashboard_more_widgets_help">जब पाँच से ज़्यादा चीज़ें चालू हों, तो पिछली स्क्रीन उन्हें अपने आप बदल-बदलकर दिखाती है।</string>
@@ -426,4 +433,15 @@
         <item quantity="one">%1$d मिनट</item>
         <item quantity="other">%1$d मिनट</item>
     </plurals>
+    <string name="crop_frame_title">पैनल के लिए फ़्रेम</string>
+    <string name="crop_frame_cancel">रद्द करें</string>
+    <string name="crop_frame_done">हो गया</string>
+    <string name="crop_frame_larger">फ़्रेम बड़ा करें</string>
+    <string name="crop_frame_smaller">फ़्रेम छोटा करें</string>
+    <string name="overlay_frame_help">किसी ऐप के ऊपर तैरते बटन को दबाए रखें और फ़्रेम से स्क्रीन का वह हिस्सा चुनें जो पैनल दिखाए – जैसे बटनों के बिना कैमरे का व्यूफ़ाइंडर।</string>
+    <string name="crop_frame_hint">फ़्रेम को उस पर खींचें जो पैनल को दिखाना है। भुजाओं और कोनों से आकार बदलता है, और पैनल के आकार के पास फ़्रेम उससे चिपककर उसे पूरा भर देता है।</string>
+    <string name="crop_frame_values">फ़्रेम %1$d × %2$d · पैनल पर %3$d × %4$d</string>
+    <string name="crop_frame_whole">पूरी स्क्रीन</string>
+    <string name="crop_frame_fill">पूरा पैनल भरें</string>
+    <string name="calibration_framed_notice">इस प्रोफ़ाइल की कटाई ऐप के ऊपर खींचे गए फ़्रेम से तय होती है, इसलिए नीचे के स्लाइडर कुछ नहीं करते। कैलिब्रेशन रीसेट करने पर वे फिर काम करेंगे।</string>
 </resources>

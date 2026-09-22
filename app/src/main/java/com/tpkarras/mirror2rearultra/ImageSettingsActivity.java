@@ -40,6 +40,7 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
     private HyperValueRow qualityModeInput;
     private MaterialSwitch calibrationGridSwitch;
     private View calibrationPreviewButton;
+    private View framedNotice;
     private HyperSlider zoomSlider;
     private HyperSlider horizontalOffsetSlider;
     private HyperSlider verticalOffsetSlider;
@@ -82,6 +83,7 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
         zoomSlider = findViewById(R.id.zoom_slider);
         horizontalOffsetSlider = findViewById(R.id.horizontal_offset_slider);
         verticalOffsetSlider = findViewById(R.id.vertical_offset_slider);
+        framedNotice = findViewById(R.id.calibration_framed_notice);
         zoomValue = findViewById(R.id.zoom_value);
         horizontalOffsetValue = findViewById(R.id.horizontal_offset_value);
         verticalOffsetValue = findViewById(R.id.vertical_offset_value);
@@ -247,6 +249,13 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
         brightnessSlider.setValue(profile.brightnessPercent);
         updateBrightnessValue(profile.brightnessPercent);
         autoBrightnessSwitch.setChecked(DashboardWidgetLayout.isAutoBrightnessEnabled(this));
+        // A frame overrules all three, so the sliders say so rather than
+        // moving something nothing on the panel is following.
+        boolean framed = profile.crop != null;
+        zoomSlider.setEnabled(!framed);
+        horizontalOffsetSlider.setEnabled(!framed);
+        verticalOffsetSlider.setEnabled(!framed);
+        framedNotice.setVisibility(framed ? View.VISIBLE : View.GONE);
         zoomSlider.setValue(profile.zoomPercent);
         horizontalOffsetSlider.setValue(profile.horizontalOffsetPercent);
         verticalOffsetSlider.setValue(profile.verticalOffsetPercent);

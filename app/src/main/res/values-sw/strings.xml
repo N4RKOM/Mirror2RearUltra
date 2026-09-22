@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">Vipimo vya kifalme</string>
     <string name="dashboard_call_incoming">Simu inayoingia</string>
     <string name="panel_pocket_lock">Zuia mguso mfukoni</string>
+    <string name="shutter_service_title">Ufikiaji wa kitufe cha kupiga</string>
+    <string name="shutter_service_summary">Huruhusu kugusa paneli kubonyeza kitufe cha kupiga picha</string>
+    <string name="shutter_service_description">Paneli inapoonyesha kamera, kuigusa hubonyeza kitufe cha kupiga picha katika programu hiyo. Nyakati nyingine hakuna kinachosomwa wala kubonyezwa. Bila hii, kupiga picha hupitia root.</string>
+    <string name="shutter_service_on">Imewashwa · paneli hubonyeza kitufe chenyewe</string>
+    <string name="shutter_service_off">Imezimwa · kupiga picha hupitia root</string>
+    <string name="shutter_service_open">Mipangilio ya ufikivu</string>
+    <string name="panel_shutter_on_tap">Gusa paneli ili kupiga picha</string>
     <string name="panel_face_down_off">Zima panel inapoelekea chini</string>
     <string name="dashboard_more_widgets_title">Wijeti zaidi</string>
     <string name="dashboard_more_widgets_help">Vipengee zaidi ya vitano vikiwashwa, skrini ya nyuma huvipokezanya kiotomatiki.</string>
@@ -426,4 +433,15 @@
         <item quantity="one">dakika %1$d</item>
         <item quantity="other">dakika %1$d</item>
     </plurals>
+    <string name="crop_frame_title">Fremu ya paneli</string>
+    <string name="crop_frame_cancel">Ghairi</string>
+    <string name="crop_frame_done">Imekamilika</string>
+    <string name="crop_frame_larger">Panua fremu</string>
+    <string name="crop_frame_smaller">Punguza fremu</string>
+    <string name="overlay_frame_help">Shikilia kitufe kinachoelea juu ya programu ili kuchagua kwa fremu sehemu ya skrini ambayo paneli inaonyesha – kwa mfano, kitafutaji cha kamera bila vitufe vyake.</string>
+    <string name="crop_frame_hint">Buruta fremu juu ya kile ambacho paneli inapaswa kuonyesha. Kingo na pembe hubadilisha ukubwa, na karibu na umbo la paneli fremu hujibandika na kuijaza.</string>
+    <string name="crop_frame_values">Fremu %1$d × %2$d · kwenye paneli %3$d × %4$d</string>
+    <string name="crop_frame_whole">Skrini nzima</string>
+    <string name="crop_frame_fill">Jaza paneli</string>
+    <string name="calibration_framed_notice">Upunguzaji wa wasifu huu unaamuliwa na fremu iliyochorwa juu ya programu, kwa hivyo vitelezi vilivyo hapa chini havifanyi chochote. Weka upya urekebishaji ili virudishiwe kazi hiyo.</string>
 </resources>

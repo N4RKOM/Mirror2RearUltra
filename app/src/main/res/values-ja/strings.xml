@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">ヤード・ポンド法</string>
     <string name="dashboard_call_incoming">着信</string>
     <string name="panel_pocket_lock">ポケット内ではタッチを無効</string>
+    <string name="shutter_service_title">シャッター操作の許可</string>
+    <string name="shutter_service_summary">パネルをタップしてカメラのシャッターを押せるようにします</string>
+    <string name="shutter_service_description">パネルがカメラを映している間、パネルをタップするとそのカメラアプリのシャッターボタンを押します。それ以外のときは何も読み取らず、何も押しません。これがないとシャッターは root 経由になります。</string>
+    <string name="shutter_service_on">オン · パネルがシャッターボタンを直接押します</string>
+    <string name="shutter_service_off">オフ · シャッターは root 経由です</string>
+    <string name="shutter_service_open">ユーザー補助の設定</string>
+    <string name="panel_shutter_on_tap">パネルをタップして撮影</string>
     <string name="panel_face_down_off">下向きのときは消灯</string>
     <string name="dashboard_more_widgets_title">その他のウィジェット</string>
     <string name="dashboard_more_widgets_help">6 つ以上の項目をオンにすると、背面画面が自動的に切り替えて表示します。</string>
@@ -424,4 +431,15 @@
     <plurals name="dashboard_timer_minutes">
         <item quantity="other">%1$d 分</item>
     </plurals>
+    <string name="crop_frame_title">パネルの表示枠</string>
+    <string name="crop_frame_cancel">キャンセル</string>
+    <string name="crop_frame_done">完了</string>
+    <string name="crop_frame_larger">枠を大きく</string>
+    <string name="crop_frame_smaller">枠を小さく</string>
+    <string name="overlay_frame_help">アプリの上でフローティングボタンを長押しすると、パネルに表示する画面の範囲を枠で選べます。たとえばボタンを除いたカメラのファインダーだけ。</string>
+    <string name="crop_frame_hint">パネルに表示したい部分に枠をドラッグします。辺や角でサイズを変えられ、パネルの形に近づくと吸着してパネル全体を埋めます。</string>
+    <string name="crop_frame_values">枠 %1$d × %2$d · パネル上 %3$d × %4$d</string>
+    <string name="crop_frame_whole">画面全体</string>
+    <string name="crop_frame_fill">パネルいっぱい</string>
+    <string name="calibration_framed_notice">このプロファイルの切り取りは、アプリの上に引いた枠が決めています。そのため下のスライダーは効きません。調整をリセットすると、またスライダーが使えます。</string>
 </resources>

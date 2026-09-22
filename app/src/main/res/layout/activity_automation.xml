@@ -93,6 +93,10 @@
                     android:text="@string/overlay_control_help" />
 
                 <TextView
+                    style="@style/HyperOS.RowSummary"
+                    android:text="@string/overlay_frame_help" />
+
+                <TextView
                     android:id="@+id/overlay_access_status"
                     style="@style/HyperOS.TextRow"
                     android:text="@string/overlay_access_required"

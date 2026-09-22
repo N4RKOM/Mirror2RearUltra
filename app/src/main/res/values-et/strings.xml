@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">Briti ühikud</string>
     <string name="dashboard_call_incoming">Sissetulev kõne</string>
     <string name="panel_pocket_lock">Lukusta puuted taskus</string>
+    <string name="shutter_service_title">Päästiku juurdepääs</string>
+    <string name="shutter_service_summary">Lubab paneeli puudutusel kaamera vallandada</string>
+    <string name="shutter_service_description">Kui paneel näitab kaamerat, vajutab puudutus selle rakenduse päästikunuppu. Muul ajal ei loeta ega vajutata midagi. Ilma selleta käib päästik rooti kaudu.</string>
+    <string name="shutter_service_on">Sees · paneel vajutab ise päästikunuppu</string>
+    <string name="shutter_service_off">Väljas · päästik käib rooti kaudu</string>
+    <string name="shutter_service_open">Juurdepääsetavuse seaded</string>
+    <string name="panel_shutter_on_tap">Pildistamiseks puuduta paneeli</string>
     <string name="panel_face_down_off">Kustuta, kui paneel on allapoole</string>
     <string name="dashboard_more_widgets_title">Rohkem vidinaid</string>
     <string name="dashboard_more_widgets_help">Kui sees on üle viie üksuse, vahetab tagaekraan neid automaatselt.</string>
@@ -426,4 +433,15 @@
         <item quantity="one">%1$d minut</item>
         <item quantity="other">%1$d minutit</item>
     </plurals>
+    <string name="crop_frame_title">Paneeli kaader</string>
+    <string name="crop_frame_cancel">Tühista</string>
+    <string name="crop_frame_done">Valmis</string>
+    <string name="crop_frame_larger">Suurenda raami</string>
+    <string name="crop_frame_smaller">Vähenda raami</string>
+    <string name="overlay_frame_help">Hoia ujuvat nuppu rakenduse kohal all, et valida raamiga ekraani osa, mida paneel näitab – näiteks kaamera pildiotsija ilma nuppudeta.</string>
+    <string name="crop_frame_hint">Lohista raam sellele, mida paneel peab näitama. Külgedest ja nurkadest muudad suurust ning paneeli kuju lähedal haakub raam sellega ja täidab selle.</string>
+    <string name="crop_frame_values">Raam %1$d × %2$d · paneelil %3$d × %4$d</string>
+    <string name="crop_frame_whole">Kogu ekraan</string>
+    <string name="crop_frame_fill">Täida paneel</string>
+    <string name="calibration_framed_notice">Selle profiili kadreeringu otsustab rakenduse kohale joonistatud raam, nii et allolevad liugurid ei tee midagi. Lähtesta kalibreerimine, et see neile tagasi anda.</string>
 </resources>

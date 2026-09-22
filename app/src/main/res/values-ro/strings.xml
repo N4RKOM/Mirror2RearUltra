@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">Unități imperiale</string>
     <string name="dashboard_call_incoming">Apel primit</string>
     <string name="panel_pocket_lock">Blochează atingerea în buzunar</string>
+    <string name="shutter_service_title">Acces la declanșator</string>
+    <string name="shutter_service_summary">Permite declanșarea printr-o atingere pe panou</string>
+    <string name="shutter_service_description">Cât timp panoul arată o cameră, o atingere pe el apasă butonul de declanșare al acelei aplicații. În rest nu se citește și nu se apasă nimic. Fără aceasta, declanșarea trece prin root.</string>
+    <string name="shutter_service_on">Pornit · panoul apasă singur butonul de declanșare</string>
+    <string name="shutter_service_off">Oprit · declanșarea trece prin root</string>
+    <string name="shutter_service_open">Setări de accesibilitate</string>
+    <string name="panel_shutter_on_tap">Atingeți panoul pentru a fotografia</string>
     <string name="panel_face_down_off">Stinge când panoul e cu fața în jos</string>
     <string name="dashboard_more_widgets_title">Mai multe widgeturi</string>
     <string name="dashboard_more_widgets_help">Când sunt activate mai mult de cinci elemente, ecranul din spate le rotește automat.</string>
@@ -428,4 +435,15 @@
         <item quantity="few">%1$d minute</item>
         <item quantity="other">%1$d de minute</item>
     </plurals>
+    <string name="crop_frame_title">Cadru pentru panou</string>
+    <string name="crop_frame_cancel">Anulați</string>
+    <string name="crop_frame_done">Gata</string>
+    <string name="crop_frame_larger">Mărește cadrul</string>
+    <string name="crop_frame_smaller">Micșorează cadrul</string>
+    <string name="overlay_frame_help">Țineți apăsat butonul plutitor deasupra unei aplicații pentru a alege cu un cadru partea de ecran afișată de panou – de exemplu, vizorul unei camere fără butoanele sale.</string>
+    <string name="crop_frame_hint">Trageți cadrul peste ce trebuie să arate panoul. Laturile și colțurile îl redimensionează, iar lângă forma panoului se prinde de ea și îl umple.</string>
+    <string name="crop_frame_values">Cadru %1$d × %2$d · pe panou %3$d × %4$d</string>
+    <string name="crop_frame_whole">Tot ecranul</string>
+    <string name="crop_frame_fill">Umple panoul</string>
+    <string name="calibration_framed_notice">Decuparea acestui profil este dată de un cadru trasat peste o aplicație, așa că glisoarele de mai jos nu fac nimic. Resetați calibrarea ca să le-o dați înapoi.</string>
 </resources>

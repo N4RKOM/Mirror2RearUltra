@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">Unità imperiali</string>
     <string name="dashboard_call_incoming">Chiamata in arrivo</string>
     <string name="panel_pocket_lock">Blocca il tocco in tasca</string>
+    <string name="shutter_service_title">Accesso allo scatto</string>
+    <string name="shutter_service_summary">Permette di scattare toccando il pannello</string>
+    <string name="shutter_service_description">Mentre il pannello mostra una fotocamera, un tocco su di esso preme il pulsante di scatto di quell’app. Il resto del tempo non legge né preme nulla. Senza questo lo scatto passa da root.</string>
+    <string name="shutter_service_on">Attivo · il pannello preme il pulsante di scatto</string>
+    <string name="shutter_service_off">Disattivo · lo scatto passa da root</string>
+    <string name="shutter_service_open">Impostazioni di accessibilità</string>
+    <string name="panel_shutter_on_tap">Tocca il pannello per scattare</string>
     <string name="panel_face_down_off">Spegni quando è rivolto in basso</string>
     <string name="dashboard_more_widgets_title">Altri widget</string>
     <string name="dashboard_more_widgets_help">Quando sono attivi più di cinque elementi, lo schermo posteriore li alterna automaticamente.</string>
@@ -426,4 +433,15 @@
         <item quantity="one">%1$d minuto</item>
         <item quantity="other">%1$d minuti</item>
     </plurals>
+    <string name="crop_frame_title">Inquadratura del pannello</string>
+    <string name="crop_frame_cancel">Annulla</string>
+    <string name="crop_frame_done">Fine</string>
+    <string name="crop_frame_larger">Ingrandisci la cornice</string>
+    <string name="crop_frame_smaller">Riduci la cornice</string>
+    <string name="overlay_frame_help">Tieni premuto il pulsante mobile sopra un\'app per inquadrare la parte di schermo mostrata dal pannello: ad esempio il mirino di una fotocamera senza i suoi pulsanti.</string>
+    <string name="crop_frame_hint">Trascina la cornice su ciò che il pannello deve mostrare. Lati e angoli la ridimensionano, e vicino alla forma del pannello si aggancia e lo riempie.</string>
+    <string name="crop_frame_values">Cornice %1$d × %2$d · sul pannello %3$d × %4$d</string>
+    <string name="crop_frame_whole">Schermo intero</string>
+    <string name="crop_frame_fill">Riempi il pannello</string>
+    <string name="calibration_framed_notice">Il ritaglio di questo profilo è deciso da una cornice tracciata sopra un’app, quindi i cursori qui sotto non fanno nulla. Azzera la calibrazione per restituirglielo.</string>
 </resources>

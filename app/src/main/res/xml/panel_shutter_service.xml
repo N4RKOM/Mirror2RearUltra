@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Shutter access.
+
+    It watches no events and asks for no content on its own: the panel calls it
+    when it has been tapped, and it needs only to be handed the camera's window
+    at that moment. Hence interactive windows, so the camera can be found on
+    the main screen while the panel holds the focus, and reported view ids,
+    without which every id reads as null and a button named "shutter" cannot be
+    told from any other.
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagRetrieveInteractiveWindows|flagIncludeNotImportantViews|flagReportViewIds"
+    android:canPerformGestures="true"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/shutter_service_description"
+    android:notificationTimeout="0"
+    android:summary="@string/shutter_service_summary" />

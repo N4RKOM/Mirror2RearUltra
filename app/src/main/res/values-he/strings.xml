@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">יחידות אימפריאליות</string>
     <string name="dashboard_call_incoming">שיחה נכנסת</string>
     <string name="panel_pocket_lock">נעילת מגע בכיס</string>
+    <string name="shutter_service_title">גישה לצילום</string>
+    <string name="shutter_service_summary">מאפשרת להקשה על הלוח ללחוץ על כפתור הצילום</string>
+    <string name="shutter_service_description">כל עוד הלוח מציג מצלמה, הקשה עליו לוחצת על כפתור הצילום באותה אפליקציה. בשאר הזמן לא נקרא ולא נלחץ דבר. בלי זה הצילום עובר דרך root.</string>
+    <string name="shutter_service_on">פועל · הלוח לוחץ על כפתור הצילום בעצמו</string>
+    <string name="shutter_service_off">כבוי · הצילום עובר דרך root</string>
+    <string name="shutter_service_open">הגדרות נגישות</string>
+    <string name="panel_shutter_on_tap">הקשה על הלוח מצלמת תמונה</string>
     <string name="panel_face_down_off">כיבוי כשהפאנל פונה למטה</string>
     <string name="dashboard_more_widgets_title">ווידג׳טים נוספים</string>
     <string name="dashboard_more_widgets_help">כשמופעלים יותר מחמישה פריטים, המסך האחורי מחליף ביניהם אוטומטית.</string>
@@ -430,4 +437,15 @@
         <item quantity="many">%1$d דקות</item>
         <item quantity="other">%1$d דקות</item>
     </plurals>
+    <string name="crop_frame_title">מסגרת ללוח</string>
+    <string name="crop_frame_cancel">ביטול</string>
+    <string name="crop_frame_done">סיום</string>
+    <string name="crop_frame_larger">הגדלת המסגרת</string>
+    <string name="crop_frame_smaller">הקטנת המסגרת</string>
+    <string name="overlay_frame_help">החזיקו את הכפתור הצף מעל אפליקציה כדי לבחור במסגרת את חלק המסך שהלוח מציג – למשל את העינית של המצלמה בלי הכפתורים שלה.</string>
+    <string name="crop_frame_hint">גררו את המסגרת אל מה שהלוח צריך להציג. הצלעות והפינות משנות את הגודל, וקרוב לצורת הלוח המסגרת נצמדת אליה וממלאת אותו.</string>
+    <string name="crop_frame_values">מסגרת %1$d × %2$d · על הלוח %3$d × %4$d</string>
+    <string name="crop_frame_whole">כל המסך</string>
+    <string name="crop_frame_fill">מילוי הלוח</string>
+    <string name="calibration_framed_notice">את החיתוך של הפרופיל הזה קובעת מסגרת שסומנה מעל אפליקציה, ולכן המחוונים שלמטה אינם עושים דבר. איפוס הכיול יחזיר להם אותו.</string>
 </resources>

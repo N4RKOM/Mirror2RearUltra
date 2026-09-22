@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">Imperiale eenheden</string>
     <string name="dashboard_call_incoming">Inkomende oproep</string>
     <string name="panel_pocket_lock">Aanraking vergrendelen in zak</string>
+    <string name="shutter_service_title">Sluitertoegang</string>
+    <string name="shutter_service_summary">Laat een tik op het paneel de sluiter indrukken</string>
+    <string name="shutter_service_description">Terwijl het paneel een camera toont, drukt een tik erop de sluiterknop van die app in. Op andere momenten wordt er niets gelezen of ingedrukt. Zonder dit loopt de sluiter via root.</string>
+    <string name="shutter_service_on">Aan · het paneel drukt zelf op de sluiterknop</string>
+    <string name="shutter_service_off">Uit · de sluiter loopt via root</string>
+    <string name="shutter_service_open">Toegankelijkheidsinstellingen</string>
+    <string name="panel_shutter_on_tap">Tik op het paneel om een foto te maken</string>
     <string name="panel_face_down_off">Uitschakelen als het naar beneden wijst</string>
     <string name="dashboard_more_widgets_title">Meer widgets</string>
     <string name="dashboard_more_widgets_help">Bij meer dan vijf ingeschakelde onderdelen wisselt het achterscherm ze automatisch af.</string>
@@ -426,4 +433,15 @@
         <item quantity="one">%1$d minuut</item>
         <item quantity="other">%1$d minuten</item>
     </plurals>
+    <string name="crop_frame_title">Kader voor het paneel</string>
+    <string name="crop_frame_cancel">Annuleren</string>
+    <string name="crop_frame_done">Klaar</string>
+    <string name="crop_frame_larger">Kader vergroten</string>
+    <string name="crop_frame_smaller">Kader verkleinen</string>
+    <string name="overlay_frame_help">Houd de zwevende knop boven een app ingedrukt om met een kader het deel van het scherm te kiezen dat het paneel toont – bijvoorbeeld de zoeker van een camera zonder de knoppen.</string>
+    <string name="crop_frame_hint">Sleep het kader over wat het paneel moet tonen. Zijden en hoeken wijzigen de grootte, en bij de vorm van het paneel klikt het vast en vult het.</string>
+    <string name="crop_frame_values">Kader %1$d × %2$d · op het paneel %3$d × %4$d</string>
+    <string name="crop_frame_whole">Hele scherm</string>
+    <string name="crop_frame_fill">Paneel vullen</string>
+    <string name="calibration_framed_notice">De uitsnede van dit profiel wordt bepaald door een kader over een app, dus de schuifregelaars hieronder doen niets. Zet de kalibratie terug om ze weer in te schakelen.</string>
 </resources>

@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">英制单位</string>
     <string name="dashboard_call_incoming">来电</string>
     <string name="panel_pocket_lock">口袋中锁定触摸</string>
+    <string name="shutter_service_title">快门访问</string>
+    <string name="shutter_service_summary">让点按面板即可按下相机快门</string>
+    <string name="shutter_service_description">当面板正在显示相机时，点按面板会按下该相机应用的快门按钮。其余时间不读取也不点按任何内容。没有它，快门将通过 root 完成。</string>
+    <string name="shutter_service_on">已开启 · 由面板直接按下快门按钮</string>
+    <string name="shutter_service_off">已关闭 · 快门通过 root 完成</string>
+    <string name="shutter_service_open">无障碍设置</string>
+    <string name="panel_shutter_on_tap">点按面板拍照</string>
     <string name="panel_face_down_off">面朝下时熄灭</string>
     <string name="dashboard_more_widgets_title">更多小组件</string>
     <string name="dashboard_more_widgets_help">启用超过五项时，后屏会自动轮流显示它们。</string>
@@ -424,4 +431,15 @@
     <plurals name="dashboard_timer_minutes">
         <item quantity="other">%1$d 分钟</item>
     </plurals>
+    <string name="crop_frame_title">面板取景框</string>
+    <string name="crop_frame_cancel">取消</string>
+    <string name="crop_frame_done">完成</string>
+    <string name="crop_frame_larger">放大取景框</string>
+    <string name="crop_frame_smaller">缩小取景框</string>
+    <string name="overlay_frame_help">在应用上方长按悬浮按钮，即可用取景框选择面板显示的屏幕区域——例如只留相机取景画面、去掉按钮。</string>
+    <string name="crop_frame_hint">把取景框拖到面板要显示的内容上。拖动边或角可调整大小，接近面板比例时会自动吸附并铺满面板。</string>
+    <string name="crop_frame_values">取景框 %1$d × %2$d · 面板上 %3$d × %4$d</string>
+    <string name="crop_frame_whole">整个屏幕</string>
+    <string name="crop_frame_fill">铺满面板</string>
+    <string name="calibration_framed_notice">该配置的裁剪由在应用上方画出的取景框决定，因此下面的滑块不起作用。重置校准即可把裁剪交还给它们。</string>
 </resources>

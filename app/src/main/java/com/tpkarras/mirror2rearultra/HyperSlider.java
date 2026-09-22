@@ -83,6 +83,20 @@ public class HyperSlider extends AppCompatSeekBar {
         });
     }
 
+    /**
+     * Dims the bar when it is switched off.
+     *
+     * <p>The bar carries no handle, so at a value of nought a live one and a
+     * dead one look alike: both are an empty capsule. A crop chosen with a
+     * frame leaves these three standing by, and a bright bar that ignores a
+     * finger reads as a fault rather than as a decision.
+     */
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        setAlpha(enabled ? 1f : 0.4f);
+    }
+
     public void addOnChangeListener(OnChangeListener listener) {
         listeners.add(listener);
     }

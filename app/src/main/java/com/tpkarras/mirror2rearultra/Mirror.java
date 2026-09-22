@@ -17,6 +17,8 @@ import android.hardware.display.DisplayManager;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.os.IBinder;
 import android.os.Handler;
 import android.os.Looper;
@@ -66,12 +68,24 @@ public class Mirror extends Activity implements
      * before the next is asked for.
      */
     private static final int AOD_BACKLIGHT_FADE_STEPS = 10;
+    /** How far a finger may stray and still be pressing the shutter. */
+    private static final float SHUTTER_TAP_SLOP_PIXELS = 12f;
+    private static final long SHUTTER_TAP_MILLIS = 500L;
     static final String EXTRA_SESSION_HAS_PROJECTION = "session_has_projection";
     static final String EXTRA_DASHBOARD_ONLY = "dashboard_only";
 
     private TextureView textureView;
     private View brightnessOverlay;
     private CalibrationGridView calibrationGrid;
+    private CropMaskView cropMask;
+    private View shutterFlash;
+    private PanelShutter panelShutter;
+    /** Where the finger went down, for telling a tap from a swipe. */
+    private float touchDownX;
+    private float touchDownY;
+    private long touchDownAt;
+    /** Whether the profile in use has a frame that leaves part of the panel black. */
+    private boolean cropMaskWanted;
     private RearDashboardView dashboardView;
     /** The dashboard page on screen, which decides which way round it sits. */
     private int dashboardPage = 1;
@@ -84,6 +98,14 @@ public class Mirror extends Activity implements
     private DeviceHealthMonitor deviceHealthMonitor;
     private ForegroundAppMonitor foregroundAppMonitor;
     private MirrorControlOverlay mirrorControlOverlay;
+    private CropFrameOverlay cropFrameOverlay;
+    /**
+     * The profile as it was before the frame came up, or null when no frame
+     * is up. Moving the frame changes the live profile only; this is what
+     * Cancel puts back.
+     */
+    @Nullable
+    private MirrorProfile framingOriginal;
     private DisplayManager displayManager;
     private SensorManager sensorManager;
     private Sensor screenDownSensor;
@@ -226,14 +248,46 @@ public class Mirror extends Activity implements
         mirrorLayout = findViewById(R.id.mirror_layout);
         brightnessOverlay = findViewById(R.id.brightness_overlay);
         calibrationGrid = findViewById(R.id.calibration_grid);
+        cropMask = findViewById(R.id.crop_mask);
+        shutterFlash = findViewById(R.id.shutter_flash);
+        panelShutter = new PanelShutter();
         dashboardView = findViewById(R.id.rear_dashboard);
         textureView.setClickable(false);
         brightnessOverlay.setClickable(false);
         calibrationGrid.setClickable(false);
         dashboardView.setClickable(true);
         dashboardView.setDashboardSettings(dashboardSettings, sessionContentMode);
-        mirrorControlOverlay = new MirrorControlOverlay(this, () ->
-                runOnUiThread(() -> setManualProjectionEnabled(!manualProjectionEnabled)));
+        mirrorControlOverlay = new MirrorControlOverlay(this, new MirrorControlOverlay.Listener() {
+            @Override
+            public void onToggleRequested() {
+                runOnUiThread(() -> setManualProjectionEnabled(!manualProjectionEnabled));
+            }
+
+            @Override
+            public void onFrameRequested() {
+                runOnUiThread(Mirror.this::startFraming);
+            }
+        });
+        cropFrameOverlay = new CropFrameOverlay(this, new CropFrameOverlay.Listener() {
+            @Override
+            public void onFramePreview(CropFrame.Rect frame) {
+                previewFrame(frame);
+            }
+
+            @Override
+            public void onFrameSettled() {
+                // The capture resolution follows the zoom, and changing it
+                // re-attaches the surface: worth doing once the finger is
+                // off, not on every move.
+                updateProjectionBufferFromSettings();
+                resetIdleTimer();
+            }
+
+            @Override
+            public void onFrameFinished(boolean keep, @Nullable CropFrame.Rect frame) {
+                endFraming(keep, frame);
+            }
+        });
         // Each page can be turned a different way round, and the rotation is
         // applied out here because it needs the panel's own dimensions.
         dashboardView.setOnPageChangedListener(page -> {
@@ -295,6 +349,10 @@ public class Mirror extends Activity implements
 
     @Override
     protected void onStop() {
+        // The frame is only any good against a live panel.
+        if (cropFrameOverlay != null) {
+            cropFrameOverlay.cancel();
+        }
         unregisterRuntimeListeners();
         super.onStop();
     }
@@ -308,6 +366,9 @@ public class Mirror extends Activity implements
         unregisterRuntimeListeners();
         detachProjectionSurface();
         stopAutoProfileMonitoring();
+        if (cropFrameOverlay != null) {
+            cropFrameOverlay.cancel();
+        }
         if (mirrorControlOverlay != null) {
             mirrorControlOverlay.close();
         }
@@ -319,6 +380,9 @@ public class Mirror extends Activity implements
         }
         if (autoBrightness != null) {
             autoBrightness.stop();
+        }
+        if (panelShutter != null) {
+            panelShutter.close();
         }
         AutoProfileState.clear();
 
@@ -410,7 +474,98 @@ public class Mirror extends Activity implements
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             resetIdleTimer();
         }
+        if (handleShutterTouch(event)) {
+            return true;
+        }
         return super.dispatchTouchEvent(event);
+    }
+
+    /**
+     * A tap on the panel while it is showing a camera, as the shutter.
+     *
+     * <p>Only while the image is up, where the panel answers to nothing else:
+     * the widgets are away, so there is no gesture to take away from them.
+     * Only over a camera too - the key would open the camera app anywhere
+     * else, which is the last thing a tap on a map should do.
+     *
+     * @return whether the touch was used up here
+     */
+    private boolean handleShutterTouch(MotionEvent event) {
+        if (!shouldShowProjection() || !isCameraInFront()
+                || !DashboardWidgetLayout.isShutterOnTapEnabled(this)) {
+            return false;
+        }
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                touchDownX = event.getX();
+                touchDownY = event.getY();
+                touchDownAt = event.getEventTime();
+                return true;
+            case MotionEvent.ACTION_UP:
+                float moved = (float) Math.hypot(
+                        event.getX() - touchDownX, event.getY() - touchDownY);
+                boolean tap = moved <= SHUTTER_TAP_SLOP_PIXELS
+                        && event.getEventTime() - touchDownAt <= SHUTTER_TAP_MILLIS;
+                if (tap && panelShutter != null && panelShutter.fire()) {
+                    flashShutter();
+                }
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    /**
+     * Whether what is being mirrored is a camera.
+     *
+     * <p>The profile answers for the built-in one; the classifier answers for
+     * a camera app somebody has given a profile of its own.
+     */
+    private boolean isCameraInFront() {
+        if (activeProfile != null && MirrorProfile.CAMERA_ID.equals(activeProfile.id)) {
+            return true;
+        }
+        String packageName = AutoProfileState.get().packageName;
+        return packageName != null
+                && MirrorProfile.CAMERA_ID.equals(AppProfileClassifier.classify(packageName));
+    }
+
+    /**
+     * Finds the camera's shutter button while the shot is still being framed.
+     *
+     * <p>The search reads the app's layout and takes seconds; a tap on the
+     * panel has to be answered at once. So it happens when the image goes up,
+     * which is always well before the first tap, and once for each app and
+     * each way round the screen.
+     */
+    private void prepareShutter() {
+        if (panelShutter == null) {
+            return;
+        }
+        if (!shouldShowProjection() || !isCameraInFront()
+                || !DashboardWidgetLayout.isShutterOnTapEnabled(this)) {
+            return;
+        }
+        Display mainDisplay = displayManager == null
+                ? null : displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+        panelShutter.prepare(AutoProfileState.get().packageName,
+                mainDisplay == null ? Surface.ROTATION_0 : mainDisplay.getRotation());
+    }
+
+    /** A blink of the panel, since the shot itself happens out of sight. */
+    private void flashShutter() {
+        if (shutterFlash == null) {
+            return;
+        }
+        shutterFlash.animate().cancel();
+        shutterFlash.setAlpha(1f);
+        shutterFlash.setVisibility(View.VISIBLE);
+        shutterFlash.animate().alpha(0f).setDuration(220L)
+                .withEndAction(() -> shutterFlash.setVisibility(View.GONE));
+        Vibrator vibrator = getSystemService(Vibrator.class);
+        if (vibrator != null && vibrator.hasVibrator()) {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+        }
     }
 
     /**
@@ -524,7 +679,15 @@ public class Mirror extends Activity implements
     @Override
     public void onDisplayChanged(int displayId) {
         if (displayId == Display.DEFAULT_DISPLAY) {
+            // A frame drawn for the screen one way round means nothing once
+            // it has turned: the same numbers crop a different part of it.
+            Display mainDisplay = displayManager == null ? null : displayManager.getDisplay(displayId);
+            if (cropFrameOverlay != null && cropFrameOverlay.isShowing() && mainDisplay != null
+                    && mainDisplay.getRotation() != cropFrameOverlay.rotation()) {
+                cropFrameOverlay.cancel();
+            }
             applyRotationTransform();
+            prepareShutter();
         }
     }
 
@@ -631,14 +794,33 @@ public class Mirror extends Activity implements
         MirrorProfile profile = activeProfile == null
                 ? MirrorSettings.loadActiveProfile(this)
                 : activeProfile;
+        DisplayMetrics rearMetrics = getResources().getDisplayMetrics();
+        Display.Mode mode = mainDisplay == null ? null : mainDisplay.getMode();
+        float pivotX = textureView.getWidth() / 2f;
+        float pivotY = textureView.getHeight() / 2f;
+        // A frame answers every question this method asks - which way round,
+        // how big, where - so when the profile has one nothing below runs.
+        CropFrame.Projection framed = framedProjection(profile, rotation, mode, rearMetrics);
+        if (framed != null) {
+            Matrix framedMatrix = new Matrix();
+            framedMatrix.setRotate(framed.degrees, pivotX, pivotY);
+            framedMatrix.postScale(framed.scaleX, framed.scaleY, pivotX, pivotY);
+            framedMatrix.postTranslate(framed.translateX, framed.translateY);
+            textureView.setScaleX(1f);
+            textureView.setScaleY(1f);
+            textureView.setTranslationX(0f);
+            textureView.setTranslationY(0f);
+            textureView.setTransform(framedMatrix);
+            showCropMask(framed);
+            return;
+        }
+        showCropMask(null);
         RotationTransform transform = RotationTransform.forRotation(
                 rotation,
                 profile.rotationDegrees,
                 profile.mirrorHorizontally
         );
 
-        DisplayMetrics rearMetrics = getResources().getDisplayMetrics();
-        Display.Mode mode = mainDisplay == null ? null : mainDisplay.getMode();
         ProjectionGeometry.Scale scale = ProjectionGeometry.calculateScale(
                 profile.scaleMode,
                 rearMetrics.widthPixels,
@@ -652,8 +834,6 @@ public class Mirror extends Activity implements
         float calibrationZoom = profile.zoomPercent / 100f;
         float combinedScaleX = transform.scaleX * scale.x * calibrationZoom;
         float combinedScaleY = transform.scaleY * scale.y * calibrationZoom;
-        float pivotX = textureView.getWidth() / 2f;
-        float pivotY = textureView.getHeight() / 2f;
 
         Matrix matrix = new Matrix();
         matrix.setRotate(
@@ -662,17 +842,90 @@ public class Mirror extends Activity implements
                 pivotY
         );
         matrix.postScale(combinedScaleX, combinedScaleY, pivotX, pivotY);
+        // The offsets slide the image inside the texture rather than the
+        // texture across the panel. The texture is exactly as tall as the
+        // panel and clips what it draws to its own edges, so moving the view
+        // down left a black band above it instead of showing the zoomed-in
+        // screen that was there all along - a vertical offset could hide the
+        // top of the screen but never show any more of it.
+        matrix.postTranslate(
+                Math.round(ProjectionGeometry.calculateTranslation(
+                        rearMetrics.widthPixels, profile.horizontalOffsetPercent)),
+                Math.round(ProjectionGeometry.calculateTranslation(
+                        rearMetrics.heightPixels, profile.verticalOffsetPercent)));
         textureView.setScaleX(1f);
         textureView.setScaleY(1f);
-        textureView.setTranslationX(Math.round(ProjectionGeometry.calculateTranslation(
-                rearMetrics.widthPixels,
-                profile.horizontalOffsetPercent
-        )));
-        textureView.setTranslationY(Math.round(ProjectionGeometry.calculateTranslation(
-                rearMetrics.heightPixels,
-                profile.verticalOffsetPercent
-        )));
+        textureView.setTranslationX(0f);
+        textureView.setTranslationY(0f);
         textureView.setTransform(matrix);
+    }
+
+    /**
+     * How the profile's frame lands on the panel, or null when it has none.
+     *
+     * <p>A frame is held against the screen the way round it was drawn. Turn
+     * the phone and the same fractions would cut a different part of a
+     * re-laid-out screen, so the older zoom and offsets take over until it is
+     * turned back.
+     */
+    @Nullable
+    private CropFrame.Projection framedProjection(
+            MirrorProfile profile, int rotation, @Nullable Display.Mode mode,
+            DisplayMetrics rearMetrics) {
+        MirrorProfile.Crop crop = profile.crop;
+        if (crop == null || crop.rotation != rotation) {
+            return null;
+        }
+        return cropFrameFor(profile, rotation, mode, rearMetrics)
+                .projectionFor(new CropFrame.Rect(crop.left, crop.top, crop.right, crop.bottom));
+    }
+
+    private CropFrame cropFrameFor(
+            MirrorProfile profile, int rotation, @Nullable Display.Mode mode,
+            DisplayMetrics rearMetrics) {
+        int naturalWidth = mode == null ? rearMetrics.widthPixels : mode.getPhysicalWidth();
+        int naturalHeight = mode == null ? rearMetrics.heightPixels : mode.getPhysicalHeight();
+        // The mode reports the screen the way it was built, never the way it
+        // is being held; a frame is in the held screen's own fractions.
+        boolean turned = rotation % 2 != 0;
+        return new CropFrame(
+                rearMetrics.widthPixels,
+                rearMetrics.heightPixels,
+                turned ? naturalHeight : naturalWidth,
+                turned ? naturalWidth : naturalHeight,
+                rotation,
+                profile
+        );
+    }
+
+    private void showCropMask(@Nullable CropFrame.Projection projection) {
+        cropMaskWanted = projection != null;
+        if (cropMask == null) {
+            return;
+        }
+        if (projection == null) {
+            cropMask.setVisibility(View.GONE);
+            return;
+        }
+        cropMask.setVisibleSize(projection.visibleWidth, projection.visibleHeight);
+        cropMask.setVisibility(shouldShowProjection() && !CallWidgetState.get().ringing
+                ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * How far the image is blown up, which is what the capture has to be
+     * sharp enough for.
+     *
+     * <p>A frame says it by its own size; without one it is the zoom slider.
+     */
+    private int magnificationPercent(MirrorProfile profile) {
+        Display mainDisplay = displayManager == null
+                ? null : displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+        int rotation = mainDisplay == null ? Surface.ROTATION_0 : mainDisplay.getRotation();
+        CropFrame.Projection framed = framedProjection(profile, rotation,
+                mainDisplay == null ? null : mainDisplay.getMode(),
+                getResources().getDisplayMetrics());
+        return framed == null ? profile.zoomPercent : framed.magnificationPercent;
     }
 
     private void configureProjectionBuffer(
@@ -689,8 +942,9 @@ public class Mirror extends Activity implements
         MirrorProfile profile = activeProfile == null
                 ? MirrorSettings.loadActiveProfile(this)
                 : activeProfile;
-        int desiredWidth = quality.bufferDimension(viewWidth, profile.zoomPercent);
-        int desiredHeight = quality.bufferDimension(viewHeight, profile.zoomPercent);
+        int magnification = magnificationPercent(profile);
+        int desiredWidth = quality.bufferDimension(viewWidth, magnification);
+        int desiredHeight = quality.bufferDimension(viewHeight, magnification);
         if (projectionBufferWidth == desiredWidth && projectionBufferHeight == desiredHeight) {
             return;
         }
@@ -698,8 +952,8 @@ public class Mirror extends Activity implements
         projectionBufferWidth = desiredWidth;
         projectionBufferHeight = desiredHeight;
         Log.i(TAG, "Projection buffer: " + desiredWidth + "x" + desiredHeight
-                + " (" + quality + ", zoom=" + profile.zoomPercent + "%, resolution="
-                + quality.bufferPercent(profile.zoomPercent) + "%)");
+                + " (" + quality + ", magnified=" + magnification + "%, resolution="
+                + quality.bufferPercent(magnification) + "%)");
     }
 
     private void updateProjectionBufferFromSettings() {
@@ -817,15 +1071,29 @@ public class Mirror extends Activity implements
         if (wasDimmed || wasFading) {
             applyProfileBrightness();
         }
+        idleHandler.postDelayed(idleAction, idleDelayMillis());
+    }
+
+    private long idleDelayMillis() {
         DashboardWidgetLayout.IdleMode mode = DashboardWidgetLayout.loadIdleMode(this);
-        long delay = mode == DashboardWidgetLayout.IdleMode.TIMEOUT_15
+        return mode == DashboardWidgetLayout.IdleMode.TIMEOUT_15
                 ? 15_000L : mode == DashboardWidgetLayout.IdleMode.TIMEOUT_30
                 ? 30_000L : AOD_DIM_DELAY_MILLIS;
-        idleHandler.postDelayed(idleAction, delay);
     }
 
     private void beginIdleFade() {
         if (!MirrorState.isActive() || activeProfile == null) {
+            return;
+        }
+        // A live image is its own reason to stay lit. The timers here are for
+        // a dashboard that nobody is looking at; a mirrored viewfinder is
+        // watched rather than touched, and went dark in the middle of a shot.
+        // Asked again rather than switched off at the source: the image can
+        // stop for a dozen reasons - the app in front, the button, the heat
+        // limit - and each would otherwise have to remember to wind the timer
+        // back up.
+        if (shouldShowProjection()) {
+            idleHandler.postDelayed(idleAction, idleDelayMillis());
             return;
         }
         idleFadeRunning = true;
@@ -963,6 +1231,14 @@ public class Mirror extends Activity implements
         }
         Log.i(TAG, "Automatic profile: package=" + packageName
                 + ", profile=" + (profileId == null ? "manual fallback" : profileId));
+        // A frame belongs to the app it was laid over, and so does the
+        // place its shutter button sits.
+        if (cropFrameOverlay != null) {
+            cropFrameOverlay.cancel();
+        }
+        if (panelShutter != null) {
+            panelShutter.forget();
+        }
         AutoProfileState.set(profileId, packageName);
         // Entering another app is a new explicit decision. Never carry an
         // active capture into it, even when both apps use the same profile.
@@ -1095,6 +1371,13 @@ public class Mirror extends Activity implements
         // interrupting for.
         boolean ringing = CallWidgetState.get().ringing;
         textureView.setVisibility(showProjection && !ringing ? View.VISIBLE : View.INVISIBLE);
+        if (cropMask != null) {
+            // The mask belongs to the image. Left up on its own it would lay
+            // black bars over the widgets or over a ringing call.
+            cropMask.setVisibility(cropMaskWanted && showProjection && !ringing
+                    ? View.VISIBLE : View.GONE);
+        }
+        prepareShutter();
         if (dashboardView != null) {
             // The widgets step aside for the image rather than sitting on
             // top of it. In the mixed mode the image is usually a camera
@@ -1168,8 +1451,72 @@ public class Mirror extends Activity implements
 
     private void updateMirrorControl(@Nullable String profileId) {
         if (mirrorControlOverlay != null) {
-            mirrorControlOverlay.show(profileId != null && usesProjection(), manualProjectionEnabled);
+            // Out of the way while framing: it would sit inside the frame.
+            boolean framing = cropFrameOverlay != null && cropFrameOverlay.isShowing();
+            mirrorControlOverlay.show(profileId != null && usesProjection() && !framing,
+                    manualProjectionEnabled);
         }
+    }
+
+    /**
+     * Lays a frame over the app in front for choosing what the panel shows.
+     *
+     * <p>Mirroring is switched on for it if it was not: the frame is only
+     * worth anything with the panel following it.
+     */
+    private void startFraming() {
+        if (cropFrameOverlay == null || cropFrameOverlay.isShowing() || !usesProjection()
+                || AutoProfileState.get().profileId == null || !appProjectionAllowed) {
+            return;
+        }
+        if (!manualProjectionEnabled) {
+            setManualProjectionEnabled(true);
+        }
+        MirrorProfile profile = activeProfile == null
+                ? MirrorSettings.loadActiveProfile(this)
+                : activeProfile;
+        // Set before the frame is shown: showing it reports where it stands.
+        framingOriginal = profile;
+        DisplayMetrics panel = getResources().getDisplayMetrics();
+        if (!cropFrameOverlay.show(profile, panel.widthPixels, panel.heightPixels)) {
+            framingOriginal = null;
+            return;
+        }
+        Log.i(TAG, "Framing " + profile.id);
+        updateMirrorControl(AutoProfileState.get().profileId);
+        resetIdleTimer();
+    }
+
+    private void previewFrame(CropFrame.Rect frame) {
+        if (framingOriginal == null || cropFrameOverlay == null) {
+            return;
+        }
+        activeProfile = framingOriginal.withCrop(new MirrorProfile.Crop(
+                frame.left, frame.top, frame.right, frame.bottom, cropFrameOverlay.rotation()));
+        applyRotationTransform();
+        resetIdleTimer();
+    }
+
+    private void endFraming(boolean keep, @Nullable CropFrame.Rect frame) {
+        MirrorProfile original = framingOriginal;
+        framingOriginal = null;
+        if (original == null) {
+            return;
+        }
+        if (keep && frame != null && cropFrameOverlay != null) {
+            MirrorProfile framed = original.withCrop(new MirrorProfile.Crop(
+                    frame.left, frame.top, frame.right, frame.bottom, cropFrameOverlay.rotation()));
+            activeProfile = framed;
+            Log.i(TAG, "Framed " + framed.id + ": " + frame.left + ", " + frame.top
+                    + " to " + frame.right + ", " + frame.bottom);
+            // Saved like the sliders save, and picked up the same way.
+            MirrorSettings.saveCalibration(this, framed);
+        } else {
+            activeProfile = original;
+            updateProjectionBufferFromSettings();
+            applyRotationTransform();
+        }
+        updateMirrorControl(AutoProfileState.get().profileId);
     }
 
     private void applyDashboardOrientation() {

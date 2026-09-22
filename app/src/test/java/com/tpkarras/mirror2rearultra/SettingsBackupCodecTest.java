@@ -1,6 +1,8 @@
 package com.tpkarras.mirror2rearultra;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -112,6 +114,51 @@ public class SettingsBackupCodecTest {
         assertThrows(
                 SettingsBackupCodec.BackupException.class,
                 () -> SettingsBackupCodec.read(new ByteArrayInputStream(bytes))
+        );
+    }
+
+    @Test
+    public void aFrameSurvivesTheRoundTripAndItsAbsenceDoesToo() throws Exception {
+        // A frame is the whole of a profile's crop, so a backup that dropped
+        // it would come back showing a different part of the screen.
+        List<MirrorProfile> profiles = new java.util.ArrayList<>(sampleData(true).profiles);
+        profiles.set(0, profiles.get(0).withCrop(
+                new MirrorProfile.Crop(0f, 0.1475f, 1f, 0.7475f, 0)));
+        SettingsBackupCodec.Data source = withProfiles(sampleData(true), profiles);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        SettingsBackupCodec.write(source, output);
+        SettingsBackupCodec.Data restored = SettingsBackupCodec.read(
+                new ByteArrayInputStream(output.toByteArray()));
+
+        MirrorProfile.Crop crop = profile(restored, MirrorProfile.CAMERA_ID).crop;
+        assertNotNull(crop);
+        assertEquals(0f, crop.left, 1e-4f);
+        assertEquals(0.1475f, crop.top, 1e-4f);
+        assertEquals(1f, crop.right, 1e-4f);
+        assertEquals(0.7475f, crop.bottom, 1e-4f);
+        assertEquals(0, crop.rotation);
+        assertNull(profile(restored, MirrorProfile.NAVIGATION_ID).crop);
+    }
+
+    private static SettingsBackupCodec.Data withProfiles(
+            SettingsBackupCodec.Data source, List<MirrorProfile> profiles) {
+        return new SettingsBackupCodec.Data(
+                source.activeProfileId,
+                source.projectionQuality,
+                source.autoProfileEnabled,
+                source.autoVisibilityEnabled,
+                source.calibrationGridEnabled,
+                source.temperatureProtectionEnabled,
+                source.temperatureThreshold,
+                source.batteryProtectionEnabled,
+                source.batteryThreshold,
+                source.dashboardSettings,
+                profiles,
+                source.assignments,
+                source.dashboardImage,
+                source.dashboardLayoutState,
+                source.dashboardTemplateState
         );
     }
 

@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">Unidades imperiales</string>
     <string name="dashboard_call_incoming">Llamada entrante</string>
     <string name="panel_pocket_lock">Bloquear toques en el bolsillo</string>
+    <string name="shutter_service_title">Acceso al disparador</string>
+    <string name="shutter_service_summary">Permite disparar tocando el panel</string>
+    <string name="shutter_service_description">Mientras el panel muestra una cámara, un toque en él pulsa el disparador de esa app. El resto del tiempo no lee ni pulsa nada. Sin esto, el disparo pasa por root.</string>
+    <string name="shutter_service_on">Activado · el panel pulsa el disparador</string>
+    <string name="shutter_service_off">Desactivado · el disparo pasa por root</string>
+    <string name="shutter_service_open">Ajustes de accesibilidad</string>
+    <string name="panel_shutter_on_tap">Tocar el panel para hacer una foto</string>
     <string name="panel_face_down_off">Apagar cuando mire hacia abajo</string>
     <string name="dashboard_more_widgets_title">Más widgets</string>
     <string name="dashboard_more_widgets_help">Cuando hay más de cinco elementos activados, la pantalla trasera los va rotando automáticamente.</string>
@@ -426,4 +433,15 @@
         <item quantity="one">%1$d minuto</item>
         <item quantity="other">%1$d minutos</item>
     </plurals>
+    <string name="crop_frame_title">Encuadre del panel</string>
+    <string name="crop_frame_cancel">Cancelar</string>
+    <string name="crop_frame_done">Listo</string>
+    <string name="crop_frame_larger">Agrandar el marco</string>
+    <string name="crop_frame_smaller">Reducir el marco</string>
+    <string name="overlay_frame_help">Mantén pulsado el botón flotante sobre una app para encuadrar la parte de la pantalla que muestra el panel: por ejemplo, el visor de una cámara sin sus botones.</string>
+    <string name="crop_frame_hint">Arrastra el marco sobre lo que debe mostrar el panel. Los lados y las esquinas lo redimensionan, y cerca de la forma del panel se imanta y lo llena.</string>
+    <string name="crop_frame_values">Marco %1$d × %2$d · en el panel %3$d × %4$d</string>
+    <string name="crop_frame_whole">Pantalla completa</string>
+    <string name="crop_frame_fill">Llenar el panel</string>
+    <string name="calibration_framed_notice">El recorte de este perfil lo decide un marco trazado sobre una app, así que los controles de abajo no hacen nada. Restablece la calibración para devolvérselo.</string>
 </resources>

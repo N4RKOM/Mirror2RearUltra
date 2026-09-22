@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Custom accessibility actions, for gestures TalkBack has no way to make. -->
+<resources>
+    <item name="crop_frame_action_open" type="id" />
+    <item name="crop_frame_action_larger" type="id" />
+    <item name="crop_frame_action_smaller" type="id" />
+</resources>

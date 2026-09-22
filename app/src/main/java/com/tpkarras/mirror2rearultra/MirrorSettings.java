@@ -122,11 +122,68 @@ final class MirrorSettings {
                 .putInt(prefix + "zoom", profile.zoomPercent)
                 .putInt(prefix + "offset_x", profile.horizontalOffsetPercent)
                 .putInt(prefix + "offset_y", profile.verticalOffsetPercent);
+        writeCrop(editor, prefix, profile.crop);
         if (profile.isCustom()) {
             editor.putString(prefix + "name", normalizeProfileName(profile.customName));
         }
         editor.apply();
         notifyListeners(profile);
+    }
+
+    /**
+     * Keeps a profile's zoom and offsets and nothing else.
+     *
+     * <p>Unlike {@link #saveProfile} this leaves the chosen profile alone: a
+     * crop framed over an app belongs to that app's profile, and framing it
+     * is no reason to make it the profile the panel falls back to elsewhere.
+     */
+    static void saveCalibration(Context context, MirrorProfile profile) {
+        String prefix = prefix(profile.id);
+        SharedPreferences.Editor editor = preferences(context).edit()
+                .putInt(prefix + "zoom", profile.zoomPercent)
+                .putInt(prefix + "offset_x", profile.horizontalOffsetPercent)
+                .putInt(prefix + "offset_y", profile.verticalOffsetPercent);
+        writeCrop(editor, prefix, profile.crop);
+        editor.apply();
+        notifyListeners(profile);
+    }
+
+    /**
+     * The frame, or its absence.
+     *
+     * <p>Cleared rather than left behind when there is none: resetting the
+     * calibration has to reach the frame as well, or the sliders would go on
+     * being overruled by something nothing on the screen still mentions.
+     */
+    private static void writeCrop(
+            SharedPreferences.Editor editor, String prefix, @Nullable MirrorProfile.Crop crop) {
+        if (crop == null) {
+            editor.remove(prefix + "crop_left")
+                    .remove(prefix + "crop_top")
+                    .remove(prefix + "crop_right")
+                    .remove(prefix + "crop_bottom")
+                    .remove(prefix + "crop_rotation");
+            return;
+        }
+        editor.putFloat(prefix + "crop_left", crop.left)
+                .putFloat(prefix + "crop_top", crop.top)
+                .putFloat(prefix + "crop_right", crop.right)
+                .putFloat(prefix + "crop_bottom", crop.bottom)
+                .putInt(prefix + "crop_rotation", crop.rotation);
+    }
+
+    @Nullable
+    private static MirrorProfile.Crop readCrop(SharedPreferences preferences, String prefix) {
+        if (!preferences.contains(prefix + "crop_right")) {
+            return null;
+        }
+        return new MirrorProfile.Crop(
+                preferences.getFloat(prefix + "crop_left", 0f),
+                preferences.getFloat(prefix + "crop_top", 0f),
+                preferences.getFloat(prefix + "crop_right", 1f),
+                preferences.getFloat(prefix + "crop_bottom", 1f),
+                preferences.getInt(prefix + "crop_rotation", 0)
+        );
     }
 
     static List<MirrorProfile> loadProfiles(Context context) {
@@ -619,7 +676,8 @@ final class MirrorSettings {
                 preferences.getInt(prefix + "brightness", defaults.brightnessPercent),
                 preferences.getInt(prefix + "zoom", defaults.zoomPercent),
                 preferences.getInt(prefix + "offset_x", defaults.horizontalOffsetPercent),
-                preferences.getInt(prefix + "offset_y", defaults.verticalOffsetPercent)
+                preferences.getInt(prefix + "offset_y", defaults.verticalOffsetPercent),
+                readCrop(preferences, prefix)
         );
     }
 

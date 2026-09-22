@@ -15,13 +15,20 @@ import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.Nullable;
 
 /** Movable main-screen control shown while an app assigned to a profile is in front. */
 final class MirrorControlOverlay {
-    interface Listener { void onToggleRequested(); }
+    interface Listener {
+        void onToggleRequested();
+
+        /** Held down: frame the part of the screen the panel shows. */
+        void onFrameRequested();
+    }
 
     private static final String PREFS = "mirror_control_overlay";
     private static final String X = "x";
@@ -51,7 +58,7 @@ final class MirrorControlOverlay {
         this.context = displayContext;
         this.listener = listener;
         windowManager = this.context.getSystemService(WindowManager.class);
-        view = new ControlView(this.context);
+        view = new ControlView(this.context, listener);
         int size = dp(56);
         params = new WindowManager.LayoutParams(size, size,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
@@ -134,6 +141,12 @@ final class MirrorControlOverlay {
         private int startX;
         private int startY;
         private boolean moved;
+        private boolean held;
+        private final Runnable hold = () -> {
+            held = true;
+            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            listener.onFrameRequested();
+        };
 
         @Override public boolean onTouch(View target, MotionEvent event) {
             switch (event.getActionMasked()) {
@@ -143,11 +156,17 @@ final class MirrorControlOverlay {
                     startX = params.x;
                     startY = params.y;
                     moved = false;
+                    held = false;
+                    target.postDelayed(hold, ViewConfiguration.getLongPressTimeout());
                     return true;
                 case MotionEvent.ACTION_MOVE:
+                    if (held) return true;
                     float dx = event.getRawX() - downRawX;
                     float dy = event.getRawY() - downRawY;
-                    if (Math.hypot(dx, dy) > dp(5)) moved = true;
+                    if (Math.hypot(dx, dy) > dp(5)) {
+                        moved = true;
+                        target.removeCallbacks(hold);
+                    }
                     if (moved && attached) {
                         params.x = clampX(startX + Math.round(dx));
                         params.y = clampY(startY + Math.round(dy));
@@ -156,6 +175,11 @@ final class MirrorControlOverlay {
                     }
                     return true;
                 case MotionEvent.ACTION_UP:
+                    target.removeCallbacks(hold);
+                    if (held) {
+                        // The press already did its work when it was held.
+                        return true;
+                    }
                     if (moved) {
                         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
                                 .putInt(X, params.x).putInt(Y, params.y).apply();
@@ -165,6 +189,7 @@ final class MirrorControlOverlay {
                     }
                     return true;
                 case MotionEvent.ACTION_CANCEL:
+                    target.removeCallbacks(hold);
                     return true;
                 default:
                     return false;
@@ -175,10 +200,12 @@ final class MirrorControlOverlay {
     private static final class ControlView extends View {
         private final Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Paint icon = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Listener listener;
         private boolean mirroring;
 
-        ControlView(Context context) {
+        ControlView(Context context, Listener listener) {
             super(context);
+            this.listener = listener;
             setClickable(true);
             setElevation(12f * context.getResources().getDisplayMetrics().density);
             icon.setStyle(Paint.Style.STROKE);
@@ -191,6 +218,23 @@ final class MirrorControlOverlay {
             setContentDescription(getResources().getString(value
                     ? R.string.overlay_stop_mirroring : R.string.overlay_start_mirroring));
             invalidate();
+        }
+
+        // Holding the button has no equivalent under TalkBack, so framing is
+        // offered as an action of its own.
+        @Override public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(info);
+            info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                    R.id.crop_frame_action_open,
+                    getResources().getString(R.string.crop_frame_title)));
+        }
+
+        @Override public boolean performAccessibilityAction(int action, android.os.Bundle arguments) {
+            if (action == R.id.crop_frame_action_open) {
+                listener.onFrameRequested();
+                return true;
+            }
+            return super.performAccessibilityAction(action, arguments);
         }
 
         @Override protected void onDraw(Canvas canvas) {

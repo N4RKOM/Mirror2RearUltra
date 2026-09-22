@@ -136,6 +136,12 @@
                     android:text="@string/calibration_preview" />
 
                 <TextView
+                    android:id="@+id/calibration_framed_notice"
+                    style="@style/HyperOS.RowSummary"
+                    android:text="@string/calibration_framed_notice"
+                    android:visibility="gone" />
+
+                <TextView
                     android:id="@+id/zoom_value"
                     style="@style/HyperOS.SliderLabel"
                     android:labelFor="@id/zoom_slider"
@@ -196,6 +202,10 @@
             <TextView
                 style="@style/HyperOS.GroupFootnote"
                 android:text="@string/calibration_help" />
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/overlay_frame_help" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

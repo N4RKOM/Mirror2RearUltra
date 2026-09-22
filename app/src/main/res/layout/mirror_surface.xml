@@ -12,10 +12,25 @@
         android:layout_height="match_parent"
         android:visibility="visible" />
 
+    <com.tpkarras.mirror2rearultra.CropMaskView
+        android:id="@+id/crop_mask"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
+
     <com.tpkarras.mirror2rearultra.RearDashboardView
         android:id="@+id/rear_dashboard"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
+
+    <View
+        android:id="@+id/shutter_flash"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
         android:importantForAccessibility="no"
         android:visibility="gone" />
 

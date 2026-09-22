@@ -172,6 +172,13 @@
     <string name="dashboard_units_imperial">Imperial units</string>
     <string name="dashboard_call_incoming">Incoming call</string>
     <string name="panel_pocket_lock">Lock touches in a pocket</string>
+    <string name="shutter_service_title">Shutter access</string>
+    <string name="shutter_service_summary">Lets a tap on the panel press the camera shutter</string>
+    <string name="shutter_service_description">While the panel is mirroring a camera, a tap on it presses that camera’s shutter button. Nothing is read or done at any other time. Without this the shutter goes through root instead.</string>
+    <string name="shutter_service_on">On · the panel presses the shutter button itself</string>
+    <string name="shutter_service_off">Off · the shutter goes through root</string>
+    <string name="shutter_service_open">Accessibility settings</string>
+    <string name="panel_shutter_on_tap">Tap the panel to take a photo</string>
     <string name="panel_face_down_off">Turn off when facing down</string>
     <string name="dashboard_more_widgets_title">More widgets</string>
     <string name="dashboard_more_widgets_help">When more than five items are enabled, the rear screen rotates them automatically.</string>
@@ -446,4 +453,15 @@
         <item quantity="one">%1$d minute</item>
         <item quantity="other">%1$d minutes</item>
     </plurals>
+    <string name="crop_frame_title">Frame for the panel</string>
+    <string name="crop_frame_cancel">Cancel</string>
+    <string name="crop_frame_done">Done</string>
+    <string name="crop_frame_larger">Make frame larger</string>
+    <string name="crop_frame_smaller">Make frame smaller</string>
+    <string name="overlay_frame_help">Hold the floating button over an app to frame the part of the screen the panel shows – a camera\'s viewfinder, say, without its buttons.</string>
+    <string name="crop_frame_hint">Drag the frame onto what the panel should show. Sides and corners resize it, and near the panel\'s shape it snaps to fill it.</string>
+    <string name="crop_frame_values">Frame %1$d × %2$d · on the panel %3$d × %4$d</string>
+    <string name="crop_frame_whole">Whole screen</string>
+    <string name="crop_frame_fill">Fill the panel</string>
+    <string name="calibration_framed_notice">A frame drawn over an app is deciding this profile’s crop, so the sliders below do nothing. Reset the calibration to hand it back to them.</string>
 </resources>

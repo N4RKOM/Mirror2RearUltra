@@ -18,6 +18,50 @@ final class MirrorProfile {
         STRETCH
     }
 
+    /**
+     * The part of the main screen the panel shows, chosen with a frame.
+     *
+     * <p>Sides are fractions of the screen as it was turned when the frame was
+     * drawn, which is what {@link #rotation} records. Whatever is inside goes
+     * on the panel whole, keeping its shape, with black where the panel is
+     * wider or taller than the frame - so a viewfinder can be shown entire
+     * rather than trimmed to the panel's own proportions.
+     *
+     * <p>A crop answers the same question as the zoom and the offsets and
+     * answers it better, so while one is set those are left alone.
+     */
+    static final class Crop {
+        final float left;
+        final float top;
+        final float right;
+        final float bottom;
+        final int rotation;
+
+        Crop(float left, float top, float right, float bottom, int rotation) {
+            this.left = clampFraction(left);
+            this.top = clampFraction(top);
+            this.right = clampFraction(right);
+            this.bottom = clampFraction(bottom);
+            this.rotation = Math.floorMod(rotation, 4);
+        }
+
+        float width() {
+            return right - left;
+        }
+
+        float height() {
+            return bottom - top;
+        }
+
+        boolean isUsable() {
+            return width() > 0.01f && height() > 0.01f;
+        }
+
+        private static float clampFraction(float value) {
+            return Math.max(0f, Math.min(1f, value));
+        }
+    }
+
     final String id;
     final String customName;
     final ScaleMode scaleMode;
@@ -27,6 +71,8 @@ final class MirrorProfile {
     final int zoomPercent;
     final int horizontalOffsetPercent;
     final int verticalOffsetPercent;
+    @androidx.annotation.Nullable
+    final Crop crop;
 
     MirrorProfile(
             Id id,
@@ -64,6 +110,23 @@ final class MirrorProfile {
             int horizontalOffsetPercent,
             int verticalOffsetPercent
     ) {
+        this(id, customName, scaleMode, rotationDegrees, mirrorHorizontally, brightnessPercent,
+                zoomPercent, horizontalOffsetPercent, verticalOffsetPercent, null);
+    }
+
+    MirrorProfile(
+            String id,
+            String customName,
+            ScaleMode scaleMode,
+            int rotationDegrees,
+            boolean mirrorHorizontally,
+            int brightnessPercent,
+            int zoomPercent,
+            int horizontalOffsetPercent,
+            int verticalOffsetPercent,
+            @androidx.annotation.Nullable Crop crop
+    ) {
+        this.crop = crop != null && crop.isUsable() ? crop : null;
         this.id = normalizeId(id);
         this.customName = customName == null ? null : customName.trim();
         this.scaleMode = scaleMode;
@@ -110,9 +173,17 @@ final class MirrorProfile {
                 zoomPercent, horizontalOffsetPercent, value);
     }
 
+    /** The frame, or none: with one set the zoom and the offsets stand aside. */
+    MirrorProfile withCrop(@androidx.annotation.Nullable Crop value) {
+        return new MirrorProfile(id, customName, scaleMode, rotationDegrees, mirrorHorizontally,
+                brightnessPercent, zoomPercent, horizontalOffsetPercent, verticalOffsetPercent,
+                value);
+    }
+
+    /** Back to the whole screen: the frame goes with the numbers. */
     MirrorProfile resetCalibration() {
-        return copy(scaleMode, rotationDegrees, mirrorHorizontally, brightnessPercent,
-                100, 0, 0);
+        return new MirrorProfile(id, customName, scaleMode, rotationDegrees, mirrorHorizontally,
+                brightnessPercent, 100, 0, 0, null);
     }
 
     MirrorProfile withCustomName(String value) {
@@ -125,7 +196,8 @@ final class MirrorProfile {
                 brightnessPercent,
                 zoomPercent,
                 horizontalOffsetPercent,
-                verticalOffsetPercent
+                verticalOffsetPercent,
+                crop
         );
     }
 
@@ -151,7 +223,8 @@ final class MirrorProfile {
                 newBrightnessPercent,
                 newZoomPercent,
                 newHorizontalOffsetPercent,
-                newVerticalOffsetPercent
+                newVerticalOffsetPercent,
+                crop
         );
     }
 

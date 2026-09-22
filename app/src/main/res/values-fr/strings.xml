@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">Unités impériales</string>
     <string name="dashboard_call_incoming">Appel entrant</string>
     <string name="panel_pocket_lock">Bloquer le toucher en poche</string>
+    <string name="shutter_service_title">Accès au déclencheur</string>
+    <string name="shutter_service_summary">Permet au panneau de déclencher par un toucher</string>
+    <string name="shutter_service_description">Pendant que le panneau affiche un appareil photo, un toucher sur le panneau appuie sur le déclencheur de cette app. Rien n\'est lu ni touché le reste du temps. Sans cela, le déclenchement passe par root.</string>
+    <string name="shutter_service_on">Activé · le panneau appuie lui-même sur le déclencheur</string>
+    <string name="shutter_service_off">Désactivé · le déclenchement passe par root</string>
+    <string name="shutter_service_open">Paramètres d\'accessibilité</string>
+    <string name="panel_shutter_on_tap">Toucher le panneau pour photographier</string>
     <string name="panel_face_down_off">Éteindre quand le panneau est vers le bas</string>
     <string name="dashboard_more_widgets_title">Plus de widgets</string>
     <string name="dashboard_more_widgets_help">Lorsque plus de cinq éléments sont activés, l\'écran arrière les fait défiler automatiquement.</string>
@@ -426,4 +433,15 @@
         <item quantity="one">%1$d minute</item>
         <item quantity="other">%1$d minutes</item>
     </plurals>
+    <string name="crop_frame_title">Cadre du panneau</string>
+    <string name="crop_frame_cancel">Annuler</string>
+    <string name="crop_frame_done">Terminé</string>
+    <string name="crop_frame_larger">Agrandir le cadre</string>
+    <string name="crop_frame_smaller">Réduire le cadre</string>
+    <string name="overlay_frame_help">Maintenez le bouton flottant au-dessus d\'une app pour cadrer la partie de l\'écran affichée par le panneau – le viseur d\'un appareil photo sans ses boutons, par exemple.</string>
+    <string name="crop_frame_hint">Faites glisser le cadre sur ce que le panneau doit afficher. Les côtés et les coins le redimensionnent, et près de la forme du panneau il s\'y aimante et le remplit.</string>
+    <string name="crop_frame_values">Cadre %1$d × %2$d · sur le panneau %3$d × %4$d</string>
+    <string name="crop_frame_whole">Écran entier</string>
+    <string name="crop_frame_fill">Remplir le panneau</string>
+    <string name="calibration_framed_notice">Le recadrage de ce profil est défini par un cadre tracé au-dessus d\'une app, donc les curseurs ci-dessous n\'ont aucun effet. Réinitialisez le calibrage pour les leur rendre.</string>
 </resources>

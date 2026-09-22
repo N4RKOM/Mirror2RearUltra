@@ -168,6 +168,13 @@
     <string name="dashboard_units_imperial">Brittiläiset yksiköt</string>
     <string name="dashboard_call_incoming">Saapuva puhelu</string>
     <string name="panel_pocket_lock">Lukitse kosketus taskussa</string>
+    <string name="shutter_service_title">Laukaisimen käyttöoikeus</string>
+    <string name="shutter_service_summary">Antaa paneelin napautuksen laukaista kameran</string>
+    <string name="shutter_service_description">Kun paneeli näyttää kameraa, sen napautus painaa kyseisen sovelluksen laukaisinta. Muulloin mitään ei lueta eikä paineta. Ilman tätä laukaisu kulkee rootin kautta.</string>
+    <string name="shutter_service_on">Päällä · paneeli painaa itse laukaisinta</string>
+    <string name="shutter_service_off">Pois · laukaisu kulkee rootin kautta</string>
+    <string name="shutter_service_open">Saavutettavuusasetukset</string>
+    <string name="panel_shutter_on_tap">Ota kuva napauttamalla paneelia</string>
     <string name="panel_face_down_off">Sammuta, kun paneeli on alaspäin</string>
     <string name="dashboard_more_widgets_title">Lisää widgetejä</string>
     <string name="dashboard_more_widgets_help">Kun käytössä on yli viisi kohdetta, takanäyttö kierrättää niitä automaattisesti.</string>
@@ -426,4 +433,15 @@
         <item quantity="one">%1$d minuutti</item>
         <item quantity="other">%1$d minuuttia</item>
     </plurals>
+    <string name="crop_frame_title">Paneelin rajaus</string>
+    <string name="crop_frame_cancel">Peruuta</string>
+    <string name="crop_frame_done">Valmis</string>
+    <string name="crop_frame_larger">Suurenna kehystä</string>
+    <string name="crop_frame_smaller">Pienennä kehystä</string>
+    <string name="overlay_frame_help">Pidä kelluvaa painiketta painettuna sovelluksen päällä, niin voit rajata kehyksellä näytön osan, jonka paneeli näyttää – esimerkiksi kameran etsimen ilman painikkeita.</string>
+    <string name="crop_frame_hint">Vedä kehys sen päälle, mitä paneelin pitää näyttää. Sivut ja kulmat muuttavat kokoa, ja lähellä paneelin muotoa kehys napsahtaa siihen ja täyttää sen.</string>
+    <string name="crop_frame_values">Kehys %1$d × %2$d · paneelissa %3$d × %4$d</string>
+    <string name="crop_frame_whole">Koko näyttö</string>
+    <string name="crop_frame_fill">Täytä paneeli</string>
+    <string name="calibration_framed_notice">Tämän profiilin rajauksen määrää sovelluksen päälle piirretty kehys, joten alla olevat liukusäätimet eivät tee mitään. Palauta kalibrointi, niin ne saavat sen takaisin.</string>
 </resources>

@@ -1,6 +1,8 @@
 package com.tpkarras.mirror2rearultra;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.provider.Settings;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -56,6 +58,9 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     private MaterialSwitch autoPagesSwitch;
     private MaterialSwitch imperialUnitsSwitch;
     private MaterialSwitch pocketLockSwitch;
+    private MaterialSwitch shutterOnTapSwitch;
+    private TextView shutterAccessStatus;
+    private View shutterAccessButton;
     private MaterialSwitch faceDownSwitch;
     private TextView customImageStatus;
     private View customImageChooseButton;
@@ -97,6 +102,9 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         autoPagesSwitch = findViewById(R.id.dashboard_auto_pages_switch);
         imperialUnitsSwitch = findViewById(R.id.dashboard_imperial_units_switch);
         pocketLockSwitch = findViewById(R.id.dashboard_pocket_lock_switch);
+        shutterOnTapSwitch = findViewById(R.id.dashboard_shutter_switch);
+        shutterAccessStatus = findViewById(R.id.dashboard_shutter_access_status);
+        shutterAccessButton = findViewById(R.id.dashboard_shutter_access_button);
         faceDownSwitch = findViewById(R.id.dashboard_face_down_switch);
         customImageStatus = findViewById(R.id.dashboard_custom_image_status);
         customImageChooseButton = findViewById(R.id.dashboard_custom_image_choose_button);
@@ -204,6 +212,20 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                         MirrorSettings.loadDashboardSettings(this));
             }
         });
+        shutterAccessButton.setOnClickListener(button -> {
+            try {
+                startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+            } catch (ActivityNotFoundException missing) {
+                // Nowhere to send them; the row above still says how it stands.
+            }
+        });
+        shutterOnTapSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!bindingUi) {
+                DashboardWidgetLayout.setShutterOnTapEnabled(this, checked);
+                MirrorSettings.saveDashboardSettings(this,
+                        MirrorSettings.loadDashboardSettings(this));
+            }
+        });
         faceDownSwitch.setOnCheckedChangeListener((button, checked) -> {
             if (!bindingUi) {
                 DashboardWidgetLayout.setFaceDownOffEnabled(this, checked);
@@ -306,6 +328,12 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         autoPagesSwitch.setChecked(DashboardWidgetLayout.isAutoPageSwitchEnabled(this));
         imperialUnitsSwitch.setChecked(DashboardWidgetLayout.isImperialUnits(this));
         pocketLockSwitch.setChecked(DashboardWidgetLayout.isPocketLockEnabled(this));
+        shutterOnTapSwitch.setChecked(DashboardWidgetLayout.isShutterOnTapEnabled(this));
+        // Switched on in the system's own settings, so it is read afresh here
+        // rather than remembered: this screen is where people come back to.
+        boolean access = PanelShutterService.isEnabled(this);
+        shutterAccessStatus.setText(access
+                ? R.string.shutter_service_on : R.string.shutter_service_off);
         faceDownSwitch.setChecked(DashboardWidgetLayout.isFaceDownOffEnabled(this));
         int aodMinBrightness = DashboardWidgetLayout.loadAodMinBrightnessPercent(this);
         aodMinBrightnessSlider.setValue(aodMinBrightness);
