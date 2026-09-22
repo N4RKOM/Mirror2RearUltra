@@ -32,6 +32,9 @@ public final class CropFrameView extends View {
         /** The frame moved or changed size. */
         void onFrameChanged(CropFrame.Rect frame);
 
+        /** A finger has taken hold of the frame. */
+        void onFrameGrabbed();
+
         /** The finger has let go. */
         void onFrameSettled();
     }
@@ -194,6 +197,9 @@ public final class CropFrameView extends View {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 beginSingle(event.getX(), event.getY(), true);
+                if (listener != null) {
+                    listener.onFrameGrabbed();
+                }
                 return true;
             case MotionEvent.ACTION_POINTER_DOWN:
                 if (event.getPointerCount() == 2) {

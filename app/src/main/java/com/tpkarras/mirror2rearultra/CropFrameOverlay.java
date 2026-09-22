@@ -61,6 +61,10 @@ final class CropFrameOverlay {
     private int rotation;
     private int screenWidth;
     private int screenHeight;
+    /** Set between a finger taking hold of the frame and letting go. */
+    private boolean grabbed;
+    /** Whether the card is up, as opposed to faded out under a finger. */
+    private boolean cardShown = true;
 
     CropFrameOverlay(Context context, Listener listener) {
         Context applicationContext = context.getApplicationContext();
@@ -112,9 +116,7 @@ final class CropFrameOverlay {
 
         View view = LayoutInflater.from(context).inflate(R.layout.overlay_crop_frame, null);
         frameView = view.findViewById(R.id.crop_frame);
-        card = view.findViewById(R.id.crop_frame_card);
-        cardTitle = view.findViewById(R.id.crop_frame_title);
-        cardHint = view.findViewById(R.id.crop_frame_hint);
+        addCard((FrameLayout) view);
         values = view.findViewById(R.id.crop_frame_values);
         view.findViewById(R.id.crop_frame_done).setOnClickListener(button ->
                 finish(true, frameView == null ? null : frameView.frame()));
@@ -144,12 +146,24 @@ final class CropFrameOverlay {
                     @Override
                     public void onFrameChanged(CropFrame.Rect frame) {
                         describe(frame);
+                        // Hidden on the first move rather than on the touch:
+                        // a tap that changes nothing should not blink it.
+                        if (grabbed) {
+                            showCard(false);
+                        }
                         listener.onFramePreview(frame);
                     }
 
                     @Override
+                    public void onFrameGrabbed() {
+                        grabbed = true;
+                    }
+
+                    @Override
                     public void onFrameSettled() {
+                        grabbed = false;
                         placeCard();
+                        showCard(true);
                         listener.onFrameSettled();
                     }
                 });
@@ -176,6 +190,58 @@ final class CropFrameOverlay {
         view.requestFocus();
         view.post(this::placeCard);
         return true;
+    }
+
+    /**
+     * Puts the card on the screen, laid out for the way the screen is held.
+     *
+     * <p>Upright it is a band across the bottom. Sideways it is a column down
+     * the right edge, where a camera keeps its own buttons: across the bottom
+     * it would lie over the viewfinder, which is the one thing being framed.
+     */
+    private void addCard(FrameLayout parent) {
+        boolean wide = screenWidth > screenHeight;
+        View added = LayoutInflater.from(context).inflate(
+                wide ? R.layout.overlay_crop_card_wide : R.layout.overlay_crop_card,
+                parent, false);
+        int margin = context.getResources().getDimensionPixelSize(R.dimen.spacing_md);
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) added.getLayoutParams();
+        params.gravity = wide
+                ? Gravity.END | Gravity.CENTER_VERTICAL
+                : Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+        params.leftMargin = margin;
+        params.rightMargin = margin;
+        parent.addView(added, params);
+        card = added;
+        cardTitle = added.findViewById(R.id.crop_frame_title);
+        cardHint = added.findViewById(R.id.crop_frame_hint);
+    }
+
+    /**
+     * Takes the card away while the frame is being dragged, and brings it
+     * back when the finger lifts.
+     *
+     * <p>The panel is showing this screen: a card over the frame is a card on
+     * the panel, and the moment it matters least is the moment the frame is
+     * being aimed.
+     */
+    private void showCard(boolean visible) {
+        // Asked on every move of the frame, so the state is checked rather
+        // than the animation restarted: a fade begun afresh sixty times a
+        // second never finishes, and the card hung half way.
+        if (card == null || cardShown == visible) {
+            return;
+        }
+        cardShown = visible;
+        View shown = card;
+        shown.animate().cancel();
+        if (visible) {
+            shown.setVisibility(View.VISIBLE);
+            shown.animate().alpha(1f).setDuration(120L).start();
+        } else {
+            shown.animate().alpha(0f).setDuration(120L)
+                    .withEndAction(() -> shown.setVisibility(View.INVISIBLE)).start();
+        }
     }
 
     /** Drops the frame and puts back whatever the profile had before. */
@@ -272,6 +338,15 @@ final class CropFrameOverlay {
         android.graphics.Insets bars = insets.getInsets(
                 WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
         int margin = context.getResources().getDimensionPixelSize(R.dimen.spacing_md);
+        if (screenWidth > screenHeight) {
+            // The column keeps its side; only the bars move it.
+            FrameLayout.LayoutParams wide = (FrameLayout.LayoutParams) card.getLayoutParams();
+            if (wide.rightMargin != bars.right + margin) {
+                wide.rightMargin = bars.right + margin;
+                card.setLayoutParams(wide);
+            }
+            return;
+        }
         RectF frame = frameView.frameInView();
         int height = root.getHeight();
         int cardHeight = card.getHeight();
