@@ -252,6 +252,11 @@ final class CropFrame {
         return Rect.around(frame.centreX(), frame.centreY(), width, width / aspect);
     }
 
+    /** The panel's long side, for anything measured in panel pixels. */
+    int panelLongSide() {
+        return side;
+    }
+
     /** The whole screen, which is where a frame starts from. */
     Rect wholeScreen() {
         return new Rect(0f, 0f, 1f, 1f);

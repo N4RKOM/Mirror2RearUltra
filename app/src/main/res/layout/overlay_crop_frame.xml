@@ -35,6 +35,7 @@
         android:paddingBottom="@dimen/spacing_xs">
 
         <TextView
+            android:id="@+id/crop_frame_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/spacing_sm"
@@ -43,6 +44,7 @@
             android:textAppearance="@style/HyperOS.Text.RowTitle" />
 
         <TextView
+            android:id="@+id/crop_frame_hint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"

@@ -251,7 +251,7 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
         autoBrightnessSwitch.setChecked(DashboardWidgetLayout.isAutoBrightnessEnabled(this));
         // A frame overrules all three, so the sliders say so rather than
         // moving something nothing on the panel is following.
-        boolean framed = profile.crop != null;
+        boolean framed = profile.hasCrop();
         zoomSlider.setEnabled(!framed);
         horizontalOffsetSlider.setEnabled(!framed);
         verticalOffsetSlider.setEnabled(!framed);

@@ -122,7 +122,8 @@ final class MirrorSettings {
                 .putInt(prefix + "zoom", profile.zoomPercent)
                 .putInt(prefix + "offset_x", profile.horizontalOffsetPercent)
                 .putInt(prefix + "offset_y", profile.verticalOffsetPercent);
-        writeCrop(editor, prefix, profile.crop);
+        writeCrop(editor, prefix, "crop_", profile.crop);
+        writeCrop(editor, prefix, "crop_landscape_", profile.landscapeCrop);
         if (profile.isCustom()) {
             editor.putString(prefix + "name", normalizeProfileName(profile.customName));
         }
@@ -143,7 +144,8 @@ final class MirrorSettings {
                 .putInt(prefix + "zoom", profile.zoomPercent)
                 .putInt(prefix + "offset_x", profile.horizontalOffsetPercent)
                 .putInt(prefix + "offset_y", profile.verticalOffsetPercent);
-        writeCrop(editor, prefix, profile.crop);
+        writeCrop(editor, prefix, "crop_", profile.crop);
+        writeCrop(editor, prefix, "crop_landscape_", profile.landscapeCrop);
         editor.apply();
         notifyListeners(profile);
     }
@@ -155,34 +157,35 @@ final class MirrorSettings {
      * calibration has to reach the frame as well, or the sliders would go on
      * being overruled by something nothing on the screen still mentions.
      */
-    private static void writeCrop(
-            SharedPreferences.Editor editor, String prefix, @Nullable MirrorProfile.Crop crop) {
+    private static void writeCrop(SharedPreferences.Editor editor, String prefix,
+            String name, @Nullable MirrorProfile.Crop crop) {
         if (crop == null) {
-            editor.remove(prefix + "crop_left")
-                    .remove(prefix + "crop_top")
-                    .remove(prefix + "crop_right")
-                    .remove(prefix + "crop_bottom")
-                    .remove(prefix + "crop_rotation");
+            editor.remove(prefix + name + "left")
+                    .remove(prefix + name + "top")
+                    .remove(prefix + name + "right")
+                    .remove(prefix + name + "bottom")
+                    .remove(prefix + name + "rotation");
             return;
         }
-        editor.putFloat(prefix + "crop_left", crop.left)
-                .putFloat(prefix + "crop_top", crop.top)
-                .putFloat(prefix + "crop_right", crop.right)
-                .putFloat(prefix + "crop_bottom", crop.bottom)
-                .putInt(prefix + "crop_rotation", crop.rotation);
+        editor.putFloat(prefix + name + "left", crop.left)
+                .putFloat(prefix + name + "top", crop.top)
+                .putFloat(prefix + name + "right", crop.right)
+                .putFloat(prefix + name + "bottom", crop.bottom)
+                .putInt(prefix + name + "rotation", crop.rotation);
     }
 
     @Nullable
-    private static MirrorProfile.Crop readCrop(SharedPreferences preferences, String prefix) {
-        if (!preferences.contains(prefix + "crop_right")) {
+    private static MirrorProfile.Crop readCrop(
+            SharedPreferences preferences, String prefix, String name) {
+        if (!preferences.contains(prefix + name + "right")) {
             return null;
         }
         return new MirrorProfile.Crop(
-                preferences.getFloat(prefix + "crop_left", 0f),
-                preferences.getFloat(prefix + "crop_top", 0f),
-                preferences.getFloat(prefix + "crop_right", 1f),
-                preferences.getFloat(prefix + "crop_bottom", 1f),
-                preferences.getInt(prefix + "crop_rotation", 0)
+                preferences.getFloat(prefix + name + "left", 0f),
+                preferences.getFloat(prefix + name + "top", 0f),
+                preferences.getFloat(prefix + name + "right", 1f),
+                preferences.getFloat(prefix + name + "bottom", 1f),
+                preferences.getInt(prefix + name + "rotation", 0)
         );
     }
 
@@ -677,7 +680,8 @@ final class MirrorSettings {
                 preferences.getInt(prefix + "zoom", defaults.zoomPercent),
                 preferences.getInt(prefix + "offset_x", defaults.horizontalOffsetPercent),
                 preferences.getInt(prefix + "offset_y", defaults.verticalOffsetPercent),
-                readCrop(preferences, prefix)
+                readCrop(preferences, prefix, "crop_"),
+                readCrop(preferences, prefix, "crop_landscape_")
         );
     }
 

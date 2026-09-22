@@ -122,8 +122,9 @@ public class SettingsBackupCodecTest {
         // A frame is the whole of a profile's crop, so a backup that dropped
         // it would come back showing a different part of the screen.
         List<MirrorProfile> profiles = new java.util.ArrayList<>(sampleData(true).profiles);
-        profiles.set(0, profiles.get(0).withCrop(
-                new MirrorProfile.Crop(0f, 0.1475f, 1f, 0.7475f, 0)));
+        profiles.set(0, profiles.get(0)
+                .withCrop(new MirrorProfile.Crop(0f, 0.1475f, 1f, 0.7475f, 0))
+                .withCrop(new MirrorProfile.Crop(0.25f, 0f, 0.75f, 1f, 1)));
         SettingsBackupCodec.Data source = withProfiles(sampleData(true), profiles);
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
@@ -138,7 +139,13 @@ public class SettingsBackupCodecTest {
         assertEquals(1f, crop.right, 1e-4f);
         assertEquals(0.7475f, crop.bottom, 1e-4f);
         assertEquals(0, crop.rotation);
+        // The sideways frame is its own line and comes back on its own.
+        MirrorProfile.Crop sideways = profile(restored, MirrorProfile.CAMERA_ID).landscapeCrop;
+        assertNotNull(sideways);
+        assertEquals(0.25f, sideways.left, 1e-4f);
+        assertEquals(1, sideways.rotation);
         assertNull(profile(restored, MirrorProfile.NAVIGATION_ID).crop);
+        assertNull(profile(restored, MirrorProfile.NAVIGATION_ID).landscapeCrop);
     }
 
     private static SettingsBackupCodec.Data withProfiles(

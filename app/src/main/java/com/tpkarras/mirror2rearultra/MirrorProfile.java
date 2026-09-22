@@ -71,8 +71,19 @@ final class MirrorProfile {
     final int zoomPercent;
     final int horizontalOffsetPercent;
     final int verticalOffsetPercent;
+    /**
+     * The frame for a screen held upright, and the one for a screen on its
+     * side.
+     *
+     * <p>Two, because an app laid out sideways is a different picture and not
+     * the same one turned: the viewfinder changes shape and the buttons move
+     * to the edge that is now long. A frame taken from one and used on the
+     * other would cut a part of the screen nobody chose.
+     */
     @androidx.annotation.Nullable
     final Crop crop;
+    @androidx.annotation.Nullable
+    final Crop landscapeCrop;
 
     MirrorProfile(
             Id id,
@@ -111,7 +122,7 @@ final class MirrorProfile {
             int verticalOffsetPercent
     ) {
         this(id, customName, scaleMode, rotationDegrees, mirrorHorizontally, brightnessPercent,
-                zoomPercent, horizontalOffsetPercent, verticalOffsetPercent, null);
+                zoomPercent, horizontalOffsetPercent, verticalOffsetPercent, null, null);
     }
 
     MirrorProfile(
@@ -124,9 +135,12 @@ final class MirrorProfile {
             int zoomPercent,
             int horizontalOffsetPercent,
             int verticalOffsetPercent,
-            @androidx.annotation.Nullable Crop crop
+            @androidx.annotation.Nullable Crop crop,
+            @androidx.annotation.Nullable Crop landscapeCrop
     ) {
         this.crop = crop != null && crop.isUsable() ? crop : null;
+        this.landscapeCrop = landscapeCrop != null && landscapeCrop.isUsable()
+                ? landscapeCrop : null;
         this.id = normalizeId(id);
         this.customName = customName == null ? null : customName.trim();
         this.scaleMode = scaleMode;
@@ -173,17 +187,34 @@ final class MirrorProfile {
                 zoomPercent, horizontalOffsetPercent, value);
     }
 
-    /** The frame, or none: with one set the zoom and the offsets stand aside. */
-    MirrorProfile withCrop(@androidx.annotation.Nullable Crop value) {
+    /**
+     * The frame for the way the screen was held when it was drawn.
+     *
+     * <p>It replaces the frame for that way round and leaves the other alone,
+     * so a phone framed upright and then framed sideways keeps both.
+     */
+    MirrorProfile withCrop(Crop value) {
+        boolean upright = value.rotation % 2 == 0;
         return new MirrorProfile(id, customName, scaleMode, rotationDegrees, mirrorHorizontally,
                 brightnessPercent, zoomPercent, horizontalOffsetPercent, verticalOffsetPercent,
-                value);
+                upright ? value : crop, upright ? landscapeCrop : value);
     }
 
-    /** Back to the whole screen: the frame goes with the numbers. */
+    /** The frame to use with the screen turned this way, or none. */
+    @androidx.annotation.Nullable
+    Crop cropFor(int rotation) {
+        return rotation % 2 == 0 ? crop : landscapeCrop;
+    }
+
+    /** Whether a frame decides this profile's crop either way round. */
+    boolean hasCrop() {
+        return crop != null || landscapeCrop != null;
+    }
+
+    /** Back to the whole screen: both frames go with the numbers. */
     MirrorProfile resetCalibration() {
         return new MirrorProfile(id, customName, scaleMode, rotationDegrees, mirrorHorizontally,
-                brightnessPercent, 100, 0, 0, null);
+                brightnessPercent, 100, 0, 0, null, null);
     }
 
     MirrorProfile withCustomName(String value) {
@@ -197,7 +228,8 @@ final class MirrorProfile {
                 zoomPercent,
                 horizontalOffsetPercent,
                 verticalOffsetPercent,
-                crop
+                crop,
+                landscapeCrop
         );
     }
 
@@ -224,7 +256,8 @@ final class MirrorProfile {
                 newZoomPercent,
                 newHorizontalOffsetPercent,
                 newVerticalOffsetPercent,
-                crop
+                crop,
+                landscapeCrop
         );
     }
 

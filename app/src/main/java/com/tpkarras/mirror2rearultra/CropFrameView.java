@@ -138,16 +138,21 @@ public final class CropFrameView extends View {
             return;
         }
         drawn.set(frameInView());
+        // Everything drawn here stops short of the frame by more than one of
+        // the panel's own pixels. The panel shows exactly the inside, scaled,
+        // and a scrim ending exactly at the edge was smeared a pixel into the
+        // picture by that scaling - the panel's top row came out a tenth
+        // darker than the row beneath it.
+        float bleed = clearance();
         canvas.save();
-        canvas.clipOutRect(drawn);
+        canvas.clipOutRect(drawn.left - bleed, drawn.top - bleed,
+                drawn.right + bleed, drawn.bottom + bleed);
         canvas.drawPaint(scrim);
         canvas.restore();
-        // Both lines sit just outside the frame, so the panel - which shows
-        // exactly the inside - never shows either of them.
-        float outside = border.getStrokeWidth() / 2f + density;
+        float outside = bleed + border.getStrokeWidth() / 2f;
         canvas.drawRect(drawn.left - outside, drawn.top - outside,
                 drawn.right + outside, drawn.bottom + outside, border);
-        float inset = handle.getStrokeWidth() / 2f + density;
+        float inset = bleed + handle.getStrokeWidth() / 2f;
         float arm = Math.min(22f * density, Math.min(drawn.width(), drawn.height()) / 3f);
         drawCorner(canvas, drawn.left - inset, drawn.top - inset, arm, arm);
         drawCorner(canvas, drawn.right + inset, drawn.top - inset, -arm, arm);
@@ -164,6 +169,16 @@ public final class CropFrameView extends View {
                 drawn.left - inset, drawn.centerY() + bar / 2f, handle);
         canvas.drawLine(drawn.right + inset, drawn.centerY() - bar / 2f,
                 drawn.right + inset, drawn.centerY() + bar / 2f, handle);
+    }
+
+    /** How far off the frame anything drawn has to stay, in this view. */
+    private float clearance() {
+        if (crop == null) {
+            return density;
+        }
+        float perPanelPixel = Math.max(drawn.width(), drawn.height())
+                / (float) crop.panelLongSide();
+        return Math.max(density, perPanelPixel * 1.5f);
     }
 
     private void drawCorner(Canvas canvas, float x, float y, float armX, float armY) {

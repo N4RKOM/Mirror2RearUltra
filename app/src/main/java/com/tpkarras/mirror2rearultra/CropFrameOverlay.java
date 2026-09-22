@@ -55,6 +55,8 @@ final class CropFrameOverlay {
     @Nullable private CropFrameView frameView;
     @Nullable private CropFrame crop;
     @Nullable private View card;
+    @Nullable private View cardTitle;
+    @Nullable private View cardHint;
     @Nullable private TextView values;
     private int rotation;
     private int screenWidth;
@@ -111,6 +113,8 @@ final class CropFrameOverlay {
         View view = LayoutInflater.from(context).inflate(R.layout.overlay_crop_frame, null);
         frameView = view.findViewById(R.id.crop_frame);
         card = view.findViewById(R.id.crop_frame_card);
+        cardTitle = view.findViewById(R.id.crop_frame_title);
+        cardHint = view.findViewById(R.id.crop_frame_hint);
         values = view.findViewById(R.id.crop_frame_values);
         view.findViewById(R.id.crop_frame_done).setOnClickListener(button ->
                 finish(true, frameView == null ? null : frameView.frame()));
@@ -189,6 +193,8 @@ final class CropFrameOverlay {
         frameView = null;
         crop = null;
         card = null;
+        cardTitle = null;
+        cardHint = null;
         values = null;
         if (windowManager != null) {
             try {
@@ -201,12 +207,12 @@ final class CropFrameOverlay {
     }
 
     private CropFrame.Rect startingFrame(MirrorProfile profile) {
-        MirrorProfile.Crop saved = profile.crop;
-        if (saved != null && saved.rotation == rotation) {
+        MirrorProfile.Crop saved = profile.cropFor(rotation);
+        if (saved != null) {
             return new CropFrame.Rect(saved.left, saved.top, saved.right, saved.bottom);
         }
-        // Never framed, or framed with the screen the other way round: start
-        // from the part of the screen the profile shows as it stands.
+        // Never framed this way round: start from the part of the screen the
+        // profile shows as it stands.
         return crop.frameOf(new CropFrame.Calibration(profile.zoomPercent,
                 profile.horizontalOffsetPercent, profile.verticalOffsetPercent));
     }
@@ -251,7 +257,13 @@ final class CropFrameOverlay {
     /**
      * Keeps the card out of the frame: at the bottom where there is room, at
      * the top when the frame reaches down past it and leaves more room above.
-     * Inside the frame it would be on the panel as well.
+     * Inside the frame it is on the panel as well, since the panel is showing
+     * this very screen.
+     *
+     * <p>A frame that leaves room nowhere - the whole screen, say - gets the
+     * card stripped to its buttons and the reading, which is a third of the
+     * height and so a third of the intrusion. The words it drops have been
+     * read by then: they say what to drag.
      */
     private void placeCard(WindowInsets insets) {
         if (root == null || card == null || frameView == null) {
@@ -265,6 +277,12 @@ final class CropFrameOverlay {
         int cardHeight = card.getHeight();
         float roomBelow = height - bars.bottom - frame.bottom;
         float roomAbove = frame.top - bars.top;
+        boolean fits = Math.max(roomBelow, roomAbove) >= cardHeight + 2 * margin;
+        int words = fits ? View.VISIBLE : View.GONE;
+        if (cardTitle != null && cardTitle.getVisibility() != words) {
+            cardTitle.setVisibility(words);
+            cardHint.setVisibility(words);
+        }
         boolean top = roomBelow < cardHeight + 2 * margin && roomAbove > roomBelow;
         FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) card.getLayoutParams();
         int gravity = (top ? Gravity.TOP : Gravity.BOTTOM) | Gravity.CENTER_HORIZONTAL;

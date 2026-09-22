@@ -213,14 +213,10 @@ final class SettingsBackupCodec {
             properties.setProperty(prefix + "zoom", String.valueOf(profile.zoomPercent));
             properties.setProperty(prefix + "offsetX", String.valueOf(profile.horizontalOffsetPercent));
             properties.setProperty(prefix + "offsetY", String.valueOf(profile.verticalOffsetPercent));
-            if (profile.crop != null) {
-                // One line rather than five keys: a frame is read and written
-                // whole, and an older file simply has no line at all.
-                properties.setProperty(prefix + "crop", String.format(
-                        java.util.Locale.ROOT, "%f,%f,%f,%f,%d",
-                        profile.crop.left, profile.crop.top,
-                        profile.crop.right, profile.crop.bottom, profile.crop.rotation));
-            }
+            // One line rather than five keys: a frame is read and written
+            // whole, and an older file simply has no line at all.
+            writeCrop(properties, prefix + "crop", profile.crop);
+            writeCrop(properties, prefix + "crop.landscape", profile.landscapeCrop);
         }
 
         properties.setProperty("assignment.count", String.valueOf(data.assignments.size()));
@@ -289,7 +285,8 @@ final class SettingsBackupCodec {
                     integer(properties, prefix + "zoom", 100, 200),
                     integer(properties, prefix + "offsetX", -50, 50),
                     integer(properties, prefix + "offsetY", -50, 50),
-                    crop(properties, prefix + "crop")
+                    crop(properties, prefix + "crop"),
+                    crop(properties, prefix + "crop.landscape")
             );
             profiles.add(profile);
         }
@@ -447,6 +444,15 @@ final class SettingsBackupCodec {
             throw new BackupException("missing_" + key);
         }
         return value;
+    }
+
+    private static void writeCrop(
+            Properties properties, String key, @Nullable MirrorProfile.Crop crop) {
+        if (crop == null) {
+            return;
+        }
+        properties.setProperty(key, String.format(java.util.Locale.ROOT, "%f,%f,%f,%f,%d",
+                crop.left, crop.top, crop.right, crop.bottom, crop.rotation));
     }
 
     /** A frame, when the file has one: four fractions and a rotation. */

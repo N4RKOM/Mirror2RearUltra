@@ -1,6 +1,9 @@
 package com.tpkarras.mirror2rearultra;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -30,6 +33,36 @@ public class MirrorProfileTest {
         );
 
         assertEquals(10, profile.brightnessPercent);
+    }
+
+    @Test
+    public void aFrameBelongsToTheWayTheScreenWasHeld() {
+        // Sideways an app is laid out afresh, so the two frames are kept
+        // apart rather than one standing in for the other.
+        MirrorProfile profile = new MirrorProfile(
+                MirrorProfile.Id.CAMERA, MirrorProfile.ScaleMode.FILL, 0, false, 100)
+                .withCrop(new MirrorProfile.Crop(0f, 0.15f, 1f, 0.75f, 0))
+                .withCrop(new MirrorProfile.Crop(0.2f, 0f, 0.8f, 1f, 1));
+
+        assertEquals(0.15f, profile.cropFor(0).top, 1e-4f);
+        assertEquals(0.15f, profile.cropFor(2).top, 1e-4f);
+        assertEquals(0.2f, profile.cropFor(1).left, 1e-4f);
+        assertEquals(0.2f, profile.cropFor(3).left, 1e-4f);
+        assertTrue(profile.hasCrop());
+        assertNull(profile.resetCalibration().cropFor(0));
+        assertNull(profile.resetCalibration().cropFor(1));
+        assertFalse(profile.resetCalibration().hasCrop());
+    }
+
+    @Test
+    public void aFrameOnlyOneWayRoundLeavesTheOtherWayUnframed() {
+        MirrorProfile profile = new MirrorProfile(
+                MirrorProfile.Id.CAMERA, MirrorProfile.ScaleMode.FILL, 0, false, 100)
+                .withCrop(new MirrorProfile.Crop(0f, 0.15f, 1f, 0.75f, 0));
+
+        assertNull(profile.cropFor(1));
+        // The rest of the profile rides along with the frame.
+        assertEquals(MirrorProfile.ScaleMode.FILL, profile.scaleMode);
     }
 
     @Test

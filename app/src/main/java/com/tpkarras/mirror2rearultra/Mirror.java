@@ -863,17 +863,20 @@ public class Mirror extends Activity implements
     /**
      * How the profile's frame lands on the panel, or null when it has none.
      *
-     * <p>A frame is held against the screen the way round it was drawn. Turn
-     * the phone and the same fractions would cut a different part of a
-     * re-laid-out screen, so the older zoom and offsets take over until it is
-     * turned back.
+     * <p>Each way round the screen can be held has a frame of its own, since
+     * an app laid out sideways is a different picture rather than the same one
+     * turned. Until the way in hand has been framed, the older zoom and
+     * offsets take over.
      */
     @Nullable
     private CropFrame.Projection framedProjection(
             MirrorProfile profile, int rotation, @Nullable Display.Mode mode,
             DisplayMetrics rearMetrics) {
-        MirrorProfile.Crop crop = profile.crop;
-        if (crop == null || crop.rotation != rotation) {
+        // Held against the way the screen is turned now, not the way it was
+        // framed: an upright frame and a sideways one are kept apart, and the
+        // one that matches is the one that applies.
+        MirrorProfile.Crop crop = profile.cropFor(rotation);
+        if (crop == null) {
             return null;
         }
         return cropFrameFor(profile, rotation, mode, rearMetrics)
