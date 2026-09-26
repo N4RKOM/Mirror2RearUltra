@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Size of a widget on a free page, in the builder's widget sheet.
+
+    The same range a pinch in the preview allows, 40 to 220 per cent, in steps
+    of five so a hundred can be hit exactly. Sits in the same track tone as
+    the segmented rows around it.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/hyper_segment_track"
+    android:paddingStart="@dimen/spacing_md"
+    android:paddingTop="18dp"
+    android:paddingEnd="@dimen/spacing_md"
+    android:paddingBottom="18dp">
+
+    <com.tpkarras.mirror2rearultra.HyperSlider
+        android:id="@+id/widget_size_slider"
+        style="@style/HyperOS.Slider"
+        app:hyperStepSize="5"
+        app:hyperValueFrom="40"
+        app:hyperValueTo="220" />
+</FrameLayout>

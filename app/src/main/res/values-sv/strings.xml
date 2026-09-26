@@ -462,4 +462,5 @@
     <string name="dashboard_page_label_named">Sida %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">En sida utanför automatiskt byte går fortfarande att nå med svep. Duplicera utseende lägger till en sida med samma layout, orientering och namn, men tom: en widget finns bara på en sida.</string>
     <string name="panel_trigger_template">Mall: %1$s</string>
+    <string name="dashboard_builder_size_percent">Storlek: %1$d%%</string>
 </resources>

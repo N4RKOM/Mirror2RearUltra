@@ -481,4 +481,5 @@
     <string name="dashboard_page_label_named">Page %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">A page left out of automatic cycling is still there to swipe to. Duplicate look adds a page with the same layout, orientation and name, but empty: a widget sits on one page only.</string>
     <string name="panel_trigger_template">Template: %1$s</string>
+    <string name="dashboard_builder_size_percent">Size: %1$d%%</string>
 </resources>

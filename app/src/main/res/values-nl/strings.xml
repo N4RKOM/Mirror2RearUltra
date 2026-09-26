@@ -462,4 +462,5 @@
     <string name="dashboard_page_label_named">Pagina %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">Een pagina buiten het automatisch wisselen blijft bereikbaar door te vegen. Uiterlijk dupliceren voegt een pagina toe met dezelfde indeling, stand en naam, maar leeg: een widget staat maar op één pagina.</string>
     <string name="panel_trigger_template">Sjabloon: %1$s</string>
+    <string name="dashboard_builder_size_percent">Grootte: %1$d%%</string>
 </resources>

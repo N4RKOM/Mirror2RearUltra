@@ -470,4 +470,5 @@
     <string name="dashboard_page_label_named">الصفحة %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">الصفحة المستبعدة من التقليب التلقائي تبقى متاحة بالسحب. يضيف تكرار المظهر صفحة بنفس التخطيط والاتجاه والاسم، لكنها فارغة: الأداة تكون في صفحة واحدة فقط.</string>
     <string name="panel_trigger_template">القالب: %1$s</string>
+    <string name="dashboard_builder_size_percent">الحجم: %1$d%%</string>
 </resources>

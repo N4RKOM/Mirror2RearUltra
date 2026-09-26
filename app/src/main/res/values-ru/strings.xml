@@ -486,4 +486,5 @@
     <string name="dashboard_page_label_named">Страница %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">Страница вне автолистания остаётся доступной свайпом. «Дублировать вид» добавляет страницу с тем же видом, ориентацией и названием, но пустую: виджет стоит только на одной странице.</string>
     <string name="panel_trigger_template">Шаблон «%1$s»</string>
+    <string name="dashboard_builder_size_percent">Размер: %1$d%%</string>
 </resources>

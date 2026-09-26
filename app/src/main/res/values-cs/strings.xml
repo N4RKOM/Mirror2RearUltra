@@ -466,4 +466,5 @@
     <string name="dashboard_page_label_named">Stránka %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">Stránka vyřazená z automatického přepínání zůstává dostupná přejetím. Duplikovat vzhled přidá stránku se stejným rozvržením, orientací a názvem, ale prázdnou: widget je vždy jen na jedné stránce.</string>
     <string name="panel_trigger_template">Šablona %1$s</string>
+    <string name="dashboard_builder_size_percent">Velikost: %1$d%%</string>
 </resources>

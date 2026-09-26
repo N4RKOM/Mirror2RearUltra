@@ -464,4 +464,5 @@
     <string name="dashboard_page_label_named">Pagina %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">O pagină scoasă din derularea automată rămâne accesibilă prin glisare. Duplică aspectul adaugă o pagină cu același aspect, orientare și nume, dar goală: un widget stă doar pe o pagină.</string>
     <string name="panel_trigger_template">Șablon: %1$s</string>
+    <string name="dashboard_builder_size_percent">Dimensiune: %1$d%%</string>
 </resources>

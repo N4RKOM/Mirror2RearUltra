@@ -462,4 +462,5 @@
     <string name="dashboard_page_label_named">Leht %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">Automaatsest vahetusest välja jäetud leht on pühkides endiselt kättesaadav. Kopeeri välimus lisab sama paigutuse, suuna ja nimega lehe, kuid tühjana: vidin on korraga vaid ühel lehel.</string>
     <string name="panel_trigger_template">Mall: %1$s</string>
+    <string name="dashboard_builder_size_percent">Suurus: %1$d%%</string>
 </resources>

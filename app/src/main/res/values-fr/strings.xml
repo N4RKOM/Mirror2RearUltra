@@ -462,4 +462,5 @@
     <string name="dashboard_page_label_named">Page %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">Une page exclue du défilement automatique reste accessible d\'un glissement. Dupliquer l\'apparence ajoute une page avec la même disposition, orientation et nom, mais vide : un widget n\'est que sur une seule page.</string>
     <string name="panel_trigger_template">Modèle : %1$s</string>
+    <string name="dashboard_builder_size_percent">Taille: %1$d%%</string>
 </resources>

@@ -460,4 +460,5 @@
     <string name="dashboard_page_label_named">%1$d ページ目 · %2$s</string>
     <string name="dashboard_page_cycle_help">自動切り替えから外したページもスワイプで表示できます。「見た目を複製」は同じレイアウト・向き・名前の空のページを追加します。ウィジェットは 1 つのページにしか置けません。</string>
     <string name="panel_trigger_template">テンプレート：%1$s</string>
+    <string name="dashboard_builder_size_percent">大きさ：%1$d%%</string>
 </resources>

@@ -462,4 +462,5 @@
     <string name="dashboard_page_label_named">Σελίδα %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">Μια σελίδα εκτός αυτόματης εναλλαγής παραμένει διαθέσιμη με σάρωση. Η αντιγραφή εμφάνισης προσθέτει σελίδα με ίδια διάταξη, προσανατολισμό και όνομα, αλλά κενή: ένα γραφικό στοιχείο βρίσκεται σε μία μόνο σελίδα.</string>
     <string name="panel_trigger_template">Πρότυπο: %1$s</string>
+    <string name="dashboard_builder_size_percent">Μέγεθος: %1$d%%</string>
 </resources>

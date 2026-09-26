@@ -462,4 +462,5 @@
     <string name="dashboard_page_label_named">صفحهٔ %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">صفحه‌ای که از ورق‌زدن خودکار بیرون است، با کشیدن انگشت همچنان در دسترس است. «تکثیر ظاهر» صفحه‌ای با همان چیدمان، جهت و نام اضافه می‌کند، ولی خالی: هر ابزارک فقط در یک صفحه است.</string>
     <string name="panel_trigger_template">الگو: %1$s</string>
+    <string name="dashboard_builder_size_percent">اندازه: %1$d%%</string>
 </resources>

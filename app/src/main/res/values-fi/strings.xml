@@ -462,4 +462,5 @@
     <string name="dashboard_page_label_named">Sivu %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">Automaattisesta vaihdosta pois jätetylle sivulle pääsee edelleen pyyhkäisemällä. Kopioi ulkoasu lisää sivun, jolla on sama asettelu, suunta ja nimi, mutta tyhjänä: widget on vain yhdellä sivulla.</string>
     <string name="panel_trigger_template">Malli: %1$s</string>
+    <string name="dashboard_builder_size_percent">Koko: %1$d%%</string>
 </resources>

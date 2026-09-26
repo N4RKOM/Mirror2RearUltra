@@ -792,21 +792,27 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     }));
         }
 
-        // Size on every page, the free one included. A pinch sets it there
+        // Size on every page, the free one included: a pinch sets it there
         // too, but a pinch cannot say "back to normal", and a widget left
-        // large from some earlier arrangement had no other way down.
-        column.addView(segmentedRow(R.string.dashboard_builder_size_label,
-                new String[]{
-                        getString(R.string.dashboard_builder_small),
-                        getString(R.string.dashboard_builder_normal),
-                        getString(R.string.dashboard_builder_large)},
-                DashboardWidgetLayout.loadSize(this, widget).ordinal(),
-                getString(R.string.dashboard_builder_size, label(widget)),
-                choice -> {
-                    DashboardWidgetLayout.saveSize(this, widget,
-                            DashboardWidgetLayout.Size.values()[choice]);
-                    notifyDashboardChanged();
-                }));
+        // large from some earlier arrangement had no other way down. On a
+        // free page the size is continuous, so it gets a slider rather than
+        // three steps that could only ever show the nearest one.
+        if (freeLayout) {
+            column.addView(sizeSlider(widget));
+        } else {
+            column.addView(segmentedRow(R.string.dashboard_builder_size_label,
+                    new String[]{
+                            getString(R.string.dashboard_builder_small),
+                            getString(R.string.dashboard_builder_normal),
+                            getString(R.string.dashboard_builder_large)},
+                    DashboardWidgetLayout.loadSize(this, widget).ordinal(),
+                    getString(R.string.dashboard_builder_size, label(widget)),
+                    choice -> {
+                        DashboardWidgetLayout.saveSize(this, widget,
+                                DashboardWidgetLayout.Size.values()[choice]);
+                        notifyDashboardChanged();
+                    }));
+        }
 
         if (DashboardWidgetLayout.supportsVariant(widget)) {
             column.addView(segmentedRow(R.string.dashboard_builder_variant_label,
@@ -959,6 +965,31 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             reload();
         });
         column.addView(remove, spaced(12));
+    }
+
+    /** The free page's size control: a label with the percentage, and a slider. */
+    private LinearLayout sizeSlider(DashboardWidgetLayout.Widget widget) {
+        LinearLayout column = new LinearLayout(this);
+        column.setOrientation(LinearLayout.VERTICAL);
+        column.setLayoutParams(spaced());
+        TextView label = (TextView) getLayoutInflater()
+                .inflate(R.layout.widget_segment_label, column, false);
+        column.addView(label);
+        View track = getLayoutInflater().inflate(R.layout.widget_size_slider, column, false);
+        HyperSlider slider = track.findViewById(R.id.widget_size_slider);
+        int percent = Math.round(DashboardWidgetLayout.scale(this, widget) * 100f);
+        label.setText(getString(R.string.dashboard_builder_size_percent, percent));
+        slider.setValue(percent);
+        slider.setContentDescription(getString(R.string.dashboard_builder_size, label(widget)));
+        slider.addOnChangeListener((control, value, fromUser) -> {
+            label.setText(getString(R.string.dashboard_builder_size_percent, Math.round(value)));
+            if (fromUser) {
+                DashboardWidgetLayout.saveScale(this, widget, value / 100f);
+                notifyDashboardChanged();
+            }
+        });
+        column.addView(track);
+        return column;
     }
 
     private LinearLayout.LayoutParams spaced() {

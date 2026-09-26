@@ -460,4 +460,5 @@
     <string name="dashboard_page_label_named">第 %1$d 页 · %2$s</string>
     <string name="dashboard_page_cycle_help">不参与自动翻页的页面仍可通过滑动查看。“复制外观”会添加一个布局、方向和名称相同但为空的页面：一个小组件只能在一个页面上。</string>
     <string name="panel_trigger_template">模板：%1$s</string>
+    <string name="dashboard_builder_size_percent">大小：%1$d%%</string>
 </resources>

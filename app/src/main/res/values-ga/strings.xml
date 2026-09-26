@@ -468,4 +468,5 @@
     <string name="dashboard_page_label_named">Leathanach %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">Tá leathanach atá fágtha as an athrú uathoibríoch fós ar fáil le svaidhpeáil. Cuireann Dúbailt an chuma leathanach leis a bhfuil an leagan amach, an treoshuíomh agus an t-ainm céanna air, ach folamh: ní bhíonn giuirléid ach ar leathanach amháin.</string>
     <string name="panel_trigger_template">Teimpléad: %1$s</string>
+    <string name="dashboard_builder_size_percent">Méid: %1$d%%</string>
 </resources>

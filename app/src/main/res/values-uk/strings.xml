@@ -466,4 +466,5 @@
     <string name="dashboard_page_label_named">Сторінка %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">Сторінка поза автогортанням лишається доступною свайпом. «Дублювати вигляд» додає сторінку з тим самим виглядом, орієнтацією й назвою, але порожню: віджет стоїть лише на одній сторінці.</string>
     <string name="panel_trigger_template">Шаблон «%1$s»</string>
+    <string name="dashboard_builder_size_percent">Розмір: %1$d%%</string>
 </resources>

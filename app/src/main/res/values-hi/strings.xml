@@ -462,4 +462,5 @@
     <string name="dashboard_page_label_named">पेज %1$d · %2$s</string>
     <string name="dashboard_page_cycle_help">अपने आप बदलने से बाहर रखा गया पेज स्वाइप से मिलता रहता है। रूप की कॉपी उसी लेआउट, ओरिएंटेशन और नाम वाला खाली पेज जोड़ती है: एक विजेट सिर्फ़ एक पेज पर होता है।</string>
     <string name="panel_trigger_template">टेम्पलेट: %1$s</string>
+    <string name="dashboard_builder_size_percent">आकार: %1$d%%</string>
 </resources>
