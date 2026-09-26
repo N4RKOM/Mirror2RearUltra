@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The window the builder's widget editor shows the preview through. Its
+     corners match the preview card's, and the outline clips a preview taller
+     than the window to the same rounded shape. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@android:color/black" />
+    <corners android:radius="@dimen/group_corner" />
+</shape>

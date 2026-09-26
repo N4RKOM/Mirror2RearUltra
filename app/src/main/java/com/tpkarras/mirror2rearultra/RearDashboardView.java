@@ -96,6 +96,7 @@ public final class RearDashboardView extends View {
      * measured once by drawing it. See {@link #drawIcon}.
      */
     private static final Map<Icon, RectF> ICON_INK = new EnumMap<>(Icon.class);
+    @Nullable private Runnable drawnListener;
     /** Follow-up frames asked for in a row by {@link #drawFree}; see there. */
     private int freeSettlePasses;
     @Nullable private DashboardWidgetLayout.Widget selectedWidget;
@@ -522,6 +523,32 @@ public final class RearDashboardView extends View {
             }
         }
         return nearest == null ? null : nearest.widget;
+    }
+
+    /**
+     * Told after each frame, once the widgets have their bounds for it.
+     *
+     * <p>For the builder's editor, which moves the preview so a widget sits in
+     * its window and can only know where the widget is once it is drawn.
+     */
+    void setOnDrawnListener(@Nullable Runnable listener) {
+        drawnListener = listener;
+    }
+
+    /** Where a widget was drawn in the last frame, or null if it was not. */
+    @Nullable
+    RectF widgetBounds(DashboardWidgetLayout.Widget widget) {
+        RectF bounds = boundsOf(widget);
+        return bounds == null ? null : new RectF(bounds);
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+        Runnable listener = drawnListener;
+        if (listener != null) {
+            post(listener);
+        }
     }
 
     @Override

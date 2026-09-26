@@ -375,16 +375,6 @@
         <item name="android:textAppearance">@style/HyperOS.Text.Title</item>
     </style>
 
-    <!-- Widget settings sheet in the builder. A tone above the page ground,
-         so the sheet's edge shows on a black page in the dark theme. -->
-    <style name="HyperOS.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
-        <item name="bottomSheetStyle">@style/HyperOS.BottomSheet</item>
-    </style>
-
-    <style name="HyperOS.BottomSheet" parent="Widget.Material3.BottomSheet.Modal">
-        <item name="backgroundTint">@color/hyper_surface</item>
-    </style>
-
     <style name="HyperOS.Snackbar" parent="Widget.Material3.Snackbar">
         <item name="shapeAppearanceOverlay">@style/HyperOS.Shape.Snackbar</item>
         <item name="backgroundTint">@color/hyper_text_primary</item>

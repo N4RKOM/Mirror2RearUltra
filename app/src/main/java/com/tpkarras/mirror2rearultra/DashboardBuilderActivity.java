@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Point;
+import android.graphics.RectF;
 import android.hardware.display.DisplayManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
@@ -26,9 +28,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.widget.NestedScrollView;
 
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.bottomsheet.BottomSheetDragHandleView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.card.MaterialCardView;
@@ -74,7 +73,28 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private TextView listHint;
     /** The widget picked in the preview or the list, outlined in both. */
     @Nullable private DashboardWidgetLayout.Widget selectedWidget;
-    @Nullable private BottomSheetDialog widgetSheet;
+    private MaterialToolbar toolbar;
+    private View editor;
+    /** Where the preview is shown while a widget is being edited. */
+    private FrameLayout editorWindow;
+    private TextView editorTitle;
+    private NestedScrollView editorScroll;
+    private LinearLayout editorRows;
+    /** The widget the editor is open for, or null while it is closed. */
+    @Nullable private DashboardWidgetLayout.Widget editingWidget;
+    /** Where the preview came from, to put it back when the editor closes. */
+    @Nullable private ViewGroup previewHome;
+    private int previewHomeIndex;
+    private int builderScrollY;
+    /** Set when the preview should be moved to the edited widget once drawn. */
+    private boolean focusPending;
+    /** Brings an editor control back in line after a pinch in the preview. */
+    @Nullable private Runnable editorSync;
+    private final OnBackPressedCallback closeEditorOnBack = new OnBackPressedCallback(false) {
+        @Override public void handleOnBackPressed() {
+            closeWidgetEditor();
+        }
+    };
     /**
      * The page being edited: the tab that is checked, the page the preview
      * shows, and the page the layout rows and the widget list belong to.
@@ -84,8 +104,14 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     @Override protected void onCreate(@Nullable Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_dashboard_builder);
-        MaterialToolbar toolbar = findViewById(R.id.dashboard_builder_toolbar);
-        toolbar.setNavigationOnClickListener(view -> finish());
+        toolbar = findViewById(R.id.dashboard_builder_toolbar);
+        toolbar.setNavigationOnClickListener(view -> {
+            if (editingWidget != null) {
+                closeWidgetEditor();
+            } else {
+                finish();
+            }
+        });
         toolbar.inflateMenu(R.menu.dashboard_builder);
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.dashboard_builder_menu_help) {
@@ -100,6 +126,14 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         });
 
         scroll = findViewById(R.id.dashboard_builder_scroll);
+        editor = findViewById(R.id.dashboard_builder_editor);
+        editorWindow = findViewById(R.id.dashboard_builder_editor_window);
+        editorTitle = findViewById(R.id.dashboard_builder_editor_title);
+        editorScroll = findViewById(R.id.dashboard_builder_editor_scroll);
+        editorRows = findViewById(R.id.dashboard_builder_editor_rows);
+        findViewById(R.id.dashboard_builder_editor_done).setOnClickListener(view ->
+                closeWidgetEditor());
+        getOnBackPressedDispatcher().addCallback(this, closeEditorOnBack);
         pageTabs = findViewById(R.id.dashboard_builder_page_tabs);
         addPageButton = findViewById(R.id.dashboard_builder_page_add);
         pageActionsButton = findViewById(R.id.dashboard_builder_page_actions);
@@ -187,9 +221,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         MediaWidgetState.removeListener(mediaListener);
-        if (widgetSheet != null) {
-            widgetSheet.dismiss();
-        }
+        preview.setOnDrawnListener(null);
         super.onDestroy();
     }
 
@@ -584,10 +616,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                             : index == page.size() - 1 ? R.style.HyperOS_Shape_RowBottom
                             : R.style.HyperOS_Shape_RowMiddle).build());
             markSelected(row, widget == selectedWidget);
-            row.setOnClickListener(view -> {
-                selectWidget(widget);
-                openWidgetSheet(widget);
-            });
+            row.setOnClickListener(view -> openWidgetEditor(widget));
             row.setOnLongClickListener(view -> {
                 ClipData data = ClipData.newPlainText("widget", widget.name());
                 return view.startDragAndDrop(data, new View.DragShadowBuilder(view), widget, 0);
@@ -692,55 +721,137 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     }
 
     // ------------------------------------------------------------------
-    // Widget sheet
+    // Widget editor
     // ------------------------------------------------------------------
 
     /**
-     * Opens a widget's settings over the lower half of the screen.
+     * Opens a widget's settings, with the preview held above them.
      *
-     * <p>They were nine rows inside every card, so a page of five widgets was
-     * several screens of controls to scroll past. The builder scrolls the
-     * preview into view first, so each change can be watched as it lands.
+     * <p>They were nine rows inside every card, then a sheet over the lower
+     * half of the screen - which covered the preview whenever the page was
+     * upright, and slid the page about to uncover it. The preview itself now
+     * moves into the editor's window, so it stays in sight however far the
+     * settings are scrolled. A sideways page fits the window whole. An
+     * upright one is shown the full width, far taller than the window, which
+     * moves to whichever widget is being edited.
+     *
+     * <p>The preview is moved, not copied: more than one of this view on
+     * screen at once shared each other's drawings on HyperOS.
+     *
+     * <p>Tapping another widget in the preview while the editor is open
+     * switches the editor to it.
      */
-    private void openWidgetSheet(DashboardWidgetLayout.Widget widget) {
-        if (widgetSheet != null) {
-            widgetSheet.dismiss();
+    private void openWidgetEditor(DashboardWidgetLayout.Widget widget) {
+        if (widget == editingWidget) {
+            return;
         }
-        scroll.smoothScrollTo(0, Math.max(0, previewContainer.getTop() - dp(56)));
-        BottomSheetDialog sheet = new BottomSheetDialog(this, R.style.HyperOS_BottomSheetDialog);
-        NestedScrollView content = new NestedScrollView(this);
-        LinearLayout column = new LinearLayout(this);
-        column.setOrientation(LinearLayout.VERTICAL);
-        int margin = getResources().getDimensionPixelSize(R.dimen.page_margin_horizontal);
-        column.setPadding(margin, 0, margin, dp(24));
-        column.addView(new BottomSheetDragHandleView(this), new LinearLayout.LayoutParams(-1, -2));
-        content.addView(column, new ViewGroup.LayoutParams(-1, -2));
-        fillWidgetSheet(column, widget, sheet);
-        sheet.setContentView(content);
-        if (sheet.getWindow() != null) {
-            // Light enough that the preview reads through it.
-            sheet.getWindow().setDimAmount(0.2f);
+        boolean opening = editingWidget == null;
+        editingWidget = widget;
+        editorTitle.setText(label(widget));
+        editorRows.removeAllViews();
+        editorSync = null;
+        fillWidgetSheet(editorRows, widget);
+        editorScroll.scrollTo(0, 0);
+        if (opening) {
+            builderScrollY = scroll.getScrollY();
+            previewHome = (ViewGroup) previewContainer.getParent();
+            previewHomeIndex = previewHome.indexOfChild(previewContainer);
+            previewHome.removeView(previewContainer);
+            editorWindow.addView(previewContainer);
+            preview.setOnDrawnListener(this::focusEditedWidget);
+            editor.setAlpha(0f);
+            editor.setVisibility(View.VISIBLE);
+            editor.animate().alpha(1f).setDuration(160L).start();
+            closeEditorOnBack.setEnabled(true);
+            toolbar.getMenu().setGroupVisible(0, false);
+            // Sized again once the editor has been laid out: until then its
+            // window has no width and its height is a guess.
+            editor.post(() -> {
+                if (editingWidget != null) {
+                    focusPending = true;
+                    refreshPreview();
+                }
+            });
         }
-        BottomSheetBehavior<?> behavior = sheet.getBehavior();
-        behavior.setPeekHeight(Math.round(getResources().getDisplayMetrics().heightPixels * 0.5f));
-        behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        sheet.setOnDismissListener(dialog -> {
-            if (widgetSheet == sheet) {
-                widgetSheet = null;
-            }
-        });
-        widgetSheet = sheet;
-        sheet.show();
+        selectWidget(widget);
+        focusPending = true;
+        refreshPreview();
     }
 
-    private void fillWidgetSheet(LinearLayout column, DashboardWidgetLayout.Widget widget,
-            BottomSheetDialog sheet) {
-        TextView title = new TextView(this);
-        title.setText(label(widget));
-        title.setTextAppearance(R.style.HyperOS_Text_Title);
-        title.setPadding(0, 0, 0, dp(4));
-        column.addView(title);
+    private void closeWidgetEditor() {
+        if (editingWidget == null) {
+            return;
+        }
+        editingWidget = null;
+        editorSync = null;
+        focusPending = false;
+        closeEditorOnBack.setEnabled(false);
+        toolbar.getMenu().setGroupVisible(0, true);
+        preview.setOnDrawnListener(null);
+        previewContainer.animate().cancel();
+        previewContainer.setTranslationY(0f);
+        editorWindow.removeView(previewContainer);
+        if (previewHome != null) {
+            previewHome.addView(previewContainer, previewHomeIndex,
+                    new LinearLayout.LayoutParams(-1, dp(150)));
+        }
+        editor.setVisibility(View.GONE);
+        editorRows.removeAllViews();
+        refreshPreview();
+        scroll.post(() -> scroll.scrollTo(0, builderScrollY));
+    }
 
+    /**
+     * Sizes the preview for the editor's window: the full width, and the
+     * window as tall as the page is sideways, or a part of the screen when it
+     * is upright and would never fit.
+     */
+    private void layoutEditorPreview(DashboardWidgetLayout.Orientation orientation) {
+        boolean landscape = orientation == DashboardWidgetLayout.Orientation.LANDSCAPE;
+        int width = editorWindow.getWidth() > 0 ? editorWindow.getWidth() : previewMaxWidth();
+        int height = Math.round(width / panelAspect(orientation));
+        FrameLayout.LayoutParams card = new FrameLayout.LayoutParams(width, height);
+        previewContainer.setLayoutParams(card);
+        ViewGroup.LayoutParams window = editorWindow.getLayoutParams();
+        int available = editor.getHeight() > 0
+                ? editor.getHeight() : getResources().getDisplayMetrics().heightPixels;
+        window.height = landscape ? ViewGroup.LayoutParams.WRAP_CONTENT
+                : Math.min(height, Math.round(available * 0.42f));
+        editorWindow.setLayoutParams(window);
+        if (landscape) {
+            previewContainer.animate().cancel();
+            previewContainer.setTranslationY(0f);
+        }
+    }
+
+    /**
+     * Moves an upright preview so the edited widget sits in the middle of the
+     * window, as far as the preview's ends allow.
+     *
+     * <p>Only when asked - on opening, and on changing widget or page - and
+     * never after a frame the finger caused: moving the preview under a
+     * widget being dragged would drag it somewhere else.
+     */
+    private void focusEditedWidget() {
+        if (!focusPending || editingWidget == null) {
+            return;
+        }
+        RectF bounds = preview.widgetBounds(editingWidget);
+        int window = editorWindow.getHeight();
+        int card = previewContainer.getHeight();
+        if (bounds == null || window <= 0 || card <= 0) {
+            return;
+        }
+        focusPending = false;
+        float target = 0f;
+        if (card > window) {
+            float middle = preview.getTop() + bounds.centerY();
+            target = Math.max(window - card, Math.min(0f, window / 2f - middle));
+        }
+        previewContainer.animate().translationY(target).setDuration(220L).start();
+    }
+
+    private void fillWidgetSheet(LinearLayout column, DashboardWidgetLayout.Widget widget) {
         int pageCount = DashboardWidgetLayout.loadPageCount(this);
         if (pageCount > 1) {
             String[] pageLabels = new String[pageCount];
@@ -760,6 +871,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                             // widget simply vanishing from the list.
                             selectPage(target);
                             selectWidget(widget);
+                            focusPending = true;
+                            refreshPreview();
                         }
                     });
             // Pages a full-screen widget keeps to itself are shown but not
@@ -960,7 +1073,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 .inflate(R.layout.widget_builder_remove_button, column, false);
         remove.setOnClickListener(view -> {
             DashboardWidgetLayout.setWidgetEnabled(this, widget, false);
-            sheet.dismiss();
+            closeWidgetEditor();
             selectWidget(null);
             reload();
         });
@@ -981,6 +1094,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         label.setText(getString(R.string.dashboard_builder_size_percent, percent));
         slider.setValue(percent);
         slider.setContentDescription(getString(R.string.dashboard_builder_size, label(widget)));
+        editorSync = () -> slider.setValue(
+                Math.round(DashboardWidgetLayout.scale(this, widget) * 100f));
         slider.addOnChangeListener((control, value, fromUser) -> {
             label.setText(getString(R.string.dashboard_builder_size_percent, Math.round(value)));
             if (fromUser) {
@@ -1170,7 +1285,11 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         bindingSnap = true;
         snapSwitch.setChecked(DashboardWidgetLayout.isGridSnapEnabled(this));
         bindingSnap = false;
-        sizePreviewToPanel(orientation);
+        if (editingWidget != null) {
+            layoutEditorPreview(orientation);
+        } else {
+            sizePreviewToPanel(orientation);
+        }
     }
 
     /** Redraws the preview when the session starts, stops or changes track. */
@@ -1188,9 +1307,10 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private void bindPreview() {
         preview.setOnWidgetSelectedListener(new RearDashboardView.OnWidgetSelectedListener() {
             @Override public void onWidgetSelected(@Nullable DashboardWidgetLayout.Widget widget) {
-                selectWidget(widget);
                 if (widget != null) {
-                    openWidgetSheet(widget);
+                    openWidgetEditor(widget);
+                } else if (editingWidget == null) {
+                    selectWidget(null);
                 }
             }
 
@@ -1203,6 +1323,9 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 // or resized, and no row shows either.
                 refreshPreview();
                 selectWidget(widget);
+                if (editorSync != null) {
+                    editorSync.run();
+                }
             }
         });
         preview.setOnPageChangedListener(page -> {
@@ -1315,6 +1438,14 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         params.height = height;
         params.gravity = Gravity.CENTER_HORIZONTAL;
         previewContainer.setLayoutParams(params);
+    }
+
+    /** Width over height of the panel as a page turned this way shows it. */
+    private float panelAspect(DashboardWidgetLayout.Orientation orientation) {
+        Point panel = rearPanelSize();
+        float wide = panel == null ? 294f / 126f
+                : Math.max(panel.x, panel.y) / (float) Math.min(panel.x, panel.y);
+        return orientation == DashboardWidgetLayout.Orientation.LANDSCAPE ? wide : 1f / wide;
     }
 
     private int previewMaxWidth() {
