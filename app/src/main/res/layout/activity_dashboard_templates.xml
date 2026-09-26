@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Templates and triggers.
+
+    These act on the whole arrangement - replace it, store it, or say when a
+    stored one should come up by itself - so they live apart from the builder,
+    whose screen is about the page being edited. Rows are bound by
+    DashboardTemplatesActivity.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/hyper_background"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/dashboard_templates_toolbar"
+        style="@style/HyperOS.Toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:navigationContentDescription="@string/abc_action_bar_up_description"
+        app:navigationIcon="@drawable/ic_hyper_back" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout style="@style/HyperOS.Page">
+
+            <TextView
+                style="@style/HyperOS.PageTitle"
+                android:text="@string/dashboard_templates_title" />
+
+            <!-- ===================== Presets ===================== -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:text="@string/dashboard_presets_title" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_builder_preset"
+                    style="@style/HyperOS.ValueRow.Single"
+                    app:rowTitle="@string/dashboard_presets_title"
+                    app:rowValue="@string/dashboard_builder_choose_value" />
+            </LinearLayout>
+
+            <!-- ===================== Saved arrangements =====================
+                 Two separate things, so they are two separate groups. The
+                 profile template is applied for you when you switch to this
+                 profile; named templates are applied by hand and outlive it. -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/dashboard_profile_template_title" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/dashboard_custom_template_save"
+                    style="@style/HyperOS.Button.Secondary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/dashboard_custom_template_save" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/dashboard_custom_template_apply"
+                    style="@style/HyperOS.Button.Secondary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_sm"
+                    android:layout_weight="1"
+                    android:text="@string/dashboard_custom_template_apply" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/dashboard_profile_template_help" />
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/dashboard_custom_templates_title" />
+
+            <!-- One row per saved template, built by the activity. -->
+            <LinearLayout
+                android:id="@+id/dashboard_named_templates"
+                style="@style/HyperOS.Group"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dashboard_named_template_add"
+                style="@style/HyperOS.Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:text="@string/dashboard_named_template_add" />
+
+            <TextView
+                android:id="@+id/dashboard_named_templates_empty"
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/dashboard_named_templates_help" />
+
+            <!-- ===================== Triggers =====================
+                 Beside the templates on purpose: the question these answer is
+                 "when should one of these come up", and it is asked while
+                 looking at the list of them. -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/panel_triggers_title" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/panel_trigger_charging_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_charging" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/panel_trigger_time_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_time" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/panel_trigger_from_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_from" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/panel_trigger_to_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_to" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/panel_triggers_help" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

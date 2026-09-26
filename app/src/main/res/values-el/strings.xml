@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">Απόκρυψη εικονιδίου</string>
     <string name="dashboard_builder_hide_icon_for">Απόκρυψη του εικονιδίου του %1$s</string>
     <string name="dashboard_auto_pages">Αυτόματη εναλλαγή σελίδων</string>
-    <string name="dashboard_auto_pages_help">Όταν είναι ενεργό, οι σελίδες αλλάζουν κάθε 8 δευτερόλεπτα. Μετά από χειροκίνητη χρήση, ο πίνακας επιστρέφει στην πρώτη σελίδα ύστερα από 30 δευτερόλεπτα αδράνειας.</string>
+    <string name="dashboard_auto_pages_help">Όταν είναι ενεργό, οι σελίδες αλλάζουν κάθε 8 δευτερόλεπτα. Μετά από χειροκίνητη χρήση, ο πίνακας επιστρέφει στην κύρια σελίδα ύστερα από 30 δευτερόλεπτα αδράνειας.</string>
     <string name="dashboard_widget_fullscreen_weather">Καιρός σε πλήρη οθόνη</string>
     <string name="dashboard_widget_fullscreen_media">Χειριστήρια πολυμέσων σε πλήρη οθόνη</string>
     <string name="tile_on">Κατοπτρισμός</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">Αδιαφάνεια εικόνας: %1$d%%</string>
     <string name="dashboard_builder_title">Διάταξη γραφικών στοιχείων</string>
     <string name="dashboard_builder_open">Τακτοποίηση γραφικών στοιχείων</string>
-    <string name="dashboard_builder_help">Οι αλλαγές εμφανίζονται αμέσως στην προεπισκόπηση.</string>
-    <string name="dashboard_builder_preview">Προεπισκόπηση</string>
-    <string name="dashboard_builder_drag">Σύρετε το %1$s</string>
     <string name="dashboard_builder_sample_track">Δείγμα κομματιού</string>
     <string name="dashboard_builder_small">Μικρό</string>
     <string name="dashboard_builder_normal">Κανονικό</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">Αλλαγή μεγέθους του %1$s</string>
     <string name="dashboard_builder_position_label">Στοίχιση</string>
     <string name="dashboard_builder_size_label">Μέγεθος</string>
-    <string name="dashboard_builder_drag_hint">Σύρετε για αναδιάταξη</string>
-    <string name="dashboard_orientation_auto">Προσανατολισμός: σύμφωνα με την πίσω οθόνη</string>
-    <string name="dashboard_orientation_landscape">Προσανατολισμός: οριζόντιος</string>
-    <string name="dashboard_orientation_portrait">Προσανατολισμός: κατακόρυφος</string>
     <string name="dashboard_builder_visible">Εμφάνιση γραφικού στοιχείου</string>
     <string name="dashboard_builder_visibility">Εμφάνιση ή απόκρυψη του %1$s</string>
     <string name="dashboard_builder_position_value">Στοίχιση: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">Ό,τι ενεργοποιείτε εδώ εμφανίζεται στον τακτοποιητή. Ό,τι μένει ανενεργό περιμένει σε αυτήν την οθόνη.</string>
     <string name="dashboard_builder_choose">Επιλογή γραφικών στοιχείων</string>
     <string name="dashboard_builder_empty">Δεν έχει ενεργοποιηθεί ακόμη κανένα γραφικό στοιχείο. Επιλέξτε τι θα δείχνει ο πίσω πίνακας.</string>
-    <string name="dashboard_builder_pages">Σελίδες</string>
-    <string name="dashboard_builder_one_page">1 σελίδα</string>
-    <string name="dashboard_builder_pages_count">%1$d σελίδες</string>
     <string name="dashboard_builder_choose_value">Επιλογή</string>
     <string name="panel_gestures_help">Στον ίδιο τον πίνακα: ένα πάτημα σε γραφικό στοιχείο αλλάζει την παρουσίασή του, και ένα παρατεταμένο πάτημα οπουδήποτε ανάβει ή σβήνει την οθόνη πάντα σε λειτουργία.</string>
     <string name="dashboard_builder_pages_help">Με περισσότερες από μία σελίδες, ο πίσω πίνακας τις εναλλάσσει, περίπου οκτώ δευτερόλεπτα την καθεμία. Σύρετε στον πίνακα για να κρατήσετε μια σελίδα.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">Ελαφριά</string>
     <string name="dashboard_burn_in_normal">Κανονική</string>
     <string name="dashboard_burn_in_large">Ευρεία</string>
-    <string name="dashboard_builder_show_on_panel">Εμφάνιση στον πίσω πίνακα · 30 δ</string>
-    <string name="dashboard_builder_show_on_panel_active">Σταματήστε τον κατοπτρισμό για να δείτε τον πίνακα</string>
     <string name="dashboard_builder_preview_note">Η προεπισκόπηση έχει το σχήμα του πίσω πίνακα. Η μπαταρία, η θερμοκρασία, το τρέχον κομμάτι και το ρολόι είναι πραγματικά· τα υπόλοιπα είναι δείγματα τιμών.</string>
     <string name="dashboard_builder_reset">Επαναφορά</string>
     <string name="dashboard_builder_reset_title">Επαναφορά της διάταξης των γραφικών στοιχείων;</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">Διαδρομή</string>
     <string name="dashboard_preset_music">Μουσική</string>
     <string name="dashboard_preset_weather">Καιρός</string>
-    <string name="dashboard_builder_layout_stacked">Διάταξη: στήλη</string>
-    <string name="dashboard_builder_layout_corners">Διάταξη: γωνίες</string>
-    <string name="dashboard_builder_layout_compact">Διάταξη: συμπαγής</string>
     <string name="dashboard_location_access_granted">Η πρόσβαση στην τοποθεσία είναι ενεργή</string>
     <string name="dashboard_location_access_required">Για την ταχύτητα και το υψόμετρο απαιτείται ακριβής τοποθεσία</string>
     <string name="dashboard_location_access_optional">Η τοποθεσία χρησιμοποιείται μόνο για την ταχύτητα και το υψόμετρο</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">Τονισμού</string>
     <string name="dashboard_builder_style_muted">Υποτονισμένο</string>
     <string name="dashboard_builder_page_section">Σελίδα %1$d</string>
-    <string name="dashboard_builder_page_empty">Κενή. Μετακινήστε εδώ ένα γραφικό στοιχείο ή σύρετε ένα από αλλού.</string>
     <string name="dashboard_builder_moved">Το %1$s μετακινήθηκε στη σελίδα %2$d</string>
-    <string name="dashboard_builder_preview_page">Σελίδα που εμφανίζεται στην προεπισκόπηση</string>
-    <string name="dashboard_builder_preview_page_note">Ο προσανατολισμός και η διάταξη ανήκουν στην παραπάνω σελίδα, οπότε κάθε σελίδα μπορεί να στέκεται με τον δικό της τρόπο.</string>
     <string name="dashboard_profile_template_title">Ο πίνακας του τρέχοντος προφίλ</string>
     <string name="dashboard_profile_template_help">Εφαρμόζεται από μόνος του όταν μεταβαίνετε σε αυτό το προφίλ και φυλάσσεται από μόνος του όταν το αφήνετε, ώστε κάθε προφίλ να επιστρέφει στον δικό του πίνακα.</string>
     <string name="dashboard_named_template_add">Αποθήκευση τρέχοντος ως…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">Διαγραφή</string>
     <string name="dashboard_named_template_delete_message">Διαγραφή του προτύπου «%1$s»;</string>
     <string name="dashboard_named_template_full">Δεν υπάρχει χώρος για άλλο πρότυπο</string>
-    <string name="dashboard_builder_layout_free">Προβολή: ελεύθερη</string>
     <string name="dashboard_builder_preview_pick_hint">Πατήστε ένα γραφικό στοιχείο στην προεπισκόπηση για να φτάσετε στις ρυθμίσεις του. Στην ελεύθερη προβολή μπορείτε επίσης να το σύρετε και να αλλάξετε το μέγεθός του με τσίμπημα.</string>
     <string name="dashboard_builder_preview_free_hint">Σύρετε ένα γραφικό στοιχείο στην προεπισκόπηση για να το τοποθετήσετε και τσιμπήστε για να αλλάξετε το μέγεθός του. Πατήστε το για να φτάσετε στις ρυθμίσεις του.</string>
     <string name="dashboard_builder_snap">Κούμπωμα σε πλέγμα</string>
@@ -444,4 +425,31 @@
     <string name="crop_frame_whole">Όλη η οθόνη</string>
     <string name="crop_frame_fill">Γέμισμα του πίνακα</string>
     <string name="calibration_framed_notice">Την περικοπή αυτού του προφίλ την ορίζει ένα πλαίσιο πάνω από μια εφαρμογή, οπότε τα ρυθμιστικά παρακάτω δεν κάνουν τίποτα. Επαναφέρετε τη βαθμονόμηση για να τους τη δώσετε πίσω.</string>
+    <string name="dashboard_builder_pages_title">Σελίδες</string>
+    <string name="dashboard_page_add">Προσθήκη σελίδας</string>
+    <string name="dashboard_page_actions">Ενέργειες σελίδας %1$d</string>
+    <string name="dashboard_page_home_description">Σελίδα %1$d, κύρια</string>
+    <string name="dashboard_page_make_home">Ορισμός ως κύρια</string>
+    <string name="dashboard_page_move_left">Μετακίνηση αριστερά</string>
+    <string name="dashboard_page_move_right">Μετακίνηση δεξιά</string>
+    <string name="dashboard_page_delete">Διαγραφή σελίδας</string>
+    <string name="dashboard_page_delete_message">Τα γραφικά στοιχεία της σελίδας %1$d θα αφαιρεθούν από τον πίνακα. Μπορείτε να τα ενεργοποιήσετε ξανά στην Επιλογή γραφικών στοιχείων.</string>
+    <string name="dashboard_page_layout">Διάταξη σελίδας</string>
+    <string name="dashboard_page_orientation">Προσανατολισμός</string>
+    <string name="dashboard_builder_page_widgets">Γραφικά στοιχεία στη σελίδα %1$d</string>
+    <string name="dashboard_builder_list_hint">Πατήστε ένα γραφικό στοιχείο για τις ρυθμίσεις του. Κρατήστε το για να το σύρετε: μέσα στη λίστα για αλλαγή σειράς ή σε καρτέλα σελίδας για μεταφορά εκεί.</string>
+    <string name="dashboard_builder_page_empty_hint">Δεν υπάρχει τίποτα σε αυτή τη σελίδα ακόμη. Προσθέστε γραφικά στοιχεία ή μεταφέρετε ένα από άλλη σελίδα.</string>
+    <string name="dashboard_widget_page_label">Σελίδα</string>
+    <string name="dashboard_widget_remove">Αφαίρεση από τον πίνακα</string>
+    <string name="dashboard_builder_move_to_page">Μετακίνηση %1$s στη σελίδα %2$d</string>
+    <string name="dashboard_templates_title">Πρότυπα και ενεργοποιητές</string>
+    <string name="dashboard_templates_help">Έτοιμες διατάξεις, αποθηκευμένες διατάξεις και πότε εμφανίζονται μόνες τους.</string>
+    <string name="dashboard_builder_help_title">Βοήθεια</string>
+    <string name="dashboard_page_home_help">Ο πίνακας ανοίγει στην κύρια σελίδα (★) και επιστρέφει σε αυτή ύστερα από 30 δευτερόλεπτα χωρίς άγγιγμα.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>Όπως η πίσω οθόνη</item>
+        <item>Οριζόντιος</item>
+        <item>Κατακόρυφος</item>
+    </string-array>
+    <string name="dashboard_page_full">Δεν γίνεται στη σελίδα %1$d: ένα γραφικό στοιχείο πλήρους οθόνης χρειάζεται δική του σελίδα.</string>
 </resources>

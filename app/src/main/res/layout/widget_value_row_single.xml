@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Inflatable value row standing alone in a group built in code. -->
+<com.tpkarras.mirror2rearultra.HyperValueRow
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/HyperOS.ValueRow.Single"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />

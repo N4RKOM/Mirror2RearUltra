@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">إخفاء الرمز</string>
     <string name="dashboard_builder_hide_icon_for">إخفاء رمز %1$s</string>
     <string name="dashboard_auto_pages">تبديل الصفحات تلقائيًا</string>
-    <string name="dashboard_auto_pages_help">عند التفعيل تتغير الصفحات كل 8 ثوانٍ. بعد الاستخدام اليدوي، تعود اللوحة إلى الصفحة الأولى بعد 30 ثانية من عدم النشاط.</string>
+    <string name="dashboard_auto_pages_help">عند التفعيل تتغير الصفحات كل 8 ثوانٍ. بعد الاستخدام اليدوي، تعود اللوحة إلى الصفحة الرئيسية بعد 30 ثانية من عدم النشاط.</string>
     <string name="dashboard_widget_fullscreen_weather">الطقس بملء الشاشة</string>
     <string name="dashboard_widget_fullscreen_media">أدوات التحكم بالوسائط بملء الشاشة</string>
     <string name="tile_on">يجري النسخ</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">عتامة الصورة: %1$d%%</string>
     <string name="dashboard_builder_title">تخطيط الأدوات</string>
     <string name="dashboard_builder_open">ترتيب الأدوات</string>
-    <string name="dashboard_builder_help">تظهر التغييرات في المعاينة فورًا.</string>
-    <string name="dashboard_builder_preview">المعاينة</string>
-    <string name="dashboard_builder_drag">سحب %1$s</string>
     <string name="dashboard_builder_sample_track">مقطع نموذجي</string>
     <string name="dashboard_builder_small">صغير</string>
     <string name="dashboard_builder_normal">عادي</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">تغيير حجم %1$s</string>
     <string name="dashboard_builder_position_label">المحاذاة</string>
     <string name="dashboard_builder_size_label">الحجم</string>
-    <string name="dashboard_builder_drag_hint">اسحب لإعادة الترتيب</string>
-    <string name="dashboard_orientation_auto">الاتجاه: حسب الشاشة الخلفية</string>
-    <string name="dashboard_orientation_landscape">الاتجاه: أفقي</string>
-    <string name="dashboard_orientation_portrait">الاتجاه: رأسي</string>
     <string name="dashboard_builder_visible">إظهار الأداة</string>
     <string name="dashboard_builder_visibility">إظهار %1$s أو إخفاؤها</string>
     <string name="dashboard_builder_position_value">المحاذاة: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">كل ما تفعّله هنا يظهر في شاشة الترتيب. وما يبقى مغلقًا ينتظر في هذه الشاشة.</string>
     <string name="dashboard_builder_choose">اختيار الأدوات</string>
     <string name="dashboard_builder_empty">لم تُفعَّل أي أداة بعد. اختر ما ينبغي للوحة الخلفية أن تعرضه.</string>
-    <string name="dashboard_builder_pages">الصفحات</string>
-    <string name="dashboard_builder_one_page">صفحة واحدة</string>
-    <string name="dashboard_builder_pages_count">%1$d صفحات</string>
     <string name="dashboard_builder_choose_value">اختيار</string>
     <string name="panel_gestures_help">على اللوحة نفسها: نقرة على أداة تنقل طريقة عرضها خطوة، والضغط المطوّل في أي موضع يشغّل الشاشة الدائمة أو يوقفها.</string>
     <string name="dashboard_builder_pages_help">مع أكثر من صفحة، تتنقّل اللوحة الخلفية بينها، نحو ثماني ثوانٍ لكل صفحة. مرّر على اللوحة لتثبيت صفحة.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">خفيفة</string>
     <string name="dashboard_burn_in_normal">عادية</string>
     <string name="dashboard_burn_in_large">واسعة</string>
-    <string name="dashboard_builder_show_on_panel">العرض على اللوحة الخلفية · 30 ث</string>
-    <string name="dashboard_builder_show_on_panel_active">أوقف النسخ لمعاينة اللوحة</string>
     <string name="dashboard_builder_preview_note">تطابق المعاينة شكل اللوحة الخلفية. البطارية والحرارة والمقطع الجاري والساعة حقيقية؛ وما عداها قيم نموذجية.</string>
     <string name="dashboard_builder_reset">إعادة ضبط</string>
     <string name="dashboard_builder_reset_title">إعادة ضبط تخطيط الأدوات؟</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">رحلة</string>
     <string name="dashboard_preset_music">موسيقى</string>
     <string name="dashboard_preset_weather">طقس</string>
-    <string name="dashboard_builder_layout_stacked">التخطيط: عمود</string>
-    <string name="dashboard_builder_layout_corners">التخطيط: زوايا</string>
-    <string name="dashboard_builder_layout_compact">التخطيط: مضغوط</string>
     <string name="dashboard_location_access_granted">الوصول إلى الموقع مفعّل</string>
     <string name="dashboard_location_access_required">تتطلب السرعة والارتفاع موقعًا دقيقًا</string>
     <string name="dashboard_location_access_optional">لا يُستخدم الموقع إلا للسرعة والارتفاع</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">لون مميّز</string>
     <string name="dashboard_builder_style_muted">خافت</string>
     <string name="dashboard_builder_page_section">الصفحة %1$d</string>
-    <string name="dashboard_builder_page_empty">فارغة. انقل أداة إلى هنا، أو اسحب واحدة من صفحة أخرى.</string>
     <string name="dashboard_builder_moved">نُقلت %1$s إلى الصفحة %2$d</string>
-    <string name="dashboard_builder_preview_page">الصفحة المعروضة في المعاينة</string>
-    <string name="dashboard_builder_preview_page_note">الاتجاه والترتيب يخصّان الصفحة أعلاه، فلكل صفحة أن تقف على وجهها الخاص.</string>
     <string name="dashboard_profile_template_title">لوحة الملف الحالي</string>
     <string name="dashboard_profile_template_help">تُطبَّق من تلقاء نفسها عند الانتقال إلى هذا الملف، وتُحفظ من تلقاء نفسها عند مغادرته، ليعود كل ملف إلى لوحته الخاصة.</string>
     <string name="dashboard_named_template_add">حفظ الحالية باسم…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">حذف</string>
     <string name="dashboard_named_template_delete_message">حذف القالب «%1$s»؟</string>
     <string name="dashboard_named_template_full">لا مساحة لقالب آخر</string>
-    <string name="dashboard_builder_layout_free">العرض: حر</string>
     <string name="dashboard_builder_preview_pick_hint">انقر على أداة في المعاينة للوصول إلى إعداداتها. وفي العرض الحر يمكنك أيضًا سحبها وتغيير حجمها بالقرص.</string>
     <string name="dashboard_builder_preview_free_hint">اسحب أداة في المعاينة لوضعها، واقرص لتغيير حجمها. انقر عليها للوصول إلى إعداداتها.</string>
     <string name="dashboard_builder_snap">المحاذاة إلى شبكة</string>
@@ -452,4 +433,31 @@
     <string name="crop_frame_whole">الشاشة كاملة</string>
     <string name="crop_frame_fill">ملء اللوحة</string>
     <string name="calibration_framed_notice">يحدّد اقتصاص هذا الملف إطار رُسم فوق تطبيق، لذا لا تفعل أشرطة التمرير أدناه شيئًا. أعد ضبط المعايرة لتعود إليها.</string>
+    <string name="dashboard_builder_pages_title">الصفحات</string>
+    <string name="dashboard_page_add">إضافة صفحة</string>
+    <string name="dashboard_page_actions">إجراءات الصفحة %1$d</string>
+    <string name="dashboard_page_home_description">الصفحة %1$d، الرئيسية</string>
+    <string name="dashboard_page_make_home">جعلها الرئيسية</string>
+    <string name="dashboard_page_move_left">نقل لليسار</string>
+    <string name="dashboard_page_move_right">نقل لليمين</string>
+    <string name="dashboard_page_delete">حذف الصفحة</string>
+    <string name="dashboard_page_delete_message">ستُزال أدوات الصفحة %1$d من اللوحة. يمكنك تشغيلها مجددًا من اختيار الأدوات.</string>
+    <string name="dashboard_page_layout">تخطيط الصفحة</string>
+    <string name="dashboard_page_orientation">الاتجاه</string>
+    <string name="dashboard_builder_page_widgets">الأدوات في الصفحة %1$d</string>
+    <string name="dashboard_builder_list_hint">اضغط على أداة لفتح إعداداتها. اضغط مطولًا لسحبها: داخل القائمة لتغيير الترتيب، أو إلى تبويب صفحة لنقلها إليها.</string>
+    <string name="dashboard_builder_page_empty_hint">لا يوجد شيء في هذه الصفحة بعد. أضف أدوات أو انقل إليها أداة من صفحة أخرى.</string>
+    <string name="dashboard_widget_page_label">الصفحة</string>
+    <string name="dashboard_widget_remove">إزالة من اللوحة</string>
+    <string name="dashboard_builder_move_to_page">نقل %1$s إلى الصفحة %2$d</string>
+    <string name="dashboard_templates_title">القوالب والمشغّلات</string>
+    <string name="dashboard_templates_help">تخطيطات جاهزة وترتيبات محفوظة ومتى تظهر من تلقاء نفسها.</string>
+    <string name="dashboard_builder_help_title">مساعدة</string>
+    <string name="dashboard_page_home_help">تفتح اللوحة على الصفحة الرئيسية (★) وتعود إليها بعد 30 ثانية دون لمس.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>مثل الشاشة الخلفية</item>
+        <item>أفقي</item>
+        <item>عمودي</item>
+    </string-array>
+    <string name="dashboard_page_full">لا يمكن النقل إلى الصفحة %1$d: الأداة بملء الشاشة تحتاج إلى صفحة خاصة بها.</string>
 </resources>

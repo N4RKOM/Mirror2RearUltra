@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">Hide icon</string>
     <string name="dashboard_builder_hide_icon_for">Hide icon of %1$s</string>
     <string name="dashboard_auto_pages">Automatically switch pages</string>
-    <string name="dashboard_auto_pages_help">When enabled, pages change every 8 seconds. After manual use, the panel returns to page one after 30 seconds of inactivity.</string>
+    <string name="dashboard_auto_pages_help">When enabled, pages change every 8 seconds. After manual use, the panel returns to the main page after 30 seconds of inactivity.</string>
     <string name="dashboard_widget_fullscreen_weather">Fullscreen weather</string>
     <string name="dashboard_widget_fullscreen_media">Fullscreen media controls</string>
     <string name="tile_on">Mirroring</string>
@@ -217,9 +217,6 @@
     <string name="dashboard_custom_image_opacity_value">Image opacity: %1$d%%</string>
     <string name="dashboard_builder_title">Widget layout</string>
     <string name="dashboard_builder_open">Arrange widgets</string>
-    <string name="dashboard_builder_help">Changes appear in the preview immediately.</string>
-    <string name="dashboard_builder_preview">Preview</string>
-    <string name="dashboard_builder_drag">Drag %1$s</string>
     <string name="dashboard_builder_sample_track">Sample track</string>
     <string name="dashboard_builder_small">Small</string>
     <string name="dashboard_builder_normal">Normal</string>
@@ -233,10 +230,6 @@
     <string name="dashboard_builder_size">Change size of %1$s</string>
     <string name="dashboard_builder_position_label">Alignment</string>
     <string name="dashboard_builder_size_label">Size</string>
-    <string name="dashboard_builder_drag_hint">Drag to reorder</string>
-    <string name="dashboard_orientation_auto">Orientation: match rear screen</string>
-    <string name="dashboard_orientation_landscape">Orientation: landscape</string>
-    <string name="dashboard_orientation_portrait">Orientation: portrait</string>
     <string name="dashboard_builder_visible">Show widget</string>
     <string name="dashboard_builder_visibility">Show or hide %1$s</string>
     <string name="dashboard_builder_position_value">Align: %1$s</string>
@@ -252,13 +245,9 @@
     <string name="dashboard_widgets_pick_help">Everything you switch on here appears in the arranger. What stays off waits on this screen.</string>
     <string name="dashboard_builder_choose">Choose widgets</string>
     <string name="dashboard_builder_empty">No widgets are on yet. Choose the ones the rear panel should show.</string>
-    <string name="dashboard_builder_pages">Pages</string>
-    <string name="dashboard_builder_one_page">1 page</string>
-    <string name="dashboard_builder_pages_count">%1$d pages</string>
     <string name="dashboard_builder_choose_value">Choose</string>
     <string name="panel_gestures_help">On the panel itself: a tap on a widget steps its display style on, and a press held anywhere turns always-on on or off again.</string>
     <string name="dashboard_builder_pages_help">With more than one page the rear panel cycles through them, about eight seconds each. Swipe on the panel to hold a page.</string>
-    <string name="dashboard_builder_page_short">%1$d</string>
     <string name="dashboard_builder_presence_label">Show</string>
     <string name="dashboard_builder_presence_always">Always</string>
     <string name="dashboard_builder_presence_when_data">With data</string>
@@ -274,8 +263,6 @@
     <string name="dashboard_burn_in_small">Slight</string>
     <string name="dashboard_burn_in_normal">Normal</string>
     <string name="dashboard_burn_in_large">Wide</string>
-    <string name="dashboard_builder_show_on_panel">Show on the rear panel · 30 s</string>
-    <string name="dashboard_builder_show_on_panel_active">Stop mirroring to preview the panel</string>
     <string name="dashboard_builder_preview_note">The preview matches the shape of the rear panel. Battery, temperature, the current track and the clock are live; the rest are sample values.</string>
     <string name="dashboard_builder_reset">Reset</string>
     <string name="dashboard_builder_reset_title">Reset widget layout?</string>
@@ -286,9 +273,6 @@
     <string name="dashboard_preset_trip">Trip</string>
     <string name="dashboard_preset_music">Music</string>
     <string name="dashboard_preset_weather">Weather</string>
-    <string name="dashboard_builder_layout_stacked">Layout: column</string>
-    <string name="dashboard_builder_layout_corners">Layout: corners</string>
-    <string name="dashboard_builder_layout_compact">Layout: compact</string>
     <string name="dashboard_location_access_granted">Location access is enabled</string>
     <string name="dashboard_location_access_required">Precise location is required for speed and altitude</string>
     <string name="dashboard_location_access_optional">Location is used only for speed and altitude</string>
@@ -346,10 +330,7 @@
     <string name="dashboard_builder_style_accent">Accent</string>
     <string name="dashboard_builder_style_muted">Muted</string>
     <string name="dashboard_builder_page_section">Page %1$d</string>
-    <string name="dashboard_builder_page_empty">Empty. Move a widget here, or drag one across.</string>
     <string name="dashboard_builder_moved">%1$s moved to page %2$d</string>
-    <string name="dashboard_builder_preview_page">Page shown in the preview</string>
-    <string name="dashboard_builder_preview_page_note">Orientation and arrangement belong to the page above, so each page can sit its own way round.</string>
     <string name="dashboard_profile_template_title">Current profile panel</string>
     <string name="dashboard_profile_template_help">Applied on its own when you switch to this profile, and kept on its own when you switch away, so each profile comes back to its own panel.</string>
     <string name="dashboard_named_template_add">Save current as…</string>
@@ -371,7 +352,6 @@
     <string name="dashboard_named_template_delete">Delete</string>
     <string name="dashboard_named_template_delete_message">Delete the template «%1$s»?</string>
     <string name="dashboard_named_template_full">No room for another template</string>
-    <string name="dashboard_builder_layout_free">View: free</string>
     <string name="dashboard_builder_preview_pick_hint">Tap a widget in the preview to reach its settings. In the free view you can also drag it and pinch to resize.</string>
     <string name="dashboard_builder_preview_free_hint">Drag a widget in the preview to place it, and pinch to resize. Tap one to reach its settings.</string>
     <string name="dashboard_builder_snap">Snap to a grid</string>
@@ -464,4 +444,31 @@
     <string name="crop_frame_whole">Whole screen</string>
     <string name="crop_frame_fill">Fill the panel</string>
     <string name="calibration_framed_notice">A frame drawn over an app is deciding this profile’s crop, so the sliders below do nothing. Reset the calibration to hand it back to them.</string>
+    <string name="dashboard_builder_pages_title">Pages</string>
+    <string name="dashboard_page_add">Add page</string>
+    <string name="dashboard_page_actions">Page %1$d actions</string>
+    <string name="dashboard_page_home_description">Page %1$d, main</string>
+    <string name="dashboard_page_make_home">Make main page</string>
+    <string name="dashboard_page_move_left">Move left</string>
+    <string name="dashboard_page_move_right">Move right</string>
+    <string name="dashboard_page_delete">Delete page</string>
+    <string name="dashboard_page_delete_message">Widgets on page %1$d will be taken off the panel. You can switch them back on under Choose widgets.</string>
+    <string name="dashboard_page_layout">Page layout</string>
+    <string name="dashboard_page_orientation">Orientation</string>
+    <string name="dashboard_builder_page_widgets">Widgets on page %1$d</string>
+    <string name="dashboard_builder_list_hint">Tap a widget for its settings. Hold to drag it: within the list to reorder, or onto a page tab to move it there.</string>
+    <string name="dashboard_builder_page_empty_hint">Nothing on this page yet. Add widgets, or move one here from another page.</string>
+    <string name="dashboard_widget_page_label">Page</string>
+    <string name="dashboard_widget_remove">Remove from panel</string>
+    <string name="dashboard_builder_move_to_page">Move %1$s to page %2$d</string>
+    <string name="dashboard_templates_title">Templates and triggers</string>
+    <string name="dashboard_templates_help">Ready-made layouts, saved arrangements, and when one comes up by itself.</string>
+    <string name="dashboard_builder_help_title">Help</string>
+    <string name="dashboard_page_home_help">The panel opens on the main page (★) and returns to it after 30 seconds without a touch.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>Match rear screen</item>
+        <item>Landscape</item>
+        <item>Portrait</item>
+    </string-array>
+    <string name="dashboard_page_full">Page %1$d can\'t take it: a full-screen widget needs a page to itself.</string>
 </resources>

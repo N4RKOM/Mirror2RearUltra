@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">Dölj ikon</string>
     <string name="dashboard_builder_hide_icon_for">Dölj ikonen för %1$s</string>
     <string name="dashboard_auto_pages">Byt sida automatiskt</string>
-    <string name="dashboard_auto_pages_help">När detta är på byts sidan var åttonde sekund. Efter manuell användning återgår panelen till sida ett efter 30 sekunders inaktivitet.</string>
+    <string name="dashboard_auto_pages_help">När detta är på byts sidan var åttonde sekund. Efter manuell användning återgår panelen till huvudsidan efter 30 sekunders inaktivitet.</string>
     <string name="dashboard_widget_fullscreen_weather">Väder i helskärm</string>
     <string name="dashboard_widget_fullscreen_media">Mediekontroller i helskärm</string>
     <string name="tile_on">Speglar</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">Bildens opacitet: %1$d%%</string>
     <string name="dashboard_builder_title">Widgetlayout</string>
     <string name="dashboard_builder_open">Ordna widgetarna</string>
-    <string name="dashboard_builder_help">Ändringar syns direkt i förhandsgranskningen.</string>
-    <string name="dashboard_builder_preview">Förhandsgranskning</string>
-    <string name="dashboard_builder_drag">Dra %1$s</string>
     <string name="dashboard_builder_sample_track">Exempelspår</string>
     <string name="dashboard_builder_small">Liten</string>
     <string name="dashboard_builder_normal">Normal</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">Ändra storleken på %1$s</string>
     <string name="dashboard_builder_position_label">Justering</string>
     <string name="dashboard_builder_size_label">Storlek</string>
-    <string name="dashboard_builder_drag_hint">Dra för att ändra ordning</string>
-    <string name="dashboard_orientation_auto">Riktning: följ bakre skärmen</string>
-    <string name="dashboard_orientation_landscape">Riktning: liggande</string>
-    <string name="dashboard_orientation_portrait">Riktning: stående</string>
     <string name="dashboard_builder_visible">Visa widgeten</string>
     <string name="dashboard_builder_visibility">Visa eller dölj %1$s</string>
     <string name="dashboard_builder_position_value">Justering: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">Allt du slår på här dyker upp i ordnaren. Det som förblir avstängt väntar på den här skärmen.</string>
     <string name="dashboard_builder_choose">Välj widgetar</string>
     <string name="dashboard_builder_empty">Ingen widget är påslagen än. Välj vilka den bakre panelen ska visa.</string>
-    <string name="dashboard_builder_pages">Sidor</string>
-    <string name="dashboard_builder_one_page">1 sida</string>
-    <string name="dashboard_builder_pages_count">%1$d sidor</string>
     <string name="dashboard_builder_choose_value">Välj</string>
     <string name="panel_gestures_help">På själva panelen: en tryckning på en widget stegar dess visning framåt, och ett långt tryck var som helst slår på eller av alltid på-skärmen.</string>
     <string name="dashboard_builder_pages_help">Med fler än en sida bläddrar den bakre panelen genom dem, ungefär åtta sekunder var. Svep på panelen för att hålla kvar en sida.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">Svag</string>
     <string name="dashboard_burn_in_normal">Normal</string>
     <string name="dashboard_burn_in_large">Bred</string>
-    <string name="dashboard_builder_show_on_panel">Visa på den bakre panelen · 30 s</string>
-    <string name="dashboard_builder_show_on_panel_active">Stoppa speglingen för att förhandsgranska panelen</string>
     <string name="dashboard_builder_preview_note">Förhandsgranskningen har samma form som den bakre panelen. Batteri, temperatur, aktuellt spår och klockan är verkliga; resten är exempelvärden.</string>
     <string name="dashboard_builder_reset">Återställ</string>
     <string name="dashboard_builder_reset_title">Återställa widgetlayouten?</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">Resa</string>
     <string name="dashboard_preset_music">Musik</string>
     <string name="dashboard_preset_weather">Väder</string>
-    <string name="dashboard_builder_layout_stacked">Layout: kolumn</string>
-    <string name="dashboard_builder_layout_corners">Layout: hörn</string>
-    <string name="dashboard_builder_layout_compact">Layout: kompakt</string>
     <string name="dashboard_location_access_granted">Platsåtkomsten är påslagen</string>
     <string name="dashboard_location_access_required">Exakt plats krävs för hastighet och höjd</string>
     <string name="dashboard_location_access_optional">Platsen används bara för hastighet och höjd</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">Accent</string>
     <string name="dashboard_builder_style_muted">Dämpad</string>
     <string name="dashboard_builder_page_section">Sida %1$d</string>
-    <string name="dashboard_builder_page_empty">Tom. Flytta hit en widget, eller dra en hit.</string>
     <string name="dashboard_builder_moved">%1$s flyttades till sida %2$d</string>
-    <string name="dashboard_builder_preview_page">Sida som visas i förhandsgranskningen</string>
-    <string name="dashboard_builder_preview_page_note">Riktning och layout hör till sidan ovanför, så varje sida kan ligga åt sitt eget håll.</string>
     <string name="dashboard_profile_template_title">Den aktuella profilens panel</string>
     <string name="dashboard_profile_template_help">Tillämpas av sig själv när du byter till den här profilen, och sparas av sig själv när du byter bort, så att varje profil kommer tillbaka till sin egen panel.</string>
     <string name="dashboard_named_template_add">Spara nuvarande som…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">Ta bort</string>
     <string name="dashboard_named_template_delete_message">Ta bort mallen ”%1$s”?</string>
     <string name="dashboard_named_template_full">Ingen plats för ytterligare en mall</string>
-    <string name="dashboard_builder_layout_free">Vy: fri</string>
     <string name="dashboard_builder_preview_pick_hint">Tryck på en widget i förhandsgranskningen för att nå dess inställningar. I den fria vyn kan du även dra den och nypa för att ändra storlek.</string>
     <string name="dashboard_builder_preview_free_hint">Dra en widget i förhandsgranskningen för att placera den, och nyp för att ändra storlek. Tryck på den för att nå dess inställningar.</string>
     <string name="dashboard_builder_snap">Fäst mot ett rutnät</string>
@@ -444,4 +425,31 @@
     <string name="crop_frame_whole">Hela skärmen</string>
     <string name="crop_frame_fill">Fyll panelen</string>
     <string name="calibration_framed_notice">Profilens beskärning bestäms av en ram som dragits över en app, så reglagen nedan gör ingenting. Återställ kalibreringen för att lämna tillbaka den till dem.</string>
+    <string name="dashboard_builder_pages_title">Sidor</string>
+    <string name="dashboard_page_add">Lägg till sida</string>
+    <string name="dashboard_page_actions">Åtgärder för sida %1$d</string>
+    <string name="dashboard_page_home_description">Sida %1$d, huvudsida</string>
+    <string name="dashboard_page_make_home">Gör till huvudsida</string>
+    <string name="dashboard_page_move_left">Flytta åt vänster</string>
+    <string name="dashboard_page_move_right">Flytta åt höger</string>
+    <string name="dashboard_page_delete">Ta bort sida</string>
+    <string name="dashboard_page_delete_message">Widgetarna på sida %1$d tas bort från panelen. Du kan slå på dem igen under Välj widgetar.</string>
+    <string name="dashboard_page_layout">Sidlayout</string>
+    <string name="dashboard_page_orientation">Orientering</string>
+    <string name="dashboard_builder_page_widgets">Widgetar på sida %1$d</string>
+    <string name="dashboard_builder_list_hint">Tryck på en widget för dess inställningar. Håll kvar för att dra: i listan för att ändra ordning, eller till en sidflik för att flytta den dit.</string>
+    <string name="dashboard_builder_page_empty_hint">Det finns inget på den här sidan än. Lägg till widgetar eller flytta hit en från en annan sida.</string>
+    <string name="dashboard_widget_page_label">Sida</string>
+    <string name="dashboard_widget_remove">Ta bort från panelen</string>
+    <string name="dashboard_builder_move_to_page">Flytta %1$s till sida %2$d</string>
+    <string name="dashboard_templates_title">Mallar och utlösare</string>
+    <string name="dashboard_templates_help">Färdiga layouter, sparade uppställningar och när de dyker upp av sig själva.</string>
+    <string name="dashboard_builder_help_title">Hjälp</string>
+    <string name="dashboard_page_home_help">Panelen öppnas på huvudsidan (★) och återgår dit efter 30 sekunder utan beröring.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>Som bakskärmen</item>
+        <item>Liggande</item>
+        <item>Stående</item>
+    </string-array>
+    <string name="dashboard_page_full">Går inte till sida %1$d: en helskärmswidget behöver en egen sida.</string>
 </resources>

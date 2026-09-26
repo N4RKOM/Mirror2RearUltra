@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">आइकॉन छिपाएँ</string>
     <string name="dashboard_builder_hide_icon_for">%1$s का आइकॉन छिपाएँ</string>
     <string name="dashboard_auto_pages">पेज अपने आप बदलें</string>
-    <string name="dashboard_auto_pages_help">चालू होने पर पेज हर 8 सेकंड में बदलते हैं। हाथ से इस्तेमाल करने के बाद, 30 सेकंड तक कुछ न करने पर पैनल पहले पेज पर लौट आता है।</string>
+    <string name="dashboard_auto_pages_help">चालू होने पर पेज हर 8 सेकंड में बदलते हैं। हाथ से इस्तेमाल करने के बाद, 30 सेकंड तक कुछ न करने पर पैनल मुख्य पेज पर लौट आता है।</string>
     <string name="dashboard_widget_fullscreen_weather">पूरी स्क्रीन पर मौसम</string>
     <string name="dashboard_widget_fullscreen_media">पूरी स्क्रीन पर मीडिया कंट्रोल</string>
     <string name="tile_on">मिररिंग चालू</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">इमेज की अपारदर्शिता: %1$d%%</string>
     <string name="dashboard_builder_title">विजेट की सजावट</string>
     <string name="dashboard_builder_open">विजेट सजाएँ</string>
-    <string name="dashboard_builder_help">बदलाव झलक में तुरंत दिखते हैं।</string>
-    <string name="dashboard_builder_preview">झलक</string>
-    <string name="dashboard_builder_drag">%1$s खींचें</string>
     <string name="dashboard_builder_sample_track">नमूना ट्रैक</string>
     <string name="dashboard_builder_small">छोटा</string>
     <string name="dashboard_builder_normal">सामान्य</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">%1$s का आकार बदलें</string>
     <string name="dashboard_builder_position_label">संरेखण</string>
     <string name="dashboard_builder_size_label">आकार</string>
-    <string name="dashboard_builder_drag_hint">क्रम बदलने के लिए खींचें</string>
-    <string name="dashboard_orientation_auto">दिशा: पिछली स्क्रीन के मुताबिक</string>
-    <string name="dashboard_orientation_landscape">दिशा: आड़ी</string>
-    <string name="dashboard_orientation_portrait">दिशा: खड़ी</string>
     <string name="dashboard_builder_visible">विजेट दिखाएँ</string>
     <string name="dashboard_builder_visibility">%1$s दिखाएँ या छिपाएँ</string>
     <string name="dashboard_builder_position_value">संरेखण: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">यहाँ जो भी चालू करेंगे, वह सजाने वाली स्क्रीन में दिखेगा। जो बंद रहेगा, वह इसी स्क्रीन पर इंतज़ार करेगा।</string>
     <string name="dashboard_builder_choose">विजेट चुनें</string>
     <string name="dashboard_builder_empty">अभी कोई विजेट चालू नहीं है। चुनें कि पिछला पैनल क्या दिखाए।</string>
-    <string name="dashboard_builder_pages">पेज</string>
-    <string name="dashboard_builder_one_page">1 पेज</string>
-    <string name="dashboard_builder_pages_count">%1$d पेज</string>
     <string name="dashboard_builder_choose_value">चुनें</string>
     <string name="panel_gestures_help">पैनल पर ही: किसी विजेट पर टैप करने से उसका प्रदर्शन बदलता है, और कहीं भी देर तक दबाने से ऑलवेज़ ऑन डिस्प्ले चालू या बंद होता है।</string>
     <string name="dashboard_builder_pages_help">एक से ज़्यादा पेज होने पर पिछला पैनल उन्हें बारी-बारी दिखाता है, हर एक करीब आठ सेकंड। किसी पेज को रोके रखने के लिए पैनल पर स्वाइप करें।</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">हल्का</string>
     <string name="dashboard_burn_in_normal">सामान्य</string>
     <string name="dashboard_burn_in_large">चौड़ा</string>
-    <string name="dashboard_builder_show_on_panel">पिछले पैनल पर दिखाएँ · 30 से</string>
-    <string name="dashboard_builder_show_on_panel_active">पैनल देखने के लिए मिररिंग रोकें</string>
     <string name="dashboard_builder_preview_note">झलक का आकार पिछले पैनल जैसा ही है। बैटरी, तापमान, अभी चल रहा ट्रैक और घड़ी असली हैं; बाकी नमूने के आँकड़े हैं।</string>
     <string name="dashboard_builder_reset">रीसेट करें</string>
     <string name="dashboard_builder_reset_title">विजेट की सजावट रीसेट करें?</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">सफ़र</string>
     <string name="dashboard_preset_music">संगीत</string>
     <string name="dashboard_preset_weather">मौसम</string>
-    <string name="dashboard_builder_layout_stacked">सजावट: कॉलम</string>
-    <string name="dashboard_builder_layout_corners">सजावट: कोने</string>
-    <string name="dashboard_builder_layout_compact">सजावट: सघन</string>
     <string name="dashboard_location_access_granted">लोकेशन तक पहुँच चालू है</string>
     <string name="dashboard_location_access_required">रफ़्तार और ऊँचाई के लिए सटीक लोकेशन चाहिए</string>
     <string name="dashboard_location_access_optional">लोकेशन सिर्फ़ रफ़्तार और ऊँचाई के लिए इस्तेमाल होती है</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">एक्सेंट</string>
     <string name="dashboard_builder_style_muted">फीका</string>
     <string name="dashboard_builder_page_section">पेज %1$d</string>
-    <string name="dashboard_builder_page_empty">खाली। यहाँ कोई विजेट लाएँ, या किसी को खींचकर यहाँ डालें।</string>
     <string name="dashboard_builder_moved">%1$s पेज %2$d पर ले जाया गया</string>
-    <string name="dashboard_builder_preview_page">झलक में दिखने वाला पेज</string>
-    <string name="dashboard_builder_preview_page_note">दिशा और सजावट ऊपर वाले पेज की हैं, इसलिए हर पेज अपनी दिशा में रह सकता है।</string>
     <string name="dashboard_profile_template_title">मौजूदा प्रोफ़ाइल का पैनल</string>
     <string name="dashboard_profile_template_help">इस प्रोफ़ाइल पर जाते ही अपने आप लागू होता है, और उससे हटते ही अपने आप सेव हो जाता है, ताकि हर प्रोफ़ाइल अपने पैनल पर लौटे।</string>
     <string name="dashboard_named_template_add">मौजूदा को इस नाम से सेव करें…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">हटाएँ</string>
     <string name="dashboard_named_template_delete_message">टेम्पलेट «%1$s» हटाएँ?</string>
     <string name="dashboard_named_template_full">एक और टेम्पलेट के लिए जगह नहीं है</string>
-    <string name="dashboard_builder_layout_free">दृश्य: मुक्त</string>
     <string name="dashboard_builder_preview_pick_hint">विजेट की सेटिंग तक पहुँचने के लिए झलक में उस पर टैप करें। मुक्त दृश्य में उसे खींच भी सकते हैं और चुटकी से आकार बदल सकते हैं।</string>
     <string name="dashboard_builder_preview_free_hint">विजेट रखने के लिए झलक में उसे खींचें, और आकार बदलने के लिए चुटकी लें। सेटिंग तक पहुँचने के लिए उस पर टैप करें।</string>
     <string name="dashboard_builder_snap">ग्रिड से चिपकाएँ</string>
@@ -444,4 +425,31 @@
     <string name="crop_frame_whole">पूरी स्क्रीन</string>
     <string name="crop_frame_fill">पूरा पैनल भरें</string>
     <string name="calibration_framed_notice">इस प्रोफ़ाइल की कटाई ऐप के ऊपर खींचे गए फ़्रेम से तय होती है, इसलिए नीचे के स्लाइडर कुछ नहीं करते। कैलिब्रेशन रीसेट करने पर वे फिर काम करेंगे।</string>
+    <string name="dashboard_builder_pages_title">पेज</string>
+    <string name="dashboard_page_add">पेज जोड़ें</string>
+    <string name="dashboard_page_actions">पेज %1$d की कार्रवाइयाँ</string>
+    <string name="dashboard_page_home_description">पेज %1$d, मुख्य</string>
+    <string name="dashboard_page_make_home">मुख्य पेज बनाएँ</string>
+    <string name="dashboard_page_move_left">बाएँ खिसकाएँ</string>
+    <string name="dashboard_page_move_right">दाएँ खिसकाएँ</string>
+    <string name="dashboard_page_delete">पेज हटाएँ</string>
+    <string name="dashboard_page_delete_message">पेज %1$d के विजेट पैनल से हट जाएँगे। उन्हें फिर से विजेट चुनें में चालू किया जा सकता है।</string>
+    <string name="dashboard_page_layout">पेज लेआउट</string>
+    <string name="dashboard_page_orientation">ओरिएंटेशन</string>
+    <string name="dashboard_builder_page_widgets">पेज %1$d के विजेट</string>
+    <string name="dashboard_builder_list_hint">सेटिंग के लिए विजेट पर टैप करें। खींचने के लिए दबाकर रखें: सूची के अंदर क्रम बदलने के लिए, या किसी पेज टैब पर उसे वहाँ ले जाने के लिए।</string>
+    <string name="dashboard_builder_page_empty_hint">इस पेज पर अभी कुछ नहीं है। विजेट जोड़ें या किसी दूसरे पेज से एक यहाँ लाएँ।</string>
+    <string name="dashboard_widget_page_label">पेज</string>
+    <string name="dashboard_widget_remove">पैनल से हटाएँ</string>
+    <string name="dashboard_builder_move_to_page">%1$s को पेज %2$d पर ले जाएँ</string>
+    <string name="dashboard_templates_title">टेम्पलेट और ट्रिगर</string>
+    <string name="dashboard_templates_help">तैयार लेआउट, सहेजी गई व्यवस्थाएँ और वे अपने आप कब आती हैं।</string>
+    <string name="dashboard_builder_help_title">सहायता</string>
+    <string name="dashboard_page_home_help">पैनल मुख्य पेज (★) पर खुलता है और 30 सेकंड तक छुए बिना रहने पर उसी पर लौट आता है।</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>पीछे की स्क्रीन जैसा</item>
+        <item>लैंडस्केप</item>
+        <item>पोर्ट्रेट</item>
+    </string-array>
+    <string name="dashboard_page_full">पेज %1$d पर नहीं जा सकता: पूरी स्क्रीन वाले विजेट को अलग पेज चाहिए।</string>
 </resources>

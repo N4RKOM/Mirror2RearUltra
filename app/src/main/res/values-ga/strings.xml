@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">Folaigh an deilbhín</string>
     <string name="dashboard_builder_hide_icon_for">Folaigh deilbhín %1$s</string>
     <string name="dashboard_auto_pages">Athraigh leathanaigh go huathoibríoch</string>
-    <string name="dashboard_auto_pages_help">Nuair atá sé seo ar siúl, athraíonn na leathanaigh gach 8 soicind. Tar éis úsáide de láimh, filleann an painéal ar an gcéad leathanach tar éis 30 soicind gan ghníomh.</string>
+    <string name="dashboard_auto_pages_help">Nuair atá sé seo ar siúl, athraíonn na leathanaigh gach 8 soicind. Tar éis úsáide de láimh, filleann an painéal ar an bpríomhleathanach tar éis 30 soicind gan ghníomh.</string>
     <string name="dashboard_widget_fullscreen_weather">Aimsir ar an scáileán iomlán</string>
     <string name="dashboard_widget_fullscreen_media">Rialtáin mheán ar an scáileán iomlán</string>
     <string name="tile_on">Ag scáthánú</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">Teimhneacht na híomhá: %1$d%%</string>
     <string name="dashboard_builder_title">Leagan amach na ngiuirléidí</string>
     <string name="dashboard_builder_open">Socraigh na giuirléidí</string>
-    <string name="dashboard_builder_help">Taispeántar athruithe sa réamhamharc láithreach.</string>
-    <string name="dashboard_builder_preview">Réamhamharc</string>
-    <string name="dashboard_builder_drag">Tarraing %1$s</string>
     <string name="dashboard_builder_sample_track">Rian samplach</string>
     <string name="dashboard_builder_small">Beag</string>
     <string name="dashboard_builder_normal">Gnáth</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">Athraigh méid %1$s</string>
     <string name="dashboard_builder_position_label">Ailíniú</string>
     <string name="dashboard_builder_size_label">Méid</string>
-    <string name="dashboard_builder_drag_hint">Tarraing chun an t-ord a athrú</string>
-    <string name="dashboard_orientation_auto">Treoshuíomh: de réir an scáileáin chúil</string>
-    <string name="dashboard_orientation_landscape">Treoshuíomh: tírdhreach</string>
-    <string name="dashboard_orientation_portrait">Treoshuíomh: portráid</string>
     <string name="dashboard_builder_visible">Taispeáin an ghiuirléid</string>
     <string name="dashboard_builder_visibility">Taispeáin nó folaigh %1$s</string>
     <string name="dashboard_builder_position_value">Ailíniú: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">Taispeánfar gach rud a chuireann tú ar siúl anseo sa socraitheoir. Fanann an méid atá as ar an scáileán seo.</string>
     <string name="dashboard_builder_choose">Roghnaigh giuirléidí</string>
     <string name="dashboard_builder_empty">Níl aon ghiuirléid ar siúl fós. Roghnaigh na cinn ba cheart don phainéal cúil a thaispeáint.</string>
-    <string name="dashboard_builder_pages">Leathanaigh</string>
-    <string name="dashboard_builder_one_page">1 leathanach</string>
-    <string name="dashboard_builder_pages_count">%1$d leathanach</string>
     <string name="dashboard_builder_choose_value">Roghnaigh</string>
     <string name="panel_gestures_help">Ar an bpainéal féin: cuireann tapa ar ghiuirléid a taispeáint ar aghaidh céim, agus cuireann brú fada áit ar bith an taispeáint bhuan ar siúl nó as.</string>
     <string name="dashboard_builder_pages_help">Le níos mó ná leathanach amháin, téann an painéal cúil tríothu, thart ar ocht soicind an ceann. Svaidhpeáil ar an bpainéal chun leathanach a choinneáil.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">Éadrom</string>
     <string name="dashboard_burn_in_normal">Gnáth</string>
     <string name="dashboard_burn_in_large">Leathan</string>
-    <string name="dashboard_builder_show_on_panel">Taispeáin ar an bpainéal cúil · 30 s</string>
-    <string name="dashboard_builder_show_on_panel_active">Stad an scáthánú chun réamhamharc a fháil ar an bpainéal</string>
     <string name="dashboard_builder_preview_note">Tá cruth an phainéil chúil ar an réamhamharc. Tá an ceallra, an teocht, an rian reatha agus an clog beo; is luachanna samplacha an chuid eile.</string>
     <string name="dashboard_builder_reset">Athshocraigh</string>
     <string name="dashboard_builder_reset_title">Leagan amach na ngiuirléidí a athshocrú?</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">Turas</string>
     <string name="dashboard_preset_music">Ceol</string>
     <string name="dashboard_preset_weather">Aimsir</string>
-    <string name="dashboard_builder_layout_stacked">Leagan amach: colún</string>
-    <string name="dashboard_builder_layout_corners">Leagan amach: cúinní</string>
-    <string name="dashboard_builder_layout_compact">Leagan amach: dlúth</string>
     <string name="dashboard_location_access_granted">Tá rochtain ar shuíomh ar siúl</string>
     <string name="dashboard_location_access_required">Tá suíomh cruinn ag teastáil don luas agus don airde</string>
     <string name="dashboard_location_access_optional">Ní úsáidtear an suíomh ach don luas agus don airde</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">Aibhsiú</string>
     <string name="dashboard_builder_style_muted">Maolaithe</string>
     <string name="dashboard_builder_page_section">Leathanach %1$d</string>
-    <string name="dashboard_builder_page_empty">Folamh. Bog giuirléid anseo, nó tarraing ceann anall.</string>
     <string name="dashboard_builder_moved">Bogadh %1$s go leathanach %2$d</string>
-    <string name="dashboard_builder_preview_page">An leathanach atá sa réamhamharc</string>
-    <string name="dashboard_builder_preview_page_note">Baineann an treoshuíomh agus an leagan amach leis an leathanach thuas, mar sin is féidir le gach leathanach luí ar a bhealach féin.</string>
     <string name="dashboard_profile_template_title">Painéal na próifíle reatha</string>
     <string name="dashboard_profile_template_help">Cuirtear i bhfeidhm as a stuaim féin é nuair a athraíonn tú go dtí an phróifíl seo, agus coinnítear as a stuaim féin é nuair a fhágann tú í, ionas go dtagann gach próifíl ar ais chuig a painéal féin.</string>
     <string name="dashboard_named_template_add">Sábháil an ceann reatha mar…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">Scrios</string>
     <string name="dashboard_named_template_delete_message">An teimpléad „%1$s“ a scriosadh?</string>
     <string name="dashboard_named_template_full">Níl spás ann do theimpléad eile</string>
-    <string name="dashboard_builder_layout_free">Amharc: saor</string>
     <string name="dashboard_builder_preview_pick_hint">Tapáil giuirléid sa réamhamharc chun teacht ar a socruithe. San amharc saor is féidir leat í a tharraingt freisin agus a méid a athrú le liomóg.</string>
     <string name="dashboard_builder_preview_free_hint">Tarraing giuirléid sa réamhamharc chun í a chur ina háit, agus bain liomóg aisti chun a méid a athrú. Tapáil í chun teacht ar a socruithe.</string>
     <string name="dashboard_builder_snap">Léim chuig greille</string>
@@ -450,4 +431,31 @@
     <string name="crop_frame_whole">An scáileán ar fad</string>
     <string name="crop_frame_fill">Líon an painéal</string>
     <string name="calibration_framed_notice">Is fráma a tarraingíodh os cionn aipe a shocraíonn bearradh na próifíle seo, mar sin ní dhéanann na sleamhnáin thíos faic. Athshocraigh an calabrú chun é a thabhairt ar ais dóibh.</string>
+    <string name="dashboard_builder_pages_title">Leathanaigh</string>
+    <string name="dashboard_page_add">Cuir leathanach leis</string>
+    <string name="dashboard_page_actions">Gníomhartha leathanach %1$d</string>
+    <string name="dashboard_page_home_description">Leathanach %1$d, príomh</string>
+    <string name="dashboard_page_make_home">Déan príomhleathanach de</string>
+    <string name="dashboard_page_move_left">Bog ar chlé</string>
+    <string name="dashboard_page_move_right">Bog ar dheis</string>
+    <string name="dashboard_page_delete">Scrios an leathanach</string>
+    <string name="dashboard_page_delete_message">Bainfear na giuirléidí ó leathanach %1$d den phainéal. Is féidir iad a chur ar siúl arís faoi Roghnaigh giuirléidí.</string>
+    <string name="dashboard_page_layout">Leagan amach an leathanaigh</string>
+    <string name="dashboard_page_orientation">Treoshuíomh</string>
+    <string name="dashboard_builder_page_widgets">Giuirléidí ar leathanach %1$d</string>
+    <string name="dashboard_builder_list_hint">Tapáil giuirléid chun a socruithe a oscailt. Coinnigh síos í chun í a tharraingt: laistigh den liosta chun an t-ord a athrú, nó ar chluaisín leathanaigh chun í a bhogadh ann.</string>
+    <string name="dashboard_builder_page_empty_hint">Níl aon rud ar an leathanach seo fós. Cuir giuirléidí leis, nó bog ceann anseo ó leathanach eile.</string>
+    <string name="dashboard_widget_page_label">Leathanach</string>
+    <string name="dashboard_widget_remove">Bain den phainéal</string>
+    <string name="dashboard_builder_move_to_page">Bog %1$s go leathanach %2$d</string>
+    <string name="dashboard_templates_title">Teimpléid agus truiceanna</string>
+    <string name="dashboard_templates_help">Leaganacha amach réamhdhéanta, socruithe sábháilte, agus cathain a thagann siad aníos leo féin.</string>
+    <string name="dashboard_builder_help_title">Cabhair</string>
+    <string name="dashboard_page_home_help">Osclaíonn an painéal ar an bpríomhleathanach (★) agus filleann sé air tar éis 30 soicind gan teagmháil.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>Mar an scáileán cúil</item>
+        <item>Tírdhreach</item>
+        <item>Portráid</item>
+    </string-array>
+    <string name="dashboard_page_full">Ní féidir é a chur ar leathanach %1$d: teastaíonn leathanach dá cuid féin ó ghiuirléid lánscáileáin.</string>
 </resources>

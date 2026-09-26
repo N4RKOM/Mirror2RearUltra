@@ -1,109 +1,137 @@
 package com.tpkarras.mirror2rearultra;
 
-import android.Manifest;
-import android.app.ActivityOptions;
-import android.graphics.Point;
-import android.hardware.display.DisplayManager;
-import android.os.Build;
-import android.os.Bundle;
 import android.content.ClipData;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Point;
+import android.hardware.display.DisplayManager;
 import android.os.BatteryManager;
-import android.view.Gravity;
+import android.os.Bundle;
 import android.view.Display;
 import android.view.DragEvent;
+import android.view.Gravity;
+import android.view.Menu;
 import android.view.View;
-import android.text.TextUtils;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.widget.NestedScrollView;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.bottomsheet.BottomSheetDragHandleView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.shape.ShapeAppearanceModel;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-
-import androidx.appcompat.app.AlertDialog;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
+/**
+ * Arranges the rear panel one page at a time.
+ *
+ * <p>The screen used to be one long list: the preview, a page-count row, a
+ * separate row to pick which page the preview showed, every page's widgets
+ * under headings with nine controls in each card, and the presets, templates
+ * and triggers in between. Pages are tabs now, and everything under the tabs
+ * belongs to the page picked there. A widget's settings open in a sheet, and
+ * the arrangement-wide tools moved to {@link DashboardTemplatesActivity}.
+ */
 public class DashboardBuilderActivity extends AppCompatActivity {
-    private enum Preset { CLOCK, TRIP, MUSIC, WEATHER }
     private final List<DashboardWidgetLayout.Widget> widgets = new ArrayList<>();
-    private LinearLayout rows;
+    private NestedScrollView scroll;
+    private FrameLayout pageTabs;
+    private MaterialButton addPageButton;
+    private MaterialButton pageActionsButton;
     private RearDashboardView preview;
-    private RearDashboardView singlePreview;
     private MaterialCardView previewContainer;
-    private MaterialButton orientationButton;
-    private MaterialButton layoutButton;
-    private HyperValueRow triggerChargingInput;
-    private HyperValueRow triggerTimeInput;
-    private HyperValueRow triggerFromInput;
-    private HyperValueRow triggerToInput;
-    private HyperValueRow pagesInput;
-    private HyperValueRow presetInput;
-    private LinearLayout previewPages;
-    private TextView previewPageNote;
-    private androidx.core.widget.NestedScrollView scroll;
+    private HyperValueRow layoutRow;
+    private HyperValueRow orientationRow;
     private TextView previewHint;
     private TextView overflowNote;
     private View snapGroup;
-    private com.google.android.material.materialswitch.MaterialSwitch snapSwitch;
+    private MaterialSwitch snapSwitch;
     /** Guards the switch while it is being written from stored state. */
     private boolean bindingSnap;
-    /** The widget picked in the preview, outlined there and in its card. */
+    private TextView widgetsHeader;
+    private LinearLayout rows;
+    private TextView listHint;
+    /** The widget picked in the preview or the list, outlined in both. */
     @Nullable private DashboardWidgetLayout.Widget selectedWidget;
-    private LinearLayout namedTemplates;
-    private TextView namedTemplatesEmpty;
-    private MaterialButton addNamedTemplateButton;
-    private TextView emptyState;
-    private MaterialButton showOnPanelButton;
-    private ActivityResultLauncher<String> permissionLauncher;
+    @Nullable private BottomSheetDialog widgetSheet;
     /**
-     * The page the preview shows and the two buttons above it change.
-     *
-     * <p>Orientation and arrangement used to be one setting for the whole
-     * panel, so a trip page could not sit sideways next to an upright clock
-     * page. They belong to a page now, which means the screen has to say which
-     * page is being edited.
+     * The page being edited: the tab that is checked, the page the preview
+     * shows, and the page the layout rows and the widget list belong to.
      */
-    private int previewPage = 1;
+    private int editedPage = 1;
 
     @Override protected void onCreate(@Nullable Bundle state) {
         super.onCreate(state);
-        permissionLauncher = registerForActivityResult(
-                new ActivityResultContracts.RequestPermission(), granted -> refreshPreview());
         setContentView(R.layout.activity_dashboard_builder);
         MaterialToolbar toolbar = findViewById(R.id.dashboard_builder_toolbar);
         toolbar.setNavigationOnClickListener(view -> finish());
-        rows = findViewById(R.id.dashboard_builder_rows);
-        preview = findViewById(R.id.dashboard_builder_preview_view);
-        singlePreview = preview;
-        previewContainer = findViewById(R.id.dashboard_builder_preview_container);
-        orientationButton = findViewById(R.id.dashboard_builder_orientation);
-        layoutButton = findViewById(R.id.dashboard_builder_layout);
-        pagesInput = findViewById(R.id.dashboard_builder_pages);
-        presetInput = findViewById(R.id.dashboard_builder_preset);
-        previewPages = findViewById(R.id.dashboard_builder_preview_pages);
-        previewPageNote = findViewById(R.id.dashboard_builder_preview_page_note);
+        toolbar.inflateMenu(R.menu.dashboard_builder);
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.dashboard_builder_menu_help) {
+                showHelp();
+                return true;
+            }
+            if (item.getItemId() == R.id.dashboard_builder_menu_reset) {
+                confirmReset();
+                return true;
+            }
+            return false;
+        });
+
         scroll = findViewById(R.id.dashboard_builder_scroll);
+        pageTabs = findViewById(R.id.dashboard_builder_page_tabs);
+        addPageButton = findViewById(R.id.dashboard_builder_page_add);
+        pageActionsButton = findViewById(R.id.dashboard_builder_page_actions);
+        preview = findViewById(R.id.dashboard_builder_preview_view);
+        previewContainer = findViewById(R.id.dashboard_builder_preview_container);
+        layoutRow = findViewById(R.id.dashboard_builder_layout);
+        orientationRow = findViewById(R.id.dashboard_builder_orientation);
         previewHint = findViewById(R.id.dashboard_builder_preview_hint);
         overflowNote = findViewById(R.id.dashboard_builder_overflow);
         snapGroup = findViewById(R.id.dashboard_builder_snap_group);
         snapSwitch = findViewById(R.id.dashboard_builder_snap_switch);
+        widgetsHeader = findViewById(R.id.dashboard_builder_widgets_header);
+        rows = findViewById(R.id.dashboard_builder_rows);
+        listHint = findViewById(R.id.dashboard_builder_empty);
+
+        addPageButton.setOnClickListener(view -> addPage());
+        pageActionsButton.setOnClickListener(view -> showPageActions(view));
+
+        String[] layoutLabels = getResources().getStringArray(R.array.dashboard_layout_entries);
+        layoutRow.setEntries(layoutLabels);
+        layoutRow.setOnItemSelectedListener(position -> {
+            if (position >= 0 && position < DashboardSettings.Layout.values().length) {
+                setPageLayout(DashboardSettings.Layout.values()[position]);
+            }
+        });
+        String[] orientationLabels =
+                getResources().getStringArray(R.array.dashboard_orientation_entries);
+        orientationRow.setEntries(orientationLabels);
+        orientationRow.setOnItemSelectedListener(position -> {
+            if (position >= 0 && position < DashboardWidgetLayout.Orientation.values().length) {
+                DashboardWidgetLayout.savePageOrientation(this, editedPage,
+                        DashboardWidgetLayout.Orientation.values()[position]);
+                notifyDashboardChanged();
+            }
+        });
+
         snapSwitch.setOnCheckedChangeListener((button, checked) -> {
             if (bindingSnap) {
                 return;
@@ -119,160 +147,236 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 refreshPreview();
             }
         });
-        namedTemplates = findViewById(R.id.dashboard_named_templates);
-        namedTemplatesEmpty = findViewById(R.id.dashboard_named_templates_empty);
-        addNamedTemplateButton = findViewById(R.id.dashboard_named_template_add);
-        emptyState = findViewById(R.id.dashboard_builder_empty);
-        orientationButton.setOnClickListener(view -> cycleOrientation());
-        layoutButton.setOnClickListener(view -> cycleLayout());
-        widgets.addAll(DashboardWidgetLayout.loadOrder(this));
-        rows.setOnDragListener(this::handleDrop);
-        // The preview is the other half of the list: tapping a widget there
-        // picks it here, and in the free layout dragging it moves it.
-        bindPreview(singlePreview);
+
+        rows.setOnDragListener(this::handleRowDrop);
+        bindPreview();
         // Without this the preview keeps whatever the track was doing when it
         // was last drawn, which is the very confusion the icon was fixed for.
         MediaWidgetState.addListener(mediaListener);
-        String[] presetLabels = {getString(R.string.dashboard_preset_clock),
-                getString(R.string.dashboard_preset_trip), getString(R.string.dashboard_preset_music),
-                getString(R.string.dashboard_preset_weather)};
-        presetInput.setEntries(presetLabels);
-        presetInput.setValue(getString(R.string.dashboard_builder_choose_value));
-        presetInput.setOnItemSelectedListener(position -> {
-            if (position >= 0 && position < Preset.values().length) applyPreset(Preset.values()[position]);
-        });
-        refreshPageControls();
-        addNamedTemplateButton.setOnClickListener(view -> promptForNewTemplate());
-        renderNamedTemplates();
-        triggerChargingInput = findViewById(R.id.panel_trigger_charging_input);
-        triggerTimeInput = findViewById(R.id.panel_trigger_time_input);
-        triggerFromInput = findViewById(R.id.panel_trigger_from_input);
-        triggerToInput = findViewById(R.id.panel_trigger_to_input);
-        triggerFromInput.setOnClickListener(view -> pickTriggerTime(true));
-        triggerToInput.setOnClickListener(view -> pickTriggerTime(false));
-        renderTriggers();
-        refreshPreview();
-        renderRows();
+
         findViewById(R.id.dashboard_builder_choose).setOnClickListener(view ->
-                startActivity(new android.content.Intent(this, WidgetPickerActivity.class)));
-        showOnPanelButton = findViewById(R.id.dashboard_builder_show_on_panel);
-        showOnPanelButton.setOnClickListener(view -> showOnRearPanel());
-        findViewById(R.id.dashboard_builder_done).setOnClickListener(view -> finish());
-        findViewById(R.id.dashboard_builder_reset).setOnClickListener(view -> confirmReset());
-        findViewById(R.id.dashboard_custom_template_save).setOnClickListener(view -> {
-            DashboardTemplateStore.save(this);
-            Toast.makeText(this, R.string.dashboard_custom_template_saved, Toast.LENGTH_SHORT).show();
-        });
-        findViewById(R.id.dashboard_custom_template_apply).setOnClickListener(view -> {
-            if (!DashboardTemplateStore.apply(this)) {
-                Toast.makeText(this, R.string.dashboard_custom_template_empty, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            widgets.clear(); widgets.addAll(DashboardWidgetLayout.loadOrder(this));
-            refreshPageControls();
-            renderRows(); notifyDashboardChanged();
-        });
+                startActivity(new Intent(this, WidgetPickerActivity.class)
+                        .putExtra(WidgetPickerActivity.EXTRA_TARGET_PAGE, editedPage)));
+        findViewById(R.id.dashboard_builder_templates).setOnClickListener(view ->
+                startActivity(new Intent(this, DashboardTemplatesActivity.class)));
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // The picker may have switched widgets on or off while this screen was
-        // stopped, and this list only shows the ones that are on.
+        // The picker and the templates screen both change the arrangement
+        // while this one is stopped.
+        reload();
+    }
+
+    @Override
+    protected void onDestroy() {
+        MediaWidgetState.removeListener(mediaListener);
+        if (widgetSheet != null) {
+            widgetSheet.dismiss();
+        }
+        super.onDestroy();
+    }
+
+    /** Rebuilds every part of the screen from stored state. */
+    private void reload() {
         widgets.clear();
         widgets.addAll(DashboardWidgetLayout.loadOrder(this));
+        editedPage = Math.max(1, Math.min(DashboardWidgetLayout.loadPageCount(this), editedPage));
+        renderPageTabs();
         renderRows();
         refreshPreview();
-        updateShowOnPanelState();
+    }
+
+    // ------------------------------------------------------------------
+    // Pages
+    // ------------------------------------------------------------------
+
+    /**
+     * One tab per page, the main page marked with a star.
+     *
+     * <p>A tab is also where a dragged widget can be dropped to move it to
+     * that page, and holding one opens the same page actions as the button
+     * beside the tabs.
+     */
+    private void renderPageTabs() {
+        int pageCount = DashboardWidgetLayout.loadPageCount(this);
+        int home = DashboardWidgetLayout.loadHomePage(this);
+        pageTabs.removeAllViews();
+        MaterialButtonToggleGroup group = (MaterialButtonToggleGroup) getLayoutInflater()
+                .inflate(R.layout.widget_segment_group, pageTabs, false);
+        int[] ids = new int[pageCount];
+        for (int page = 1; page <= pageCount; page++) {
+            MaterialButton tab = (MaterialButton) getLayoutInflater()
+                    .inflate(R.layout.widget_segment_button, group, false);
+            tab.setId(View.generateViewId());
+            ids[page - 1] = tab.getId();
+            tab.setText(page == home ? page + " ★" : String.valueOf(page));
+            tab.setContentDescription(page == home
+                    ? getString(R.string.dashboard_page_home_description, page)
+                    : getString(R.string.dashboard_builder_page_section, page));
+            int target = page;
+            tab.setOnLongClickListener(view -> {
+                selectPage(target);
+                // The tabs were just rebuilt, so the button stays the anchor.
+                showPageActions(pageActionsButton);
+                return true;
+            });
+            tab.setOnDragListener((view, event) -> handleTabDrop(view, event, target));
+            group.addView(tab, new LinearLayout.LayoutParams(0, dp(42), 1f));
+        }
+        group.check(ids[editedPage - 1]);
+        group.addOnButtonCheckedListener((toggleGroup, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            for (int index = 0; index < ids.length; index++) {
+                if (ids[index] == checkedId) {
+                    selectPage(index + 1);
+                    return;
+                }
+            }
+        });
+        pageTabs.addView(group);
+        addPageButton.setEnabled(pageCount < DashboardWidgetLayout.MAX_PAGES);
+        pageActionsButton.setContentDescription(
+                getString(R.string.dashboard_page_actions, editedPage));
     }
 
     /**
-     * Puts the current arrangement on the rear panel for half a minute.
+     * Moves the editing to another page.
      *
-     * <p>Uses the same launch-on-the-rear-display route as the calibration
-     * grid. Refused while mirroring owns the panel, and when the rear display
-     * is not reachable at all.
+     * <p>The selection is dropped because the widget that was picked belongs
+     * to the page being left.
      */
-    private void showOnRearPanel() {
-        DisplayManager manager = getSystemService(DisplayManager.class);
-        int rearDisplayId = DisplayActivity.findRearDisplayId(manager);
-        if (rearDisplayId == Display.INVALID_DISPLAY) {
-            Toast.makeText(this, R.string.rear_display_missing, Toast.LENGTH_SHORT).show();
+    private void selectPage(int page) {
+        if (page == editedPage) {
             return;
         }
-        ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchDisplayId(rearDisplayId);
-        startActivity(new android.content.Intent(this, DashboardPreviewActivity.class)
-                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-                        | android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP),
-                options.toBundle());
+        editedPage = page;
+        selectedWidget = null;
+        preview.setSelectedWidget(null);
+        renderPageTabs();
+        renderRows();
+        refreshPreview();
     }
 
-    /** The panel cannot show a preview while a mirroring session owns it. */
-    private void updateShowOnPanelState() {
-        if (showOnPanelButton == null) {
+    private void addPage() {
+        int page = DashboardWidgetLayout.addPage(this);
+        if (page == 0) {
             return;
         }
-        boolean mirroring = MirrorState.isActive();
-        showOnPanelButton.setEnabled(!mirroring);
-        showOnPanelButton.setText(mirroring
-                ? R.string.dashboard_builder_show_on_panel_active
-                : R.string.dashboard_builder_show_on_panel);
+        editedPage = page;
+        selectedWidget = null;
+        notifyDashboardChanged();
+        renderPageTabs();
+        renderRows();
+        pageTabs.announceForAccessibility(getString(R.string.dashboard_builder_page_section, page));
+    }
+
+    private void showPageActions(View anchor) {
+        int pageCount = DashboardWidgetLayout.loadPageCount(this);
+        boolean home = DashboardWidgetLayout.loadHomePage(this) == editedPage;
+        PopupMenu menu = new PopupMenu(this, anchor, Gravity.END);
+        Menu items = menu.getMenu();
+        items.add(0, 1, 0, R.string.dashboard_page_make_home).setEnabled(!home);
+        items.add(0, 2, 1, R.string.dashboard_page_move_left).setEnabled(editedPage > 1);
+        items.add(0, 3, 2, R.string.dashboard_page_move_right).setEnabled(editedPage < pageCount);
+        items.add(0, 4, 3, R.string.dashboard_page_delete).setEnabled(pageCount > 1);
+        menu.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case 1:
+                    DashboardWidgetLayout.saveHomePage(this, editedPage);
+                    notifyDashboardChanged();
+                    renderPageTabs();
+                    return true;
+                case 2:
+                    movePage(-1);
+                    return true;
+                case 3:
+                    movePage(1);
+                    return true;
+                case 4:
+                    confirmDeletePage();
+                    return true;
+                default:
+                    return false;
+            }
+        });
+        menu.show();
+    }
+
+    /** Swaps the edited page with its neighbour and follows it there. */
+    private void movePage(int direction) {
+        int pageCount = DashboardWidgetLayout.loadPageCount(this);
+        int target = editedPage + direction;
+        if (target < 1 || target > pageCount) {
+            return;
+        }
+        DashboardWidgetLayout.remapPages(this,
+                DashboardPages.swap(pageCount, editedPage, target));
+        editedPage = target;
+        reload();
+    }
+
+    private void confirmDeletePage() {
+        if (currentPages().get(editedPage - 1).isEmpty()) {
+            deletePage();
+            return;
+        }
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.dashboard_page_delete)
+                .setMessage(getString(R.string.dashboard_page_delete_message, editedPage))
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.dashboard_page_delete, (dialog, which) -> deletePage())
+                .show();
+    }
+
+    private void deletePage() {
+        int pageCount = DashboardWidgetLayout.loadPageCount(this);
+        if (pageCount <= 1) {
+            return;
+        }
+        DashboardWidgetLayout.remapPages(this, DashboardPages.remove(pageCount, editedPage));
+        editedPage = Math.max(1, editedPage - 1);
+        selectedWidget = null;
+        reload();
     }
 
     /**
-     * Moves a widget one place up or down the visible list.
+     * Sets the edited page's arrangement.
      *
-     * <p>The stored order holds every widget, on or off, but the list shows
-     * only the ones that are on. Swapping with the neighbour in the stored
-     * order would look like nothing happened whenever a disabled widget sat
-     * between the two, so this swaps with the nearest enabled neighbour.
+     * <p>Page one's is the panel-wide setting the rear-panel screen shows, so
+     * it is written there; later pages are overrides of it.
      */
-    private void moveWidget(DashboardWidgetLayout.Widget widget, int direction) {
-        List<List<DashboardWidgetLayout.Widget>> pages = currentPages();
-        int fromPage = -1;
-        int fromIndex = -1;
-        for (int page = 0; page < pages.size(); page++) {
-            int index = pages.get(page).indexOf(widget);
-            if (index >= 0) {
-                fromPage = page;
-                fromIndex = index;
-                break;
-            }
-        }
-        if (fromPage < 0) {
+    private void setPageLayout(DashboardSettings.Layout next) {
+        DashboardSettings settings = MirrorSettings.loadDashboardSettings(this);
+        if (next == DashboardWidgetLayout.loadPageLayout(this, editedPage, settings.layout)) {
             return;
         }
-        int toPage = fromPage;
-        int toIndex = fromIndex + direction;
-        if (toIndex < 0) {
-            // Off the top of a page: the previous page's last place, so the
-            // buttons walk the whole arrangement rather than stopping at a
-            // page boundary that TalkBack cannot cross by dragging.
-            if (fromPage == 0) {
-                return;
-            }
-            toPage = fromPage - 1;
-            toIndex = pages.get(toPage).size();
-        } else if (toIndex > pages.get(fromPage).size() - 1) {
-            if (fromPage == pages.size() - 1) {
-                return;
-            }
-            toPage = fromPage + 1;
-            toIndex = 0;
+        if (next == DashboardSettings.Layout.FREE) {
+            // Seeded from the frame still on screen, so the free layout opens
+            // where the flowed one left off.
+            preview.seedFreePositions();
         }
-        pages.get(fromPage).remove(fromIndex);
-        pages.get(toPage).add(Math.min(toIndex, pages.get(toPage).size()), widget);
-        applyArrangement(pages);
-        rows.announceForAccessibility(getString(R.string.dashboard_builder_moved,
-                label(widget), toPage + 1));
+        if (editedPage <= 1) {
+            MirrorSettings.saveDashboardSettings(this, settings.withLayout(next));
+            refreshPreview();
+        } else {
+            DashboardWidgetLayout.savePageLayout(this, editedPage, next);
+            notifyDashboardChanged();
+        }
     }
+
+    // ------------------------------------------------------------------
+    // Widget list
+    // ------------------------------------------------------------------
 
     /**
      * The widgets that are on, split into the pages they sit on.
      *
-     * <p>This is the model the list, the move buttons and dragging all work
-     * on, so the three cannot disagree about where a widget is.
+     * <p>This is the model the list, dragging and the move actions all work
+     * on, so they cannot disagree about where a widget is.
      */
     private List<List<DashboardWidgetLayout.Widget>> currentPages() {
         int pageCount = DashboardWidgetLayout.loadPageCount(this);
@@ -323,221 +427,276 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     }
 
     /**
-     * The page-count chooser. Rebuilt rather than built once: a preset or a
-     * template can change the count, and the chooser has to follow.
+     * Puts a widget at a place on a page.
+     *
+     * @param toIndex place on the target page, or -1 for its end
+     * @return false when the page could not take it, which is said on screen
      */
-    private void buildPagesSegment() {
-        int current = DashboardWidgetLayout.loadPageCount(this);
-        String[] labels = new String[DashboardWidgetLayout.MAX_PAGES];
-        for (int index = 0; index < labels.length; index++) labels[index] = pageCountLabel(index + 1);
-        pagesInput.setEntries(labels);
-        pagesInput.setValue(labels[Math.max(0, Math.min(labels.length - 1, current - 1))]);
-        pagesInput.setOnItemSelectedListener(index -> {
-            int count = index + 1;
-            DashboardWidgetLayout.savePageCount(this, count);
-            previewPage = Math.min(previewPage, count);
-            buildPreviewPagesSegment();
-            renderRows();
-            notifyDashboardChanged();
-        });
-    }
-
-    private String pageCountLabel(int count) {
-        return count == 1 ? getString(R.string.dashboard_builder_one_page)
-                : getString(R.string.dashboard_builder_pages_count, count);
+    private boolean moveWidget(DashboardWidgetLayout.Widget widget, int toPage, int toIndex) {
+        List<List<DashboardWidgetLayout.Widget>> pages = currentPages();
+        int fromPage = -1;
+        int fromIndex = -1;
+        for (int page = 0; page < pages.size(); page++) {
+            int index = pages.get(page).indexOf(widget);
+            if (index >= 0) {
+                fromPage = page + 1;
+                fromIndex = index;
+                break;
+            }
+        }
+        if (fromPage < 0 || toPage < 1 || toPage > pages.size()) {
+            return false;
+        }
+        if (toPage != fromPage && !DashboardWidgetLayout.canMoveTo(this, widget, toPage)) {
+            Toast.makeText(this, getString(R.string.dashboard_page_full, toPage),
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        pages.get(fromPage - 1).remove(fromIndex);
+        List<DashboardWidgetLayout.Widget> target = pages.get(toPage - 1);
+        int index = toIndex < 0 ? target.size() : toIndex;
+        if (toPage == fromPage && fromIndex < index) {
+            index--;
+        }
+        target.add(Math.max(0, Math.min(index, target.size())), widget);
+        applyArrangement(pages);
+        if (toPage != fromPage) {
+            rows.announceForAccessibility(getString(R.string.dashboard_builder_moved,
+                    label(widget), toPage));
+        }
+        return true;
     }
 
     /**
-     * Builds the arrangement as a list of pages.
+     * Lists the edited page's widgets as rows of one group.
      *
-     * <p>The list used to show all nineteen widgets with an on/off switch in
-     * every card, so arranging four of them meant scrolling past fifteen
-     * greyed-out cards. Selection moved to {@link WidgetPickerActivity}; this
-     * screen arranges what is on and nothing else.
-     *
-     * <p>Pages used to be a number picked inside each card, which meant reading
-     * nineteen cards to find out what page two held. They are sections here
-     * instead: a widget is on the page it is listed under, and it changes page
-     * by crossing a heading, by drag or with the move buttons.
+     * <p>A row is the widget's name and nothing else: tapping it opens its
+     * settings, holding it drags it - within the list to reorder, or onto a
+     * tab to move it to that page. The same moves are offered to TalkBack as
+     * actions on the row, since a drag is not something it can perform.
      */
     private void renderRows() {
         rows.removeAllViews();
         List<List<DashboardWidgetLayout.Widget>> pages = currentPages();
-        DashboardSettings.Layout firstPageLayout =
-                MirrorSettings.loadDashboardSettings(this).layout;
+        List<DashboardWidgetLayout.Widget> page = pages.get(editedPage - 1);
+        widgetsHeader.setText(pages.size() > 1
+                ? getString(R.string.dashboard_builder_page_widgets, editedPage)
+                : getString(R.string.dashboard_builder_widgets_title));
+        rows.setVisibility(page.isEmpty() ? View.GONE : View.VISIBLE);
         int total = 0;
-        for (List<DashboardWidgetLayout.Widget> page : pages) {
-            total += page.size();
+        for (List<DashboardWidgetLayout.Widget> each : pages) {
+            total += each.size();
         }
-        emptyState.setVisibility(total == 0 ? View.VISIBLE : View.GONE);
-        if (total == 0) {
-            // Empty page headings over an empty list say nothing twice.
-            return;
-        }
-        for (int page = 0; page < pages.size(); page++) {
-            if (pages.size() > 1) {
-                rows.addView(pageHeader(page + 1));
-            }
-            if (pages.get(page).isEmpty()) {
-                if (pages.size() > 1) {
-                    rows.addView(emptyPageHint());
-                }
-                continue;
-            }
-            for (int index = 0; index < pages.get(page).size(); index++) {
-                // The move buttons stop only at the two ends of the whole
-                // arrangement. Anywhere else they step over a page heading,
-                // including onto a page that is still empty.
-                boolean canMoveUp = page > 0 || index > 0;
-                boolean canMoveDown = page < pages.size() - 1
-                        || index < pages.get(page).size() - 1;
-                // The free layout places and sizes a widget by hand, so a
-                // card on such a page leaves those two out; see widgetCard.
-                boolean freeLayout = DashboardWidgetLayout.loadPageLayout(
-                        this, page + 1, firstPageLayout) == DashboardSettings.Layout.FREE;
-                MaterialCardView card = widgetCard(
-                        pages.get(page).get(index), canMoveUp, canMoveDown, freeLayout);
-                LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(-1, -2);
-                cardParams.bottomMargin = dp(8);
-                rows.addView(card, cardParams);
-            }
+        listHint.setText(total == 0 ? R.string.dashboard_builder_empty
+                : page.isEmpty() ? R.string.dashboard_builder_page_empty_hint
+                : R.string.dashboard_builder_list_hint);
+        for (int index = 0; index < page.size(); index++) {
+            DashboardWidgetLayout.Widget widget = page.get(index);
+            MaterialButton row = (MaterialButton) getLayoutInflater()
+                    .inflate(R.layout.widget_builder_row, rows, false);
+            row.setTag(widget);
+            row.setText(label(widget));
+            row.setShapeAppearanceModel(ShapeAppearanceModel.builder(this, 0,
+                    page.size() == 1 ? R.style.HyperOS_Shape_Group
+                            : index == 0 ? R.style.HyperOS_Shape_RowTop
+                            : index == page.size() - 1 ? R.style.HyperOS_Shape_RowBottom
+                            : R.style.HyperOS_Shape_RowMiddle).build());
+            markSelected(row, widget == selectedWidget);
+            row.setOnClickListener(view -> {
+                selectWidget(widget);
+                openWidgetSheet(widget);
+            });
+            row.setOnLongClickListener(view -> {
+                ClipData data = ClipData.newPlainText("widget", widget.name());
+                return view.startDragAndDrop(data, new View.DragShadowBuilder(view), widget, 0);
+            });
+            addMoveActions(row, widget, index, page.size(), pages.size());
+            rows.addView(row, new LinearLayout.LayoutParams(-1, -2));
         }
     }
 
-    /**
-     * Picks a widget in both halves of the screen.
-     *
-     * <p>Selecting in the preview scrolls its card into view, because the
-     * point of tapping a widget is to reach its controls without hunting
-     * through the list for it.
-     */
-    private void selectWidget(@Nullable DashboardWidgetLayout.Widget widget, boolean scrollToCard) {
+    private void addMoveActions(View row, DashboardWidgetLayout.Widget widget,
+            int index, int pageSize, int pageCount) {
+        if (index > 0) {
+            ViewCompat.addAccessibilityAction(row,
+                    getString(R.string.dashboard_builder_move_up, label(widget)),
+                    (view, arguments) -> {
+                        moveWidget(widget, editedPage, index - 1);
+                        return true;
+                    });
+        }
+        if (index < pageSize - 1) {
+            ViewCompat.addAccessibilityAction(row,
+                    getString(R.string.dashboard_builder_move_down, label(widget)),
+                    (view, arguments) -> {
+                        moveWidget(widget, editedPage, index + 2);
+                        return true;
+                    });
+        }
+        for (int page = 1; page <= pageCount; page++) {
+            if (page == editedPage || !DashboardWidgetLayout.canMoveTo(this, widget, page)) {
+                continue;
+            }
+            int target = page;
+            ViewCompat.addAccessibilityAction(row,
+                    getString(R.string.dashboard_builder_move_to_page, label(widget), target),
+                    (view, arguments) -> {
+                        moveWidget(widget, target, -1);
+                        return true;
+                    });
+        }
+    }
+
+    /** Picks a widget in both the preview and the list. */
+    private void selectWidget(@Nullable DashboardWidgetLayout.Widget widget) {
         selectedWidget = widget;
         preview.setSelectedWidget(widget);
         for (int index = 0; index < rows.getChildCount(); index++) {
             View child = rows.getChildAt(index);
-            if (!(child instanceof MaterialCardView)) {
-                continue;
+            if (child instanceof MaterialButton) {
+                markSelected((MaterialButton) child, widget != null && child.getTag() == widget);
             }
-            MaterialCardView card = (MaterialCardView) child;
-            boolean picked = card.getTag() == widget && widget != null;
-            card.setStrokeWidth(picked ? dp(2) : 0);
-            if (picked) {
-                card.setStrokeColor(com.google.android.material.color.MaterialColors.getColor(
-                        card, androidx.appcompat.R.attr.colorPrimary));
-                if (scrollToCard && scroll != null) {
-                    scroll.post(() -> scroll.smoothScrollTo(0, Math.max(0, topInScroll(card) - dp(24))));
+        }
+    }
+
+    private void markSelected(MaterialButton row, boolean picked) {
+        row.setTextColor(ContextCompat.getColorStateList(this,
+                picked ? R.color.hyper_text_button_text : R.color.hyper_row_title_text));
+    }
+
+    /** Reorders within the edited page, by where the finger lets go. */
+    private boolean handleRowDrop(View view, DragEvent event) {
+        if (event.getAction() != DragEvent.ACTION_DROP) {
+            return true;
+        }
+        Object state = event.getLocalState();
+        if (!(state instanceof DashboardWidgetLayout.Widget)) {
+            return false;
+        }
+        int index = rows.getChildCount();
+        for (int child = 0; child < rows.getChildCount(); child++) {
+            View row = rows.getChildAt(child);
+            if (event.getY() < row.getTop() + row.getHeight() / 2f) {
+                index = child;
+                break;
+            }
+        }
+        moveWidget((DashboardWidgetLayout.Widget) state, editedPage, index);
+        return true;
+    }
+
+    /** A widget dropped on a tab goes to the end of that page. */
+    private boolean handleTabDrop(View tab, DragEvent event, int page) {
+        Object state = event.getLocalState();
+        if (!(state instanceof DashboardWidgetLayout.Widget)) {
+            return false;
+        }
+        switch (event.getAction()) {
+            case DragEvent.ACTION_DRAG_ENTERED:
+                tab.animate().scaleX(1.12f).scaleY(1.12f).setDuration(120L).start();
+                return true;
+            case DragEvent.ACTION_DRAG_EXITED:
+            case DragEvent.ACTION_DRAG_ENDED:
+                tab.animate().scaleX(1f).scaleY(1f).setDuration(120L).start();
+                return true;
+            case DragEvent.ACTION_DROP:
+                if (page != editedPage) {
+                    moveWidget((DashboardWidgetLayout.Widget) state, page, -1);
                 }
-            }
+                return true;
+            default:
+                return true;
         }
     }
 
-    /** How far down the scrolling page a view sits. */
-    private int topInScroll(View view) {
-        int top = 0;
-        View current = view;
-        while (current != null && current != scroll) {
-            top += current.getTop();
-            android.view.ViewParent parent = current.getParent();
-            current = parent instanceof View ? (View) parent : null;
-        }
-        return top;
-    }
-
-    /** A page heading, tagged with its number so a drop can read it back. */
-    private TextView pageHeader(int page) {
-        TextView header = new TextView(this);
-        header.setText(getString(R.string.dashboard_builder_page_section, page));
-        header.setTextAppearance(R.style.HyperOS_Text_SectionHeader);
-        header.setTag(page);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
-        params.topMargin = dp(page == 1 ? 0 : 12);
-        params.bottomMargin = dp(6);
-        header.setLayoutParams(params);
-        return header;
-    }
-
-    /** Says a page is empty, and gives a drop something to land on. */
-    private TextView emptyPageHint() {
-        TextView hint = new TextView(this);
-        hint.setText(R.string.dashboard_builder_page_empty);
-        hint.setTextAppearance(R.style.HyperOS_Text_Caption);
-        hint.setTag(Boolean.TRUE);
-        hint.setPadding(dp(16), dp(14), dp(16), dp(18));
-        hint.setBackgroundResource(R.drawable.hyper_group_background);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
-        params.bottomMargin = dp(8);
-        hint.setLayoutParams(params);
-        return hint;
-    }
+    // ------------------------------------------------------------------
+    // Widget sheet
+    // ------------------------------------------------------------------
 
     /**
-     * @param freeLayout the page places widgets by hand. Alignment and size
-     *     are then the drag and the pinch, which the hint over the preview
-     *     already says, and the two rows here would be a second way of
-     *     saying the same thing - a worse one, since alignment shifts a
-     *     widget off the point it was dropped on.
+     * Opens a widget's settings over the lower half of the screen.
+     *
+     * <p>They were nine rows inside every card, so a page of five widgets was
+     * several screens of controls to scroll past. The builder scrolls the
+     * preview into view first, so each change can be watched as it lands.
      */
-    private MaterialCardView widgetCard(DashboardWidgetLayout.Widget widget,
-            boolean canMoveUp, boolean canMoveDown, boolean freeLayout) {
-        MaterialCardView card = new MaterialCardView(this);
-        card.setTag(widget);
-        card.setCardBackgroundColor(androidx.core.content.ContextCompat.getColor(
-                this, R.color.hyper_surface_grouped));
-        card.setRadius(dp(20)); card.setCardElevation(0f);
-        boolean picked = widget == selectedWidget;
-        card.setStrokeWidth(picked ? dp(2) : 0);
-        if (picked) {
-            card.setStrokeColor(com.google.android.material.color.MaterialColors.getColor(
-                    card, androidx.appcompat.R.attr.colorPrimary));
+    private void openWidgetSheet(DashboardWidgetLayout.Widget widget) {
+        if (widgetSheet != null) {
+            widgetSheet.dismiss();
         }
-        // Tapping the card is the way back: it outlines the widget in the
-        // preview, so a name in the list and a line on the panel can be
-        // matched up in either direction.
-        card.setOnClickListener(view -> selectWidget(widget, false));
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.VERTICAL);
-        row.setPadding(dp(16), dp(8), dp(8), dp(12));
-        LinearLayout header = new LinearLayout(this);
-        header.setGravity(Gravity.CENTER_VERTICAL);
+        scroll.smoothScrollTo(0, Math.max(0, previewContainer.getTop() - dp(56)));
+        BottomSheetDialog sheet = new BottomSheetDialog(this, R.style.HyperOS_BottomSheetDialog);
+        NestedScrollView content = new NestedScrollView(this);
+        LinearLayout column = new LinearLayout(this);
+        column.setOrientation(LinearLayout.VERTICAL);
+        int margin = getResources().getDimensionPixelSize(R.dimen.page_margin_horizontal);
+        column.setPadding(margin, 0, margin, dp(24));
+        column.addView(new BottomSheetDragHandleView(this), new LinearLayout.LayoutParams(-1, -2));
+        content.addView(column, new ViewGroup.LayoutParams(-1, -2));
+        fillWidgetSheet(column, widget, sheet);
+        sheet.setContentView(content);
+        if (sheet.getWindow() != null) {
+            // Light enough that the preview reads through it.
+            sheet.getWindow().setDimAmount(0.2f);
+        }
+        BottomSheetBehavior<?> behavior = sheet.getBehavior();
+        behavior.setPeekHeight(Math.round(getResources().getDisplayMetrics().heightPixels * 0.5f));
+        behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        sheet.setOnDismissListener(dialog -> {
+            if (widgetSheet == sheet) {
+                widgetSheet = null;
+            }
+        });
+        widgetSheet = sheet;
+        sheet.show();
+    }
+
+    private void fillWidgetSheet(LinearLayout column, DashboardWidgetLayout.Widget widget,
+            BottomSheetDialog sheet) {
         TextView title = new TextView(this);
         title.setText(label(widget));
-        title.setTextAppearance(R.style.HyperOS_Text_RowTitle);
-        title.setMaxLines(2); title.setEllipsize(TextUtils.TruncateAt.END);
-        header.addView(title, new LinearLayout.LayoutParams(0, -2, 1f));
-        MaterialButton drag = compactButton("≡");
-        drag.setContentDescription(getString(R.string.dashboard_builder_drag, label(widget)));
-        drag.setTooltipText(getString(R.string.dashboard_builder_drag_hint));
-        View.OnLongClickListener startDrag = view -> {
-            ClipData data = ClipData.newPlainText("widget", widget.name());
-            return card.startDragAndDrop(data, new View.DragShadowBuilder(card), widget, 0);
-        };
-        drag.setOnLongClickListener(startDrag);
-        // The whole card starts a drag too: aiming at a 56dp handle to
-        // reorder a list is needless precision.
-        card.setOnLongClickListener(startDrag);
+        title.setTextAppearance(R.style.HyperOS_Text_Title);
+        title.setPadding(0, 0, 0, dp(4));
+        column.addView(title);
 
-        // Explicit move buttons beside the drag handle. Long-press drag was
-        // the only way to reorder, which TalkBack cannot practically perform
-        // and which is awkward with one hand. They step over page headings as
-        // well, so changing page never requires a drag.
-        MaterialButton up = compactButton("↑");
-        up.setContentDescription(getString(R.string.dashboard_builder_move_up, label(widget)));
-        up.setEnabled(canMoveUp);
-        up.setOnClickListener(view -> moveWidget(widget, -1));
-        header.addView(up, new LinearLayout.LayoutParams(dp(48), dp(48)));
+        int pageCount = DashboardWidgetLayout.loadPageCount(this);
+        if (pageCount > 1) {
+            String[] pageLabels = new String[pageCount];
+            for (int index = 0; index < pageCount; index++) {
+                pageLabels[index] = String.valueOf(index + 1);
+            }
+            LinearLayout pageRow = segmentedRow(R.string.dashboard_widget_page_label, pageLabels,
+                    DashboardWidgetLayout.loadPage(this, widget) - 1,
+                    getString(R.string.dashboard_widget_page_label),
+                    choice -> {
+                        int target = choice + 1;
+                        if (target == DashboardWidgetLayout.loadPage(this, widget)) {
+                            return;
+                        }
+                        if (moveWidget(widget, target, -1)) {
+                            // Follow it, so the move is seen rather than the
+                            // widget simply vanishing from the list.
+                            selectPage(target);
+                            selectWidget(widget);
+                        }
+                    });
+            // Pages a full-screen widget keeps to itself are shown but not
+            // offered, so the choice cannot be made and then quietly undone.
+            ViewGroup segments = (ViewGroup) pageRow.getChildAt(1);
+            int current = DashboardWidgetLayout.loadPage(this, widget);
+            for (int page = 1; page <= segments.getChildCount(); page++) {
+                segments.getChildAt(page - 1).setEnabled(page == current
+                        || DashboardWidgetLayout.canMoveTo(this, widget, page));
+            }
+            column.addView(pageRow);
+        }
 
-        MaterialButton down = compactButton("↓");
-        down.setContentDescription(getString(R.string.dashboard_builder_move_down, label(widget)));
-        down.setEnabled(canMoveDown);
-        down.setOnClickListener(view -> moveWidget(widget, 1));
-        header.addView(down, new LinearLayout.LayoutParams(dp(48), dp(48)));
-
-        header.addView(drag, new LinearLayout.LayoutParams(dp(56), dp(48)));
-        row.addView(header, new LinearLayout.LayoutParams(-1, -2));
-
+        boolean freeLayout = DashboardWidgetLayout.loadPageLayout(this, editedPage,
+                MirrorSettings.loadDashboardSettings(this).layout) == DashboardSettings.Layout.FREE;
+        // The free layout places and sizes a widget by hand in the preview,
+        // so the flowed layouts' alignment and size steps are left out there.
         if (!freeLayout) {
-            row.addView(segmentedRow(R.string.dashboard_builder_position_label,
+            column.addView(segmentedRow(R.string.dashboard_builder_position_label,
                     new String[]{
                             getString(R.string.dashboard_builder_left),
                             getString(R.string.dashboard_builder_center),
@@ -550,7 +709,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                         notifyDashboardChanged();
                     }));
 
-            row.addView(segmentedRow(R.string.dashboard_builder_size_label,
+            column.addView(segmentedRow(R.string.dashboard_builder_size_label,
                     new String[]{
                             getString(R.string.dashboard_builder_small),
                             getString(R.string.dashboard_builder_normal),
@@ -564,7 +723,19 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     }));
         }
 
-        row.addView(segmentedRow(R.string.dashboard_builder_style_label,
+        if (DashboardWidgetLayout.supportsVariant(widget)) {
+            column.addView(segmentedRow(R.string.dashboard_builder_variant_label,
+                    variantLabels(widget),
+                    DashboardWidgetLayout.loadVariant(this, widget).ordinal(),
+                    getString(R.string.dashboard_builder_variant, label(widget)),
+                    choice -> {
+                        DashboardWidgetLayout.saveVariant(this, widget,
+                                DashboardWidgetLayout.Variant.values()[choice]);
+                        notifyDashboardChanged();
+                    }));
+        }
+
+        column.addView(segmentedRow(R.string.dashboard_builder_style_label,
                 new String[]{
                         getString(R.string.dashboard_builder_style_default),
                         getString(R.string.dashboard_builder_style_accent),
@@ -577,29 +748,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     notifyDashboardChanged();
                 }));
 
-        if (DashboardWidgetLayout.supportsVariant(widget)) {
-            row.addView(segmentedRow(R.string.dashboard_builder_variant_label,
-                    variantLabels(widget),
-                    DashboardWidgetLayout.loadVariant(this, widget).ordinal(),
-                    getString(R.string.dashboard_builder_variant, label(widget)),
-                    choice -> {
-                        DashboardWidgetLayout.saveVariant(this, widget,
-                                DashboardWidgetLayout.Variant.values()[choice]);
-                        notifyDashboardChanged();
-                    }));
-        }
-
-        row.addView(segmentedRow(R.string.dashboard_builder_rotation_label,
-                new String[]{"0°", "90°", "180°", "270°"},
-                DashboardWidgetLayout.loadRotation(this, widget) / 90,
-                getString(R.string.dashboard_builder_rotation, label(widget)),
-                choice -> {
-                    DashboardWidgetLayout.saveRotation(this, widget, choice * 90);
-                    notifyDashboardChanged();
-                }));
-
         // The one number that decides whether this widget counts up or down,
-        // so it belongs on its own card rather than in a settings screen.
+        // so it belongs with the widget rather than in a settings screen.
         if (widget == DashboardWidgetLayout.Widget.TIMER) {
             int[] choices = {0, 1, 3, 5, 10, 15, 20, 30, 45, 60, 90, 120};
             String[] durationLabels = new String[choices.length];
@@ -610,7 +760,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                                 R.plurals.dashboard_timer_minutes,
                                 choices[index], choices[index]);
             }
-            HyperValueRow durationRow = new HyperValueRow(this);
+            HyperValueRow durationRow = (HyperValueRow) getLayoutInflater()
+                    .inflate(R.layout.widget_value_row_single, column, false);
             durationRow.setTitle(getString(R.string.dashboard_timer_duration));
             durationRow.setEntries(durationLabels);
             int minutes = DashboardWidgetLayout.timerMinutes(this);
@@ -621,6 +772,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 }
             }
             durationRow.setValue(durationLabels[current]);
+            durationRow.setBackgroundResource(R.drawable.hyper_segment_track);
             durationRow.setOnItemSelectedListener(position -> {
                 if (position >= 0 && position < choices.length) {
                     DashboardWidgetLayout.setTimerMinutes(this, choices[position]);
@@ -630,46 +782,23 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     notifyDashboardChanged();
                 }
             });
-            LinearLayout.LayoutParams durationParams = new LinearLayout.LayoutParams(-1, -2);
-            durationParams.topMargin = dp(10);
-            row.addView(durationRow, durationParams);
+            column.addView(durationRow, spaced());
         }
 
-        // A list rather than a segmented row: there are ten faces, and the
-        // panel-wide setting is the first of them.
-        List<PanelFonts.Choice> fonts = PanelFonts.choices(this);
-        HyperValueRow fontRow = new HyperValueRow(this);
-        fontRow.setTitle(getString(R.string.dashboard_font_widget_label));
-        fontRow.setEntries(PanelFonts.labels(fonts));
-        int chosenIndex = PanelFonts.indexOf(fonts,
-                DashboardWidgetLayout.loadWidgetFontId(this, widget));
-        fontRow.setValue(fonts.get(chosenIndex).label);
-        fontRow.setOnItemSelectedListener(position -> {
-            if (position >= 0 && position < fonts.size()) {
-                DashboardWidgetLayout.saveWidgetFontId(this, widget, fonts.get(position).id);
-                notifyDashboardChanged();
-            }
-        });
-        LinearLayout.LayoutParams fontParams = new LinearLayout.LayoutParams(-1, -2);
-        fontParams.topMargin = dp(10);
-        row.addView(fontRow, fontParams);
-
-        MaterialSwitch iconSwitch = (MaterialSwitch) getLayoutInflater()
-                .inflate(R.layout.widget_switch_row, row, false);
-        iconSwitch.setText(R.string.dashboard_builder_hide_icon);
-        iconSwitch.setContentDescription(getString(
-                R.string.dashboard_builder_hide_icon_for, label(widget)));
-        iconSwitch.setChecked(DashboardWidgetLayout.isIconHidden(this, widget));
-        iconSwitch.setOnCheckedChangeListener((button, checked) -> {
-            DashboardWidgetLayout.setIconHidden(this, widget, checked);
-            notifyDashboardChanged();
-        });
-        row.addView(iconSwitch);
+        // Rarely changed, so after the four that shape the widget.
+        column.addView(segmentedRow(R.string.dashboard_builder_rotation_label,
+                new String[]{"0°", "90°", "180°", "270°"},
+                DashboardWidgetLayout.loadRotation(this, widget) / 90,
+                getString(R.string.dashboard_builder_rotation, label(widget)),
+                choice -> {
+                    DashboardWidgetLayout.saveRotation(this, widget, choice * 90);
+                    notifyDashboardChanged();
+                }));
 
         // Only the widgets that can run out of data have anything to decide
         // here; the clock always has a value.
         if (DashboardWidgetLayout.canBeEmpty(widget)) {
-            row.addView(segmentedRow(R.string.dashboard_builder_presence_label,
+            column.addView(segmentedRow(R.string.dashboard_builder_presence_label,
                     new String[]{
                             getString(R.string.dashboard_builder_presence_when_data),
                             getString(R.string.dashboard_builder_presence_always)},
@@ -682,7 +811,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     }));
         }
 
-        row.addView(segmentedRow(R.string.dashboard_builder_gap_label,
+        column.addView(segmentedRow(R.string.dashboard_builder_gap_label,
                 new String[]{
                         getString(R.string.dashboard_builder_gap_none),
                         getString(R.string.dashboard_builder_gap_small),
@@ -695,8 +824,66 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     notifyDashboardChanged();
                 }));
 
-        card.addView(row);
-        return card;
+        // The font list and the icon switch share one block, drawn in the
+        // same track tone as the segmented rows above it: on the sheet's
+        // surface a group background would not show.
+        LinearLayout group = new LinearLayout(this);
+        group.setOrientation(LinearLayout.VERTICAL);
+        group.setBackgroundResource(R.drawable.hyper_segment_track);
+        group.setClipToOutline(true);
+
+        // A list rather than a segmented row: there are ten faces, and the
+        // panel-wide setting is the first of them.
+        List<PanelFonts.Choice> fonts = PanelFonts.choices(this);
+        HyperValueRow fontRow = (HyperValueRow) getLayoutInflater()
+                .inflate(R.layout.widget_value_row_top, group, false);
+        fontRow.setTitle(getString(R.string.dashboard_font_widget_label));
+        fontRow.setEntries(PanelFonts.labels(fonts));
+        int chosenIndex = PanelFonts.indexOf(fonts,
+                DashboardWidgetLayout.loadWidgetFontId(this, widget));
+        fontRow.setValue(fonts.get(chosenIndex).label);
+        fontRow.setBackground(null);
+        fontRow.setOnItemSelectedListener(position -> {
+            if (position >= 0 && position < fonts.size()) {
+                DashboardWidgetLayout.saveWidgetFontId(this, widget, fonts.get(position).id);
+                notifyDashboardChanged();
+            }
+        });
+        group.addView(fontRow);
+
+        MaterialSwitch iconSwitch = (MaterialSwitch) getLayoutInflater()
+                .inflate(R.layout.widget_switch_row_bottom, group, false);
+        iconSwitch.setText(R.string.dashboard_builder_hide_icon);
+        iconSwitch.setContentDescription(getString(
+                R.string.dashboard_builder_hide_icon_for, label(widget)));
+        iconSwitch.setChecked(DashboardWidgetLayout.isIconHidden(this, widget));
+        iconSwitch.setBackground(null);
+        iconSwitch.setOnCheckedChangeListener((button, checked) -> {
+            DashboardWidgetLayout.setIconHidden(this, widget, checked);
+            notifyDashboardChanged();
+        });
+        group.addView(iconSwitch);
+        column.addView(group, spaced(16));
+
+        MaterialButton remove = (MaterialButton) getLayoutInflater()
+                .inflate(R.layout.widget_builder_remove_button, column, false);
+        remove.setOnClickListener(view -> {
+            DashboardWidgetLayout.setWidgetEnabled(this, widget, false);
+            sheet.dismiss();
+            selectWidget(null);
+            reload();
+        });
+        column.addView(remove, spaced(12));
+    }
+
+    private LinearLayout.LayoutParams spaced() {
+        return spaced(10);
+    }
+
+    private LinearLayout.LayoutParams spaced(int topDp) {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
+        params.topMargin = dp(topDp);
+        return params;
     }
 
     private String[] variantLabels(DashboardWidgetLayout.Widget widget) {
@@ -729,9 +916,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             String accessibilityName, java.util.function.IntConsumer onChosen) {
         LinearLayout column = new LinearLayout(this);
         column.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams columnParams = new LinearLayout.LayoutParams(-1, -2);
-        columnParams.topMargin = dp(10);
-        column.setLayoutParams(columnParams);
+        column.setLayoutParams(spaced());
 
         TextView label = (TextView) getLayoutInflater()
                 .inflate(R.layout.widget_segment_label, column, false);
@@ -748,9 +933,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             segment.setId(View.generateViewId());
             segment.setText(options[index]);
             ids[index] = segment.getId();
-            LinearLayout.LayoutParams params =
-                    new LinearLayout.LayoutParams(0, dp(42), 1f);
-            group.addView(segment, params);
+            group.addView(segment, new LinearLayout.LayoutParams(0, dp(42), 1f));
         }
         if (selectedIndex >= 0 && selectedIndex < ids.length) {
             group.check(ids[selectedIndex]);
@@ -770,7 +953,25 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         return column;
     }
 
+    // ------------------------------------------------------------------
+    // Menu
+    // ------------------------------------------------------------------
 
+    /**
+     * What used to be five footnotes spread down the screen, read once and
+     * then only in the way.
+     */
+    private void showHelp() {
+        String message = getString(R.string.dashboard_builder_pages_help)
+                + "\n\n" + getString(R.string.dashboard_page_home_help)
+                + "\n\n" + getString(R.string.panel_gestures_help)
+                + "\n\n" + getString(R.string.dashboard_builder_preview_note);
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.dashboard_builder_help_title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
+    }
 
     private void confirmReset() {
         new MaterialAlertDialogBuilder(this)
@@ -785,132 +986,15 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values())
                         current = current.withWidget(widget, defaults.isWidgetVisible(widget));
                     MirrorSettings.saveDashboardSettings(this, current);
-                    widgets.clear(); widgets.addAll(DashboardWidgetLayout.loadOrder(this));
-                    refreshPageControls();
-                    renderRows(); notifyDashboardChanged();
+                    editedPage = 1;
+                    selectedWidget = null;
+                    reload();
                 }).show();
     }
 
-    private void applyPreset(Preset preset) {
-        DashboardWidgetLayout.reset(this);
-        DashboardWidgetLayout.Widget[] selected;
-        DashboardSettings.Layout layout;
-        DashboardWidgetLayout.Orientation orientation;
-        if (preset == Preset.TRIP) {
-            selected = new DashboardWidgetLayout.Widget[]{DashboardWidgetLayout.Widget.SPEED,
-                    DashboardWidgetLayout.Widget.COMPASS, DashboardWidgetLayout.Widget.ALTITUDE,
-                    DashboardWidgetLayout.Widget.SESSION_TIMER, DashboardWidgetLayout.Widget.BATTERY,
-                    DashboardWidgetLayout.Widget.CLOCK};
-            layout = DashboardSettings.Layout.COMPACT;
-            orientation = DashboardWidgetLayout.Orientation.LANDSCAPE;
-        } else if (preset == Preset.MUSIC) {
-            selected = new DashboardWidgetLayout.Widget[]{DashboardWidgetLayout.Widget.MEDIA,
-                    DashboardWidgetLayout.Widget.CLOCK, DashboardWidgetLayout.Widget.BATTERY};
-            layout = DashboardSettings.Layout.STACKED;
-            orientation = DashboardWidgetLayout.Orientation.LANDSCAPE;
-        } else if (preset == Preset.WEATHER) {
-            selected = new DashboardWidgetLayout.Widget[]{DashboardWidgetLayout.Widget.WEATHER,
-                    DashboardWidgetLayout.Widget.CLOCK, DashboardWidgetLayout.Widget.DATE,
-                    DashboardWidgetLayout.Widget.TEMPERATURE, DashboardWidgetLayout.Widget.BATTERY};
-            layout = DashboardSettings.Layout.STACKED;
-            orientation = DashboardWidgetLayout.Orientation.PORTRAIT;
-        } else {
-            selected = new DashboardWidgetLayout.Widget[]{DashboardWidgetLayout.Widget.CLOCK,
-                    DashboardWidgetLayout.Widget.DATE, DashboardWidgetLayout.Widget.BATTERY};
-            layout = DashboardSettings.Layout.STACKED;
-            orientation = DashboardWidgetLayout.Orientation.AUTO;
-        }
-        List<DashboardWidgetLayout.Widget> order = new ArrayList<>();
-        for (DashboardWidgetLayout.Widget widget : selected) order.add(widget);
-        for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values())
-            if (!order.contains(widget)) order.add(widget);
-        DashboardWidgetLayout.saveOrder(this, order);
-        DashboardWidgetLayout.saveOrientation(this, orientation);
-        DashboardSettings settings = MirrorSettings.loadDashboardSettings(this).withLayout(layout);
-        for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values())
-            settings = settings.withWidget(widget, order.indexOf(widget) < selected.length);
-        if (preset == Preset.CLOCK) {
-            DashboardWidgetLayout.saveSize(this, DashboardWidgetLayout.Widget.CLOCK,
-                    DashboardWidgetLayout.Size.LARGE);
-        }
-        MirrorSettings.saveDashboardSettings(this, settings);
-        widgets.clear(); widgets.addAll(order);
-        refreshPageControls(); renderRows(); refreshPreview();
-    }
-
-    private MaterialButton compactButton(String text) {
-        // Inflated rather than constructed: a MaterialButton built in Java cannot
-        // take an XML widget style, and these sit next to buttons that do.
-        MaterialButton button = (MaterialButton) getLayoutInflater()
-                .inflate(R.layout.widget_compact_button, null, false);
-        button.setText(text); button.setMinWidth(dp(48)); button.setMinimumHeight(dp(48));
-        button.setMaxLines(1); button.setEllipsize(TextUtils.TruncateAt.END);
-        return button;
-    }
-
-    /**
-     * Drops a dragged widget where the pointer is, page included.
-     *
-     * <p>The drop used to be resolved against the position of the card in the
-     * list and then applied to the stored order, which also holds the widgets
-     * that are switched off - so a widget landed one place out for every
-     * disabled widget above it. It resolves to a page and a place on that page
-     * now, which is the model the list itself is built from.
-     */
-    private boolean handleDrop(View view, DragEvent event) {
-        if (event.getAction() != DragEvent.ACTION_DROP) return true;
-        Object state = event.getLocalState();
-        if (!(state instanceof DashboardWidgetLayout.Widget)) return false;
-        DashboardWidgetLayout.Widget dragged = (DashboardWidgetLayout.Widget) state;
-
-        int page = 1;
-        int index = 0;
-        int targetPage = 1;
-        int targetIndex = 0;
-        boolean found = false;
-        for (int child = 0; child < rows.getChildCount(); child++) {
-            View row = rows.getChildAt(child);
-            Object tag = row.getTag();
-            if (tag instanceof Integer) {
-                // A page heading: everything after it belongs to that page.
-                page = (Integer) tag;
-                index = 0;
-                continue;
-            }
-            if (tag instanceof Boolean) {
-                // The placeholder on an empty page: the only place to land.
-                if (!found && event.getY() < row.getBottom()) {
-                    targetPage = page; targetIndex = 0; found = true;
-                }
-                continue;
-            }
-            if (!found && event.getY() < row.getTop() + row.getHeight() / 2f) {
-                targetPage = page; targetIndex = index; found = true;
-            }
-            index++;
-        }
-        if (!found) {
-            targetPage = page;
-            targetIndex = index;
-        }
-
-        List<List<DashboardWidgetLayout.Widget>> pages = currentPages();
-        int fromPage = -1;
-        int fromIndex = -1;
-        for (int candidate = 0; candidate < pages.size(); candidate++) {
-            int at = pages.get(candidate).indexOf(dragged);
-            if (at >= 0) { fromPage = candidate; fromIndex = at; break; }
-        }
-        if (fromPage < 0) return true;
-        pages.get(fromPage).remove(fromIndex);
-        int toPage = Math.max(0, Math.min(pages.size() - 1, targetPage - 1));
-        if (toPage == fromPage && fromIndex < targetIndex) targetIndex--;
-        targetIndex = Math.max(0, Math.min(targetIndex, pages.get(toPage).size()));
-        pages.get(toPage).add(targetIndex, dragged);
-        applyArrangement(pages);
-        return true;
-    }
-
+    // ------------------------------------------------------------------
+    // Preview
+    // ------------------------------------------------------------------
 
     private void notifyDashboardChanged() {
         MirrorSettings.saveDashboardSettings(this, MirrorSettings.loadDashboardSettings(this));
@@ -922,19 +1006,25 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         DashboardSettings settings = MirrorSettings.loadDashboardSettings(this)
                 .withContentMode(RearContentMode.DASHBOARD);
         Point panel = rearPanelSize();
-        RearDashboardSnapshot snapshot = previewSnapshot();
         int pageCount = DashboardWidgetLayout.loadPageCount(this);
-        configurePreview(singlePreview, pageCount > 1 ? previewPage : 0, settings, panel, snapshot);
-        preview = singlePreview;
+        preview.setDashboardSettings(settings, RearContentMode.DASHBOARD);
+        preview.setPanelMetrics(panel == null ? 0 : Math.min(panel.x, panel.y),
+                panel == null ? 0f : rearPanelDensity());
+        preview.setSnapshot(previewSnapshot());
         // Pinned rather than left to cycle: editing page two should not mean
         // waiting eight seconds for it to come round again.
+        preview.setSelectedPage(pageCount > 1 ? editedPage : 0);
+        preview.setContentDescription(getString(R.string.dashboard_builder_page_section, editedPage));
+
         DashboardWidgetLayout.Orientation orientation =
-                DashboardWidgetLayout.loadPageOrientation(this, previewPage);
-        orientationButton.setText(orientationLabel(orientation));
-        layoutButton.setText(layoutLabel(
-                DashboardWidgetLayout.loadPageLayout(this, previewPage, settings.layout)));
-        boolean free = DashboardWidgetLayout.loadPageLayout(this, previewPage, settings.layout)
-                == DashboardSettings.Layout.FREE;
+                DashboardWidgetLayout.loadPageOrientation(this, editedPage);
+        DashboardSettings.Layout layout =
+                DashboardWidgetLayout.loadPageLayout(this, editedPage, settings.layout);
+        layoutRow.setValue(getResources().getStringArray(
+                R.array.dashboard_layout_entries)[layout.ordinal()]);
+        orientationRow.setValue(getResources().getStringArray(
+                R.array.dashboard_orientation_entries)[orientation.ordinal()]);
+        boolean free = layout == DashboardSettings.Layout.FREE;
         previewHint.setText(free
                 ? R.string.dashboard_builder_preview_free_hint
                 : R.string.dashboard_builder_preview_pick_hint);
@@ -952,59 +1042,61 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         bindingSnap = true;
         snapSwitch.setChecked(DashboardWidgetLayout.isGridSnapEnabled(this));
         bindingSnap = false;
-        // Every page, not just the first. The guard here belonged to the
-        // carousel, which sized its own cards; with one preview for all pages
-        // it meant that from the second page on the preview never changed
-        // shape, so choosing an orientation looked like it did nothing.
         sizePreviewToPanel(orientation);
     }
 
-    /**
-     * Moves the editing to another page.
-     *
-     * <p>This is the only thing that changes the page. The preview reads
-     * previewPage and shows it; it does not have a page of its own to put
-     * back, and the selection is dropped because the widget that was picked
-     * belongs to the page being left.
-     */
-    private void selectPreviewPage(int page) {
-        if (page == previewPage) {
-            return;
+    /** Redraws the preview when the session starts, stops or changes track. */
+    private final MediaWidgetState.Listener mediaListener = snapshot -> runOnUiThread(() -> {
+        if (!isFinishing() && !isDestroyed()) {
+            refreshPreview();
         }
-        previewPage = page;
-        selectedWidget = null;
-        if (preview != null) {
-            preview.setSelectedWidget(null);
-        }
-        refreshPreview();
-    }
+    });
 
-    private void configurePreview(RearDashboardView target, int page, DashboardSettings settings,
-                                  @Nullable Point panel, RearDashboardSnapshot snapshot) {
-        target.setDashboardSettings(settings, RearContentMode.DASHBOARD);
-        target.setPanelMetrics(panel == null ? 0 : Math.min(panel.x, panel.y),
-                panel == null ? 0f : rearPanelDensity());
-        target.setSnapshot(snapshot);
-        target.setSelectedPage(page);
-        target.setContentDescription(getString(R.string.dashboard_builder_page_short,
-                page == 0 ? 1 : page));
+    /**
+     * Wires the preview back into the list: a tap there opens the widget's
+     * settings, in the free layout a drag moves it, and a swipe turns to the
+     * next page the way it does on the panel.
+     */
+    private void bindPreview() {
+        preview.setOnWidgetSelectedListener(new RearDashboardView.OnWidgetSelectedListener() {
+            @Override public void onWidgetSelected(@Nullable DashboardWidgetLayout.Widget widget) {
+                selectWidget(widget);
+                if (widget != null) {
+                    openWidgetSheet(widget);
+                }
+            }
+
+            @Override public void onWidgetGrabbed(DashboardWidgetLayout.Widget widget) {
+                selectWidget(widget);
+            }
+
+            @Override public void onWidgetChanged(DashboardWidgetLayout.Widget widget) {
+                // Not renderRows(): this arrives when a widget has been moved
+                // or resized, and no row shows either.
+                refreshPreview();
+                selectWidget(widget);
+            }
+        });
+        preview.setOnPageChangedListener(page -> {
+            if (!isFinishing() && page != editedPage
+                    && page <= DashboardWidgetLayout.loadPageCount(this)) {
+                selectPage(page);
+            }
+        });
     }
 
     /**
      * Fills the preview from live state where the app already has it.
      *
-     * <p>It used to be entirely invented - 72%, 36.5 degrees, a sample track -
-     * so the preview could not show that the battery reading wraps at the
-     * current text size, or that the playing track is too long for one line.
-     * Battery, temperature, charging, the current track, the clock, the
+     * <p>Battery, temperature, charging, the current track, the clock, the
      * profile name, the network, memory and storage are real. Weather,
      * heading, speed, altitude, the next event and today's steps stand in:
      * those come from sensors, a network fetch and a content query the builder
-     * does not start, and the rear-panel preview shows them for real.
+     * does not start.
      *
-     * <p>The system counters used to be left at "no reading", which is not the
-     * same as standing in for them: a widget with no reading is dropped, so a
-     * page made of them looked empty here while the panel showed it.
+     * <p>The system counters are stood in for rather than left at "no
+     * reading": a widget with no reading is dropped, so a page made of them
+     * would look empty here while the panel showed it.
      */
     private RearDashboardSnapshot previewSnapshot() {
         MediaWidgetState.Snapshot media = MediaWidgetState.get();
@@ -1059,11 +1151,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     /**
      * Gives the preview the rear panel's proportions.
      *
-     * <p>The preview was a fixed 180x300dp box standing in for a 126x294 panel
-     * - a 0.60 shape for a 0.43 one, at twice the linear size. Text that fit in
-     * the preview could overflow the panel, and edge alignment landed
-     * elsewhere. The shape now comes from the panel itself, and falls back to
-     * the old boxes only when the rear display cannot be read.
+     * <p>The shape comes from the panel itself, and falls back to fixed boxes
+     * only when the rear display cannot be read.
      */
     private void sizePreviewToPanel(DashboardWidgetLayout.Orientation orientation) {
         LinearLayout.LayoutParams params =
@@ -1147,389 +1236,6 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         return width > 0 && height > 0 ? new Point(width, height) : null;
     }
 
-    private void cycleOrientation() {
-        DashboardWidgetLayout.Orientation old =
-                DashboardWidgetLayout.loadPageOrientation(this, previewPage);
-        DashboardWidgetLayout.Orientation next = old == DashboardWidgetLayout.Orientation.AUTO
-                ? DashboardWidgetLayout.Orientation.LANDSCAPE
-                : old == DashboardWidgetLayout.Orientation.LANDSCAPE
-                ? DashboardWidgetLayout.Orientation.PORTRAIT : DashboardWidgetLayout.Orientation.AUTO;
-        DashboardWidgetLayout.savePageOrientation(this, previewPage, next);
-        notifyDashboardChanged();
-    }
-
-    private void cycleLayout() {
-        DashboardSettings settings = MirrorSettings.loadDashboardSettings(this);
-        DashboardSettings.Layout old =
-                DashboardWidgetLayout.loadPageLayout(this, previewPage, settings.layout);
-        DashboardSettings.Layout next = old == DashboardSettings.Layout.STACKED
-                ? DashboardSettings.Layout.CORNERS : old == DashboardSettings.Layout.CORNERS
-                ? DashboardSettings.Layout.COMPACT
-                : old == DashboardSettings.Layout.COMPACT
-                ? DashboardSettings.Layout.FREE : DashboardSettings.Layout.STACKED;
-        if (next == DashboardSettings.Layout.FREE) {
-            // Seeded from the frame still on screen, so the free layout opens
-            // where the flowed one left off.
-            preview.seedFreePositions();
-        }
-        // The first page is the panel-wide setting the rear-panel screen shows,
-        // so it is written there; later pages are overrides of it.
-        if (previewPage <= 1) {
-            MirrorSettings.saveDashboardSettings(this, settings.withLayout(next));
-            refreshPreview();
-        } else {
-            DashboardWidgetLayout.savePageLayout(this, previewPage, next);
-            notifyDashboardChanged();
-        }
-        // The cards carry rows that only some layouts have a use for, so the
-        // list is rebuilt rather than left showing the last layout's.
-        renderRows();
-    }
-
-    /**
-     * The chooser that says which page the preview and the two buttons above
-     * it are looking at. Hidden while the arrangement has a single page.
-     */
-    /** Both page choosers, after something changed the count wholesale. */
-    private void refreshPageControls() {
-        buildPagesSegment();
-        buildPreviewPagesSegment();
-    }
-
-    /**
-     * Offers the pages, and leaves the showing of one to the single preview.
-     *
-     * <p>This was a carousel of a live preview per page. Several of this view
-     * in one scroller shared each other's drawings on HyperOS, so a card
-     * showed a page that was not its own and its widgets could be dragged
-     * there, editing a page the user believed they had left; and a swipe meant
-     * for the scroller was taken for a drag before it. Drawing the idle pages
-     * as still pictures fixed neither completely. One preview and a choice of
-     * page has none of it to go wrong.
-     */
-    private void buildPreviewPagesSegment() {
-        int pageCount = DashboardWidgetLayout.loadPageCount(this);
-        previewPages.removeAllViews();
-        preview = singlePreview;
-        previewContainer.setVisibility(View.VISIBLE);
-        if (pageCount <= 1) {
-            previewPage = 1;
-            previewPages.setVisibility(View.GONE);
-            previewPageNote.setVisibility(View.GONE);
-            return;
-        }
-        previewPage = Math.max(1, Math.min(pageCount, previewPage));
-        String[] labels = new String[pageCount];
-        for (int index = 0; index < pageCount; index++) {
-            labels[index] = String.valueOf(index + 1);
-        }
-        previewPages.addView(segmentedRow(R.string.dashboard_builder_preview_page, labels,
-                previewPage - 1, getString(R.string.dashboard_builder_preview_page),
-                index -> selectPreviewPage(index + 1)));
-        previewPages.setVisibility(View.VISIBLE);
-        previewPageNote.setVisibility(View.VISIBLE);
-    }
-
-
-    /**
-     * Wires the preview back into the list: a tap there picks the widget here,
-     * and in the free layout a drag moves it.
-     *
-     * <p>The listener has no page of its own to assert. It used to: with the
-     * carousel every page had a view, so a touch meant "this is the page now",
-     * and the view was bound with the page it stood for. One preview replaced
-     * them, bound once with page one - so every touch put the builder back on
-     * page one, and page two could be looked at but never edited.
-     */
-    /** Redraws the preview when the session starts, stops or changes track. */
-    private final MediaWidgetState.Listener mediaListener = snapshot -> runOnUiThread(() -> {
-        if (!isFinishing() && !isDestroyed()) {
-            refreshPreview();
-        }
-    });
-
-    private void bindPreview(RearDashboardView target) {
-        target.setOnWidgetSelectedListener(new RearDashboardView.OnWidgetSelectedListener() {
-            @Override public void onWidgetSelected(@Nullable DashboardWidgetLayout.Widget widget) {
-                selectWidget(widget, true);
-            }
-
-            @Override public void onWidgetGrabbed(DashboardWidgetLayout.Widget widget) {
-                selectWidget(widget, false);
-            }
-
-            @Override public void onWidgetChanged(DashboardWidgetLayout.Widget widget) {
-                // Not renderRows(): this arrives when a widget has been moved
-                // or resized, and no card shows either. Rebuilding every card
-                // - nine segmented controls apiece - held the main thread just
-                // long enough that the next drag began late.
-                refreshPreview();
-                selectWidget(widget, false);
-            }
-        });
-    }
-
-    /**
-     * The list of templates the user saved.
-     *
-     * <p>Tapping one applies it. The overflow beside it renames, overwrites or
-     * deletes, so the row itself stays a single obvious action.
-     */
-    /**
-     * The rows that say when a saved template should come up by itself.
-     *
-     * <p>Rebuilt whenever the templates are, because both rows are lists of
-     * them: one deleted there must stop being offered here. The two times are
-     * only shown once a template is chosen for them - a window with nothing
-     * to put in it is a question with no answer.
-     */
-    private void renderTriggers() {
-        List<DashboardTemplateStore.Named> named = DashboardTemplateStore.listNamed(this);
-        String off = getString(R.string.panel_trigger_off);
-        String[] labels = new String[named.size() + 1];
-        labels[0] = off;
-        for (int index = 0; index < named.size(); index++) {
-            labels[index + 1] = named.get(index).name;
-        }
-        bindTriggerRow(triggerChargingInput, labels, named,
-                PanelTriggers.chargingSlot(this), off, true);
-        bindTriggerRow(triggerTimeInput, labels, named,
-                PanelTriggers.timeSlot(this), off, false);
-        boolean timed = PanelTriggers.timeSlot(this) != null;
-        triggerFromInput.setVisibility(timed ? View.VISIBLE : View.GONE);
-        triggerToInput.setVisibility(timed ? View.VISIBLE : View.GONE);
-        triggerFromInput.setValue(clockLabel(PanelTriggers.fromMinutes(this)));
-        triggerToInput.setValue(clockLabel(PanelTriggers.toMinutes(this)));
-    }
-
-    private void bindTriggerRow(HyperValueRow row, String[] labels,
-            List<DashboardTemplateStore.Named> named, @Nullable String current,
-            String off, boolean forCharging) {
-        row.setEntries(labels);
-        String label = off;
-        for (DashboardTemplateStore.Named candidate : named) {
-            if (candidate.id.equals(current)) {
-                label = candidate.name;
-            }
-        }
-        row.setValue(label);
-        row.setOnItemSelectedListener(position -> {
-            String slot = position <= 0 || position > named.size()
-                    ? null : named.get(position - 1).id;
-            if (forCharging) {
-                PanelTriggers.setChargingSlot(this, slot);
-            } else {
-                PanelTriggers.setTimeSlot(this, slot);
-            }
-            renderTriggers();
-            notifyDashboardChanged();
-        });
-    }
-
-    /** A time of day written the way the phone writes it. */
-    private String clockLabel(int minutes) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, minutes / 60);
-        calendar.set(Calendar.MINUTE, minutes % 60);
-        return android.text.format.DateFormat.getTimeFormat(this).format(calendar.getTime());
-    }
-
-    private void pickTriggerTime(boolean start) {
-        int current = start ? PanelTriggers.fromMinutes(this) : PanelTriggers.toMinutes(this);
-        new android.app.TimePickerDialog(this, (view, hour, minute) -> {
-            int picked = hour * 60 + minute;
-            PanelTriggers.setWindow(this,
-                    start ? picked : PanelTriggers.fromMinutes(this),
-                    start ? PanelTriggers.toMinutes(this) : picked);
-            renderTriggers();
-            notifyDashboardChanged();
-        }, current / 60, current % 60,
-                android.text.format.DateFormat.is24HourFormat(this)).show();
-    }
-
-    private void renderNamedTemplates() {
-        List<DashboardTemplateStore.Named> saved = DashboardTemplateStore.listNamed(this);
-        namedTemplates.removeAllViews();
-        namedTemplates.setVisibility(saved.isEmpty() ? View.GONE : View.VISIBLE);
-        namedTemplatesEmpty.setText(saved.isEmpty()
-                ? R.string.dashboard_named_templates_help
-                : R.string.dashboard_named_templates_hint);
-        addNamedTemplateButton.setEnabled(saved.size() < DashboardTemplateStore.MAX_NAMED);
-        for (int index = 0; index < saved.size(); index++) {
-            DashboardTemplateStore.Named template = saved.get(index);
-            LinearLayout row = new LinearLayout(this);
-            row.setGravity(Gravity.CENTER_VERTICAL);
-            MaterialButton apply = (MaterialButton) getLayoutInflater()
-                    .inflate(R.layout.widget_template_row, row, false);
-            apply.setText(template.name);
-            apply.setMaxLines(1);
-            apply.setEllipsize(TextUtils.TruncateAt.END);
-            // The group draws the surface; only the pressed tint is rounded,
-            // and it has to follow the corner the row sits in.
-            apply.setShapeAppearanceModel(ShapeAppearanceModel.builder(this, 0,
-                    saved.size() == 1 ? R.style.HyperOS_Shape_Group
-                            : index == 0 ? R.style.HyperOS_Shape_RowTop
-                            : index == saved.size() - 1 ? R.style.HyperOS_Shape_RowBottom
-                            : R.style.HyperOS_Shape_RowMiddle).build());
-            apply.setOnClickListener(view -> applyNamedTemplate(template));
-            row.addView(apply, new LinearLayout.LayoutParams(0, -2, 1f));
-
-            MaterialButton more = (MaterialButton) getLayoutInflater()
-                    .inflate(R.layout.widget_template_row, row, false);
-            more.setText("\u22EF");
-            more.setContentDescription(getString(
-                    R.string.dashboard_named_template_actions, template.name));
-            more.setPadding(0, 0, 0, 0);
-            more.setOnClickListener(view -> showTemplateActions(template));
-            row.addView(more, new LinearLayout.LayoutParams(dp(56), -2));
-            namedTemplates.addView(row, new LinearLayout.LayoutParams(-1, -2));
-        }
-    }
-
-    private void applyNamedTemplate(DashboardTemplateStore.Named template) {
-        if (!DashboardTemplateStore.applyNamed(this, template.id)) {
-            Toast.makeText(this, R.string.dashboard_custom_template_empty, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        widgets.clear();
-        widgets.addAll(DashboardWidgetLayout.loadOrder(this));
-        refreshPageControls();
-        renderRows();
-        notifyDashboardChanged();
-        Toast.makeText(this, getString(R.string.dashboard_named_template_applied, template.name),
-                Toast.LENGTH_SHORT).show();
-    }
-
-    private void showTemplateActions(DashboardTemplateStore.Named template) {
-        new MaterialAlertDialogBuilder(this)
-                .setTitle(template.name)
-                .setItems(new CharSequence[]{
-                        getString(R.string.dashboard_named_template_overwrite),
-                        getString(R.string.dashboard_named_template_rename),
-                        getString(R.string.dashboard_named_template_delete)
-                }, (dialog, which) -> {
-                    if (which == 0) {
-                        DashboardTemplateStore.overwriteNamed(this, template.id);
-                        Toast.makeText(this, R.string.dashboard_custom_template_saved,
-                                Toast.LENGTH_SHORT).show();
-                    } else if (which == 1) {
-                        promptForTemplateName(R.string.dashboard_named_template_rename,
-                                template.name, name -> {
-                                    DashboardTemplateStore.renameNamed(this, template.id, name);
-                                    renderNamedTemplates();
-                    renderTriggers();
-                                    renderTriggers();
-                                });
-                    } else {
-                        confirmDeleteTemplate(template);
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
-    }
-
-    private void confirmDeleteTemplate(DashboardTemplateStore.Named template) {
-        new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.dashboard_named_template_delete)
-                .setMessage(getString(R.string.dashboard_named_template_delete_message,
-                        template.name))
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.dashboard_named_template_delete, (dialog, which) -> {
-                    DashboardTemplateStore.deleteNamed(this, template.id);
-                    renderNamedTemplates();
-                    renderTriggers();
-                })
-                .show();
-    }
-
-    private void promptForNewTemplate() {
-        promptForTemplateName(R.string.dashboard_named_template_add, "", name -> {
-            if (DashboardTemplateStore.createNamed(this, name) == null) {
-                Toast.makeText(this, R.string.dashboard_named_template_full,
-                        Toast.LENGTH_SHORT).show();
-                return;
-            }
-            renderNamedTemplates();
-        });
-    }
-
-    /** The name sheet, shared by saving a new template and renaming one. */
-    private void promptForTemplateName(int titleResource, String initial,
-            java.util.function.Consumer<String> onNamed) {
-        TextInputLayout inputLayout = (TextInputLayout) getLayoutInflater()
-                .inflate(R.layout.dialog_template_name, null, false);
-        TextInputEditText input = inputLayout.findViewById(R.id.template_name_input);
-        input.setText(initial);
-        input.setSelection(input.length());
-        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle(titleResource)
-                .setView(inputLayout)
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.save, null)
-                .create();
-        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener(view -> {
-                    String name = input.getText() == null ? "" : input.getText().toString().trim();
-                    if (name.isEmpty()) {
-                        inputLayout.setError(getString(R.string.dashboard_named_template_required));
-                        return;
-                    }
-                    inputLayout.setError(null);
-                    onNamed.accept(name);
-                    dialog.dismiss();
-                }));
-        dialog.show();
-    }
-
-    private String layoutLabel(DashboardSettings.Layout layout) {
-        return getString(layout == DashboardSettings.Layout.CORNERS
-                ? R.string.dashboard_builder_layout_corners
-                : layout == DashboardSettings.Layout.COMPACT
-                ? R.string.dashboard_builder_layout_compact
-                : layout == DashboardSettings.Layout.FREE
-                ? R.string.dashboard_builder_layout_free
-                : R.string.dashboard_builder_layout_stacked);
-    }
-
-    private String orientationLabel(DashboardWidgetLayout.Orientation orientation) {
-        return getString(orientation == DashboardWidgetLayout.Orientation.LANDSCAPE
-                ? R.string.dashboard_orientation_landscape
-                : orientation == DashboardWidgetLayout.Orientation.PORTRAIT
-                ? R.string.dashboard_orientation_portrait : R.string.dashboard_orientation_auto);
-    }
-
-
-    private String positionLabel(DashboardWidgetLayout.Position position) {
-        return getString(position == DashboardWidgetLayout.Position.LEFT
-                ? R.string.dashboard_builder_left : position == DashboardWidgetLayout.Position.RIGHT
-                ? R.string.dashboard_builder_right : R.string.dashboard_builder_center);
-    }
-
-    private String sizeLabel(DashboardWidgetLayout.Size size) {
-        return getString(size == DashboardWidgetLayout.Size.SMALL ? R.string.dashboard_builder_small
-                : size == DashboardWidgetLayout.Size.LARGE ? R.string.dashboard_builder_large
-                : R.string.dashboard_builder_normal);
-    }
-
-
-
-
-
-
-
-    @Override
-    protected void onDestroy() {
-        MediaWidgetState.removeListener(mediaListener);
-        super.onDestroy();
-    }
-
-    private String styleLabel(DashboardWidgetLayout.Style style) {
-        return getString(style == DashboardWidgetLayout.Style.ACCENT
-                ? R.string.dashboard_builder_style_accent
-                : style == DashboardWidgetLayout.Style.MUTED
-                ? R.string.dashboard_builder_style_muted : R.string.dashboard_builder_style_default);
-    }
-
     private String label(DashboardWidgetLayout.Widget widget) {
         int[] labels = {R.string.dashboard_widget_clock, R.string.dashboard_widget_date,
                 R.string.dashboard_widget_battery, R.string.dashboard_widget_temperature,
@@ -1549,7 +1255,6 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         int index = widget.ordinal();
         return getString(index < labels.length ? labels[index] : R.string.dashboard_widgets_title);
     }
-
 
     private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
 }

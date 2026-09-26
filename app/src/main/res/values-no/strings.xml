@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">Skjul ikon</string>
     <string name="dashboard_builder_hide_icon_for">Skjul ikonet for %1$s</string>
     <string name="dashboard_auto_pages">Bytt side automatisk</string>
-    <string name="dashboard_auto_pages_help">Når dette er på, bytter sidene hvert 8. sekund. Etter manuell bruk går panelet tilbake til side én etter 30 sekunder uten aktivitet.</string>
+    <string name="dashboard_auto_pages_help">Når dette er på, bytter sidene hvert 8. sekund. Etter manuell bruk går panelet tilbake til hovedsiden etter 30 sekunder uten aktivitet.</string>
     <string name="dashboard_widget_fullscreen_weather">Vær i fullskjerm</string>
     <string name="dashboard_widget_fullscreen_media">Mediekontroller i fullskjerm</string>
     <string name="tile_on">Speiler</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">Bildets dekkevne: %1$d%%</string>
     <string name="dashboard_builder_title">Modulplassering</string>
     <string name="dashboard_builder_open">Ordne modulene</string>
-    <string name="dashboard_builder_help">Endringer vises i forhåndsvisningen med én gang.</string>
-    <string name="dashboard_builder_preview">Forhåndsvisning</string>
-    <string name="dashboard_builder_drag">Dra %1$s</string>
     <string name="dashboard_builder_sample_track">Eksempelspor</string>
     <string name="dashboard_builder_small">Liten</string>
     <string name="dashboard_builder_normal">Normal</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">Endre størrelsen på %1$s</string>
     <string name="dashboard_builder_position_label">Justering</string>
     <string name="dashboard_builder_size_label">Størrelse</string>
-    <string name="dashboard_builder_drag_hint">Dra for å endre rekkefølgen</string>
-    <string name="dashboard_orientation_auto">Retning: følg bakskjermen</string>
-    <string name="dashboard_orientation_landscape">Retning: liggende</string>
-    <string name="dashboard_orientation_portrait">Retning: stående</string>
     <string name="dashboard_builder_visible">Vis modulen</string>
     <string name="dashboard_builder_visibility">Vis eller skjul %1$s</string>
     <string name="dashboard_builder_position_value">Justering: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">Alt du slår på her, dukker opp i ordneren. Det som forblir av, venter på denne skjermen.</string>
     <string name="dashboard_builder_choose">Velg moduler</string>
     <string name="dashboard_builder_empty">Ingen moduler er slått på ennå. Velg hvilke bakpanelet skal vise.</string>
-    <string name="dashboard_builder_pages">Sider</string>
-    <string name="dashboard_builder_one_page">1 side</string>
-    <string name="dashboard_builder_pages_count">%1$d sider</string>
     <string name="dashboard_builder_choose_value">Velg</string>
     <string name="panel_gestures_help">På selve panelet: et trykk på en modul går videre i visningen dens, og et langt trykk hvor som helst slår alltid på-skjermen av eller på.</string>
     <string name="dashboard_builder_pages_help">Med mer enn én side blar bakpanelet gjennom dem, omtrent åtte sekunder hver. Sveip på panelet for å holde på en side.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">Svak</string>
     <string name="dashboard_burn_in_normal">Normal</string>
     <string name="dashboard_burn_in_large">Bred</string>
-    <string name="dashboard_builder_show_on_panel">Vis på bakpanelet · 30 s</string>
-    <string name="dashboard_builder_show_on_panel_active">Stopp speilingen for å forhåndsvise panelet</string>
     <string name="dashboard_builder_preview_note">Forhåndsvisningen har samme form som bakpanelet. Batteri, temperatur, sporet som spilles og klokken er ekte; resten er eksempelverdier.</string>
     <string name="dashboard_builder_reset">Tilbakestill</string>
     <string name="dashboard_builder_reset_title">Tilbakestille modulplasseringen?</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">Tur</string>
     <string name="dashboard_preset_music">Musikk</string>
     <string name="dashboard_preset_weather">Vær</string>
-    <string name="dashboard_builder_layout_stacked">Oppsett: kolonne</string>
-    <string name="dashboard_builder_layout_corners">Oppsett: hjørner</string>
-    <string name="dashboard_builder_layout_compact">Oppsett: kompakt</string>
     <string name="dashboard_location_access_granted">Posisjonstilgangen er på</string>
     <string name="dashboard_location_access_required">Nøyaktig posisjon kreves for fart og høyde</string>
     <string name="dashboard_location_access_optional">Posisjonen brukes bare til fart og høyde</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">Aksent</string>
     <string name="dashboard_builder_style_muted">Dempet</string>
     <string name="dashboard_builder_page_section">Side %1$d</string>
-    <string name="dashboard_builder_page_empty">Tom. Flytt en modul hit, eller dra en hit.</string>
     <string name="dashboard_builder_moved">%1$s ble flyttet til side %2$d</string>
-    <string name="dashboard_builder_preview_page">Siden som vises i forhåndsvisningen</string>
-    <string name="dashboard_builder_preview_page_note">Retning og oppsett hører til siden over, så hver side kan ligge sin egen vei.</string>
     <string name="dashboard_profile_template_title">Panelet til den gjeldende profilen</string>
     <string name="dashboard_profile_template_help">Tas i bruk av seg selv når du bytter til denne profilen, og lagres av seg selv når du bytter bort, slik at hver profil kommer tilbake til sitt eget panel.</string>
     <string name="dashboard_named_template_add">Lagre gjeldende som…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">Slett</string>
     <string name="dashboard_named_template_delete_message">Slette malen «%1$s»?</string>
     <string name="dashboard_named_template_full">Ikke plass til flere maler</string>
-    <string name="dashboard_builder_layout_free">Visning: fri</string>
     <string name="dashboard_builder_preview_pick_hint">Trykk på en modul i forhåndsvisningen for å komme til innstillingene dens. I den frie visningen kan du også dra den og knipe for å endre størrelsen.</string>
     <string name="dashboard_builder_preview_free_hint">Dra en modul i forhåndsvisningen for å plassere den, og knip for å endre størrelsen. Trykk på den for å komme til innstillingene dens.</string>
     <string name="dashboard_builder_snap">Fest til et rutenett</string>
@@ -444,4 +425,31 @@
     <string name="crop_frame_whole">Hele skjermen</string>
     <string name="crop_frame_fill">Fyll panelet</string>
     <string name="calibration_framed_notice">Beskjæringen til denne profilen bestemmes av en ramme tegnet over en app, så glidebryterne nedenfor gjør ingenting. Tilbakestill kalibreringen for å gi den tilbake til dem.</string>
+    <string name="dashboard_builder_pages_title">Sider</string>
+    <string name="dashboard_page_add">Legg til side</string>
+    <string name="dashboard_page_actions">Handlinger for side %1$d</string>
+    <string name="dashboard_page_home_description">Side %1$d, hovedside</string>
+    <string name="dashboard_page_make_home">Gjør til hovedside</string>
+    <string name="dashboard_page_move_left">Flytt til venstre</string>
+    <string name="dashboard_page_move_right">Flytt til høyre</string>
+    <string name="dashboard_page_delete">Slett side</string>
+    <string name="dashboard_page_delete_message">Modulene på side %1$d blir tatt av panelet. Du kan slå dem på igjen under Velg moduler.</string>
+    <string name="dashboard_page_layout">Sideoppsett</string>
+    <string name="dashboard_page_orientation">Retning</string>
+    <string name="dashboard_builder_page_widgets">Moduler på side %1$d</string>
+    <string name="dashboard_builder_list_hint">Trykk på en modul for innstillingene. Hold for å dra: i listen for å endre rekkefølge, eller til en sidefane for å flytte den dit.</string>
+    <string name="dashboard_builder_page_empty_hint">Det er ingenting på denne siden ennå. Legg til moduler, eller flytt en hit fra en annen side.</string>
+    <string name="dashboard_widget_page_label">Side</string>
+    <string name="dashboard_widget_remove">Fjern fra panelet</string>
+    <string name="dashboard_builder_move_to_page">Flytt %1$s til side %2$d</string>
+    <string name="dashboard_templates_title">Maler og utløsere</string>
+    <string name="dashboard_templates_help">Ferdige oppsett, lagrede oppsett og når de dukker opp av seg selv.</string>
+    <string name="dashboard_builder_help_title">Hjelp</string>
+    <string name="dashboard_page_home_help">Panelet åpner på hovedsiden (★) og går tilbake dit etter 30 sekunder uten berøring.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>Som bakskjermen</item>
+        <item>Liggende</item>
+        <item>Stående</item>
+    </string-array>
+    <string name="dashboard_page_full">Kan ikke flyttes til side %1$d: en fullskjermsmodul trenger en egen side.</string>
 </resources>

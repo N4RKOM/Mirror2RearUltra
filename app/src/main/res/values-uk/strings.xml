@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">Приховати піктограму</string>
     <string name="dashboard_builder_hide_icon_for">Приховати піктограму віджета %1$s</string>
     <string name="dashboard_auto_pages">Автоматично перемикати сторінки</string>
-    <string name="dashboard_auto_pages_help">Коли увімкнено, сторінки змінюються кожні 8 секунд. Після ручного керування панель повертається на першу сторінку через 30 секунд бездіяльності.</string>
+    <string name="dashboard_auto_pages_help">Коли увімкнено, сторінки змінюються кожні 8 секунд. Після ручного керування панель повертається на основну сторінку через 30 секунд бездіяльності.</string>
     <string name="dashboard_widget_fullscreen_weather">Погода на весь екран</string>
     <string name="dashboard_widget_fullscreen_media">Керування медіа на весь екран</string>
     <string name="tile_on">Дзеркалення</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">Непрозорість зображення: %1$d%%</string>
     <string name="dashboard_builder_title">Розташування віджетів</string>
     <string name="dashboard_builder_open">Упорядкувати віджети</string>
-    <string name="dashboard_builder_help">Зміни одразу з\'являються в передперегляді.</string>
-    <string name="dashboard_builder_preview">Передперегляд</string>
-    <string name="dashboard_builder_drag">Перетягнути %1$s</string>
     <string name="dashboard_builder_sample_track">Зразковий трек</string>
     <string name="dashboard_builder_small">Малий</string>
     <string name="dashboard_builder_normal">Звичайний</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">Змінити розмір віджета %1$s</string>
     <string name="dashboard_builder_position_label">Вирівнювання</string>
     <string name="dashboard_builder_size_label">Розмір</string>
-    <string name="dashboard_builder_drag_hint">Перетягніть, щоб змінити порядок</string>
-    <string name="dashboard_orientation_auto">Орієнтація: за заднім екраном</string>
-    <string name="dashboard_orientation_landscape">Орієнтація: альбомна</string>
-    <string name="dashboard_orientation_portrait">Орієнтація: книжкова</string>
     <string name="dashboard_builder_visible">Показувати віджет</string>
     <string name="dashboard_builder_visibility">Показати або приховати %1$s</string>
     <string name="dashboard_builder_position_value">Вирівнювання: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">Усе, що ви тут увімкнете, з\'явиться в упоряднику. Те, що лишається вимкненим, чекає на цьому екрані.</string>
     <string name="dashboard_builder_choose">Вибрати віджети</string>
     <string name="dashboard_builder_empty">Жодного віджета ще не увімкнено. Виберіть те, що має показувати задня панель.</string>
-    <string name="dashboard_builder_pages">Сторінки</string>
-    <string name="dashboard_builder_one_page">1 сторінка</string>
-    <string name="dashboard_builder_pages_count">%1$d сторінок</string>
     <string name="dashboard_builder_choose_value">Вибрати</string>
     <string name="panel_gestures_help">На самій панелі: тап по віджету перемикає його подання, а довге натискання будь-де вмикає та вимикає Always on Display.</string>
     <string name="dashboard_builder_pages_help">Якщо сторінок більше однієї, задня панель гортає їх приблизно по вісім секунд кожну. Проведіть по панелі, щоб затримати сторінку.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">Незначний</string>
     <string name="dashboard_burn_in_normal">Звичайний</string>
     <string name="dashboard_burn_in_large">Широкий</string>
-    <string name="dashboard_builder_show_on_panel">Показати на задній панелі · 30 с</string>
-    <string name="dashboard_builder_show_on_panel_active">Зупиніть дзеркалення, щоб переглянути панель</string>
     <string name="dashboard_builder_preview_note">Передперегляд повторює форму задньої панелі. Батарея, температура, поточний трек і годинник — справжні; решта — зразкові значення.</string>
     <string name="dashboard_builder_reset">Скинути</string>
     <string name="dashboard_builder_reset_title">Скинути розташування віджетів?</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">Поїздка</string>
     <string name="dashboard_preset_music">Музика</string>
     <string name="dashboard_preset_weather">Погода</string>
-    <string name="dashboard_builder_layout_stacked">Розкладка: стовпець</string>
-    <string name="dashboard_builder_layout_corners">Розкладка: кути</string>
-    <string name="dashboard_builder_layout_compact">Розкладка: компактна</string>
     <string name="dashboard_location_access_granted">Доступ до місцеположення увімкнено</string>
     <string name="dashboard_location_access_required">Для швидкості та висоти потрібне точне місцеположення</string>
     <string name="dashboard_location_access_optional">Місцеположення використовується лише для швидкості та висоти</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">Акцентний</string>
     <string name="dashboard_builder_style_muted">Приглушений</string>
     <string name="dashboard_builder_page_section">Сторінка %1$d</string>
-    <string name="dashboard_builder_page_empty">Порожньо. Перемістіть сюди віджет або перетягніть якийсь із іншої сторінки.</string>
     <string name="dashboard_builder_moved">%1$s переміщено на сторінку %2$d</string>
-    <string name="dashboard_builder_preview_page">Сторінка, показана в передперегляді</string>
-    <string name="dashboard_builder_preview_page_note">Орієнтація й розташування належать сторінці вище, тож кожна сторінка може лежати по-своєму.</string>
     <string name="dashboard_profile_template_title">Панель поточного профілю</string>
     <string name="dashboard_profile_template_help">Застосовується сама, коли ви перемикаєтеся на цей профіль, і сама зберігається, коли ви йдете з нього, щоб кожен профіль повертався до власної панелі.</string>
     <string name="dashboard_named_template_add">Зберегти поточну як…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">Видалити</string>
     <string name="dashboard_named_template_delete_message">Видалити шаблон «%1$s»?</string>
     <string name="dashboard_named_template_full">Немає місця для ще одного шаблону</string>
-    <string name="dashboard_builder_layout_free">Вигляд: вільний</string>
     <string name="dashboard_builder_preview_pick_hint">Торкніться віджета в передперегляді, щоб перейти до його налаштувань. У вільному вигляді його також можна перетягувати та змінювати розмір щипком.</string>
     <string name="dashboard_builder_preview_free_hint">Перетягніть віджет у передперегляді, щоб розмістити його, і зведіть пальці, щоб змінити розмір. Торкніться, щоб перейти до налаштувань.</string>
     <string name="dashboard_builder_snap">Прилипання до сітки</string>
@@ -448,4 +429,31 @@
     <string name="crop_frame_whole">Весь екран</string>
     <string name="crop_frame_fill">На всю панель</string>
     <string name="calibration_framed_notice">Обрізанням профілю керує рамка, виставлена поверх застосунку, тому повзунки нижче нічого не змінюють. «Скинути калібрування» поверне їх до роботи.</string>
+    <string name="dashboard_builder_pages_title">Сторінки</string>
+    <string name="dashboard_page_add">Додати сторінку</string>
+    <string name="dashboard_page_actions">Дії зі сторінкою %1$d</string>
+    <string name="dashboard_page_home_description">Сторінка %1$d, основна</string>
+    <string name="dashboard_page_make_home">Зробити основною</string>
+    <string name="dashboard_page_move_left">Посунути ліворуч</string>
+    <string name="dashboard_page_move_right">Посунути праворуч</string>
+    <string name="dashboard_page_delete">Видалити сторінку</string>
+    <string name="dashboard_page_delete_message">Віджети зі сторінки %1$d буде прибрано з панелі. Увімкнути їх знову можна у «Вибрати віджети».</string>
+    <string name="dashboard_page_layout">Вигляд сторінки</string>
+    <string name="dashboard_page_orientation">Орієнтація</string>
+    <string name="dashboard_builder_page_widgets">Віджети на сторінці %1$d</string>
+    <string name="dashboard_builder_list_hint">Торкніться віджета, щоб відкрити його налаштування. Утримуйте, щоб перетягнути: у списку — змінити порядок, на вкладку сторінки — перенести туди.</string>
+    <string name="dashboard_builder_page_empty_hint">На цій сторінці поки нічого немає. Додайте віджети або перенесіть сюди віджет з іншої сторінки.</string>
+    <string name="dashboard_widget_page_label">Сторінка</string>
+    <string name="dashboard_widget_remove">Прибрати з панелі</string>
+    <string name="dashboard_builder_move_to_page">Перенести %1$s на сторінку %2$d</string>
+    <string name="dashboard_templates_title">Шаблони й тригери</string>
+    <string name="dashboard_templates_help">Готові розкладки, збережені шаблони та їх автоматичне ввімкнення.</string>
+    <string name="dashboard_builder_help_title">Довідка</string>
+    <string name="dashboard_page_home_help">Панель відкривається на основній сторінці (★) і повертається на неї через 30 секунд без дотиків.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>Як задній екран</item>
+        <item>Горизонтальна</item>
+        <item>Вертикальна</item>
+    </string-array>
+    <string name="dashboard_page_full">На сторінку %1$d не можна: віджету на весь екран потрібна окрема сторінка.</string>
 </resources>

@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">Skrýt ikonu</string>
     <string name="dashboard_builder_hide_icon_for">Skrýt ikonu widgetu %1$s</string>
     <string name="dashboard_auto_pages">Automaticky přepínat stránky</string>
-    <string name="dashboard_auto_pages_help">Když je zapnuto, stránky se mění každých 8 sekund. Po ručním zásahu se panel po 30 sekundách nečinnosti vrátí na první stránku.</string>
+    <string name="dashboard_auto_pages_help">Když je zapnuto, stránky se mění každých 8 sekund. Po ručním zásahu se panel po 30 sekundách nečinnosti vrátí na hlavní stránku.</string>
     <string name="dashboard_widget_fullscreen_weather">Počasí na celou obrazovku</string>
     <string name="dashboard_widget_fullscreen_media">Ovládání přehrávání na celou obrazovku</string>
     <string name="tile_on">Zrcadlí se</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">Krytí obrázku: %1$d%%</string>
     <string name="dashboard_builder_title">Rozvržení widgetů</string>
     <string name="dashboard_builder_open">Uspořádat widgety</string>
-    <string name="dashboard_builder_help">Změny se v náhledu objeví okamžitě.</string>
-    <string name="dashboard_builder_preview">Náhled</string>
-    <string name="dashboard_builder_drag">Přetáhnout %1$s</string>
     <string name="dashboard_builder_sample_track">Ukázková skladba</string>
     <string name="dashboard_builder_small">Malý</string>
     <string name="dashboard_builder_normal">Normální</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">Změnit velikost widgetu %1$s</string>
     <string name="dashboard_builder_position_label">Zarovnání</string>
     <string name="dashboard_builder_size_label">Velikost</string>
-    <string name="dashboard_builder_drag_hint">Přetažením změníte pořadí</string>
-    <string name="dashboard_orientation_auto">Orientace: podle zadní obrazovky</string>
-    <string name="dashboard_orientation_landscape">Orientace: na šířku</string>
-    <string name="dashboard_orientation_portrait">Orientace: na výšku</string>
     <string name="dashboard_builder_visible">Zobrazit widget</string>
     <string name="dashboard_builder_visibility">Zobrazit nebo skrýt %1$s</string>
     <string name="dashboard_builder_position_value">Zarovnání: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">Vše, co zde zapnete, se objeví v uspořádání. Co zůstane vypnuté, čeká na této obrazovce.</string>
     <string name="dashboard_builder_choose">Vybrat widgety</string>
     <string name="dashboard_builder_empty">Zatím není zapnutý žádný widget. Vyberte, co má zadní panel zobrazovat.</string>
-    <string name="dashboard_builder_pages">Stránky</string>
-    <string name="dashboard_builder_one_page">1 stránka</string>
-    <string name="dashboard_builder_pages_count">%1$d stránek</string>
     <string name="dashboard_builder_choose_value">Vybrat</string>
     <string name="panel_gestures_help">Na samotném panelu: klepnutí na widget posune jeho podobu o krok dál a dlouhé podržení kdekoli zapne nebo vypne stále zapnutý displej.</string>
     <string name="dashboard_builder_pages_help">Při více než jedné stránce je zadní panel střídá, každou zhruba osm sekund. Přejetím po panelu stránku podržíte.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">Mírný</string>
     <string name="dashboard_burn_in_normal">Normální</string>
     <string name="dashboard_burn_in_large">Široký</string>
-    <string name="dashboard_builder_show_on_panel">Zobrazit na zadním panelu · 30 s</string>
-    <string name="dashboard_builder_show_on_panel_active">Pro náhled panelu zastavte zrcadlení</string>
     <string name="dashboard_builder_preview_note">Náhled odpovídá tvaru zadního panelu. Baterie, teplota, aktuální skladba a hodiny jsou skutečné; ostatní jsou ukázkové hodnoty.</string>
     <string name="dashboard_builder_reset">Obnovit</string>
     <string name="dashboard_builder_reset_title">Obnovit rozvržení widgetů?</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">Cesta</string>
     <string name="dashboard_preset_music">Hudba</string>
     <string name="dashboard_preset_weather">Počasí</string>
-    <string name="dashboard_builder_layout_stacked">Rozvržení: sloupec</string>
-    <string name="dashboard_builder_layout_corners">Rozvržení: rohy</string>
-    <string name="dashboard_builder_layout_compact">Rozvržení: kompaktní</string>
     <string name="dashboard_location_access_granted">Přístup k poloze je zapnutý</string>
     <string name="dashboard_location_access_required">Pro rychlost a nadmořskou výšku je potřeba přesná poloha</string>
     <string name="dashboard_location_access_optional">Poloha se používá jen pro rychlost a nadmořskou výšku</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">Zvýraznění</string>
     <string name="dashboard_builder_style_muted">Tlumená</string>
     <string name="dashboard_builder_page_section">Stránka %1$d</string>
-    <string name="dashboard_builder_page_empty">Prázdná. Přesuňte sem widget nebo nějaký přetáhněte.</string>
     <string name="dashboard_builder_moved">%1$s přesunut na stránku %2$d</string>
-    <string name="dashboard_builder_preview_page">Stránka zobrazená v náhledu</string>
-    <string name="dashboard_builder_preview_page_note">Orientace i rozvržení patří ke stránce výše, takže každá stránka může být natočená po svém.</string>
     <string name="dashboard_profile_template_title">Panel současného profilu</string>
     <string name="dashboard_profile_template_help">Použije se sám, když na tento profil přepnete, a sám se uloží, když od něj odejdete, aby se každý profil vrátil ke svému vlastnímu panelu.</string>
     <string name="dashboard_named_template_add">Uložit současný jako…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">Smazat</string>
     <string name="dashboard_named_template_delete_message">Smazat šablonu „%1$s“?</string>
     <string name="dashboard_named_template_full">Pro další šablonu není místo</string>
-    <string name="dashboard_builder_layout_free">Zobrazení: volné</string>
     <string name="dashboard_builder_preview_pick_hint">Klepnutím na widget v náhledu se dostanete k jeho nastavení. Ve volném zobrazení jej můžete také přetahovat a měnit velikost sevřením prstů.</string>
     <string name="dashboard_builder_preview_free_hint">Přetažením widgetu v náhledu jej umístíte, sevřením prstů změníte jeho velikost. Klepnutím se dostanete k jeho nastavení.</string>
     <string name="dashboard_builder_snap">Přichytávat k mřížce</string>
@@ -448,4 +429,31 @@
     <string name="crop_frame_whole">Celá obrazovka</string>
     <string name="crop_frame_fill">Vyplnit panel</string>
     <string name="calibration_framed_notice">Výřez tohoto profilu určuje rámeček nakreslený nad aplikací, takže posuvníky níže nic nedělají. Obnovením kalibrace je vrátíte do hry.</string>
+    <string name="dashboard_builder_pages_title">Stránky</string>
+    <string name="dashboard_page_add">Přidat stránku</string>
+    <string name="dashboard_page_actions">Akce se stránkou %1$d</string>
+    <string name="dashboard_page_home_description">Stránka %1$d, hlavní</string>
+    <string name="dashboard_page_make_home">Nastavit jako hlavní</string>
+    <string name="dashboard_page_move_left">Posunout doleva</string>
+    <string name="dashboard_page_move_right">Posunout doprava</string>
+    <string name="dashboard_page_delete">Smazat stránku</string>
+    <string name="dashboard_page_delete_message">Widgety ze stránky %1$d budou odebrány z panelu. Znovu je zapnete ve Vybrat widgety.</string>
+    <string name="dashboard_page_layout">Rozvržení stránky</string>
+    <string name="dashboard_page_orientation">Orientace</string>
+    <string name="dashboard_builder_page_widgets">Widgety na stránce %1$d</string>
+    <string name="dashboard_builder_list_hint">Klepnutím otevřete nastavení widgetu. Podržením ho přetáhnete: v seznamu změníte pořadí, na kartu stránky ho tam přesunete.</string>
+    <string name="dashboard_builder_page_empty_hint">Na této stránce zatím nic není. Přidejte widgety nebo sem nějaký přesuňte z jiné stránky.</string>
+    <string name="dashboard_widget_page_label">Stránka</string>
+    <string name="dashboard_widget_remove">Odebrat z panelu</string>
+    <string name="dashboard_builder_move_to_page">Přesunout %1$s na stránku %2$d</string>
+    <string name="dashboard_templates_title">Šablony a spouštěče</string>
+    <string name="dashboard_templates_help">Hotová rozvržení, uložená uspořádání a kdy se samy zapnou.</string>
+    <string name="dashboard_builder_help_title">Nápověda</string>
+    <string name="dashboard_page_home_help">Panel se otevírá na hlavní stránce (★) a po 30 sekundách bez dotyku se na ni vrací.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>Jako zadní displej</item>
+        <item>Na šířku</item>
+        <item>Na výšku</item>
+    </string-array>
+    <string name="dashboard_page_full">Na stránku %1$d to nejde: widget přes celou obrazovku potřebuje stránku jen pro sebe.</string>
 </resources>

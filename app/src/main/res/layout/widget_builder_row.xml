@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    One widget in the builder's list. Built in code because the list follows
+    the page being edited, and a MaterialButton constructed in Java cannot
+    pick up an XML widget style. The chevron says the row opens the widget's
+    settings.
+-->
+<com.google.android.material.button.MaterialButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/HyperOS.NavRow"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:ellipsize="end"
+    android:maxLines="2" />

@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">Piilota kuvake</string>
     <string name="dashboard_builder_hide_icon_for">Piilota kohteen %1$s kuvake</string>
     <string name="dashboard_auto_pages">Vaihda sivua automaattisesti</string>
-    <string name="dashboard_auto_pages_help">Kun tämä on käytössä, sivu vaihtuu 8 sekunnin välein. Manuaalisen käytön jälkeen paneeli palaa ensimmäiselle sivulle 30 sekunnin käyttämättömyyden jälkeen.</string>
+    <string name="dashboard_auto_pages_help">Kun tämä on käytössä, sivu vaihtuu 8 sekunnin välein. Manuaalisen käytön jälkeen paneeli palaa pääsivulle 30 sekunnin käyttämättömyyden jälkeen.</string>
     <string name="dashboard_widget_fullscreen_weather">Sää koko näytöllä</string>
     <string name="dashboard_widget_fullscreen_media">Mediasäätimet koko näytöllä</string>
     <string name="tile_on">Peilaus käynnissä</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">Kuvan peittävyys: %1$d%%</string>
     <string name="dashboard_builder_title">Widgetien asettelu</string>
     <string name="dashboard_builder_open">Järjestä widgetit</string>
-    <string name="dashboard_builder_help">Muutokset näkyvät esikatselussa heti.</string>
-    <string name="dashboard_builder_preview">Esikatselu</string>
-    <string name="dashboard_builder_drag">Vedä %1$s</string>
     <string name="dashboard_builder_sample_track">Esimerkkikappale</string>
     <string name="dashboard_builder_small">Pieni</string>
     <string name="dashboard_builder_normal">Normaali</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">Muuta kohteen %1$s kokoa</string>
     <string name="dashboard_builder_position_label">Tasaus</string>
     <string name="dashboard_builder_size_label">Koko</string>
-    <string name="dashboard_builder_drag_hint">Vedä järjestääksesi uudelleen</string>
-    <string name="dashboard_orientation_auto">Suunta: seuraa takanäyttöä</string>
-    <string name="dashboard_orientation_landscape">Suunta: vaaka</string>
-    <string name="dashboard_orientation_portrait">Suunta: pysty</string>
     <string name="dashboard_builder_visible">Näytä widget</string>
     <string name="dashboard_builder_visibility">Näytä tai piilota %1$s</string>
     <string name="dashboard_builder_position_value">Tasaus: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">Kaikki, minkä otat tässä käyttöön, ilmestyy järjestelijään. Käytöstä poistetut odottavat tällä näytöllä.</string>
     <string name="dashboard_builder_choose">Valitse widgetit</string>
     <string name="dashboard_builder_empty">Yhtään widgetiä ei ole vielä otettu käyttöön. Valitse, mitä takapaneelin pitäisi näyttää.</string>
-    <string name="dashboard_builder_pages">Sivut</string>
-    <string name="dashboard_builder_one_page">1 sivu</string>
-    <string name="dashboard_builder_pages_count">%1$d sivua</string>
     <string name="dashboard_builder_choose_value">Valitse</string>
     <string name="panel_gestures_help">Itse paneelissa: widgetin napautus vaihtaa sen esitystapaa, ja pitkä painallus missä tahansa kytkee aina päällä -näytön päälle tai pois.</string>
     <string name="dashboard_builder_pages_help">Useamman kuin yhden sivun kanssa takapaneeli kiertää niitä, noin kahdeksan sekuntia kutakin. Pyyhkäise paneelia pitääksesi sivun paikallaan.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">Vähäinen</string>
     <string name="dashboard_burn_in_normal">Normaali</string>
     <string name="dashboard_burn_in_large">Laaja</string>
-    <string name="dashboard_builder_show_on_panel">Näytä takapaneelissa · 30 s</string>
-    <string name="dashboard_builder_show_on_panel_active">Lopeta peilaus nähdäksesi paneelin</string>
     <string name="dashboard_builder_preview_note">Esikatselu vastaa takapaneelin muotoa. Akku, lämpötila, nykyinen kappale ja kello ovat todellisia; muut ovat esimerkkiarvoja.</string>
     <string name="dashboard_builder_reset">Palauta</string>
     <string name="dashboard_builder_reset_title">Palautetaanko widgetien asettelu?</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">Matka</string>
     <string name="dashboard_preset_music">Musiikki</string>
     <string name="dashboard_preset_weather">Sää</string>
-    <string name="dashboard_builder_layout_stacked">Asettelu: sarake</string>
-    <string name="dashboard_builder_layout_corners">Asettelu: kulmat</string>
-    <string name="dashboard_builder_layout_compact">Asettelu: tiivis</string>
     <string name="dashboard_location_access_granted">Sijainnin käyttöoikeus on käytössä</string>
     <string name="dashboard_location_access_required">Nopeus ja korkeus vaativat tarkan sijainnin</string>
     <string name="dashboard_location_access_optional">Sijaintia käytetään vain nopeuteen ja korkeuteen</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">Korostus</string>
     <string name="dashboard_builder_style_muted">Vaimennettu</string>
     <string name="dashboard_builder_page_section">Sivu %1$d</string>
-    <string name="dashboard_builder_page_empty">Tyhjä. Siirrä widget tähän tai vedä sellainen toiselta sivulta.</string>
     <string name="dashboard_builder_moved">%1$s siirretty sivulle %2$d</string>
-    <string name="dashboard_builder_preview_page">Esikatselussa näkyvä sivu</string>
-    <string name="dashboard_builder_preview_page_note">Suunta ja asettelu kuuluvat yllä olevaan sivuun, joten jokainen sivu voi olla omalla puolellaan.</string>
     <string name="dashboard_profile_template_title">Nykyisen profiilin paneeli</string>
     <string name="dashboard_profile_template_help">Otetaan käyttöön itsestään, kun vaihdat tähän profiiliin, ja tallennetaan itsestään, kun vaihdat pois, jotta jokainen profiili palaa omaan paneeliinsa.</string>
     <string name="dashboard_named_template_add">Tallenna nykyinen nimellä…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">Poista</string>
     <string name="dashboard_named_template_delete_message">Poistetaanko malli ”%1$s”?</string>
     <string name="dashboard_named_template_full">Uudelle mallille ei ole tilaa</string>
-    <string name="dashboard_builder_layout_free">Näkymä: vapaa</string>
     <string name="dashboard_builder_preview_pick_hint">Napauta widgetiä esikatselussa päästäksesi sen asetuksiin. Vapaassa näkymässä voit myös vetää sitä ja muuttaa kokoa nipistämällä.</string>
     <string name="dashboard_builder_preview_free_hint">Vedä widgetiä esikatselussa asettaaksesi sen paikalleen, ja nipistä muuttaaksesi kokoa. Napauta sitä päästäksesi sen asetuksiin.</string>
     <string name="dashboard_builder_snap">Kiinnitä ruudukkoon</string>
@@ -444,4 +425,31 @@
     <string name="crop_frame_whole">Koko näyttö</string>
     <string name="crop_frame_fill">Täytä paneeli</string>
     <string name="calibration_framed_notice">Tämän profiilin rajauksen määrää sovelluksen päälle piirretty kehys, joten alla olevat liukusäätimet eivät tee mitään. Palauta kalibrointi, niin ne saavat sen takaisin.</string>
+    <string name="dashboard_builder_pages_title">Sivut</string>
+    <string name="dashboard_page_add">Lisää sivu</string>
+    <string name="dashboard_page_actions">Sivun %1$d toiminnot</string>
+    <string name="dashboard_page_home_description">Sivu %1$d, pääsivu</string>
+    <string name="dashboard_page_make_home">Tee pääsivuksi</string>
+    <string name="dashboard_page_move_left">Siirrä vasemmalle</string>
+    <string name="dashboard_page_move_right">Siirrä oikealle</string>
+    <string name="dashboard_page_delete">Poista sivu</string>
+    <string name="dashboard_page_delete_message">Sivun %1$d widgetit poistetaan paneelista. Voit ottaa ne uudelleen käyttöön kohdassa Valitse widgetit.</string>
+    <string name="dashboard_page_layout">Sivun asettelu</string>
+    <string name="dashboard_page_orientation">Suunta</string>
+    <string name="dashboard_builder_page_widgets">Widgetit sivulla %1$d</string>
+    <string name="dashboard_builder_list_hint">Napauta widgetiä avataksesi sen asetukset. Pidä painettuna vetääksesi: luettelossa järjestyksen muuttamiseksi tai sivun välilehdelle siirtääksesi sen sinne.</string>
+    <string name="dashboard_builder_page_empty_hint">Tällä sivulla ei ole vielä mitään. Lisää widgettejä tai siirrä tänne jokin toiselta sivulta.</string>
+    <string name="dashboard_widget_page_label">Sivu</string>
+    <string name="dashboard_widget_remove">Poista paneelista</string>
+    <string name="dashboard_builder_move_to_page">Siirrä %1$s sivulle %2$d</string>
+    <string name="dashboard_templates_title">Mallit ja laukaisimet</string>
+    <string name="dashboard_templates_help">Valmiit asettelut, tallennetut järjestelyt ja milloin ne tulevat esiin itsestään.</string>
+    <string name="dashboard_builder_help_title">Ohje</string>
+    <string name="dashboard_page_home_help">Paneeli avautuu pääsivulle (★) ja palaa sille 30 sekunnin kuluttua ilman kosketusta.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>Kuten takanäyttö</item>
+        <item>Vaaka</item>
+        <item>Pysty</item>
+    </string-array>
+    <string name="dashboard_page_full">Sivulle %1$d ei voi siirtää: koko näytön widget tarvitsee oman sivun.</string>
 </resources>

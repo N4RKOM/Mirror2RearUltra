@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">הסתרת הסמל</string>
     <string name="dashboard_builder_hide_icon_for">הסתרת הסמל של %1$s</string>
     <string name="dashboard_auto_pages">החלפת עמודים אוטומטית</string>
-    <string name="dashboard_auto_pages_help">כשההגדרה פעילה, העמודים מתחלפים כל 8 שניות. אחרי שימוש ידני, הלוח חוזר לעמוד הראשון לאחר 30 שניות של חוסר פעילות.</string>
+    <string name="dashboard_auto_pages_help">כשההגדרה פעילה, העמודים מתחלפים כל 8 שניות. אחרי שימוש ידני, הלוח חוזר לעמוד הראשי לאחר 30 שניות של חוסר פעילות.</string>
     <string name="dashboard_widget_fullscreen_weather">מזג אוויר במסך מלא</string>
     <string name="dashboard_widget_fullscreen_media">פקדי מדיה במסך מלא</string>
     <string name="tile_on">משקף</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">אטימות התמונה: %1$d%%</string>
     <string name="dashboard_builder_title">פריסת הווידג׳טים</string>
     <string name="dashboard_builder_open">סידור הווידג׳טים</string>
-    <string name="dashboard_builder_help">השינויים מופיעים בתצוגה המקדימה מיד.</string>
-    <string name="dashboard_builder_preview">תצוגה מקדימה</string>
-    <string name="dashboard_builder_drag">גרירת %1$s</string>
     <string name="dashboard_builder_sample_track">רצועה לדוגמה</string>
     <string name="dashboard_builder_small">קטן</string>
     <string name="dashboard_builder_normal">רגיל</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">שינוי הגודל של %1$s</string>
     <string name="dashboard_builder_position_label">יישור</string>
     <string name="dashboard_builder_size_label">גודל</string>
-    <string name="dashboard_builder_drag_hint">יש לגרור כדי לשנות את הסדר</string>
-    <string name="dashboard_orientation_auto">כיוון: לפי המסך האחורי</string>
-    <string name="dashboard_orientation_landscape">כיוון: לרוחב</string>
-    <string name="dashboard_orientation_portrait">כיוון: לאורך</string>
     <string name="dashboard_builder_visible">הצגת הווידג׳ט</string>
     <string name="dashboard_builder_visibility">הצגה או הסתרה של %1$s</string>
     <string name="dashboard_builder_position_value">יישור: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">כל מה שמופעל כאן מופיע במסדר. מה שנשאר כבוי ממתין במסך הזה.</string>
     <string name="dashboard_builder_choose">בחירת ווידג׳טים</string>
     <string name="dashboard_builder_empty">עדיין לא הופעל אף ווידג׳ט. יש לבחור את אלה שהלוח האחורי יציג.</string>
-    <string name="dashboard_builder_pages">עמודים</string>
-    <string name="dashboard_builder_one_page">עמוד אחד</string>
-    <string name="dashboard_builder_pages_count">%1$d עמודים</string>
     <string name="dashboard_builder_choose_value">בחירה</string>
     <string name="panel_gestures_help">בלוח עצמו: הקשה על ווידג׳ט מקדמת את התצוגה שלו, ולחיצה ארוכה בכל מקום מפעילה או מכבה את התצוגה המתמדת.</string>
     <string name="dashboard_builder_pages_help">כשיש יותר מעמוד אחד, הלוח האחורי עובר ביניהם, כשמונה שניות לכל אחד. החלקה על הלוח מחזיקה עמוד במקומו.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">קל</string>
     <string name="dashboard_burn_in_normal">רגיל</string>
     <string name="dashboard_burn_in_large">רחב</string>
-    <string name="dashboard_builder_show_on_panel">הצגה על הלוח האחורי · 30 ש׳</string>
-    <string name="dashboard_builder_show_on_panel_active">יש לעצור את השיקוף כדי לראות את הלוח</string>
     <string name="dashboard_builder_preview_note">התצוגה המקדימה תואמת את צורת הלוח האחורי. הסוללה, הטמפרטורה, הרצועה הנוכחית והשעון אמיתיים; השאר ערכים לדוגמה.</string>
     <string name="dashboard_builder_reset">איפוס</string>
     <string name="dashboard_builder_reset_title">לאפס את פריסת הווידג׳טים?</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">נסיעה</string>
     <string name="dashboard_preset_music">מוזיקה</string>
     <string name="dashboard_preset_weather">מזג אוויר</string>
-    <string name="dashboard_builder_layout_stacked">פריסה: טור</string>
-    <string name="dashboard_builder_layout_corners">פריסה: פינות</string>
-    <string name="dashboard_builder_layout_compact">פריסה: צפופה</string>
     <string name="dashboard_location_access_granted">הגישה למיקום פעילה</string>
     <string name="dashboard_location_access_required">למהירות ולגובה נדרש מיקום מדויק</string>
     <string name="dashboard_location_access_optional">המיקום משמש רק למהירות ולגובה</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">הדגשה</string>
     <string name="dashboard_builder_style_muted">מעומעם</string>
     <string name="dashboard_builder_page_section">עמוד %1$d</string>
-    <string name="dashboard_builder_page_empty">ריק. אפשר להעביר לכאן ווידג׳ט, או לגרור אחד מעמוד אחר.</string>
     <string name="dashboard_builder_moved">%1$s הועבר לעמוד %2$d</string>
-    <string name="dashboard_builder_preview_page">העמוד המוצג בתצוגה המקדימה</string>
-    <string name="dashboard_builder_preview_page_note">הכיוון והסידור שייכים לעמוד שלמעלה, כך שכל עמוד יכול לשבת בכיוון משלו.</string>
     <string name="dashboard_profile_template_title">הלוח של הפרופיל הנוכחי</string>
     <string name="dashboard_profile_template_help">מוחל מעצמו כשעוברים לפרופיל הזה, ונשמר מעצמו כשעוזבים אותו, כך שכל פרופיל חוזר ללוח שלו.</string>
     <string name="dashboard_named_template_add">שמירת הנוכחי בשם…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">מחיקה</string>
     <string name="dashboard_named_template_delete_message">למחוק את התבנית „%1$s“?</string>
     <string name="dashboard_named_template_full">אין מקום לתבנית נוספת</string>
-    <string name="dashboard_builder_layout_free">תצוגה: חופשית</string>
     <string name="dashboard_builder_preview_pick_hint">הקשה על ווידג׳ט בתצוגה המקדימה פותחת את ההגדרות שלו. בתצוגה החופשית אפשר גם לגרור אותו ולשנות את גודלו בצביטה.</string>
     <string name="dashboard_builder_preview_free_hint">יש לגרור ווידג׳ט בתצוגה המקדימה כדי למקם אותו, ולצבוט כדי לשנות את גודלו. הקשה עליו פותחת את ההגדרות שלו.</string>
     <string name="dashboard_builder_snap">הצמדה לרשת</string>
@@ -448,4 +429,31 @@
     <string name="crop_frame_whole">כל המסך</string>
     <string name="crop_frame_fill">מילוי הלוח</string>
     <string name="calibration_framed_notice">את החיתוך של הפרופיל הזה קובעת מסגרת שסומנה מעל אפליקציה, ולכן המחוונים שלמטה אינם עושים דבר. איפוס הכיול יחזיר להם אותו.</string>
+    <string name="dashboard_builder_pages_title">עמודים</string>
+    <string name="dashboard_page_add">הוספת עמוד</string>
+    <string name="dashboard_page_actions">פעולות לעמוד %1$d</string>
+    <string name="dashboard_page_home_description">עמוד %1$d, ראשי</string>
+    <string name="dashboard_page_make_home">הגדרה כראשי</string>
+    <string name="dashboard_page_move_left">הזזה שמאלה</string>
+    <string name="dashboard_page_move_right">הזזה ימינה</string>
+    <string name="dashboard_page_delete">מחיקת עמוד</string>
+    <string name="dashboard_page_delete_message">הווידג׳טים מעמוד %1$d יוסרו מהלוח. אפשר להפעיל אותם שוב ב„בחירת ווידג׳טים”.</string>
+    <string name="dashboard_page_layout">פריסת העמוד</string>
+    <string name="dashboard_page_orientation">כיוון</string>
+    <string name="dashboard_builder_page_widgets">ווידג׳טים בעמוד %1$d</string>
+    <string name="dashboard_builder_list_hint">הקישו על ווידג׳ט כדי לפתוח את ההגדרות שלו. לחיצה ארוכה מאפשרת לגרור אותו: בתוך הרשימה כדי לשנות סדר, או ללשונית של עמוד כדי להעביר אותו לשם.</string>
+    <string name="dashboard_builder_page_empty_hint">אין עדיין כלום בעמוד הזה. הוסיפו ווידג׳טים או העבירו לכאן אחד מעמוד אחר.</string>
+    <string name="dashboard_widget_page_label">עמוד</string>
+    <string name="dashboard_widget_remove">הסרה מהלוח</string>
+    <string name="dashboard_builder_move_to_page">העברת %1$s לעמוד %2$d</string>
+    <string name="dashboard_templates_title">תבניות וטריגרים</string>
+    <string name="dashboard_templates_help">פריסות מוכנות, סידורים שמורים ומתי הם מופיעים מעצמם.</string>
+    <string name="dashboard_builder_help_title">עזרה</string>
+    <string name="dashboard_page_home_help">הלוח נפתח בעמוד הראשי (★) וחוזר אליו אחרי 30 שניות ללא מגע.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>כמו המסך האחורי</item>
+        <item>לרוחב</item>
+        <item>לאורך</item>
+    </string-array>
+    <string name="dashboard_page_full">אי אפשר לעמוד %1$d: ווידג׳ט במסך מלא צריך עמוד משלו.</string>
 </resources>

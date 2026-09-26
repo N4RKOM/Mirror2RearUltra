@@ -68,6 +68,7 @@ final class DashboardWidgetLayout {
     private static final String ICON_HIDDEN_PREFIX = "icon_hidden_";
     private static final String EXTRA_ENABLED = "extra_enabled";
     private static final String PAGE_COUNT = "page_count";
+    private static final String HOME_PAGE = "home_page";
     private static final String PRESENCE_PREFIX = "presence_";
     private static final String GAP_PREFIX = "gap_";
     private static final String BURN_IN_SHIFT = "burn_in_shift";
@@ -388,12 +389,138 @@ final class DashboardWidgetLayout {
         }
     }
 
+    /**
+     * The page the panel opens on and comes back to after being left alone.
+     *
+     * <p>It used to be page one by definition, so making another page the one
+     * the panel rests on meant rebuilding both pages by hand. Stored as a
+     * number and clamped to the pages that exist, so deleting pages can never
+     * leave it pointing at nothing.
+     */
+    static int loadHomePage(Context context) {
+        return Math.max(1, Math.min(loadPageCount(context),
+                prefs(context).getInt(HOME_PAGE, 1)));
+    }
+
+    static void saveHomePage(Context context, int page) {
+        prefs(context).edit().putInt(HOME_PAGE,
+                Math.max(1, Math.min(loadPageCount(context), page))).apply();
+    }
+
+    /**
+     * Adds an empty page after the last one.
+     *
+     * <p>Its own layout and orientation are cleared first: a page that once
+     * existed at this number and was deleted would otherwise come back with
+     * the look it had then, rather than following page one like a new page.
+     *
+     * @return the new page, or 0 when the arrangement is already full
+     */
+    static int addPage(Context context) {
+        int count = loadPageCount(context);
+        if (count >= MAX_PAGES) {
+            return 0;
+        }
+        int page = count + 1;
+        prefs(context).edit()
+                .remove(PAGE_LAYOUT_PREFIX + page)
+                .remove(PAGE_ORIENTATION_PREFIX + page)
+                .putInt(PAGE_COUNT, page)
+                .apply();
+        return page;
+    }
+
+    /**
+     * Rewrites every page-keyed setting through one renumbering.
+     *
+     * <p>Moving and deleting pages both come down to this. A page's layout and
+     * orientation travel with it, its widgets travel with it, and the main
+     * page follows its page. Widgets on a deleted page are switched off rather
+     * than piled onto another page, where they would push out what was there.
+     *
+     * <p>Page numbers are written directly rather than through {@link
+     * #savePage}: that keeps full-screen widgets apart one widget at a time,
+     * and halfway through a swap two pages legitimately hold each other's
+     * widgets.
+     *
+     * @param map from {@link DashboardPages}
+     */
+    static void remapPages(Context context, int[] map) {
+        int oldCount = map.length - 1;
+        int newCount = DashboardPages.countAfter(map);
+        DashboardSettings settings = MirrorSettings.loadDashboardSettings(context);
+        DashboardSettings.Layout[] layouts = new DashboardSettings.Layout[newCount + 1];
+        Orientation[] orientations = new Orientation[newCount + 1];
+        for (int page = 1; page <= oldCount; page++) {
+            int target = map[page];
+            if (target > 0) {
+                layouts[target] = loadPageLayout(context, page, settings.layout);
+                orientations[target] = loadPageOrientation(context, page);
+            }
+        }
+        int home = DashboardPages.homeAfter(loadHomePage(context), map);
+
+        for (Widget widget : Widget.values()) {
+            int page = loadPage(context, widget);
+            if (page <= oldCount && map[page] == 0 && isWidgetEnabled(context, widget)) {
+                setWidgetEnabled(context, widget, false);
+            }
+        }
+
+        SharedPreferences.Editor editor = prefs(context).edit();
+        for (Widget widget : Widget.values()) {
+            int page = loadPage(context, widget);
+            int target = page <= oldCount && map[page] > 0
+                    ? map[page] : Math.min(page, newCount);
+            editor.putInt(PAGE_PREFIX + widget.name(), Math.max(1, target));
+        }
+        for (int page = 2; page <= MAX_PAGES; page++) {
+            if (page <= newCount) {
+                editor.putString(PAGE_LAYOUT_PREFIX + page, layouts[page].name());
+                editor.putString(PAGE_ORIENTATION_PREFIX + page, orientations[page].name());
+            } else {
+                editor.remove(PAGE_LAYOUT_PREFIX + page);
+                editor.remove(PAGE_ORIENTATION_PREFIX + page);
+            }
+        }
+        editor.putInt(PAGE_COUNT, newCount)
+                .putInt(HOME_PAGE, home)
+                .putString(ORIENTATION, orientations[1].name())
+                .apply();
+        // Page one's layout is the panel-wide setting, so it is written there.
+        MirrorSettings.saveDashboardSettings(context,
+                MirrorSettings.loadDashboardSettings(context).withLayout(layouts[1]));
+    }
+
     static int loadPage(Context context, Widget widget) {
-        return Math.max(1, Math.min(3, prefs(context).getInt(PAGE_PREFIX + widget.name(), 1)));
+        return Math.max(1, Math.min(MAX_PAGES,
+                prefs(context).getInt(PAGE_PREFIX + widget.name(), 1)));
+    }
+
+    /**
+     * Whether a widget can be moved onto a page without {@link #savePage}
+     * pushing it, or what is already there, somewhere else.
+     *
+     * <p>A full-screen widget takes a page to itself, so a page holding one
+     * accepts nothing else, and a full-screen widget accepts only an empty
+     * page. The builder asks first: moving a widget and then finding it
+     * silently sent back looked like the move had simply not worked.
+     */
+    static boolean canMoveTo(Context context, Widget widget, int page) {
+        for (Widget other : Widget.values()) {
+            if (other == widget || !isWidgetEnabled(context, other)
+                    || loadPage(context, other) != page) {
+                continue;
+            }
+            if (isFullscreenWidget(widget) || isFullscreenWidget(other)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     static void savePage(Context context, Widget widget, int page) {
-        int target = Math.max(1, Math.min(3, page));
+        int target = Math.max(1, Math.min(MAX_PAGES, page));
         prefs(context).edit().putInt(PAGE_PREFIX + widget.name(), target).apply();
         if (isWidgetEnabled(context, widget)) {
             enforceExclusivePage(context, widget, target);

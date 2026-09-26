@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">Ascunde pictograma</string>
     <string name="dashboard_builder_hide_icon_for">Ascunde pictograma widgetului %1$s</string>
     <string name="dashboard_auto_pages">Schimbă paginile automat</string>
-    <string name="dashboard_auto_pages_help">Când este activat, paginile se schimbă la fiecare 8 secunde. După o acțiune manuală, panoul revine la prima pagină după 30 de secunde de inactivitate.</string>
+    <string name="dashboard_auto_pages_help">Când este activat, paginile se schimbă la fiecare 8 secunde. După o acțiune manuală, panoul revine la pagina principală după 30 de secunde de inactivitate.</string>
     <string name="dashboard_widget_fullscreen_weather">Vremea pe tot ecranul</string>
     <string name="dashboard_widget_fullscreen_media">Comenzi media pe tot ecranul</string>
     <string name="tile_on">Se oglindește</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">Opacitatea imaginii: %1$d%%</string>
     <string name="dashboard_builder_title">Aranjarea widgeturilor</string>
     <string name="dashboard_builder_open">Aranjează widgeturile</string>
-    <string name="dashboard_builder_help">Modificările apar imediat în previzualizare.</string>
-    <string name="dashboard_builder_preview">Previzualizare</string>
-    <string name="dashboard_builder_drag">Trage %1$s</string>
     <string name="dashboard_builder_sample_track">Piesă de exemplu</string>
     <string name="dashboard_builder_small">Mic</string>
     <string name="dashboard_builder_normal">Normal</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">Schimbă dimensiunea widgetului %1$s</string>
     <string name="dashboard_builder_position_label">Aliniere</string>
     <string name="dashboard_builder_size_label">Dimensiune</string>
-    <string name="dashboard_builder_drag_hint">Trageți pentru a reordona</string>
-    <string name="dashboard_orientation_auto">Orientare: după ecranul din spate</string>
-    <string name="dashboard_orientation_landscape">Orientare: peisaj</string>
-    <string name="dashboard_orientation_portrait">Orientare: portret</string>
     <string name="dashboard_builder_visible">Arată widgetul</string>
     <string name="dashboard_builder_visibility">Arată sau ascunde %1$s</string>
     <string name="dashboard_builder_position_value">Aliniere: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">Tot ce activați aici apare în organizator. Ce rămâne dezactivat așteaptă pe acest ecran.</string>
     <string name="dashboard_builder_choose">Alege widgeturile</string>
     <string name="dashboard_builder_empty">Niciun widget nu este activat încă. Alegeți ce trebuie să afișeze panoul din spate.</string>
-    <string name="dashboard_builder_pages">Pagini</string>
-    <string name="dashboard_builder_one_page">1 pagină</string>
-    <string name="dashboard_builder_pages_count">%1$d pagini</string>
     <string name="dashboard_builder_choose_value">Alege</string>
     <string name="panel_gestures_help">Pe panoul propriu-zis: o atingere pe un widget îi schimbă afișarea, iar o apăsare lungă oriunde pornește sau oprește ecranul mereu activ.</string>
     <string name="dashboard_builder_pages_help">Cu mai mult de o pagină, panoul din spate le parcurge, cam opt secunde fiecare. Glisați pe panou pentru a reține o pagină.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">Ușoară</string>
     <string name="dashboard_burn_in_normal">Normală</string>
     <string name="dashboard_burn_in_large">Amplă</string>
-    <string name="dashboard_builder_show_on_panel">Arată pe panoul din spate · 30 s</string>
-    <string name="dashboard_builder_show_on_panel_active">Opriți oglindirea pentru a previzualiza panoul</string>
     <string name="dashboard_builder_preview_note">Previzualizarea are forma panoului din spate. Bateria, temperatura, piesa curentă și ceasul sunt reale; restul sunt valori de exemplu.</string>
     <string name="dashboard_builder_reset">Resetează</string>
     <string name="dashboard_builder_reset_title">Resetați aranjarea widgeturilor?</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">Drum</string>
     <string name="dashboard_preset_music">Muzică</string>
     <string name="dashboard_preset_weather">Vreme</string>
-    <string name="dashboard_builder_layout_stacked">Aranjament: coloană</string>
-    <string name="dashboard_builder_layout_corners">Aranjament: colțuri</string>
-    <string name="dashboard_builder_layout_compact">Aranjament: compact</string>
     <string name="dashboard_location_access_granted">Accesul la locație este activat</string>
     <string name="dashboard_location_access_required">Pentru viteză și altitudine este necesară locația precisă</string>
     <string name="dashboard_location_access_optional">Locația este folosită doar pentru viteză și altitudine</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">Accent</string>
     <string name="dashboard_builder_style_muted">Estompată</string>
     <string name="dashboard_builder_page_section">Pagina %1$d</string>
-    <string name="dashboard_builder_page_empty">Goală. Mutați un widget aici sau trageți unul de pe altă pagină.</string>
     <string name="dashboard_builder_moved">%1$s a fost mutat pe pagina %2$d</string>
-    <string name="dashboard_builder_preview_page">Pagina afișată în previzualizare</string>
-    <string name="dashboard_builder_preview_page_note">Orientarea și aranjamentul aparțin paginii de mai sus, așa că fiecare pagină poate sta în felul ei.</string>
     <string name="dashboard_profile_template_title">Panoul profilului curent</string>
     <string name="dashboard_profile_template_help">Se aplică de la sine când treceți la acest profil și se păstrează de la sine când îl părăsiți, astfel încât fiecare profil să revină la propriul panou.</string>
     <string name="dashboard_named_template_add">Salvează cel curent ca…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">Șterge</string>
     <string name="dashboard_named_template_delete_message">Ștergeți șablonul „%1$s”?</string>
     <string name="dashboard_named_template_full">Nu mai este loc pentru încă un șablon</string>
-    <string name="dashboard_builder_layout_free">Vizualizare: liberă</string>
     <string name="dashboard_builder_preview_pick_hint">Atingeți un widget în previzualizare pentru a ajunge la setările lui. În vizualizarea liberă îl puteți și trage, iar cu două degete îi schimbați dimensiunea.</string>
     <string name="dashboard_builder_preview_free_hint">Trageți un widget în previzualizare pentru a-l așeza și apropiați degetele pentru a-i schimba dimensiunea. Atingeți-l pentru a ajunge la setările lui.</string>
     <string name="dashboard_builder_snap">Aliniere la grilă</string>
@@ -446,4 +427,31 @@
     <string name="crop_frame_whole">Tot ecranul</string>
     <string name="crop_frame_fill">Umple panoul</string>
     <string name="calibration_framed_notice">Decuparea acestui profil este dată de un cadru trasat peste o aplicație, așa că glisoarele de mai jos nu fac nimic. Resetați calibrarea ca să le-o dați înapoi.</string>
+    <string name="dashboard_builder_pages_title">Pagini</string>
+    <string name="dashboard_page_add">Adaugă pagină</string>
+    <string name="dashboard_page_actions">Acțiuni pentru pagina %1$d</string>
+    <string name="dashboard_page_home_description">Pagina %1$d, principală</string>
+    <string name="dashboard_page_make_home">Setează ca principală</string>
+    <string name="dashboard_page_move_left">Mută la stânga</string>
+    <string name="dashboard_page_move_right">Mută la dreapta</string>
+    <string name="dashboard_page_delete">Șterge pagina</string>
+    <string name="dashboard_page_delete_message">Widgeturile de pe pagina %1$d vor fi scoase de pe panou. Le poți activa din nou din Alege widgeturile.</string>
+    <string name="dashboard_page_layout">Aspectul paginii</string>
+    <string name="dashboard_page_orientation">Orientare</string>
+    <string name="dashboard_builder_page_widgets">Widgeturi pe pagina %1$d</string>
+    <string name="dashboard_builder_list_hint">Atinge un widget pentru setările lui. Ține apăsat ca să-l tragi: în listă pentru a schimba ordinea sau pe fila unei pagini pentru a-l muta acolo.</string>
+    <string name="dashboard_builder_page_empty_hint">Încă nu e nimic pe această pagină. Adaugă widgeturi sau mută aici unul de pe altă pagină.</string>
+    <string name="dashboard_widget_page_label">Pagină</string>
+    <string name="dashboard_widget_remove">Scoate de pe panou</string>
+    <string name="dashboard_builder_move_to_page">Mută %1$s pe pagina %2$d</string>
+    <string name="dashboard_templates_title">Șabloane și declanșatoare</string>
+    <string name="dashboard_templates_help">Aspecte gata făcute, aranjamente salvate și când apar singure.</string>
+    <string name="dashboard_builder_help_title">Ajutor</string>
+    <string name="dashboard_page_home_help">Panoul se deschide pe pagina principală (★) și revine la ea după 30 de secunde fără atingere.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>Ca ecranul din spate</item>
+        <item>Peisaj</item>
+        <item>Portret</item>
+    </string-array>
+    <string name="dashboard_page_full">Nu se poate pe pagina %1$d: un widget pe tot ecranul are nevoie de o pagină doar pentru el.</string>
 </resources>

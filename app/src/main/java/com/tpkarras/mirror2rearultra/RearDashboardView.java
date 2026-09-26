@@ -149,11 +149,16 @@ public final class RearDashboardView extends View {
     private final Runnable progressTick = this::invalidate;
     /** A call cannot wait for the next snapshot: the panel is redrawn at once. */
     private final CallWidgetState.Listener callListener = snapshot -> postInvalidate();
-    private int userPage = 1;
+    /** The page swiped to, or 0 for the main page the builder names. */
+    private int userPage = 0;
     private long lastPageInteractionMillis;
-    private long autoPageResumeMillis;
-    private final Runnable returnToFirstPage = () -> {
-        userPage = 1;
+    /**
+     * When the automatic cycling may start. A session opens resting on the
+     * main page for one period rather than wherever the clock would put it.
+     */
+    private long autoPageResumeMillis = System.currentTimeMillis() + 8_000L;
+    private final Runnable returnToHomePage = () -> {
+        userPage = 0;
         lastPageInteractionMillis = 0L;
         autoPageResumeMillis = System.currentTimeMillis() + 8_000L;
         invalidate();
@@ -653,7 +658,7 @@ public final class RearDashboardView extends View {
         cancelPendingLongPress();
         removeCallbacks(pageFlip);
         removeCallbacks(progressTick);
-        removeCallbacks(returnToFirstPage);
+        removeCallbacks(returnToHomePage);
         super.onDetachedFromWindow();
     }
 
@@ -1008,13 +1013,19 @@ public final class RearDashboardView extends View {
             return paginateLines(source);
         } else {
             boolean auto = DashboardWidgetLayout.isAutoPageSwitchEnabled(getContext());
+            int home = Math.min(maxPage, DashboardWidgetLayout.loadHomePage(getContext()));
+            int resting = userPage > 0 ? Math.min(userPage, maxPage) : home;
             if (lastPageInteractionMillis > 0L) {
-                page = Math.min(userPage, maxPage);
+                page = resting;
             } else if (auto && now >= autoPageResumeMillis) {
-                page = (int) ((now / 8_000L) % maxPage) + 1;
+                // Counted on from the main page, so cycling moves on from the
+                // page the panel was resting on. The steps stay on the wall
+                // clock's eight-second grid that the flip is scheduled on.
+                long steps = now / 8_000L - autoPageResumeMillis / 8_000L;
+                page = (int) ((home + steps) % maxPage) + 1;
                 requestPageFlip(8_000L);
             } else {
-                page = Math.min(userPage, maxPage);
+                page = resting;
             }
         }
         setCurrentPage(page);
@@ -1213,6 +1224,11 @@ public final class RearDashboardView extends View {
                     int maxPage = 1;
                     for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values())
                         maxPage = Math.max(maxPage, DashboardWidgetLayout.loadPage(getContext(), widget));
+                    if (interactive) {
+                        // The builder walks the pages it declares, empty ones
+                        // included, and follows along through the page listener.
+                        maxPage = Math.max(1, DashboardWidgetLayout.loadPageCount(getContext()));
+                    }
                     int current = selectedPage > 0 ? selectedPage : currentPage;
                     int next = distance < 0 ? current % maxPage + 1
                             : (current + maxPage - 2) % maxPage + 1;
@@ -1534,8 +1550,8 @@ public final class RearDashboardView extends View {
 
     private void markPageInteraction() {
         lastPageInteractionMillis = System.currentTimeMillis();
-        removeCallbacks(returnToFirstPage);
-        postDelayed(returnToFirstPage, 30_000L);
+        removeCallbacks(returnToHomePage);
+        postDelayed(returnToHomePage, 30_000L);
     }
 
     private boolean handleFullscreenTap(float x, float y) {

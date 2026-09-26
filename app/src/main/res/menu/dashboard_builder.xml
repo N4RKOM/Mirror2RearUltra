@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The builder's two rare actions, kept out of the way of the page. -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/dashboard_builder_menu_help"
+        android:title="@string/dashboard_builder_help_title"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/dashboard_builder_menu_reset"
+        android:title="@string/dashboard_builder_reset"
+        app:showAsAction="never" />
+</menu>

@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">Pictogram verbergen</string>
     <string name="dashboard_builder_hide_icon_for">Pictogram van %1$s verbergen</string>
     <string name="dashboard_auto_pages">Automatisch van pagina wisselen</string>
-    <string name="dashboard_auto_pages_help">Wanneer dit aanstaat, wisselen de pagina\'s elke 8 seconden. Na handmatig gebruik keert het paneel na 30 seconden zonder activiteit terug naar pagina één.</string>
+    <string name="dashboard_auto_pages_help">Wanneer dit aanstaat, wisselen de pagina\'s elke 8 seconden. Na handmatig gebruik keert het paneel na 30 seconden zonder activiteit terug naar de hoofdpagina.</string>
     <string name="dashboard_widget_fullscreen_weather">Weer op volledig scherm</string>
     <string name="dashboard_widget_fullscreen_media">Mediaknoppen op volledig scherm</string>
     <string name="tile_on">Spiegelen</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">Dekking van de afbeelding: %1$d%%</string>
     <string name="dashboard_builder_title">Indeling van widgets</string>
     <string name="dashboard_builder_open">Widgets schikken</string>
-    <string name="dashboard_builder_help">Wijzigingen verschijnen meteen in het voorbeeld.</string>
-    <string name="dashboard_builder_preview">Voorbeeld</string>
-    <string name="dashboard_builder_drag">%1$s slepen</string>
     <string name="dashboard_builder_sample_track">Voorbeeldnummer</string>
     <string name="dashboard_builder_small">Klein</string>
     <string name="dashboard_builder_normal">Normaal</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">Grootte van %1$s wijzigen</string>
     <string name="dashboard_builder_position_label">Uitlijning</string>
     <string name="dashboard_builder_size_label">Grootte</string>
-    <string name="dashboard_builder_drag_hint">Sleep om de volgorde te wijzigen</string>
-    <string name="dashboard_orientation_auto">Stand: achterscherm volgen</string>
-    <string name="dashboard_orientation_landscape">Stand: liggend</string>
-    <string name="dashboard_orientation_portrait">Stand: staand</string>
     <string name="dashboard_builder_visible">Widget tonen</string>
     <string name="dashboard_builder_visibility">%1$s tonen of verbergen</string>
     <string name="dashboard_builder_position_value">Uitlijning: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">Alles wat je hier aanzet, verschijnt in de schikker. Wat uit blijft, wacht op dit scherm.</string>
     <string name="dashboard_builder_choose">Widgets kiezen</string>
     <string name="dashboard_builder_empty">Er staat nog geen widget aan. Kies wat het achterpaneel moet tonen.</string>
-    <string name="dashboard_builder_pages">Pagina\'s</string>
-    <string name="dashboard_builder_one_page">1 pagina</string>
-    <string name="dashboard_builder_pages_count">%1$d pagina\'s</string>
     <string name="dashboard_builder_choose_value">Kiezen</string>
     <string name="panel_gestures_help">Op het paneel zelf: een tik op een widget schakelt zijn weergave door, en lang drukken ergens zet het altijd-aan-scherm aan of uit.</string>
     <string name="dashboard_builder_pages_help">Bij meer dan één pagina loopt het achterpaneel ze langs, ongeveer acht seconden elk. Veeg over het paneel om een pagina vast te houden.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">Licht</string>
     <string name="dashboard_burn_in_normal">Normaal</string>
     <string name="dashboard_burn_in_large">Ruim</string>
-    <string name="dashboard_builder_show_on_panel">Op het achterpaneel tonen · 30 s</string>
-    <string name="dashboard_builder_show_on_panel_active">Stop het spiegelen om het paneel te bekijken</string>
     <string name="dashboard_builder_preview_note">Het voorbeeld heeft dezelfde vorm als het achterpaneel. Accu, temperatuur, het huidige nummer en de klok zijn echt; de rest zijn voorbeeldwaarden.</string>
     <string name="dashboard_builder_reset">Herstellen</string>
     <string name="dashboard_builder_reset_title">Widgetindeling herstellen?</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">Rit</string>
     <string name="dashboard_preset_music">Muziek</string>
     <string name="dashboard_preset_weather">Weer</string>
-    <string name="dashboard_builder_layout_stacked">Indeling: kolom</string>
-    <string name="dashboard_builder_layout_corners">Indeling: hoeken</string>
-    <string name="dashboard_builder_layout_compact">Indeling: compact</string>
     <string name="dashboard_location_access_granted">Locatietoegang staat aan</string>
     <string name="dashboard_location_access_required">Voor snelheid en hoogte is een nauwkeurige locatie nodig</string>
     <string name="dashboard_location_access_optional">De locatie wordt alleen gebruikt voor snelheid en hoogte</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">Accent</string>
     <string name="dashboard_builder_style_muted">Gedempt</string>
     <string name="dashboard_builder_page_section">Pagina %1$d</string>
-    <string name="dashboard_builder_page_empty">Leeg. Verplaats hier een widget, of sleep er een naartoe.</string>
     <string name="dashboard_builder_moved">%1$s verplaatst naar pagina %2$d</string>
-    <string name="dashboard_builder_preview_page">Pagina in het voorbeeld</string>
-    <string name="dashboard_builder_preview_page_note">Stand en indeling horen bij de pagina hierboven, dus elke pagina kan zijn eigen kant op staan.</string>
     <string name="dashboard_profile_template_title">Paneel van het huidige profiel</string>
     <string name="dashboard_profile_template_help">Wordt vanzelf toegepast als je naar dit profiel overschakelt, en vanzelf bewaard als je het verlaat, zodat elk profiel bij zijn eigen paneel terugkomt.</string>
     <string name="dashboard_named_template_add">Huidige opslaan als…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">Verwijderen</string>
     <string name="dashboard_named_template_delete_message">De sjabloon ‘%1$s’ verwijderen?</string>
     <string name="dashboard_named_template_full">Geen ruimte voor nog een sjabloon</string>
-    <string name="dashboard_builder_layout_free">Weergave: vrij</string>
     <string name="dashboard_builder_preview_pick_hint">Tik op een widget in het voorbeeld om bij zijn instellingen te komen. In de vrije weergave kun je hem ook slepen en met een knijpbeweging vergroten of verkleinen.</string>
     <string name="dashboard_builder_preview_free_hint">Sleep een widget in het voorbeeld om hem te plaatsen, en knijp om hem te vergroten of verkleinen. Tik erop om bij zijn instellingen te komen.</string>
     <string name="dashboard_builder_snap">Uitlijnen op een raster</string>
@@ -444,4 +425,31 @@
     <string name="crop_frame_whole">Hele scherm</string>
     <string name="crop_frame_fill">Paneel vullen</string>
     <string name="calibration_framed_notice">De uitsnede van dit profiel wordt bepaald door een kader over een app, dus de schuifregelaars hieronder doen niets. Zet de kalibratie terug om ze weer in te schakelen.</string>
+    <string name="dashboard_builder_pages_title">Pagina\'s</string>
+    <string name="dashboard_page_add">Pagina toevoegen</string>
+    <string name="dashboard_page_actions">Acties voor pagina %1$d</string>
+    <string name="dashboard_page_home_description">Pagina %1$d, hoofdpagina</string>
+    <string name="dashboard_page_make_home">Hoofdpagina maken</string>
+    <string name="dashboard_page_move_left">Naar links</string>
+    <string name="dashboard_page_move_right">Naar rechts</string>
+    <string name="dashboard_page_delete">Pagina verwijderen</string>
+    <string name="dashboard_page_delete_message">Widgets op pagina %1$d worden van het paneel gehaald. Je kunt ze weer aanzetten via Widgets kiezen.</string>
+    <string name="dashboard_page_layout">Indeling van de pagina</string>
+    <string name="dashboard_page_orientation">Stand</string>
+    <string name="dashboard_builder_page_widgets">Widgets op pagina %1$d</string>
+    <string name="dashboard_builder_list_hint">Tik op een widget voor de instellingen. Houd vast om te slepen: binnen de lijst om de volgorde te wijzigen, of op een paginatab om hem daarheen te verplaatsen.</string>
+    <string name="dashboard_builder_page_empty_hint">Er staat nog niets op deze pagina. Voeg widgets toe of verplaats er een van een andere pagina.</string>
+    <string name="dashboard_widget_page_label">Pagina</string>
+    <string name="dashboard_widget_remove">Van paneel halen</string>
+    <string name="dashboard_builder_move_to_page">%1$s naar pagina %2$d verplaatsen</string>
+    <string name="dashboard_templates_title">Sjablonen en triggers</string>
+    <string name="dashboard_templates_help">Kant-en-klare indelingen, opgeslagen indelingen en wanneer ze vanzelf verschijnen.</string>
+    <string name="dashboard_builder_help_title">Help</string>
+    <string name="dashboard_page_home_help">Het paneel opent op de hoofdpagina (★) en keert daar na 30 seconden zonder aanraking naar terug.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>Zoals het achterscherm</item>
+        <item>Liggend</item>
+        <item>Staand</item>
+    </string-array>
+    <string name="dashboard_page_full">Kan niet naar pagina %1$d: een schermvullende widget heeft een eigen pagina nodig.</string>
 </resources>

@@ -100,6 +100,10 @@
             android:exported="false"
             android:label="@string/dashboard_builder_title" />
         <activity
+            android:name=".DashboardTemplatesActivity"
+            android:exported="false"
+            android:label="@string/dashboard_templates_title" />
+        <activity
             android:name=".WidgetPickerActivity"
             android:exported="false"
             android:label="@string/dashboard_widgets_title" />
@@ -121,12 +125,6 @@
             android:label="@string/device_protection_title" />
         <activity
             android:name=".CalibrationPreviewActivity"
-            android:excludeFromRecents="true"
-            android:exported="false"
-            android:resizeableActivity="false"
-            android:theme="@style/Theme.Mirror2RearUltra.Mirror" />
-        <activity
-            android:name=".DashboardPreviewActivity"
             android:excludeFromRecents="true"
             android:exported="false"
             android:resizeableActivity="false"

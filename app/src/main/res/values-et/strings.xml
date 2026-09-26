@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">Peida ikoon</string>
     <string name="dashboard_builder_hide_icon_for">Peida vidina %1$s ikoon</string>
     <string name="dashboard_auto_pages">Vaheta lehti automaatselt</string>
-    <string name="dashboard_auto_pages_help">Sisselülitatuna vahetuvad lehed iga 8 sekundi järel. Pärast käsitsi kasutamist naaseb paneel esimesele lehele 30 sekundi möödudes.</string>
+    <string name="dashboard_auto_pages_help">Sisselülitatuna vahetuvad lehed iga 8 sekundi järel. Pärast käsitsi kasutamist naaseb paneel peamisele lehele 30 sekundi möödudes.</string>
     <string name="dashboard_widget_fullscreen_weather">Ilm täisekraanil</string>
     <string name="dashboard_widget_fullscreen_media">Meediajuhtnupud täisekraanil</string>
     <string name="tile_on">Peegeldab</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">Pildi läbipaistmatus: %1$d%%</string>
     <string name="dashboard_builder_title">Vidinate paigutus</string>
     <string name="dashboard_builder_open">Korralda vidinaid</string>
-    <string name="dashboard_builder_help">Muudatused ilmuvad eelvaates kohe.</string>
-    <string name="dashboard_builder_preview">Eelvaade</string>
-    <string name="dashboard_builder_drag">Lohista %1$s</string>
     <string name="dashboard_builder_sample_track">Näidislugu</string>
     <string name="dashboard_builder_small">Väike</string>
     <string name="dashboard_builder_normal">Tavaline</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">Muuda vidina %1$s suurust</string>
     <string name="dashboard_builder_position_label">Joondus</string>
     <string name="dashboard_builder_size_label">Suurus</string>
-    <string name="dashboard_builder_drag_hint">Lohistage järjekorra muutmiseks</string>
-    <string name="dashboard_orientation_auto">Suund: järgi tagaekraani</string>
-    <string name="dashboard_orientation_landscape">Suund: rõhtpaigutus</string>
-    <string name="dashboard_orientation_portrait">Suund: püstpaigutus</string>
     <string name="dashboard_builder_visible">Näita vidinat</string>
     <string name="dashboard_builder_visibility">Näita või peida %1$s</string>
     <string name="dashboard_builder_position_value">Joondus: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">Kõik, mille siin sisse lülitate, ilmub korraldajasse. Väljas olev ootab sellel ekraanil.</string>
     <string name="dashboard_builder_choose">Vali vidinad</string>
     <string name="dashboard_builder_empty">Ükski vidin pole veel sees. Valige, mida tagapaneel peaks näitama.</string>
-    <string name="dashboard_builder_pages">Lehed</string>
-    <string name="dashboard_builder_one_page">1 leht</string>
-    <string name="dashboard_builder_pages_count">%1$d lehte</string>
     <string name="dashboard_builder_choose_value">Vali</string>
     <string name="panel_gestures_help">Paneelil endal: vidina puudutus vahetab selle kuvamisviisi ja pikk vajutus ükskõik kus lülitab alati sees ekraani sisse või välja.</string>
     <string name="dashboard_builder_pages_help">Rohkem kui ühe lehe korral käib tagapaneel need läbi, umbes kaheksa sekundit kumbki. Lehe kinnihoidmiseks nipsake paneelil.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">Kerge</string>
     <string name="dashboard_burn_in_normal">Tavaline</string>
     <string name="dashboard_burn_in_large">Lai</string>
-    <string name="dashboard_builder_show_on_panel">Näita tagapaneelil · 30 s</string>
-    <string name="dashboard_builder_show_on_panel_active">Paneeli eelvaatamiseks peatage peegeldamine</string>
     <string name="dashboard_builder_preview_note">Eelvaade järgib tagapaneeli kuju. Aku, temperatuur, praegune lugu ja kell on päris; ülejäänud on näidisväärtused.</string>
     <string name="dashboard_builder_reset">Lähtesta</string>
     <string name="dashboard_builder_reset_title">Kas lähtestada vidinate paigutus?</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">Sõit</string>
     <string name="dashboard_preset_music">Muusika</string>
     <string name="dashboard_preset_weather">Ilm</string>
-    <string name="dashboard_builder_layout_stacked">Paigutus: veerg</string>
-    <string name="dashboard_builder_layout_corners">Paigutus: nurgad</string>
-    <string name="dashboard_builder_layout_compact">Paigutus: kompaktne</string>
     <string name="dashboard_location_access_granted">Asukoha juurdepääs on sees</string>
     <string name="dashboard_location_access_required">Kiiruse ja kõrguse jaoks on vaja täpset asukohta</string>
     <string name="dashboard_location_access_optional">Asukohta kasutatakse ainult kiiruse ja kõrguse jaoks</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">Rõhuvärv</string>
     <string name="dashboard_builder_style_muted">Tuhm</string>
     <string name="dashboard_builder_page_section">Leht %1$d</string>
-    <string name="dashboard_builder_page_empty">Tühi. Liigutage vidin siia või lohistage mõni siia.</string>
     <string name="dashboard_builder_moved">%1$s liigutati lehele %2$d</string>
-    <string name="dashboard_builder_preview_page">Eelvaates näidatav leht</string>
-    <string name="dashboard_builder_preview_page_note">Suund ja paigutus kuuluvad ülalolevale lehele, nii et iga leht võib olla omas suunas.</string>
     <string name="dashboard_profile_template_title">Praeguse profiili paneel</string>
     <string name="dashboard_profile_template_help">Rakendub ise, kui vahetate sellele profiilile, ja salvestub ise, kui sellelt lahkute, nii et iga profiil naaseb omaenda paneeli juurde.</string>
     <string name="dashboard_named_template_add">Salvesta praegune kui…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">Kustuta</string>
     <string name="dashboard_named_template_delete_message">Kas kustutada mall „%1$s“?</string>
     <string name="dashboard_named_template_full">Uue malli jaoks pole ruumi</string>
-    <string name="dashboard_builder_layout_free">Vaade: vaba</string>
     <string name="dashboard_builder_preview_pick_hint">Vidina seadeteni jõudmiseks puudutage seda eelvaates. Vabas vaates saate seda ka lohistada ja suurust näpistades muuta.</string>
     <string name="dashboard_builder_preview_free_hint">Vidina paigutamiseks lohistage seda eelvaates ja suuruse muutmiseks näpistage. Seadeteni jõudmiseks puudutage seda.</string>
     <string name="dashboard_builder_snap">Haaku ruudustikku</string>
@@ -444,4 +425,31 @@
     <string name="crop_frame_whole">Kogu ekraan</string>
     <string name="crop_frame_fill">Täida paneel</string>
     <string name="calibration_framed_notice">Selle profiili kadreeringu otsustab rakenduse kohale joonistatud raam, nii et allolevad liugurid ei tee midagi. Lähtesta kalibreerimine, et see neile tagasi anda.</string>
+    <string name="dashboard_builder_pages_title">Lehed</string>
+    <string name="dashboard_page_add">Lisa leht</string>
+    <string name="dashboard_page_actions">Lehe %1$d toimingud</string>
+    <string name="dashboard_page_home_description">Leht %1$d, peamine</string>
+    <string name="dashboard_page_make_home">Tee peamiseks</string>
+    <string name="dashboard_page_move_left">Nihuta vasakule</string>
+    <string name="dashboard_page_move_right">Nihuta paremale</string>
+    <string name="dashboard_page_delete">Kustuta leht</string>
+    <string name="dashboard_page_delete_message">Lehe %1$d vidinad eemaldatakse paneelilt. Uuesti saad need sisse lülitada jaotises Vali vidinad.</string>
+    <string name="dashboard_page_layout">Lehe paigutus</string>
+    <string name="dashboard_page_orientation">Suund</string>
+    <string name="dashboard_builder_page_widgets">Vidinad lehel %1$d</string>
+    <string name="dashboard_builder_list_hint">Puuduta vidinat selle seadete avamiseks. Hoia all, et lohistada: loendis järjekorra muutmiseks või lehe sakile, et see sinna viia.</string>
+    <string name="dashboard_builder_page_empty_hint">Sellel lehel pole veel midagi. Lisa vidinaid või too üks teiselt lehelt.</string>
+    <string name="dashboard_widget_page_label">Leht</string>
+    <string name="dashboard_widget_remove">Eemalda paneelilt</string>
+    <string name="dashboard_builder_move_to_page">Vii %1$s lehele %2$d</string>
+    <string name="dashboard_templates_title">Mallid ja käivitajad</string>
+    <string name="dashboard_templates_help">Valmis paigutused, salvestatud paigutused ja millal need ise sisse lülituvad.</string>
+    <string name="dashboard_builder_help_title">Abi</string>
+    <string name="dashboard_page_home_help">Paneel avaneb peamisel lehel (★) ja naaseb sellele 30 sekundi pärast, kui seda ei puudutata.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>Nagu tagaekraan</item>
+        <item>Rõhtpaigutus</item>
+        <item>Püstpaigutus</item>
+    </string-array>
+    <string name="dashboard_page_full">Lehele %1$d ei saa: täisekraanvidin vajab omaette lehte.</string>
 </resources>

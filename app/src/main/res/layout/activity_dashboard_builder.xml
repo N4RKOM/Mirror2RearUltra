@@ -2,11 +2,14 @@
 <!--
     Dashboard builder.
 
-    Unlike the settings pages this screen is a workspace, so it keeps a live
-    preview near the top and the editable widget list below it. The preview is
-    a genuine object rather than a settings row, so it stays a card.
+    The screen edits one page at a time. The tabs at the top say which page,
+    and everything under them - the preview, the page's layout and
+    orientation, the widget list - belongs to that page. A widget's own
+    settings open in a sheet from its row or from the preview, so the list
+    stays a list.
 
-    Widget rows are built by DashboardBuilderActivity.
+    Presets, saved templates and triggers act on the whole arrangement and
+    live on their own screen, reached from the row at the bottom.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -40,48 +43,51 @@
                 android:paddingBottom="@dimen/spacing_sm"
                 android:text="@string/dashboard_builder_title" />
 
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:paddingTop="0dp"
-                android:text="@string/dashboard_builder_help" />
-
-            <!-- ===================== Preview ===================== -->
+            <!-- ===================== Pages ===================== -->
 
             <TextView
                 style="@style/HyperOS.SectionHeader"
-                android:layout_marginTop="@dimen/section_spacing"
-                android:text="@string/dashboard_builder_preview" />
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:text="@string/dashboard_builder_pages_title" />
 
+            <!-- One tab per page, then add and the page's actions. The tabs
+                 are built by the activity, since their number changes. -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:baselineAligned="false"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dashboard_builder_orientation"
-                    style="@style/HyperOS.Button.Secondary"
+                <FrameLayout
+                    android:id="@+id/dashboard_builder_page_tabs"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:maxLines="2" />
+                    android:layout_weight="1" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dashboard_builder_layout"
-                    style="@style/HyperOS.Button.Secondary"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:id="@+id/dashboard_builder_page_add"
+                    style="@style/HyperOS.Button.Compact"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:layout_marginStart="@dimen/spacing_sm"
-                    android:layout_weight="1"
-                    android:maxLines="2" />
-            </LinearLayout>
+                    android:contentDescription="@string/dashboard_page_add"
+                    android:minWidth="0dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"
+                    android:text="+" />
 
-            <TextView
-                android:id="@+id/dashboard_builder_preview_page_note"
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/dashboard_builder_preview_page_note"
-                android:visibility="gone" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/dashboard_builder_page_actions"
+                    style="@style/HyperOS.Button.Compact"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="@dimen/spacing_xs"
+                    android:minWidth="0dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"
+                    android:text="⋯" />
+            </LinearLayout>
 
             <!-- The rear panel is black, so the preview keeps a hairline
                  outline to stay readable against a dark page background. -->
@@ -90,7 +96,7 @@
                 style="@style/HyperOS.Card"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
-                android:layout_marginTop="@dimen/spacing_sm"
+                android:layout_marginTop="@dimen/spacing_md"
                 app:strokeColor="@color/hyper_outline_subtle"
                 app:strokeWidth="1dp">
 
@@ -99,32 +105,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
             </com.google.android.material.card.MaterialCardView>
-
-            <!-- Which page the one preview above is showing. A carousel of a
-                 live preview per page was tried here and could not be made to
-                 behave: several canvases in a scroller shared each other's
-                 drawings, and a swipe meant for the scroller was taken for a
-                 drag. One preview and a choice of page has neither problem. -->
-            <LinearLayout
-                android:id="@+id/dashboard_builder_preview_pages"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone" />
-
-            <!-- Only the free layout has anywhere to snap to, so the row
-                 appears with it. Shown and hidden by the activity. -->
-            <LinearLayout
-                android:id="@+id/dashboard_builder_snap_group"
-                style="@style/HyperOS.Group"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:visibility="gone">
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/dashboard_builder_snap_switch"
-                    style="@style/HyperOS.Switch.Single"
-                    android:text="@string/dashboard_builder_snap" />
-            </LinearLayout>
 
             <TextView
                 android:id="@+id/dashboard_builder_overflow"
@@ -141,181 +121,48 @@
                 android:accessibilityLiveRegion="polite"
                 android:text="@string/dashboard_builder_preview_pick_hint" />
 
-            <!-- The in-app preview can only approximate a 126x294 panel at a
-                 different density, so legibility is checked on the panel. -->
             <LinearLayout
                 style="@style/HyperOS.Group"
                 android:layout_marginTop="@dimen/spacing_sm">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dashboard_builder_show_on_panel"
-                    style="@style/HyperOS.ActionRow.Single"
-                    android:text="@string/dashboard_builder_show_on_panel" />
-            </LinearLayout>
-
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/dashboard_builder_preview_note" />
-
-            <!-- ===================== Presets ===================== -->
-
-            <TextView
-                style="@style/HyperOS.SectionHeader"
-                android:layout_marginTop="@dimen/section_spacing"
-                android:text="@string/dashboard_presets_title" />
-
-            <LinearLayout
-                style="@style/HyperOS.Group">
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_builder_layout"
+                    style="@style/HyperOS.ValueRow.Top"
+                    app:rowTitle="@string/dashboard_page_layout" />
 
                 <com.tpkarras.mirror2rearultra.HyperValueRow
-                    android:id="@+id/dashboard_builder_preset"
-                    style="@style/HyperOS.ValueRow.Single"
-                    app:rowTitle="@string/dashboard_presets_title"
-                    app:rowValue="@string/dashboard_builder_choose_value" />
+                    android:id="@+id/dashboard_builder_orientation"
+                    style="@style/HyperOS.ValueRow.Bottom"
+                    app:rowTitle="@string/dashboard_page_orientation" />
             </LinearLayout>
 
-            <!-- ===================== Saved arrangements =====================
-                 Two separate things, so they are two separate groups. The
-                 profile template is applied for you when you switch to this
-                 profile; named templates are applied by hand and outlive it. -->
-
-            <TextView
-                style="@style/HyperOS.SectionHeader"
-                android:layout_marginTop="@dimen/section_spacing"
-                android:text="@string/dashboard_profile_template_title" />
-
+            <!-- Only the free layout has anywhere to snap to, so the row
+                 appears with it. Shown and hidden by the activity. -->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:baselineAligned="false"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dashboard_custom_template_save"
-                    style="@style/HyperOS.Button.Secondary"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/dashboard_custom_template_save" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dashboard_custom_template_apply"
-                    style="@style/HyperOS.Button.Secondary"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/spacing_sm"
-                    android:layout_weight="1"
-                    android:text="@string/dashboard_custom_template_apply" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/dashboard_profile_template_note"
-                style="@style/HyperOS.GroupFootnote"
-                android:accessibilityLiveRegion="polite"
-                android:text="@string/dashboard_profile_template_help" />
-
-            <TextView
-                style="@style/HyperOS.SectionHeader"
-                android:layout_marginTop="@dimen/section_spacing"
-                android:text="@string/dashboard_custom_templates_title" />
-
-            <!-- One row per saved template, built by the activity. -->
-            <LinearLayout
-                android:id="@+id/dashboard_named_templates"
+                android:id="@+id/dashboard_builder_snap_group"
                 style="@style/HyperOS.Group"
-                android:visibility="gone" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/dashboard_named_template_add"
-                style="@style/HyperOS.Button.Secondary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_sm"
-                android:text="@string/dashboard_named_template_add" />
+                android:visibility="gone">
 
-            <TextView
-                android:id="@+id/dashboard_named_templates_empty"
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/dashboard_named_templates_help" />
-
-            <!-- ===================== Triggers =====================
-                 Beside the templates on purpose: the question these answer is
-                 "when should one of these come up", and it is asked while
-                 looking at the list of them. -->
-
-            <TextView
-                style="@style/HyperOS.SectionHeader"
-                android:layout_marginTop="@dimen/section_spacing"
-                android:text="@string/panel_triggers_title" />
-
-            <LinearLayout style="@style/HyperOS.Group">
-
-                <com.tpkarras.mirror2rearultra.HyperValueRow
-                    android:id="@+id/panel_trigger_charging_input"
-                    style="@style/HyperOS.ValueRow"
-                    app:rowTitle="@string/panel_trigger_charging" />
-
-                <com.tpkarras.mirror2rearultra.HyperValueRow
-                    android:id="@+id/panel_trigger_time_input"
-                    style="@style/HyperOS.ValueRow"
-                    app:rowTitle="@string/panel_trigger_time" />
-
-                <com.tpkarras.mirror2rearultra.HyperValueRow
-                    android:id="@+id/panel_trigger_from_input"
-                    style="@style/HyperOS.ValueRow"
-                    app:rowTitle="@string/panel_trigger_from" />
-
-                <com.tpkarras.mirror2rearultra.HyperValueRow
-                    android:id="@+id/panel_trigger_to_input"
-                    style="@style/HyperOS.ValueRow"
-                    app:rowTitle="@string/panel_trigger_to" />
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_builder_snap_switch"
+                    style="@style/HyperOS.Switch.Single"
+                    android:text="@string/dashboard_builder_snap" />
             </LinearLayout>
 
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/panel_triggers_help" />
-
-            <!-- ===================== Pages =====================
-                 Pages used to exist only as a per-widget number, with nothing
-                 saying what a page was or that the panel cycles through them.
-                 Setting the count here makes that explicit, and at one page
-                 the per-widget control disappears entirely. -->
+            <!-- ===================== Widgets on this page ===================== -->
 
             <TextView
-                style="@style/HyperOS.SectionHeader"
-                android:layout_marginTop="@dimen/section_spacing"
-                android:text="@string/dashboard_builder_pages" />
-
-            <LinearLayout style="@style/HyperOS.Group">
-
-                <com.tpkarras.mirror2rearultra.HyperValueRow
-                    android:id="@+id/dashboard_builder_pages"
-                    style="@style/HyperOS.ValueRow.Single"
-                    app:rowTitle="@string/dashboard_builder_pages"
-                    app:rowValue="@string/dashboard_builder_one_page" />
-            </LinearLayout>
-
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/dashboard_builder_pages_help" />
-
-            <!-- The panel's own gestures. Said here because nothing on a
-                 126x294 screen can say it, and an undiscovered gesture is
-                 the same as no gesture. -->
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/panel_gestures_help" />
-
-            <!-- ===================== Widgets ===================== -->
-
-            <TextView
+                android:id="@+id/dashboard_builder_widgets_header"
                 style="@style/HyperOS.SectionHeader"
                 android:layout_marginTop="@dimen/section_spacing"
                 android:text="@string/dashboard_builder_widgets_title" />
 
-            <!-- Selection lives in WidgetPickerActivity, so this screen only
-                 arranges what is already on and never lists the rest. -->
+            <LinearLayout
+                android:id="@+id/dashboard_builder_rows"
+                style="@style/HyperOS.Group"
+                android:layout_marginBottom="@dimen/spacing_sm" />
+
             <LinearLayout style="@style/HyperOS.Group">
 
                 <com.google.android.material.button.MaterialButton
@@ -327,50 +174,23 @@
             <TextView
                 android:id="@+id/dashboard_builder_empty"
                 style="@style/HyperOS.GroupFootnote"
-                android:paddingTop="@dimen/spacing_md"
-                android:text="@string/dashboard_builder_empty"
-                android:visibility="gone" />
+                android:text="@string/dashboard_builder_list_hint" />
+
+            <!-- ===================== Templates ===================== -->
 
             <LinearLayout
-                android:id="@+id/dashboard_builder_rows"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:orientation="vertical" />
+                style="@style/HyperOS.Group"
+                android:layout_marginTop="@dimen/section_spacing">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/dashboard_builder_templates"
+                    style="@style/HyperOS.NavRow.Single"
+                    android:text="@string/dashboard_templates_title" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/dashboard_templates_help" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
-    <View style="@style/HyperOS.BottomBarEdge" />
-
-    <!-- Reset is separated from Done by weight, not just position: it discards
-         the arrangement, so it never carries the primary accent. -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/hyper_background"
-        android:baselineAligned="false"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="@dimen/page_margin_horizontal"
-        android:paddingTop="@dimen/spacing_sm"
-        android:paddingEnd="@dimen/page_margin_horizontal"
-        android:paddingBottom="@dimen/spacing_md">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/dashboard_builder_reset"
-            style="@style/HyperOS.Button.Secondary"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/dashboard_builder_reset" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/dashboard_builder_done"
-            style="@style/HyperOS.Button.Primary"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_sm"
-            android:layout_weight="1"
-            android:text="@string/done" />
-    </LinearLayout>
 </LinearLayout>

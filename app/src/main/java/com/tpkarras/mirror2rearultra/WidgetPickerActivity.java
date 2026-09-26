@@ -37,6 +37,13 @@ import java.util.Map;
  * <p>Reached from both the dashboard settings page and the builder.
  */
 public class WidgetPickerActivity extends AppCompatActivity implements MediaWidgetState.Listener {
+    /**
+     * The builder page a widget switched on here should land on. Without it a
+     * widget turned on while page three was being edited appeared on whatever
+     * page it last sat on, usually page one, and seemed not to have been
+     * added at all.
+     */
+    static final String EXTRA_TARGET_PAGE = "target_page";
 
     /**
      * Pairs each switch with the widget it controls, in the order the screen
@@ -187,6 +194,12 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
             entry.getValue().setOnCheckedChangeListener((button, checked) -> {
                 if (bindingUi) {
                     return;
+                }
+                int targetPage = getIntent().getIntExtra(EXTRA_TARGET_PAGE, 0);
+                if (checked && targetPage > 0) {
+                    // Before enabling, so the full-screen rules see the widget
+                    // where it is going rather than where it was.
+                    DashboardWidgetLayout.savePage(this, widget, targetPage);
                 }
                 DashboardWidgetLayout.setWidgetEnabled(this, widget, checked);
                 onWidgetToggled(widget, checked);

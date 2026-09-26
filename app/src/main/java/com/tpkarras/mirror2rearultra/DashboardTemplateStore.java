@@ -70,6 +70,7 @@ final class DashboardTemplateStore {
         out.putString(prefix + "orientation", DashboardWidgetLayout.loadOrientation(context).name());
         int pageCount = DashboardWidgetLayout.loadPageCount(context);
         out.putInt(prefix + "page_count", pageCount);
+        out.putInt(prefix + "home_page", DashboardWidgetLayout.loadHomePage(context));
         // Pages after the first carry their own arrangement and rotation.
         for (int page = 2; page <= DashboardWidgetLayout.MAX_PAGES; page++) {
             out.putString(prefix + "layout_page_" + page, DashboardWidgetLayout
@@ -136,6 +137,7 @@ final class DashboardTemplateStore {
         // The count first: it pulls widgets back off pages it removes, so it has
         // to run before the per-widget pages are written.
         DashboardWidgetLayout.savePageCount(context, in.getInt(prefix + "page_count", 1));
+        DashboardWidgetLayout.saveHomePage(context, in.getInt(prefix + "home_page", 1));
         for (int page = 2; page <= DashboardWidgetLayout.MAX_PAGES; page++) {
             try {
                 DashboardWidgetLayout.savePageLayout(context, page,

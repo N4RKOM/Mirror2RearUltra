@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">Ficha aikoni</string>
     <string name="dashboard_builder_hide_icon_for">Ficha aikoni ya %1$s</string>
     <string name="dashboard_auto_pages">Badilisha kurasa kiotomatiki</string>
-    <string name="dashboard_auto_pages_help">Ikiwashwa, kurasa hubadilika kila sekunde 8. Baada ya kuitumia kwa mkono, paneli hurejea ukurasa wa kwanza baada ya sekunde 30 bila shughuli.</string>
+    <string name="dashboard_auto_pages_help">Ikiwashwa, kurasa hubadilika kila sekunde 8. Baada ya kuitumia kwa mkono, paneli hurejea ukurasa mkuu baada ya sekunde 30 bila shughuli.</string>
     <string name="dashboard_widget_fullscreen_weather">Hali ya hewa skrini nzima</string>
     <string name="dashboard_widget_fullscreen_media">Vidhibiti vya media skrini nzima</string>
     <string name="tile_on">Inaakisi</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">Ukolezi wa picha: %1$d%%</string>
     <string name="dashboard_builder_title">Mpangilio wa wijeti</string>
     <string name="dashboard_builder_open">Panga wijeti</string>
-    <string name="dashboard_builder_help">Mabadiliko huonekana katika hakikisho mara moja.</string>
-    <string name="dashboard_builder_preview">Hakikisho</string>
-    <string name="dashboard_builder_drag">Buruta %1$s</string>
     <string name="dashboard_builder_sample_track">Wimbo wa mfano</string>
     <string name="dashboard_builder_small">Ndogo</string>
     <string name="dashboard_builder_normal">Ya kawaida</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">Badilisha ukubwa wa %1$s</string>
     <string name="dashboard_builder_position_label">Mpangilio</string>
     <string name="dashboard_builder_size_label">Ukubwa</string>
-    <string name="dashboard_builder_drag_hint">Buruta ili kupanga upya</string>
-    <string name="dashboard_orientation_auto">Mwelekeo: fuata skrini ya nyuma</string>
-    <string name="dashboard_orientation_landscape">Mwelekeo: mlalo</string>
-    <string name="dashboard_orientation_portrait">Mwelekeo: wima</string>
     <string name="dashboard_builder_visible">Onyesha wijeti</string>
     <string name="dashboard_builder_visibility">Onyesha au ficha %1$s</string>
     <string name="dashboard_builder_position_value">Mpangilio: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">Kila unachowasha hapa huonekana kwenye kipanga. Kinachobaki kimezimwa husubiri kwenye skrini hii.</string>
     <string name="dashboard_builder_choose">Chagua wijeti</string>
     <string name="dashboard_builder_empty">Hakuna wijeti iliyowashwa bado. Chagua zile ambazo paneli ya nyuma inapaswa kuonyesha.</string>
-    <string name="dashboard_builder_pages">Kurasa</string>
-    <string name="dashboard_builder_one_page">Ukurasa 1</string>
-    <string name="dashboard_builder_pages_count">Kurasa %1$d</string>
     <string name="dashboard_builder_choose_value">Chagua</string>
     <string name="panel_gestures_help">Kwenye paneli yenyewe: kugusa wijeti hubadilisha jinsi inavyoonyeshwa, na kushikilia mahali popote huwasha au huzima skrini inayowaka daima.</string>
     <string name="dashboard_builder_pages_help">Kukiwa na zaidi ya ukurasa mmoja, paneli ya nyuma huzipitia, kila moja kwa takribani sekunde nane. Telezesha kidole kwenye paneli ili kushikilia ukurasa.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">Kidogo</string>
     <string name="dashboard_burn_in_normal">Wa kawaida</string>
     <string name="dashboard_burn_in_large">Mpana</string>
-    <string name="dashboard_builder_show_on_panel">Onyesha kwenye paneli ya nyuma · sek 30</string>
-    <string name="dashboard_builder_show_on_panel_active">Simamisha uakisi ili kuhakiki paneli</string>
     <string name="dashboard_builder_preview_note">Hakikisho lina umbo la paneli ya nyuma. Betri, joto, wimbo unaocheza na saa ni halisi; vingine ni thamani za mfano.</string>
     <string name="dashboard_builder_reset">Weka upya</string>
     <string name="dashboard_builder_reset_title">Uweke upya mpangilio wa wijeti?</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">Safari</string>
     <string name="dashboard_preset_music">Muziki</string>
     <string name="dashboard_preset_weather">Hali ya hewa</string>
-    <string name="dashboard_builder_layout_stacked">Mpangilio: safu</string>
-    <string name="dashboard_builder_layout_corners">Mpangilio: pembe</string>
-    <string name="dashboard_builder_layout_compact">Mpangilio: mfupi</string>
     <string name="dashboard_location_access_granted">Ufikiaji wa mahali umewashwa</string>
     <string name="dashboard_location_access_required">Kasi na mwinuko vinahitaji mahali sahihi</string>
     <string name="dashboard_location_access_optional">Mahali hutumika kwa kasi na mwinuko pekee</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">Ya msisitizo</string>
     <string name="dashboard_builder_style_muted">Hafifu</string>
     <string name="dashboard_builder_page_section">Ukurasa %1$d</string>
-    <string name="dashboard_builder_page_empty">Tupu. Sogeza wijeti hapa, au buruta moja kutoka ukurasa mwingine.</string>
     <string name="dashboard_builder_moved">%1$s imesogezwa kwenye ukurasa %2$d</string>
-    <string name="dashboard_builder_preview_page">Ukurasa unaoonyeshwa kwenye hakikisho</string>
-    <string name="dashboard_builder_preview_page_note">Mwelekeo na mpangilio ni wa ukurasa ulio hapo juu, kwa hivyo kila ukurasa unaweza kusimama kwa namna yake.</string>
     <string name="dashboard_profile_template_title">Paneli ya wasifu wa sasa</string>
     <string name="dashboard_profile_template_help">Hutumika yenyewe unapohamia wasifu huu, na huhifadhiwa yenyewe unapouacha, ili kila wasifu urudi kwenye paneli yake.</string>
     <string name="dashboard_named_template_add">Hifadhi ya sasa kama…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">Futa</string>
     <string name="dashboard_named_template_delete_message">Ufute kiolezo „%1$s“?</string>
     <string name="dashboard_named_template_full">Hakuna nafasi ya kiolezo kingine</string>
-    <string name="dashboard_builder_layout_free">Mwonekano: huru</string>
     <string name="dashboard_builder_preview_pick_hint">Gusa wijeti kwenye hakikisho ili kufika kwenye mipangilio yake. Katika mwonekano huru unaweza pia kuiburuta na kubana vidole ili kubadilisha ukubwa.</string>
     <string name="dashboard_builder_preview_free_hint">Buruta wijeti kwenye hakikisho ili kuiweka, na ubane vidole ili kubadilisha ukubwa. Igonge ili kufika kwenye mipangilio yake.</string>
     <string name="dashboard_builder_snap">Nasa kwenye gridi</string>
@@ -444,4 +425,31 @@
     <string name="crop_frame_whole">Skrini nzima</string>
     <string name="crop_frame_fill">Jaza paneli</string>
     <string name="calibration_framed_notice">Upunguzaji wa wasifu huu unaamuliwa na fremu iliyochorwa juu ya programu, kwa hivyo vitelezi vilivyo hapa chini havifanyi chochote. Weka upya urekebishaji ili virudishiwe kazi hiyo.</string>
+    <string name="dashboard_builder_pages_title">Kurasa</string>
+    <string name="dashboard_page_add">Ongeza ukurasa</string>
+    <string name="dashboard_page_actions">Vitendo vya ukurasa %1$d</string>
+    <string name="dashboard_page_home_description">Ukurasa %1$d, mkuu</string>
+    <string name="dashboard_page_make_home">Fanya kuwa mkuu</string>
+    <string name="dashboard_page_move_left">Sogeza kushoto</string>
+    <string name="dashboard_page_move_right">Sogeza kulia</string>
+    <string name="dashboard_page_delete">Futa ukurasa</string>
+    <string name="dashboard_page_delete_message">Wijeti za ukurasa %1$d zitaondolewa kwenye paneli. Unaweza kuziwasha tena katika Chagua wijeti.</string>
+    <string name="dashboard_page_layout">Mpangilio wa ukurasa</string>
+    <string name="dashboard_page_orientation">Mwelekeo</string>
+    <string name="dashboard_builder_page_widgets">Wijeti kwenye ukurasa %1$d</string>
+    <string name="dashboard_builder_list_hint">Gusa wijeti ili kufungua mipangilio yake. Ishikilie ili kuiburuta: ndani ya orodha kubadilisha mpangilio, au juu ya kichupo cha ukurasa kuihamishia huko.</string>
+    <string name="dashboard_builder_page_empty_hint">Bado hakuna kitu kwenye ukurasa huu. Ongeza wijeti, au hamisha moja hapa kutoka ukurasa mwingine.</string>
+    <string name="dashboard_widget_page_label">Ukurasa</string>
+    <string name="dashboard_widget_remove">Ondoa kwenye paneli</string>
+    <string name="dashboard_builder_move_to_page">Hamisha %1$s hadi ukurasa %2$d</string>
+    <string name="dashboard_templates_title">Violezo na vianzishi</string>
+    <string name="dashboard_templates_help">Mipangilio iliyo tayari, mipangilio iliyohifadhiwa, na wakati inapojitokeza yenyewe.</string>
+    <string name="dashboard_builder_help_title">Msaada</string>
+    <string name="dashboard_page_home_help">Paneli hufunguka kwenye ukurasa mkuu (★) na hurejea kwake baada ya sekunde 30 bila kuguswa.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>Kama skrini ya nyuma</item>
+        <item>Mlalo</item>
+        <item>Wima</item>
+    </string-array>
+    <string name="dashboard_page_full">Haiwezekani kwenye ukurasa %1$d: wijeti ya skrini nzima inahitaji ukurasa wake peke yake.</string>
 </resources>

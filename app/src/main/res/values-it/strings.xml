@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">Nascondi icona</string>
     <string name="dashboard_builder_hide_icon_for">Nascondi l\'icona di %1$s</string>
     <string name="dashboard_auto_pages">Cambia pagina automaticamente</string>
-    <string name="dashboard_auto_pages_help">Se attivo, le pagine cambiano ogni 8 secondi. Dopo un intervento manuale, il pannello torna alla prima pagina dopo 30 secondi di inattività.</string>
+    <string name="dashboard_auto_pages_help">Se attivo, le pagine cambiano ogni 8 secondi. Dopo un intervento manuale, il pannello torna alla pagina principale dopo 30 secondi di inattività.</string>
     <string name="dashboard_widget_fullscreen_weather">Meteo a schermo intero</string>
     <string name="dashboard_widget_fullscreen_media">Comandi multimediali a schermo intero</string>
     <string name="tile_on">Duplicazione attiva</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">Opacità dell\'immagine: %1$d%%</string>
     <string name="dashboard_builder_title">Disposizione dei widget</string>
     <string name="dashboard_builder_open">Disponi i widget</string>
-    <string name="dashboard_builder_help">Le modifiche compaiono subito nell\'anteprima.</string>
-    <string name="dashboard_builder_preview">Anteprima</string>
-    <string name="dashboard_builder_drag">Trascina %1$s</string>
     <string name="dashboard_builder_sample_track">Brano di esempio</string>
     <string name="dashboard_builder_small">Piccolo</string>
     <string name="dashboard_builder_normal">Normale</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">Cambia la dimensione di %1$s</string>
     <string name="dashboard_builder_position_label">Allineamento</string>
     <string name="dashboard_builder_size_label">Dimensione</string>
-    <string name="dashboard_builder_drag_hint">Trascina per riordinare</string>
-    <string name="dashboard_orientation_auto">Orientamento: segui lo schermo posteriore</string>
-    <string name="dashboard_orientation_landscape">Orientamento: orizzontale</string>
-    <string name="dashboard_orientation_portrait">Orientamento: verticale</string>
     <string name="dashboard_builder_visible">Mostra il widget</string>
     <string name="dashboard_builder_visibility">Mostra o nascondi %1$s</string>
     <string name="dashboard_builder_position_value">Allineamento: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">Tutto ciò che attivi qui compare nell\'organizzatore. Ciò che resta disattivato aspetta in questa schermata.</string>
     <string name="dashboard_builder_choose">Scegli i widget</string>
     <string name="dashboard_builder_empty">Non è ancora attivo nessun widget. Scegli quelli che il pannello posteriore deve mostrare.</string>
-    <string name="dashboard_builder_pages">Pagine</string>
-    <string name="dashboard_builder_one_page">1 pagina</string>
-    <string name="dashboard_builder_pages_count">%1$d pagine</string>
     <string name="dashboard_builder_choose_value">Scegli</string>
     <string name="panel_gestures_help">Sul pannello stesso: un tocco su un widget fa avanzare la sua visualizzazione, e una pressione prolungata ovunque attiva o disattiva il display sempre attivo.</string>
     <string name="dashboard_builder_pages_help">Con più di una pagina il pannello posteriore le alterna, circa otto secondi ciascuna. Scorri sul pannello per trattenere una pagina.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">Lieve</string>
     <string name="dashboard_burn_in_normal">Normale</string>
     <string name="dashboard_burn_in_large">Ampia</string>
-    <string name="dashboard_builder_show_on_panel">Mostra sul pannello posteriore · 30 s</string>
-    <string name="dashboard_builder_show_on_panel_active">Interrompi la duplicazione per vedere il pannello</string>
     <string name="dashboard_builder_preview_note">L\'anteprima riprende la forma del pannello posteriore. Batteria, temperatura, brano in riproduzione e orologio sono reali; il resto sono valori di esempio.</string>
     <string name="dashboard_builder_reset">Reimposta</string>
     <string name="dashboard_builder_reset_title">Reimpostare la disposizione dei widget?</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">Viaggio</string>
     <string name="dashboard_preset_music">Musica</string>
     <string name="dashboard_preset_weather">Meteo</string>
-    <string name="dashboard_builder_layout_stacked">Disposizione: colonna</string>
-    <string name="dashboard_builder_layout_corners">Disposizione: angoli</string>
-    <string name="dashboard_builder_layout_compact">Disposizione: compatta</string>
     <string name="dashboard_location_access_granted">L\'accesso alla posizione è attivo</string>
     <string name="dashboard_location_access_required">Per velocità e altitudine serve la posizione precisa</string>
     <string name="dashboard_location_access_optional">La posizione viene usata solo per velocità e altitudine</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">Accento</string>
     <string name="dashboard_builder_style_muted">Attenuato</string>
     <string name="dashboard_builder_page_section">Pagina %1$d</string>
-    <string name="dashboard_builder_page_empty">Vuota. Sposta qui un widget, o trascinane uno da un\'altra pagina.</string>
     <string name="dashboard_builder_moved">%1$s spostato alla pagina %2$d</string>
-    <string name="dashboard_builder_preview_page">Pagina mostrata nell\'anteprima</string>
-    <string name="dashboard_builder_preview_page_note">Orientamento e disposizione appartengono alla pagina qui sopra, quindi ogni pagina può stare per conto proprio.</string>
     <string name="dashboard_profile_template_title">Pannello del profilo attuale</string>
     <string name="dashboard_profile_template_help">Viene applicato da solo quando passi a questo profilo e conservato da solo quando lo lasci, così ogni profilo ritrova il proprio pannello.</string>
     <string name="dashboard_named_template_add">Salva l\'attuale come…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">Elimina</string>
     <string name="dashboard_named_template_delete_message">Eliminare il modello «%1$s»?</string>
     <string name="dashboard_named_template_full">Non c\'è spazio per un altro modello</string>
-    <string name="dashboard_builder_layout_free">Vista: libera</string>
     <string name="dashboard_builder_preview_pick_hint">Tocca un widget nell\'anteprima per raggiungere le sue impostazioni. Nella vista libera puoi anche trascinarlo e pizzicare per ridimensionarlo.</string>
     <string name="dashboard_builder_preview_free_hint">Trascina un widget nell\'anteprima per posizionarlo e pizzica per ridimensionarlo. Toccalo per raggiungere le sue impostazioni.</string>
     <string name="dashboard_builder_snap">Aggancia a una griglia</string>
@@ -444,4 +425,31 @@
     <string name="crop_frame_whole">Schermo intero</string>
     <string name="crop_frame_fill">Riempi il pannello</string>
     <string name="calibration_framed_notice">Il ritaglio di questo profilo è deciso da una cornice tracciata sopra un’app, quindi i cursori qui sotto non fanno nulla. Azzera la calibrazione per restituirglielo.</string>
+    <string name="dashboard_builder_pages_title">Pagine</string>
+    <string name="dashboard_page_add">Aggiungi pagina</string>
+    <string name="dashboard_page_actions">Azioni della pagina %1$d</string>
+    <string name="dashboard_page_home_description">Pagina %1$d, principale</string>
+    <string name="dashboard_page_make_home">Rendi principale</string>
+    <string name="dashboard_page_move_left">Sposta a sinistra</string>
+    <string name="dashboard_page_move_right">Sposta a destra</string>
+    <string name="dashboard_page_delete">Elimina pagina</string>
+    <string name="dashboard_page_delete_message">I widget della pagina %1$d verranno tolti dal pannello. Puoi riattivarli in Scegli i widget.</string>
+    <string name="dashboard_page_layout">Layout della pagina</string>
+    <string name="dashboard_page_orientation">Orientamento</string>
+    <string name="dashboard_builder_page_widgets">Widget nella pagina %1$d</string>
+    <string name="dashboard_builder_list_hint">Tocca un widget per le sue impostazioni. Tienilo premuto per trascinarlo: nell\'elenco per riordinare, o sulla scheda di una pagina per spostarlo lì.</string>
+    <string name="dashboard_builder_page_empty_hint">Questa pagina è ancora vuota. Aggiungi dei widget o spostane uno da un\'altra pagina.</string>
+    <string name="dashboard_widget_page_label">Pagina</string>
+    <string name="dashboard_widget_remove">Togli dal pannello</string>
+    <string name="dashboard_builder_move_to_page">Sposta %1$s nella pagina %2$d</string>
+    <string name="dashboard_templates_title">Modelli e attivatori</string>
+    <string name="dashboard_templates_help">Layout pronti, disposizioni salvate e quando compaiono da sole.</string>
+    <string name="dashboard_builder_help_title">Guida</string>
+    <string name="dashboard_page_home_help">Il pannello si apre sulla pagina principale (★) e ci ritorna dopo 30 secondi senza tocchi.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>Come lo schermo posteriore</item>
+        <item>Orizzontale</item>
+        <item>Verticale</item>
+    </string-array>
+    <string name="dashboard_page_full">Non si può nella pagina %1$d: un widget a schermo intero ha bisogno di una pagina tutta sua.</string>
 </resources>

@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">隐藏图标</string>
     <string name="dashboard_builder_hide_icon_for">隐藏 %1$s 的图标</string>
     <string name="dashboard_auto_pages">自动切换页面</string>
-    <string name="dashboard_auto_pages_help">开启后，页面每 8 秒切换一次。手动操作后，面板会在闲置 30 秒后回到第一页。</string>
+    <string name="dashboard_auto_pages_help">开启后，页面每 8 秒切换一次。手动操作后，面板会在闲置 30 秒后回到主页。</string>
     <string name="dashboard_widget_fullscreen_weather">全屏天气</string>
     <string name="dashboard_widget_fullscreen_media">全屏媒体控制</string>
     <string name="tile_on">镜像中</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">图片不透明度：%1$d%%</string>
     <string name="dashboard_builder_title">小组件布局</string>
     <string name="dashboard_builder_open">排布小组件</string>
-    <string name="dashboard_builder_help">更改会立即出现在预览中。</string>
-    <string name="dashboard_builder_preview">预览</string>
-    <string name="dashboard_builder_drag">拖动 %1$s</string>
     <string name="dashboard_builder_sample_track">示例曲目</string>
     <string name="dashboard_builder_small">小</string>
     <string name="dashboard_builder_normal">中</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">更改 %1$s 的大小</string>
     <string name="dashboard_builder_position_label">对齐</string>
     <string name="dashboard_builder_size_label">大小</string>
-    <string name="dashboard_builder_drag_hint">拖动可调整顺序</string>
-    <string name="dashboard_orientation_auto">方向：跟随后屏</string>
-    <string name="dashboard_orientation_landscape">方向：横向</string>
-    <string name="dashboard_orientation_portrait">方向：竖向</string>
     <string name="dashboard_builder_visible">显示小组件</string>
     <string name="dashboard_builder_visibility">显示或隐藏 %1$s</string>
     <string name="dashboard_builder_position_value">对齐：%1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">在这里开启的都会出现在排布界面。保持关闭的则留在本页等待。</string>
     <string name="dashboard_builder_choose">选择小组件</string>
     <string name="dashboard_builder_empty">还没有开启任何小组件。请选择后屏面板要显示的内容。</string>
-    <string name="dashboard_builder_pages">页面</string>
-    <string name="dashboard_builder_one_page">1 页</string>
-    <string name="dashboard_builder_pages_count">%1$d 页</string>
     <string name="dashboard_builder_choose_value">选择</string>
     <string name="panel_gestures_help">在面板本身：点按小组件会切换它的呈现方式，在任意位置长按可开启或关闭息屏显示。</string>
     <string name="dashboard_builder_pages_help">页面多于一页时，后屏面板会依次显示，每页约八秒。在面板上滑动可以停在某一页。</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">轻微</string>
     <string name="dashboard_burn_in_normal">标准</string>
     <string name="dashboard_burn_in_large">较大</string>
-    <string name="dashboard_builder_show_on_panel">在后屏面板上显示 · 30 秒</string>
-    <string name="dashboard_builder_show_on_panel_active">请先停止镜像才能预览面板</string>
     <string name="dashboard_builder_preview_note">预览与后屏面板形状一致。电量、温度、当前曲目和时钟是实时的；其余为示例数值。</string>
     <string name="dashboard_builder_reset">重置</string>
     <string name="dashboard_builder_reset_title">重置小组件布局？</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">行程</string>
     <string name="dashboard_preset_music">音乐</string>
     <string name="dashboard_preset_weather">天气</string>
-    <string name="dashboard_builder_layout_stacked">布局：单列</string>
-    <string name="dashboard_builder_layout_corners">布局：四角</string>
-    <string name="dashboard_builder_layout_compact">布局：紧凑</string>
     <string name="dashboard_location_access_granted">位置权限已开启</string>
     <string name="dashboard_location_access_required">速度和海拔需要精确位置</string>
     <string name="dashboard_location_access_optional">位置仅用于速度和海拔</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">强调色</string>
     <string name="dashboard_builder_style_muted">淡化</string>
     <string name="dashboard_builder_page_section">第 %1$d 页</string>
-    <string name="dashboard_builder_page_empty">空白。可以把小组件移到这里，或者从别的页面拖过来。</string>
     <string name="dashboard_builder_moved">%1$s 已移到第 %2$d 页</string>
-    <string name="dashboard_builder_preview_page">预览中显示的页面</string>
-    <string name="dashboard_builder_preview_page_note">方向和排布属于上面那一页，所以每一页都可以有自己的朝向。</string>
     <string name="dashboard_profile_template_title">当前配置的面板</string>
     <string name="dashboard_profile_template_help">切换到此配置时会自动应用，离开时会自动保存，这样每个配置都能回到自己的面板。</string>
     <string name="dashboard_named_template_add">将当前保存为…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">删除</string>
     <string name="dashboard_named_template_delete_message">删除模板“%1$s”？</string>
     <string name="dashboard_named_template_full">没有空位再保存模板了</string>
-    <string name="dashboard_builder_layout_free">视图：自由</string>
     <string name="dashboard_builder_preview_pick_hint">在预览中点按小组件即可打开它的设置。在自由视图中还可以拖动它，并用双指捏合改变大小。</string>
     <string name="dashboard_builder_preview_free_hint">在预览中拖动小组件即可摆放，双指捏合可改变大小。点按它可以打开设置。</string>
     <string name="dashboard_builder_snap">对齐到网格</string>
@@ -442,4 +423,31 @@
     <string name="crop_frame_whole">整个屏幕</string>
     <string name="crop_frame_fill">铺满面板</string>
     <string name="calibration_framed_notice">该配置的裁剪由在应用上方画出的取景框决定，因此下面的滑块不起作用。重置校准即可把裁剪交还给它们。</string>
+    <string name="dashboard_builder_pages_title">页面</string>
+    <string name="dashboard_page_add">添加页面</string>
+    <string name="dashboard_page_actions">第 %1$d 页操作</string>
+    <string name="dashboard_page_home_description">第 %1$d 页，主页</string>
+    <string name="dashboard_page_make_home">设为主页</string>
+    <string name="dashboard_page_move_left">左移</string>
+    <string name="dashboard_page_move_right">右移</string>
+    <string name="dashboard_page_delete">删除页面</string>
+    <string name="dashboard_page_delete_message">第 %1$d 页上的小组件将从面板移除。可以在“选择小组件”中重新开启。</string>
+    <string name="dashboard_page_layout">页面布局</string>
+    <string name="dashboard_page_orientation">方向</string>
+    <string name="dashboard_builder_page_widgets">第 %1$d 页的小组件</string>
+    <string name="dashboard_builder_list_hint">轻点小组件打开其设置。长按可拖动：在列表内调整顺序，或拖到页面标签上移到该页。</string>
+    <string name="dashboard_builder_page_empty_hint">此页面还没有内容。添加小组件，或从其他页面移过来一个。</string>
+    <string name="dashboard_widget_page_label">页面</string>
+    <string name="dashboard_widget_remove">从面板移除</string>
+    <string name="dashboard_builder_move_to_page">将%1$s移到第 %2$d 页</string>
+    <string name="dashboard_templates_title">模板和触发条件</string>
+    <string name="dashboard_templates_help">现成布局、已保存的排列，以及它们何时自动出现。</string>
+    <string name="dashboard_builder_help_title">帮助</string>
+    <string name="dashboard_page_home_help">面板在主页（★）打开，30 秒无触摸后回到主页。</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>跟随背屏</item>
+        <item>横向</item>
+        <item>纵向</item>
+    </string-array>
+    <string name="dashboard_page_full">无法移到第 %1$d 页：全屏小组件需要独占一页。</string>
 </resources>

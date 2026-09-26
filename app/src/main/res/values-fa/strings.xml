@@ -8,7 +8,7 @@
     <string name="dashboard_builder_hide_icon">پنهان کردن نماد</string>
     <string name="dashboard_builder_hide_icon_for">پنهان کردن نماد %1$s</string>
     <string name="dashboard_auto_pages">تعویض خودکار صفحه‌ها</string>
-    <string name="dashboard_auto_pages_help">وقتی روشن باشد، صفحه‌ها هر ۸ ثانیه عوض می‌شوند. پس از کار دستی، پنل بعد از ۳۰ ثانیه بی‌کاری به صفحهٔ یک برمی‌گردد.</string>
+    <string name="dashboard_auto_pages_help">وقتی روشن باشد، صفحه‌ها هر ۸ ثانیه عوض می‌شوند. پس از کار دستی، پنل بعد از ۳۰ ثانیه بی‌کاری به صفحهٔ اصلی برمی‌گردد.</string>
     <string name="dashboard_widget_fullscreen_weather">آب‌وهوا تمام‌صفحه</string>
     <string name="dashboard_widget_fullscreen_media">کنترل‌های رسانه تمام‌صفحه</string>
     <string name="tile_on">در حال آینه‌سازی</string>
@@ -213,9 +213,6 @@
     <string name="dashboard_custom_image_opacity_value">کدری تصویر: %1$d%%</string>
     <string name="dashboard_builder_title">چیدمان ابزارک‌ها</string>
     <string name="dashboard_builder_open">مرتب کردن ابزارک‌ها</string>
-    <string name="dashboard_builder_help">تغییرها بی‌درنگ در پیش‌نمایش دیده می‌شوند.</string>
-    <string name="dashboard_builder_preview">پیش‌نمایش</string>
-    <string name="dashboard_builder_drag">کشیدن %1$s</string>
     <string name="dashboard_builder_sample_track">قطعهٔ نمونه</string>
     <string name="dashboard_builder_small">کوچک</string>
     <string name="dashboard_builder_normal">معمولی</string>
@@ -229,10 +226,6 @@
     <string name="dashboard_builder_size">تغییر اندازهٔ %1$s</string>
     <string name="dashboard_builder_position_label">ترازبندی</string>
     <string name="dashboard_builder_size_label">اندازه</string>
-    <string name="dashboard_builder_drag_hint">برای تغییر ترتیب بکشید</string>
-    <string name="dashboard_orientation_auto">جهت: هماهنگ با صفحهٔ عقب</string>
-    <string name="dashboard_orientation_landscape">جهت: افقی</string>
-    <string name="dashboard_orientation_portrait">جهت: عمودی</string>
     <string name="dashboard_builder_visible">نمایش ابزارک</string>
     <string name="dashboard_builder_visibility">نمایش یا پنهان کردن %1$s</string>
     <string name="dashboard_builder_position_value">ترازبندی: %1$s</string>
@@ -248,9 +241,6 @@
     <string name="dashboard_widgets_pick_help">هر چه اینجا روشن کنید در صفحهٔ چیدمان ظاهر می‌شود. آنچه خاموش بماند در همین صفحه منتظر می‌ماند.</string>
     <string name="dashboard_builder_choose">انتخاب ابزارک‌ها</string>
     <string name="dashboard_builder_empty">هنوز هیچ ابزارکی روشن نیست. انتخاب کنید پنل پشت چه چیزی نشان دهد.</string>
-    <string name="dashboard_builder_pages">صفحه‌ها</string>
-    <string name="dashboard_builder_one_page">۱ صفحه</string>
-    <string name="dashboard_builder_pages_count">%1$d صفحه</string>
     <string name="dashboard_builder_choose_value">انتخاب</string>
     <string name="panel_gestures_help">روی خود پنل: زدن روی یک ابزارک نحوهٔ نمایش آن را یک گام جلو می‌برد، و نگه داشتن انگشت در هر جا نمایش همیشه‌روشن را روشن یا خاموش می‌کند.</string>
     <string name="dashboard_builder_pages_help">با بیش از یک صفحه، پنل پشت آن‌ها را پشت سر هم نشان می‌دهد، هر کدام حدود هشت ثانیه. برای نگه داشتن یک صفحه، روی پنل بکشید.</string>
@@ -269,8 +259,6 @@
     <string name="dashboard_burn_in_small">کم</string>
     <string name="dashboard_burn_in_normal">معمولی</string>
     <string name="dashboard_burn_in_large">زیاد</string>
-    <string name="dashboard_builder_show_on_panel">نمایش روی پنل پشت · ۳۰ ث</string>
-    <string name="dashboard_builder_show_on_panel_active">برای دیدن پنل، آینه‌سازی را متوقف کنید</string>
     <string name="dashboard_builder_preview_note">پیش‌نمایش هم‌شکل پنل پشت است. باتری، دما، قطعهٔ در حال پخش و ساعت واقعی‌اند؛ بقیه مقدارهای نمونه‌اند.</string>
     <string name="dashboard_builder_reset">بازنشانی</string>
     <string name="dashboard_builder_reset_title">چیدمان ابزارک‌ها بازنشانی شود؟</string>
@@ -281,9 +269,6 @@
     <string name="dashboard_preset_trip">سفر</string>
     <string name="dashboard_preset_music">موسیقی</string>
     <string name="dashboard_preset_weather">آب‌وهوا</string>
-    <string name="dashboard_builder_layout_stacked">چیدمان: ستونی</string>
-    <string name="dashboard_builder_layout_corners">چیدمان: گوشه‌ها</string>
-    <string name="dashboard_builder_layout_compact">چیدمان: فشرده</string>
     <string name="dashboard_location_access_granted">دسترسی به موقعیت روشن است</string>
     <string name="dashboard_location_access_required">برای سرعت و ارتفاع، موقعیت دقیق لازم است</string>
     <string name="dashboard_location_access_optional">موقعیت تنها برای سرعت و ارتفاع به کار می‌رود</string>
@@ -335,10 +320,7 @@
     <string name="dashboard_builder_style_accent">تأکیدی</string>
     <string name="dashboard_builder_style_muted">ملایم</string>
     <string name="dashboard_builder_page_section">صفحهٔ %1$d</string>
-    <string name="dashboard_builder_page_empty">خالی. ابزارکی را به اینجا بیاورید، یا یکی را از صفحه‌ای دیگر بکشید.</string>
     <string name="dashboard_builder_moved">%1$s به صفحهٔ %2$d منتقل شد</string>
-    <string name="dashboard_builder_preview_page">صفحهٔ نمایش‌داده‌شده در پیش‌نمایش</string>
-    <string name="dashboard_builder_preview_page_note">جهت و چیدمان به صفحهٔ بالا تعلق دارند، پس هر صفحه می‌تواند جهت خودش را داشته باشد.</string>
     <string name="dashboard_profile_template_title">پنل نمایهٔ کنونی</string>
     <string name="dashboard_profile_template_help">وقتی به این نمایه می‌روید خودبه‌خود اعمال می‌شود، و وقتی از آن بیرون می‌روید خودبه‌خود نگه داشته می‌شود، تا هر نمایه به پنل خودش برگردد.</string>
     <string name="dashboard_named_template_add">ذخیرهٔ کنونی با نام…</string>
@@ -360,7 +342,6 @@
     <string name="dashboard_named_template_delete">حذف</string>
     <string name="dashboard_named_template_delete_message">الگوی «%1$s» حذف شود؟</string>
     <string name="dashboard_named_template_full">جایی برای الگوی دیگر نیست</string>
-    <string name="dashboard_builder_layout_free">نما: آزاد</string>
     <string name="dashboard_builder_preview_pick_hint">برای رسیدن به تنظیمات یک ابزارک، در پیش‌نمایش روی آن بزنید. در نمای آزاد می‌توانید آن را بکشید و با دو انگشت اندازه‌اش را تغییر دهید.</string>
     <string name="dashboard_builder_preview_free_hint">برای جاگذاری ابزارک، آن را در پیش‌نمایش بکشید، و برای تغییر اندازه دو انگشت را به هم نزدیک کنید. برای رسیدن به تنظیماتش روی آن بزنید.</string>
     <string name="dashboard_builder_snap">چسبیدن به شبکه</string>
@@ -444,4 +425,31 @@
     <string name="crop_frame_whole">کل صفحه</string>
     <string name="crop_frame_fill">پر کردن پنل</string>
     <string name="calibration_framed_notice">برش این نمایه را کادری تعیین می‌کند که روی یک برنامه کشیده شده است، پس لغزنده‌های زیر کاری نمی‌کنند. با بازنشانی کالیبراسیون دوباره به آن‌ها سپرده می‌شود.</string>
+    <string name="dashboard_builder_pages_title">صفحه‌ها</string>
+    <string name="dashboard_page_add">افزودن صفحه</string>
+    <string name="dashboard_page_actions">کارهای صفحهٔ %1$d</string>
+    <string name="dashboard_page_home_description">صفحهٔ %1$d، اصلی</string>
+    <string name="dashboard_page_make_home">اصلی کردن</string>
+    <string name="dashboard_page_move_left">جابه‌جایی به چپ</string>
+    <string name="dashboard_page_move_right">جابه‌جایی به راست</string>
+    <string name="dashboard_page_delete">حذف صفحه</string>
+    <string name="dashboard_page_delete_message">ابزارک‌های صفحهٔ %1$d از پنل برداشته می‌شوند. می‌توانید دوباره از «انتخاب ابزارک‌ها» روشنشان کنید.</string>
+    <string name="dashboard_page_layout">چیدمان صفحه</string>
+    <string name="dashboard_page_orientation">جهت</string>
+    <string name="dashboard_builder_page_widgets">ابزارک‌های صفحهٔ %1$d</string>
+    <string name="dashboard_builder_list_hint">برای تنظیمات یک ابزارک رویش بزنید. برای کشیدن نگهش دارید: درون فهرست برای تغییر ترتیب، یا روی زبانهٔ یک صفحه برای بردن به آنجا.</string>
+    <string name="dashboard_builder_page_empty_hint">این صفحه هنوز خالی است. ابزارک اضافه کنید یا یکی را از صفحهٔ دیگری بیاورید.</string>
+    <string name="dashboard_widget_page_label">صفحه</string>
+    <string name="dashboard_widget_remove">برداشتن از پنل</string>
+    <string name="dashboard_builder_move_to_page">بردن %1$s به صفحهٔ %2$d</string>
+    <string name="dashboard_templates_title">الگوها و راه‌اندازها</string>
+    <string name="dashboard_templates_help">چیدمان‌های آماده، چیدمان‌های ذخیره‌شده و زمانی که خودکار نمایش داده می‌شوند.</string>
+    <string name="dashboard_builder_help_title">راهنما</string>
+    <string name="dashboard_page_home_help">پنل روی صفحهٔ اصلی (★) باز می‌شود و پس از ۳۰ ثانیه بدون لمس به آن برمی‌گردد.</string>
+    <string-array name="dashboard_orientation_entries">
+        <item>مانند صفحهٔ پشتی</item>
+        <item>افقی</item>
+        <item>عمودی</item>
+    </string-array>
+    <string name="dashboard_page_full">به صفحهٔ %1$d نمی‌شود: ابزارک تمام‌صفحه یک صفحهٔ جدا لازم دارد.</string>
 </resources>
