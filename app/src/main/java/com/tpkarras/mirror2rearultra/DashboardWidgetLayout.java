@@ -930,13 +930,8 @@ final class DashboardWidgetLayout {
     static Map<String, String> exportState(Context context) {
         Map<String, String> result = new LinkedHashMap<>();
         for (Map.Entry<String, ?> entry : prefs(context).getAll().entrySet()) {
-            Object value = entry.getValue();
-            if (value instanceof Integer) result.put(entry.getKey(), "i:" + value);
-            else if (value instanceof String) result.put(entry.getKey(), "s:" + value);
-            else if (value instanceof Set) {
-                @SuppressWarnings("unchecked") Set<String> values = (Set<String>) value;
-                result.put(entry.getKey(), "t:" + String.join(",", values));
-            }
+            String encoded = encodeStateValue(entry.getValue());
+            if (encoded != null) result.put(entry.getKey(), encoded);
         }
         return result;
     }
@@ -944,18 +939,57 @@ final class DashboardWidgetLayout {
     static void importState(Context context, Map<String, String> state) {
         SharedPreferences.Editor editor = prefs(context).edit().clear();
         for (Map.Entry<String, String> entry : state.entrySet()) {
-            String value = entry.getValue();
-            if (value.startsWith("i:")) {
-                try { editor.putInt(entry.getKey(), Integer.parseInt(value.substring(2))); }
-                catch (NumberFormatException ignored) {}
-            } else if (value.startsWith("s:")) editor.putString(entry.getKey(), value.substring(2));
-            else if (value.startsWith("t:")) {
-                Set<String> values = new HashSet<>();
-                if (value.length() > 2) Collections.addAll(values, value.substring(2).split(","));
+            Object value = decodeStateValue(entry.getValue());
+            if (value instanceof Boolean) editor.putBoolean(entry.getKey(), (Boolean) value);
+            else if (value instanceof Integer) editor.putInt(entry.getKey(), (Integer) value);
+            else if (value instanceof String) editor.putString(entry.getKey(), (String) value);
+            else if (value instanceof Set) {
+                @SuppressWarnings("unchecked") Set<String> values = (Set<String>) value;
                 editor.putStringSet(entry.getKey(), values);
             }
         }
         editor.apply();
+    }
+
+    /**
+     * One stored value as backup text, or null for a type the backup does not
+     * carry.
+     *
+     * <p>Booleans used to be that type, so a backup silently lost every switch
+     * kept here - units, auto-brightness, pocket lock, the grid, hidden icons -
+     * and restoring one, which clears this file first, turned them all off.
+     */
+    @Nullable
+    static String encodeStateValue(Object value) {
+        if (value instanceof Boolean) return "b:" + value;
+        if (value instanceof Integer) return "i:" + value;
+        if (value instanceof String) return "s:" + value;
+        if (value instanceof Set) {
+            @SuppressWarnings("unchecked") Set<String> values = (Set<String>) value;
+            return "t:" + String.join(",", values);
+        }
+        return null;
+    }
+
+    /**
+     * The value {@link #encodeStateValue} wrote, or null when the text is not
+     * one. Backups made before booleans were carried simply have no "b:"
+     * entries, so they restore as they always did.
+     */
+    @Nullable
+    static Object decodeStateValue(String value) {
+        if (value.startsWith("b:")) return Boolean.parseBoolean(value.substring(2));
+        if (value.startsWith("i:")) {
+            try { return Integer.parseInt(value.substring(2)); }
+            catch (NumberFormatException ignored) { return null; }
+        }
+        if (value.startsWith("s:")) return value.substring(2);
+        if (value.startsWith("t:")) {
+            Set<String> values = new HashSet<>();
+            if (value.length() > 2) Collections.addAll(values, value.substring(2).split(","));
+            return values;
+        }
+        return null;
     }
 
     static <T extends Item> void sort(Context context, List<T> items) {
