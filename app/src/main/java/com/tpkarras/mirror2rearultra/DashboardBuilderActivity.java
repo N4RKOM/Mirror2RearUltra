@@ -775,8 +775,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
 
         boolean freeLayout = DashboardWidgetLayout.loadPageLayout(this, editedPage,
                 MirrorSettings.loadDashboardSettings(this).layout) == DashboardSettings.Layout.FREE;
-        // The free layout places and sizes a widget by hand in the preview,
-        // so the flowed layouts' alignment and size steps are left out there.
+        // The free layout places a widget by hand in the preview, so the
+        // flowed layouts' alignment is left out there.
         if (!freeLayout) {
             column.addView(segmentedRow(R.string.dashboard_builder_position_label,
                     new String[]{
@@ -790,20 +790,23 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                                 DashboardWidgetLayout.Position.values()[choice]);
                         notifyDashboardChanged();
                     }));
-
-            column.addView(segmentedRow(R.string.dashboard_builder_size_label,
-                    new String[]{
-                            getString(R.string.dashboard_builder_small),
-                            getString(R.string.dashboard_builder_normal),
-                            getString(R.string.dashboard_builder_large)},
-                    DashboardWidgetLayout.loadSize(this, widget).ordinal(),
-                    getString(R.string.dashboard_builder_size, label(widget)),
-                    choice -> {
-                        DashboardWidgetLayout.saveSize(this, widget,
-                                DashboardWidgetLayout.Size.values()[choice]);
-                        notifyDashboardChanged();
-                    }));
         }
+
+        // Size on every page, the free one included. A pinch sets it there
+        // too, but a pinch cannot say "back to normal", and a widget left
+        // large from some earlier arrangement had no other way down.
+        column.addView(segmentedRow(R.string.dashboard_builder_size_label,
+                new String[]{
+                        getString(R.string.dashboard_builder_small),
+                        getString(R.string.dashboard_builder_normal),
+                        getString(R.string.dashboard_builder_large)},
+                DashboardWidgetLayout.loadSize(this, widget).ordinal(),
+                getString(R.string.dashboard_builder_size, label(widget)),
+                choice -> {
+                    DashboardWidgetLayout.saveSize(this, widget,
+                            DashboardWidgetLayout.Size.values()[choice]);
+                    notifyDashboardChanged();
+                }));
 
         if (DashboardWidgetLayout.supportsVariant(widget)) {
             column.addView(segmentedRow(R.string.dashboard_builder_variant_label,

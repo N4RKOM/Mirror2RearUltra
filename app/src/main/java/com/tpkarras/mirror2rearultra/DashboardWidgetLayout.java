@@ -901,8 +901,17 @@ final class DashboardWidgetLayout {
      *
      * <p>Switching one on also clears the hidden flag, so a widget the user
      * just enabled appears even if something had removed it from the layout.
+     *
+     * <p>A widget that comes back on also comes back at the normal size and
+     * without a place of its own. It used to keep whatever it was last given,
+     * perhaps on another page long ago, so widgets added together arrived at
+     * different sizes and could land on top of each other.
      */
     static void setWidgetEnabled(Context context, Widget widget, boolean enabled) {
+        if (enabled && !isWidgetEnabled(context, widget)) {
+            saveSize(context, widget, Size.NORMAL);
+            clearFreePosition(context, widget);
+        }
         setVisible(context, widget, true);
         if (isExtraWidget(widget)) {
             setExtraEnabled(context, widget, enabled);

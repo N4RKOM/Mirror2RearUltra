@@ -30,6 +30,7 @@ import com.google.android.material.color.MaterialColors;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -77,6 +78,26 @@ public final class RearDashboardView extends View {
      */
     private final Map<DashboardWidgetLayout.Widget, RectF> previousBounds = new HashMap<>();
     private final List<Line> drawnLines = new ArrayList<>();
+    /**
+     * An icon's box beside its text, and the space between them, as parts of
+     * the line's own size before any shrinking to fit.
+     *
+     * <p>Both used to follow the text after it had been shrunk to fit the
+     * panel, so a long reading got a smaller icon and a narrower gap than a
+     * short one of the same size, and a column of widgets could line up by
+     * its icons or by its values but never both.
+     */
+    private static final float ICON_BOX = 0.82f;
+    private static final float ICON_GAP = 0.30f;
+    /** How much of its box an icon's ink fills, the same for every icon. */
+    private static final float ICON_FILL = 0.92f;
+    /**
+     * Where each icon's ink actually lies within the unit box it is drawn in,
+     * measured once by drawing it. See {@link #drawIcon}.
+     */
+    private static final Map<Icon, RectF> ICON_INK = new EnumMap<>(Icon.class);
+    /** Follow-up frames asked for in a row by {@link #drawFree}; see there. */
+    private int freeSettlePasses;
     @Nullable private DashboardWidgetLayout.Widget selectedWidget;
     @Nullable private OnWidgetSelectedListener widgetSelectedListener;
     /** The burn-in drift in force, so recorded bounds match what is on screen. */
@@ -2377,6 +2398,7 @@ public final class RearDashboardView extends View {
                     20f * density, 20f * density, panelPaint);
         }
         float[][] fallback = freePlacement(lines, clockSize, normalSize, padding);
+        boolean stale = false;
         for (int index = 0; index < lines.size(); index++) {
             Line line = lines.get(index);
             float size = (line.primary ? clockSize : normalSize) * line.scale;
@@ -2413,6 +2435,20 @@ public final class RearDashboardView extends View {
                     Math.min(getHeight() - padding - half, y));
             float baseline = clampedY - (textPaint.ascent() + textPaint.descent()) / 2f;
             drawLine(canvas, line, x, baseline, available, Alignment.CENTER, true);
+            stale |= Math.abs(line.bounds.height() / 2f - half) > 1f;
+        }
+        // The half height that keeps a widget off the edge comes from the
+        // frame before, since this one is only now being measured. After the
+        // view changes size - the builder shapes its preview to the panel
+        // just after the first frame - that is a height from another size,
+        // and the clock was held too far down, over the date, until something
+        // else happened to redraw it. One more frame measures from this one.
+        // Capped, so a height that never settles cannot redraw forever.
+        if (stale && freeSettlePasses < 2) {
+            freeSettlePasses++;
+            postInvalidateOnAnimation();
+        } else if (!stale) {
+            freeSettlePasses = 0;
         }
     }
 
@@ -2486,10 +2522,11 @@ public final class RearDashboardView extends View {
     private float measuredWidth(Line line, float clockSize, float normalSize) {
         textPaint.setTextSize((line.primary ? clockSize : normalSize) * line.scale);
         textPaint.setFakeBoldText(line.primary);
+        float icon = line.icon == Icon.NONE ? 0f
+                : textPaint.getTextSize() * (ICON_BOX + ICON_GAP);
         if (line.text.indexOf('\n') >= 0) {
             textPaint.setTextSize(textPaint.getTextSize() * 0.58f);
         }
-        float icon = line.icon == Icon.NONE ? 0f : textPaint.getTextSize() * 1.10f;
         float text = 0f;
         for (String part : line.text.split("\\n", -1)) {
             text = Math.max(text, textPaint.measureText(part));
@@ -2806,11 +2843,15 @@ public final class RearDashboardView extends View {
         // The widget's own face where it named one, and back to the panel's
         // for the next line: the paint is shared by every line drawn.
         textPaint.setTypeface(line.typeface != null ? line.typeface : panelTypeface);
+        // The icon and the gap are sized from the line as asked for, before
+        // the text is stacked or shrunk to fit, so every widget of a size has
+        // the same icon box and its value starts the same distance along.
+        float nominal = textPaint.getTextSize();
+        float iconSize = line.icon == Icon.NONE ? 0f : nominal * ICON_BOX;
+        float gap = line.icon == Icon.NONE ? 0f : nominal * ICON_GAP;
         boolean multiline = line.text.indexOf('\n') >= 0;
         if (multiline) textPaint.setTextSize(textPaint.getTextSize() * 0.58f);
-        fitTextToWidth(line, width);
-        float iconSize = line.icon == Icon.NONE ? 0f : textPaint.getTextSize() * 0.82f;
-        float gap = line.icon == Icon.NONE ? 0f : textPaint.getTextSize() * 0.28f;
+        fitTextToWidth(line, width - iconSize - gap);
         float textSpace = Math.max(1f, width - iconSize - gap);
         String[] parts = line.text.split("\\n", -1);
         CharSequence[] fittedParts = new CharSequence[parts.length];
@@ -2836,8 +2877,12 @@ public final class RearDashboardView extends View {
             float highest = Math.max(edge, getWidth() - edge - totalWidth);
             startX = Math.max(edge, Math.min(startX, highest));
         }
+        // Centred on the middle of the figures rather than of the font's line
+        // box, which sits lower than the digits it holds.
+        textPaint.getTextBounds("0", 0, 1, inkBounds);
+        float figureMiddle = baseline + (inkBounds.top + inkBounds.bottom) / 2f;
         if (line.icon != Icon.NONE) {
-            float centerY = baseline + (textPaint.ascent() + textPaint.descent()) / 2f;
+            float centerY = figureMiddle;
             drawIcon(canvas, line.icon, new RectF(
                     startX,
                     centerY - iconSize / 2f,
@@ -2883,7 +2928,7 @@ public final class RearDashboardView extends View {
             inkBottom = Math.max(inkBottom, partBaseline + inkBounds.bottom);
         }
         if (line.icon != Icon.NONE) {
-            float iconCentreY = baseline + (textPaint.ascent() + textPaint.descent()) / 2f;
+            float iconCentreY = figureMiddle;
             inkTop = Math.min(inkTop, iconCentreY - iconSize / 2f);
             inkBottom = Math.max(inkBottom, iconCentreY + iconSize / 2f);
             anyInk = true;
@@ -2906,14 +2951,14 @@ public final class RearDashboardView extends View {
         canvas.restoreToCount(canvasState);
     }
 
+    /** Shrinks the text alone into the room left beside the icon. */
     private void fitTextToWidth(Line line, float width) {
         float originalSize = textPaint.getTextSize();
-        float iconSpace = line.icon == Icon.NONE ? 0f : originalSize * 1.10f;
+        width = Math.max(1f, width);
         float desired = 0f;
         for (String part : line.text.split("\\n", -1)) {
             desired = Math.max(desired, textPaint.measureText(part));
         }
-        desired += iconSpace;
         if (desired <= width || desired <= 0f) return;
         // The rear panel is only 126 px wide on the target device. A hard 40% floor
         // still forces large user-selected text to ellipsize instead of fitting it.
@@ -2936,11 +2981,92 @@ public final class RearDashboardView extends View {
                 : (left + right) / 2f;
     }
 
+    /**
+     * Draws an icon so that its ink fills the same share of the box as every
+     * other icon's, centred in it, with the same line weight.
+     *
+     * <p>Each icon is drawn by hand inside a unit box, and each used a
+     * different part of it: the memory chip and the battery ran edge to edge,
+     * the alarm clock and the stopwatch were circles a third of the way in,
+     * the thermometer was a tall sliver. At the same box size they came out
+     * at visibly different sizes with visibly different gaps to their text.
+     * Rather than retune twenty drawings by eye, each one is measured once -
+     * drawn into a bitmap and its ink found - and then drawn into whatever
+     * box makes that ink fill {@link #ICON_FILL} of the one asked for.
+     */
     private void drawIcon(Canvas canvas, Icon icon, RectF bounds) {
+        if (icon == Icon.NONE || bounds.width() <= 0f || bounds.height() <= 0f) {
+            return;
+        }
+        RectF ink = inkOf(icon);
+        float side = Math.min(bounds.width() * ICON_FILL / Math.max(0.01f, ink.width()),
+                bounds.height() * ICON_FILL / Math.max(0.01f, ink.height()));
+        float left = bounds.centerX() - ink.centerX() * side;
+        float top = bounds.centerY() - ink.centerY() * side;
         iconPaint.setColor(textPaint.getColor());
-        iconPaint.setStrokeWidth(Math.max(1f, bounds.width() * 0.09f));
+        // The weight follows the box asked for, not the box drawn into, so a
+        // thin icon blown up to fill its box is not drawn heavier than a wide
+        // one.
+        drawIconShape(canvas, icon, new RectF(left, top, left + side, top + side),
+                Math.max(1f, bounds.width() * 0.09f));
+    }
+
+    /**
+     * Where an icon's ink lies in a unit box, from drawing it once.
+     *
+     * <p>Drawn at a size where a pixel is well under the precision that
+     * matters, into the middle of a canvas twice as large, since a few icons
+     * - the network arcs, the stopwatch crown - reach past their box.
+     */
+    private RectF inkOf(Icon icon) {
+        synchronized (ICON_INK) {
+            RectF cached = ICON_INK.get(icon);
+            if (cached != null) {
+                return cached;
+            }
+            int unit = 160;
+            android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(
+                    unit * 2, unit * 2, android.graphics.Bitmap.Config.ALPHA_8);
+            Canvas scratch = new Canvas(bitmap);
+            int colour = iconPaint.getColor();
+            iconPaint.setColor(Color.BLACK);
+            drawIconShape(scratch, icon, new RectF(unit / 2f, unit / 2f,
+                    unit * 1.5f, unit * 1.5f), unit * 0.09f);
+            iconPaint.setColor(colour);
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            int minX = width;
+            int minY = height;
+            int maxX = -1;
+            int maxY = -1;
+            byte[] alpha = new byte[width * height];
+            bitmap.copyPixelsToBuffer(java.nio.ByteBuffer.wrap(alpha));
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    if ((alpha[y * width + x] & 0xff) > 24) {
+                        minX = Math.min(minX, x);
+                        maxX = Math.max(maxX, x);
+                        minY = Math.min(minY, y);
+                        maxY = Math.max(maxY, y);
+                    }
+                }
+            }
+            bitmap.recycle();
+            RectF result = maxX < 0
+                    ? new RectF(0f, 0f, 1f, 1f)
+                    : new RectF((minX - unit / 2f) / unit, (minY - unit / 2f) / unit,
+                            (maxX + 1 - unit / 2f) / unit, (maxY + 1 - unit / 2f) / unit);
+            ICON_INK.put(icon, result);
+            return result;
+        }
+    }
+
+    /** One icon's drawing, inside {@code bounds}, at a given line weight. */
+    private void drawIconShape(Canvas canvas, Icon icon, RectF bounds, float strokeWidth) {
+        iconPaint.setStrokeWidth(strokeWidth);
         iconPaint.setStyle(Paint.Style.STROKE);
-        float inset = iconPaint.getStrokeWidth();
+        // The geometry keeps its own proportions whatever the line weight.
+        float inset = bounds.width() * 0.09f;
         RectF body = new RectF(bounds);
         body.inset(inset, inset);
         switch (icon) {
