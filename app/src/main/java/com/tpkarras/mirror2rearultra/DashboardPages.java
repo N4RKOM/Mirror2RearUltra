@@ -72,6 +72,40 @@ final class DashboardPages {
         return Math.max(1, Math.min(home, count));
     }
 
+    /**
+     * The page automatic cycling shows after a number of steps.
+     *
+     * <p>Cycling moves on from the main page through the pages that take part,
+     * in order, and wraps. A page can be left out - reached by a swipe but
+     * never turned to by itself - and so can a page with nothing on it. The
+     * main page rests first even when it is left out; it is where the panel
+     * sits, not a stop on the round.
+     *
+     * @param inCycle indexed by page from 1; slot 0 unused
+     * @param steps how many turns since cycling resumed, from 0
+     */
+    static int autoPage(int home, long steps, boolean[] inCycle) {
+        int[] stops = new int[inCycle.length];
+        int count = 0;
+        for (int page = 1; page < inCycle.length; page++) {
+            if (inCycle[page]) {
+                stops[count++] = page;
+            }
+        }
+        if (count == 0) {
+            return home;
+        }
+        // The first stop after the main page, wrapping to the first stop.
+        int start = 0;
+        for (int index = 0; index < count; index++) {
+            if (stops[index] > home) {
+                start = index;
+                break;
+            }
+        }
+        return stops[(int) ((start + Math.max(0L, steps)) % count)];
+    }
+
     private static boolean inRange(int count, int page) {
         return page >= 1 && page <= count;
     }

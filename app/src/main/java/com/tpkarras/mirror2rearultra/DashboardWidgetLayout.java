@@ -69,6 +69,8 @@ final class DashboardWidgetLayout {
     private static final String EXTRA_ENABLED = "extra_enabled";
     private static final String PAGE_COUNT = "page_count";
     private static final String HOME_PAGE = "home_page";
+    private static final String PAGE_NAME_PREFIX = "name_page_";
+    private static final String PAGE_OUT_OF_CYCLE_PREFIX = "out_of_cycle_page_";
     private static final String PRESENCE_PREFIX = "presence_";
     private static final String GAP_PREFIX = "gap_";
     private static final String BURN_IN_SHIFT = "burn_in_shift";
@@ -350,7 +352,7 @@ final class DashboardWidgetLayout {
     }
 
     /** Most pages the panel is allowed to cycle through. */
-    static final int MAX_PAGES = 3;
+    static final int MAX_PAGES = 5;
 
     /**
      * How many pages the arrangement uses.
@@ -408,11 +410,53 @@ final class DashboardWidgetLayout {
     }
 
     /**
+     * What the user called a page, or an empty string when it has no name.
+     *
+     * <p>A number says nothing about what is on a page once there are five,
+     * and a trigger that brings up "page 3" is easier to set up as "Road".
+     */
+    static String loadPageName(Context context, int page) {
+        return prefs(context).getString(PAGE_NAME_PREFIX + page, "");
+    }
+
+    static void savePageName(Context context, int page, String name) {
+        String trimmed = name == null ? "" : name.trim();
+        SharedPreferences.Editor editor = prefs(context).edit();
+        if (trimmed.isEmpty()) {
+            editor.remove(PAGE_NAME_PREFIX + page);
+        } else {
+            editor.putString(PAGE_NAME_PREFIX + page, trimmed);
+        }
+        editor.apply();
+    }
+
+    /**
+     * Whether automatic cycling turns to this page by itself.
+     *
+     * <p>A page left out is still there to swipe to - the one with the
+     * compass, say, wanted on a walk and not every eight seconds at a desk.
+     * Stored as the exception, so every page takes part until told otherwise.
+     */
+    static boolean isPageInCycle(Context context, int page) {
+        return !prefs(context).getBoolean(PAGE_OUT_OF_CYCLE_PREFIX + page, false);
+    }
+
+    static void setPageInCycle(Context context, int page, boolean inCycle) {
+        SharedPreferences.Editor editor = prefs(context).edit();
+        if (inCycle) {
+            editor.remove(PAGE_OUT_OF_CYCLE_PREFIX + page);
+        } else {
+            editor.putBoolean(PAGE_OUT_OF_CYCLE_PREFIX + page, true);
+        }
+        editor.apply();
+    }
+
+    /**
      * Adds an empty page after the last one.
      *
-     * <p>Its own layout and orientation are cleared first: a page that once
+     * <p>Everything the page number keys is cleared first: a page that once
      * existed at this number and was deleted would otherwise come back with
-     * the look it had then, rather than following page one like a new page.
+     * the look and the name it had then, rather than as a new page.
      *
      * @return the new page, or 0 when the arrangement is already full
      */
@@ -425,8 +469,34 @@ final class DashboardWidgetLayout {
         prefs(context).edit()
                 .remove(PAGE_LAYOUT_PREFIX + page)
                 .remove(PAGE_ORIENTATION_PREFIX + page)
+                .remove(PAGE_NAME_PREFIX + page)
+                .remove(PAGE_OUT_OF_CYCLE_PREFIX + page)
                 .putInt(PAGE_COUNT, page)
                 .apply();
+        return page;
+    }
+
+    /**
+     * Adds a page that looks like an existing one: its layout, orientation,
+     * name and place in the cycle, but none of its widgets - a widget sits on
+     * one page only.
+     *
+     * @param name what to call the copy
+     * @return the new page, or 0 when the arrangement is already full
+     */
+    static int duplicatePage(Context context, int source, String name) {
+        DashboardSettings.Layout layout = loadPageLayout(context, source,
+                MirrorSettings.loadDashboardSettings(context).layout);
+        Orientation orientation = loadPageOrientation(context, source);
+        boolean inCycle = isPageInCycle(context, source);
+        int page = addPage(context);
+        if (page == 0) {
+            return 0;
+        }
+        savePageLayout(context, page, layout);
+        savePageOrientation(context, page, orientation);
+        savePageName(context, page, name);
+        setPageInCycle(context, page, inCycle);
         return page;
     }
 
@@ -451,11 +521,15 @@ final class DashboardWidgetLayout {
         DashboardSettings settings = MirrorSettings.loadDashboardSettings(context);
         DashboardSettings.Layout[] layouts = new DashboardSettings.Layout[newCount + 1];
         Orientation[] orientations = new Orientation[newCount + 1];
+        String[] names = new String[newCount + 1];
+        boolean[] inCycle = new boolean[newCount + 1];
         for (int page = 1; page <= oldCount; page++) {
             int target = map[page];
             if (target > 0) {
                 layouts[target] = loadPageLayout(context, page, settings.layout);
                 orientations[target] = loadPageOrientation(context, page);
+                names[target] = loadPageName(context, page);
+                inCycle[target] = isPageInCycle(context, page);
             }
         }
         int home = DashboardPages.homeAfter(loadHomePage(context), map);
@@ -474,19 +548,31 @@ final class DashboardWidgetLayout {
                     ? map[page] : Math.min(page, newCount);
             editor.putInt(PAGE_PREFIX + widget.name(), Math.max(1, target));
         }
-        for (int page = 2; page <= MAX_PAGES; page++) {
-            if (page <= newCount) {
+        for (int page = 1; page <= MAX_PAGES; page++) {
+            if (page > 1 && page <= newCount) {
                 editor.putString(PAGE_LAYOUT_PREFIX + page, layouts[page].name());
                 editor.putString(PAGE_ORIENTATION_PREFIX + page, orientations[page].name());
             } else {
                 editor.remove(PAGE_LAYOUT_PREFIX + page);
                 editor.remove(PAGE_ORIENTATION_PREFIX + page);
             }
+            if (page <= newCount && !names[page].isEmpty()) {
+                editor.putString(PAGE_NAME_PREFIX + page, names[page]);
+            } else {
+                editor.remove(PAGE_NAME_PREFIX + page);
+            }
+            if (page <= newCount && !inCycle[page]) {
+                editor.putBoolean(PAGE_OUT_OF_CYCLE_PREFIX + page, true);
+            } else {
+                editor.remove(PAGE_OUT_OF_CYCLE_PREFIX + page);
+            }
         }
         editor.putInt(PAGE_COUNT, newCount)
                 .putInt(HOME_PAGE, home)
                 .putString(ORIENTATION, orientations[1].name())
                 .apply();
+        // A trigger naming a page follows it, or lets go when it is deleted.
+        PanelTriggers.remapPages(context, map);
         // Page one's layout is the panel-wide setting, so it is written there.
         MirrorSettings.saveDashboardSettings(context,
                 MirrorSettings.loadDashboardSettings(context).withLayout(layouts[1]));

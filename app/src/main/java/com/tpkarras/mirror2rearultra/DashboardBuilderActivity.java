@@ -59,6 +59,10 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private MaterialCardView previewContainer;
     private HyperValueRow layoutRow;
     private HyperValueRow orientationRow;
+    private HyperValueRow pageNameRow;
+    private MaterialSwitch pageInCycleSwitch;
+    /** Guards the cycle switch while it is written from stored state. */
+    private boolean bindingCycle;
     private TextView previewHint;
     private TextView overflowNote;
     private View snapGroup;
@@ -103,6 +107,17 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         previewContainer = findViewById(R.id.dashboard_builder_preview_container);
         layoutRow = findViewById(R.id.dashboard_builder_layout);
         orientationRow = findViewById(R.id.dashboard_builder_orientation);
+        pageNameRow = findViewById(R.id.dashboard_builder_page_name);
+        pageInCycleSwitch = findViewById(R.id.dashboard_builder_page_in_cycle);
+        // Replaces the row's own chooser: a name is typed, not picked.
+        pageNameRow.setOnClickListener(view -> promptPageName());
+        pageInCycleSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (bindingCycle) {
+                return;
+            }
+            DashboardWidgetLayout.setPageInCycle(this, editedPage, checked);
+            notifyDashboardChanged();
+        });
         previewHint = findViewById(R.id.dashboard_builder_preview_hint);
         overflowNote = findViewById(R.id.dashboard_builder_overflow);
         snapGroup = findViewById(R.id.dashboard_builder_snap_group);
@@ -213,8 +228,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             ids[page - 1] = tab.getId();
             tab.setText(page == home ? page + " ★" : String.valueOf(page));
             tab.setContentDescription(page == home
-                    ? getString(R.string.dashboard_page_home_description, page)
-                    : getString(R.string.dashboard_builder_page_section, page));
+                    ? getString(R.string.dashboard_page_home_description, pageLabel(page))
+                    : pageLabel(page));
             int target = page;
             tab.setOnLongClickListener(view -> {
                 selectPage(target);
@@ -282,7 +297,9 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         items.add(0, 1, 0, R.string.dashboard_page_make_home).setEnabled(!home);
         items.add(0, 2, 1, R.string.dashboard_page_move_left).setEnabled(editedPage > 1);
         items.add(0, 3, 2, R.string.dashboard_page_move_right).setEnabled(editedPage < pageCount);
-        items.add(0, 4, 3, R.string.dashboard_page_delete).setEnabled(pageCount > 1);
+        items.add(0, 5, 3, R.string.dashboard_page_duplicate)
+                .setEnabled(pageCount < DashboardWidgetLayout.MAX_PAGES);
+        items.add(0, 4, 4, R.string.dashboard_page_delete).setEnabled(pageCount > 1);
         menu.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
                 case 1:
@@ -299,11 +316,73 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 case 4:
                     confirmDeletePage();
                     return true;
+                case 5:
+                    duplicatePage();
+                    return true;
                 default:
                     return false;
             }
         });
         menu.show();
+    }
+
+    /**
+     * Adds a page with the edited page's look and goes to it. The widgets
+     * stay where they are: a widget sits on one page only.
+     */
+    private void duplicatePage() {
+        String name = DashboardWidgetLayout.loadPageName(this, editedPage);
+        String copyName = name.isEmpty() ? "" : getString(R.string.dashboard_page_copy_name, name);
+        int page = DashboardWidgetLayout.duplicatePage(this, editedPage, copyName);
+        if (page == 0) {
+            return;
+        }
+        editedPage = page;
+        selectedWidget = null;
+        notifyDashboardChanged();
+        renderPageTabs();
+        renderRows();
+        pageTabs.announceForAccessibility(pageLabel(page));
+    }
+
+    /**
+     * The name sheet for the edited page. An empty name takes the page back
+     * to its number.
+     */
+    private void promptPageName() {
+        // Inflated into a holder so its margins survive: without a parent
+        // the field ran edge to edge of the dialog.
+        android.widget.FrameLayout holder = new android.widget.FrameLayout(this);
+        com.google.android.material.textfield.TextInputLayout inputLayout =
+                (com.google.android.material.textfield.TextInputLayout) getLayoutInflater()
+                        .inflate(R.layout.dialog_template_name, holder, false);
+        holder.addView(inputLayout);
+        inputLayout.setHint(getString(R.string.dashboard_page_name));
+        com.google.android.material.textfield.TextInputEditText input =
+                inputLayout.findViewById(R.id.template_name_input);
+        input.setText(DashboardWidgetLayout.loadPageName(this, editedPage));
+        input.setSelection(input.length());
+        int page = editedPage;
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.dashboard_page_rename_title)
+                .setView(holder)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.save, (dialog, which) -> {
+                    DashboardWidgetLayout.savePageName(this, page,
+                            input.getText() == null ? "" : input.getText().toString());
+                    notifyDashboardChanged();
+                    renderPageTabs();
+                    renderRows();
+                })
+                .show();
+    }
+
+    /** "Page 2", or "Page 2 · Road" once it has a name. */
+    private String pageLabel(int page) {
+        String name = DashboardWidgetLayout.loadPageName(this, page);
+        return name.isEmpty()
+                ? getString(R.string.dashboard_builder_page_section, page)
+                : getString(R.string.dashboard_page_label_named, page, name);
     }
 
     /** Swaps the edited page with its neighbour and follows it there. */
@@ -479,7 +558,10 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         rows.removeAllViews();
         List<List<DashboardWidgetLayout.Widget>> pages = currentPages();
         List<DashboardWidgetLayout.Widget> page = pages.get(editedPage - 1);
-        widgetsHeader.setText(pages.size() > 1
+        String pageName = DashboardWidgetLayout.loadPageName(this, editedPage);
+        widgetsHeader.setText(!pageName.isEmpty()
+                ? getString(R.string.dashboard_page_named_widgets, pageName)
+                : pages.size() > 1
                 ? getString(R.string.dashboard_builder_page_widgets, editedPage)
                 : getString(R.string.dashboard_builder_widgets_title));
         rows.setVisibility(page.isEmpty() ? View.GONE : View.VISIBLE);
@@ -964,6 +1046,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private void showHelp() {
         String message = getString(R.string.dashboard_builder_pages_help)
                 + "\n\n" + getString(R.string.dashboard_page_home_help)
+                + "\n\n" + getString(R.string.dashboard_page_cycle_help)
                 + "\n\n" + getString(R.string.panel_gestures_help)
                 + "\n\n" + getString(R.string.dashboard_builder_preview_note);
         new MaterialAlertDialogBuilder(this)
@@ -1014,7 +1097,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         // Pinned rather than left to cycle: editing page two should not mean
         // waiting eight seconds for it to come round again.
         preview.setSelectedPage(pageCount > 1 ? editedPage : 0);
-        preview.setContentDescription(getString(R.string.dashboard_builder_page_section, editedPage));
+        preview.setContentDescription(pageLabel(editedPage));
 
         DashboardWidgetLayout.Orientation orientation =
                 DashboardWidgetLayout.loadPageOrientation(this, editedPage);
@@ -1024,6 +1107,17 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 R.array.dashboard_layout_entries)[layout.ordinal()]);
         orientationRow.setValue(getResources().getStringArray(
                 R.array.dashboard_orientation_entries)[orientation.ordinal()]);
+        String name = DashboardWidgetLayout.loadPageName(this, editedPage);
+        pageNameRow.setValue(name.isEmpty() ? getString(R.string.dashboard_page_name_none) : name);
+        // Cycling is a question only once there is more than one page, and
+        // the orientation row closes the group when the switch is not there.
+        boolean several = pageCount > 1;
+        pageInCycleSwitch.setVisibility(several ? View.VISIBLE : View.GONE);
+        orientationRow.setBackgroundResource(several
+                ? R.drawable.hyper_row_bg_middle : R.drawable.hyper_row_bg_bottom);
+        bindingCycle = true;
+        pageInCycleSwitch.setChecked(DashboardWidgetLayout.isPageInCycle(this, editedPage));
+        bindingCycle = false;
         boolean free = layout == DashboardSettings.Layout.FREE;
         previewHint.setText(free
                 ? R.string.dashboard_builder_preview_free_hint

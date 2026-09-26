@@ -11,8 +11,9 @@ import java.util.Calendar;
  * Reasons other than the foreground app for the panel to change.
  *
  * <p>A profile answers "which app am I in". These answer "what is going on
- * around the phone": it is night, or it is on the charger. Both name a saved
- * template, and while the condition holds the panel shows it.
+ * around the phone": it is night, or it is on the charger. Each names either
+ * a saved template, which replaces the arrangement while the condition holds,
+ * or a page of the arrangement in use, which the panel then holds on.
  *
  * <p>Charging wins over the clock. Putting a phone on the charger is
  * something someone just did, and the night window is something that was
@@ -24,6 +25,8 @@ final class PanelTriggers {
     private static final String TIME_SLOT = "time_slot";
     private static final String TIME_FROM = "time_from";
     private static final String TIME_TO = "time_to";
+    /** A slot naming a page rather than a template: "page:3". */
+    private static final String PAGE_SLOT_PREFIX = "page:";
     /** Minutes past midnight; the usual night anyone would pick. */
     private static final int DEFAULT_FROM = 22 * 60;
     private static final int DEFAULT_TO = 7 * 60;
@@ -128,9 +131,48 @@ final class PanelTriggers {
         return Math.max(30_000L, soonest);
     }
 
+    /** The slot that stands for a page of the current arrangement. */
+    static String pageSlot(int page) {
+        return PAGE_SLOT_PREFIX + page;
+    }
+
+    /** The page a slot names, or 0 when it names a template or nothing. */
+    static int pageOf(@Nullable String slot) {
+        if (slot == null || !slot.startsWith(PAGE_SLOT_PREFIX)) {
+            return 0;
+        }
+        try {
+            return Math.max(0, Integer.parseInt(slot.substring(PAGE_SLOT_PREFIX.length())));
+        } catch (NumberFormatException error) {
+            return 0;
+        }
+    }
+
+    /**
+     * Keeps page slots on their page when pages are moved or deleted, and
+     * turns a slot off when its page is gone - a trigger quietly moving to
+     * whichever page slid into the place would show something nobody chose.
+     */
+    static void remapPages(Context context, int[] map) {
+        SharedPreferences.Editor editor = prefs(context).edit();
+        for (String key : new String[]{CHARGING_SLOT, TIME_SLOT}) {
+            int page = pageOf(slot(context, key));
+            if (page <= 0) {
+                continue;
+            }
+            int target = page < map.length ? map[page] : 0;
+            editor.putString(key, target > 0 ? pageSlot(target) : "");
+        }
+        editor.apply();
+    }
+
     private static boolean usable(Context context, @Nullable String slot) {
         if (slot == null) {
             return false;
+        }
+        int page = pageOf(slot);
+        if (page > 0) {
+            return page <= DashboardWidgetLayout.loadPageCount(context);
         }
         for (DashboardTemplateStore.Named named : DashboardTemplateStore.listNamed(context)) {
             if (named.id.equals(slot)) {

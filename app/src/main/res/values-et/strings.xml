@@ -332,7 +332,7 @@
     <string name="panel_trigger_from">Alates</string>
     <string name="panel_trigger_to">Kuni</string>
     <string name="panel_trigger_off">Väljas</string>
-    <string name="panel_triggers_help">Salvestatud mall võib ise esile tulla. Laadija käib kellast üle, ja kui kumbki ei kehti, naaseb paneel profiili omasse. Käivitaja kehtides tehtud muudatused jäävad selle malli, nagu profiil hoiab enda oma.</string>
+    <string name="panel_triggers_help">Paneeli leht või salvestatud mall võib ise ette tulla. Leht hoiab paneeli enda peal ega vahetu; mall asendab kogu paigutuse. Laadimine on kellast tähtsam ja kui kumbki ei kehti, naaseb paneel profiili omale. Malli ajal tehtud muudatused salvestatakse sellesse, nagu profiil hoiab enda oma.</string>
     <string name="dashboard_named_templates_help">Salvestage paigutus, et selle juurde hiljem naasta, mida profiil ka ei teeks.</string>
     <string name="dashboard_named_templates_hint">Rakendamiseks puudutage malli.</string>
     <string name="dashboard_named_template_actions">Malli %1$s tegevused</string>
@@ -428,7 +428,7 @@
     <string name="dashboard_builder_pages_title">Lehed</string>
     <string name="dashboard_page_add">Lisa leht</string>
     <string name="dashboard_page_actions">Lehe %1$d toimingud</string>
-    <string name="dashboard_page_home_description">Leht %1$d, peamine</string>
+    <string name="dashboard_page_home_description">%1$s, peamine</string>
     <string name="dashboard_page_make_home">Tee peamiseks</string>
     <string name="dashboard_page_move_left">Nihuta vasakule</string>
     <string name="dashboard_page_move_right">Nihuta paremale</string>
@@ -452,4 +452,14 @@
         <item>Püstpaigutus</item>
     </string-array>
     <string name="dashboard_page_full">Lehele %1$d ei saa: täisekraanvidin vajab omaette lehte.</string>
+    <string name="dashboard_page_name">Nimi</string>
+    <string name="dashboard_page_name_none">Nimeta</string>
+    <string name="dashboard_page_rename_title">Lehe nimi</string>
+    <string name="dashboard_page_duplicate">Kopeeri välimus</string>
+    <string name="dashboard_page_copy_name">%1$s (koopia)</string>
+    <string name="dashboard_page_in_cycle">Automaatses vahetuses</string>
+    <string name="dashboard_page_named_widgets">Vidinad: %1$s</string>
+    <string name="dashboard_page_label_named">Leht %1$d · %2$s</string>
+    <string name="dashboard_page_cycle_help">Automaatsest vahetusest välja jäetud leht on pühkides endiselt kättesaadav. Kopeeri välimus lisab sama paigutuse, suuna ja nimega lehe, kuid tühjana: vidin on korraga vaid ühel lehel.</string>
+    <string name="panel_trigger_template">Mall: %1$s</string>
 </resources>

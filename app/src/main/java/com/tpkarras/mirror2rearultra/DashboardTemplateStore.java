@@ -71,6 +71,12 @@ final class DashboardTemplateStore {
         int pageCount = DashboardWidgetLayout.loadPageCount(context);
         out.putInt(prefix + "page_count", pageCount);
         out.putInt(prefix + "home_page", DashboardWidgetLayout.loadHomePage(context));
+        for (int page = 1; page <= DashboardWidgetLayout.MAX_PAGES; page++) {
+            out.putString(prefix + "name_page_" + page,
+                    DashboardWidgetLayout.loadPageName(context, page));
+            out.putBoolean(prefix + "in_cycle_page_" + page,
+                    DashboardWidgetLayout.isPageInCycle(context, page));
+        }
         // Pages after the first carry their own arrangement and rotation.
         for (int page = 2; page <= DashboardWidgetLayout.MAX_PAGES; page++) {
             out.putString(prefix + "layout_page_" + page, DashboardWidgetLayout
@@ -138,6 +144,12 @@ final class DashboardTemplateStore {
         // to run before the per-widget pages are written.
         DashboardWidgetLayout.savePageCount(context, in.getInt(prefix + "page_count", 1));
         DashboardWidgetLayout.saveHomePage(context, in.getInt(prefix + "home_page", 1));
+        for (int page = 1; page <= DashboardWidgetLayout.MAX_PAGES; page++) {
+            DashboardWidgetLayout.savePageName(context, page,
+                    in.getString(prefix + "name_page_" + page, ""));
+            DashboardWidgetLayout.setPageInCycle(context, page,
+                    in.getBoolean(prefix + "in_cycle_page_" + page, true));
+        }
         for (int page = 2; page <= DashboardWidgetLayout.MAX_PAGES; page++) {
             try {
                 DashboardWidgetLayout.savePageLayout(context, page,

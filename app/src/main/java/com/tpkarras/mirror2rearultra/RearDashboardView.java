@@ -151,6 +151,8 @@ public final class RearDashboardView extends View {
     private final CallWidgetState.Listener callListener = snapshot -> postInvalidate();
     /** The page swiped to, or 0 for the main page the builder names. */
     private int userPage = 0;
+    /** A page a trigger holds the panel on, or 0 for none. */
+    private int triggerPage = 0;
     private long lastPageInteractionMillis;
     /**
      * When the automatic cycling may start. A session opens resting on the
@@ -218,6 +220,26 @@ public final class RearDashboardView extends View {
      */
     void setSelectedPage(int page) {
         selectedPage = Math.max(0, page);
+        invalidate();
+    }
+
+    /**
+     * Holds the panel on a page a trigger asked for, or lets go with 0.
+     *
+     * <p>It takes the main page's place: the panel rests there, comes back to
+     * it after a swipe, and does not cycle away while the trigger holds -
+     * "on the charger, show the clock page" means the clock page, not the
+     * clock page for eight seconds.
+     */
+    void setTriggerPage(int page) {
+        int next = Math.max(0, page);
+        if (next == triggerPage) {
+            return;
+        }
+        triggerPage = next;
+        userPage = 0;
+        lastPageInteractionMillis = 0L;
+        removeCallbacks(returnToHomePage);
         invalidate();
     }
 
@@ -1013,16 +1035,27 @@ public final class RearDashboardView extends View {
             return paginateLines(source);
         } else {
             boolean auto = DashboardWidgetLayout.isAutoPageSwitchEnabled(getContext());
-            int home = Math.min(maxPage, DashboardWidgetLayout.loadHomePage(getContext()));
+            int home = Math.min(maxPage, triggerPage > 0
+                    ? triggerPage : DashboardWidgetLayout.loadHomePage(getContext()));
             int resting = userPage > 0 ? Math.min(userPage, maxPage) : home;
             if (lastPageInteractionMillis > 0L) {
                 page = resting;
-            } else if (auto && now >= autoPageResumeMillis) {
+            } else if (auto && triggerPage == 0 && now >= autoPageResumeMillis) {
                 // Counted on from the main page, so cycling moves on from the
                 // page the panel was resting on. The steps stay on the wall
                 // clock's eight-second grid that the flip is scheduled on.
+                // Only pages with something on them and not left out of the
+                // cycle are turned to.
+                boolean[] inCycle = new boolean[maxPage + 1];
+                for (Line line : source) {
+                    int linePage = DashboardWidgetLayout.loadPage(getContext(), line.widget);
+                    if (linePage <= maxPage) inCycle[linePage] = true;
+                }
+                for (int candidate = 1; candidate <= maxPage; candidate++) {
+                    inCycle[candidate] &= DashboardWidgetLayout.isPageInCycle(getContext(), candidate);
+                }
                 long steps = now / 8_000L - autoPageResumeMillis / 8_000L;
-                page = (int) ((home + steps) % maxPage) + 1;
+                page = DashboardPages.autoPage(home, steps, inCycle);
                 requestPageFlip(8_000L);
             } else {
                 page = resting;

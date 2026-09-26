@@ -332,7 +332,7 @@
     <string name="panel_trigger_from">Dalle</string>
     <string name="panel_trigger_to">Alle</string>
     <string name="panel_trigger_off">Disattivato</string>
-    <string name="panel_triggers_help">Un modello salvato può comparire da solo. Il caricabatterie batte l\'orologio, e quando non vale nessuno dei due il pannello torna a quello del profilo. Le modifiche fatte mentre un attivatore vale restano nel suo modello, come un profilo tiene il proprio.</string>
+    <string name="panel_triggers_help">Una pagina del pannello o un modello salvato possono comparire da soli. Una pagina tiene il pannello su di sé senza scorrere; un modello sostituisce l\'intera disposizione. Il caricatore prevale sull\'ora e, quando nessuno dei due vale, il pannello torna a quello del profilo. Le modifiche fatte mentre vale un modello restano in esso, come un profilo conserva il suo.</string>
     <string name="dashboard_named_templates_help">Salva una disposizione per ritrovarla più tardi, qualunque cosa faccia il profilo.</string>
     <string name="dashboard_named_templates_hint">Tocca un modello per applicarlo.</string>
     <string name="dashboard_named_template_actions">Azioni per %1$s</string>
@@ -428,7 +428,7 @@
     <string name="dashboard_builder_pages_title">Pagine</string>
     <string name="dashboard_page_add">Aggiungi pagina</string>
     <string name="dashboard_page_actions">Azioni della pagina %1$d</string>
-    <string name="dashboard_page_home_description">Pagina %1$d, principale</string>
+    <string name="dashboard_page_home_description">%1$s, principale</string>
     <string name="dashboard_page_make_home">Rendi principale</string>
     <string name="dashboard_page_move_left">Sposta a sinistra</string>
     <string name="dashboard_page_move_right">Sposta a destra</string>
@@ -452,4 +452,14 @@
         <item>Verticale</item>
     </string-array>
     <string name="dashboard_page_full">Non si può nella pagina %1$d: un widget a schermo intero ha bisogno di una pagina tutta sua.</string>
+    <string name="dashboard_page_name">Nome</string>
+    <string name="dashboard_page_name_none">Senza nome</string>
+    <string name="dashboard_page_rename_title">Nome della pagina</string>
+    <string name="dashboard_page_duplicate">Duplica aspetto</string>
+    <string name="dashboard_page_copy_name">%1$s (copia)</string>
+    <string name="dashboard_page_in_cycle">Nello scorrimento automatico</string>
+    <string name="dashboard_page_named_widgets">Widget: %1$s</string>
+    <string name="dashboard_page_label_named">Pagina %1$d · %2$s</string>
+    <string name="dashboard_page_cycle_help">Una pagina esclusa dallo scorrimento automatico resta raggiungibile con uno scorrimento. Duplica aspetto aggiunge una pagina con lo stesso layout, orientamento e nome, ma vuota: un widget sta su una sola pagina.</string>
+    <string name="panel_trigger_template">Modello: %1$s</string>
 </resources>

@@ -332,7 +332,7 @@
     <string name="panel_trigger_from">Od</string>
     <string name="panel_trigger_to">Do</string>
     <string name="panel_trigger_off">Vypnuto</string>
-    <string name="panel_triggers_help">Uložená šablona se může objevit sama. Nabíječka má přednost před hodinami, a když neplatí ani jedno, panel se vrátí k tomu profilovému. Změny provedené, dokud spouštěč platí, zůstanou v jeho šabloně, stejně jako si profil drží svou.</string>
+    <string name="panel_triggers_help">Stránka panelu nebo uložená šablona se může zobrazit sama. Stránka panel podrží a nepřepíná se; šablona nahradí celé uspořádání. Nabíjení má přednost před časem, a když neplatí ani jedno, panel se vrátí k panelu profilu. Změny provedené během šablony se uloží do ní, stejně jako si profil drží svůj.</string>
     <string name="dashboard_named_templates_help">Uložte si rozvržení, abyste se k němu mohli později vrátit, ať profil dělá cokoli.</string>
     <string name="dashboard_named_templates_hint">Klepnutím na šablonu ji použijete.</string>
     <string name="dashboard_named_template_actions">Akce pro %1$s</string>
@@ -432,7 +432,7 @@
     <string name="dashboard_builder_pages_title">Stránky</string>
     <string name="dashboard_page_add">Přidat stránku</string>
     <string name="dashboard_page_actions">Akce se stránkou %1$d</string>
-    <string name="dashboard_page_home_description">Stránka %1$d, hlavní</string>
+    <string name="dashboard_page_home_description">%1$s, hlavní</string>
     <string name="dashboard_page_make_home">Nastavit jako hlavní</string>
     <string name="dashboard_page_move_left">Posunout doleva</string>
     <string name="dashboard_page_move_right">Posunout doprava</string>
@@ -456,4 +456,14 @@
         <item>Na výšku</item>
     </string-array>
     <string name="dashboard_page_full">Na stránku %1$d to nejde: widget přes celou obrazovku potřebuje stránku jen pro sebe.</string>
+    <string name="dashboard_page_name">Název</string>
+    <string name="dashboard_page_name_none">Bez názvu</string>
+    <string name="dashboard_page_rename_title">Název stránky</string>
+    <string name="dashboard_page_duplicate">Duplikovat vzhled</string>
+    <string name="dashboard_page_copy_name">%1$s (kopie)</string>
+    <string name="dashboard_page_in_cycle">Automaticky přepínat</string>
+    <string name="dashboard_page_named_widgets">Widgety: %1$s</string>
+    <string name="dashboard_page_label_named">Stránka %1$d · %2$s</string>
+    <string name="dashboard_page_cycle_help">Stránka vyřazená z automatického přepínání zůstává dostupná přejetím. Duplikovat vzhled přidá stránku se stejným rozvržením, orientací a názvem, ale prázdnou: widget je vždy jen na jedné stránce.</string>
+    <string name="panel_trigger_template">Šablona %1$s</string>
 </resources>

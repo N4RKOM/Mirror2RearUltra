@@ -125,15 +125,30 @@
                 style="@style/HyperOS.Group"
                 android:layout_marginTop="@dimen/spacing_sm">
 
+                <!-- Opens a name sheet rather than a list; the row is bound
+                     by the activity. -->
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_builder_page_name"
+                    style="@style/HyperOS.ValueRow.Top"
+                    app:rowTitle="@string/dashboard_page_name" />
+
                 <com.tpkarras.mirror2rearultra.HyperValueRow
                     android:id="@+id/dashboard_builder_layout"
-                    style="@style/HyperOS.ValueRow.Top"
+                    style="@style/HyperOS.ValueRow"
                     app:rowTitle="@string/dashboard_page_layout" />
 
+                <!-- Bottom of the group until the cycle switch below shows,
+                     which the activity decides by the page count. -->
                 <com.tpkarras.mirror2rearultra.HyperValueRow
                     android:id="@+id/dashboard_builder_orientation"
                     style="@style/HyperOS.ValueRow.Bottom"
                     app:rowTitle="@string/dashboard_page_orientation" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_builder_page_in_cycle"
+                    style="@style/HyperOS.Switch.Bottom"
+                    android:text="@string/dashboard_page_in_cycle"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <!-- Only the free layout has anywhere to snap to, so the row

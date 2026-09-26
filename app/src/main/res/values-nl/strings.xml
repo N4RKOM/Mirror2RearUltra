@@ -332,7 +332,7 @@
     <string name="panel_trigger_from">Van</string>
     <string name="panel_trigger_to">Tot</string>
     <string name="panel_trigger_off">Uit</string>
-    <string name="panel_triggers_help">Een opgeslagen sjabloon kan vanzelf verschijnen. De lader gaat voor de klok, en als geen van beide geldt keert het paneel terug naar dat van het profiel. Wijzigingen tijdens een trigger blijven in zijn sjabloon, zoals een profiel het zijne bewaart.</string>
+    <string name="panel_triggers_help">Een pagina van het paneel of een opgeslagen sjabloon kan vanzelf verschijnen. Een pagina houdt het paneel vast zonder te wisselen; een sjabloon vervangt de hele indeling. De lader gaat voor de tijd, en als geen van beide geldt, gaat het paneel terug naar dat van het profiel. Wijzigingen tijdens een sjabloon worden erin bewaard, zoals een profiel het zijne bewaart.</string>
     <string name="dashboard_named_templates_help">Sla een indeling op om er later op terug te komen, wat het profiel ook doet.</string>
     <string name="dashboard_named_templates_hint">Tik op een sjabloon om hem toe te passen.</string>
     <string name="dashboard_named_template_actions">Acties voor %1$s</string>
@@ -428,7 +428,7 @@
     <string name="dashboard_builder_pages_title">Pagina\'s</string>
     <string name="dashboard_page_add">Pagina toevoegen</string>
     <string name="dashboard_page_actions">Acties voor pagina %1$d</string>
-    <string name="dashboard_page_home_description">Pagina %1$d, hoofdpagina</string>
+    <string name="dashboard_page_home_description">%1$s, hoofdpagina</string>
     <string name="dashboard_page_make_home">Hoofdpagina maken</string>
     <string name="dashboard_page_move_left">Naar links</string>
     <string name="dashboard_page_move_right">Naar rechts</string>
@@ -452,4 +452,14 @@
         <item>Staand</item>
     </string-array>
     <string name="dashboard_page_full">Kan niet naar pagina %1$d: een schermvullende widget heeft een eigen pagina nodig.</string>
+    <string name="dashboard_page_name">Naam</string>
+    <string name="dashboard_page_name_none">Geen naam</string>
+    <string name="dashboard_page_rename_title">Paginanaam</string>
+    <string name="dashboard_page_duplicate">Uiterlijk dupliceren</string>
+    <string name="dashboard_page_copy_name">%1$s (kopie)</string>
+    <string name="dashboard_page_in_cycle">Automatisch wisselen</string>
+    <string name="dashboard_page_named_widgets">Widgets: %1$s</string>
+    <string name="dashboard_page_label_named">Pagina %1$d · %2$s</string>
+    <string name="dashboard_page_cycle_help">Een pagina buiten het automatisch wisselen blijft bereikbaar door te vegen. Uiterlijk dupliceren voegt een pagina toe met dezelfde indeling, stand en naam, maar leeg: een widget staat maar op één pagina.</string>
+    <string name="panel_trigger_template">Sjabloon: %1$s</string>
 </resources>

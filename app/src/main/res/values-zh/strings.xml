@@ -332,7 +332,7 @@
     <string name="panel_trigger_from">从</string>
     <string name="panel_trigger_to">到</string>
     <string name="panel_trigger_off">关闭</string>
-    <string name="panel_triggers_help">保存的模板可以自动出现。充电优先于时间；两者都不适用时，面板回到配置自己的那一个。触发生效期间所做的更改会留在它的模板里，就像配置保留自己的一样。</string>
+    <string name="panel_triggers_help">面板的某一页或已保存的模板可以自动出现。指定页面时面板会停在该页，不会翻走；模板则替换整个排列。充电优先于时间，两者都不适用时面板回到配置文件自己的面板。模板生效期间的修改会保存到该模板中，就像配置文件保存自己的面板一样。</string>
     <string name="dashboard_named_templates_help">保存一种排布，以后随时可以回到它，无论配置怎么变。</string>
     <string name="dashboard_named_templates_hint">点按模板即可应用。</string>
     <string name="dashboard_named_template_actions">%1$s 的操作</string>
@@ -426,7 +426,7 @@
     <string name="dashboard_builder_pages_title">页面</string>
     <string name="dashboard_page_add">添加页面</string>
     <string name="dashboard_page_actions">第 %1$d 页操作</string>
-    <string name="dashboard_page_home_description">第 %1$d 页，主页</string>
+    <string name="dashboard_page_home_description">%1$s，主页</string>
     <string name="dashboard_page_make_home">设为主页</string>
     <string name="dashboard_page_move_left">左移</string>
     <string name="dashboard_page_move_right">右移</string>
@@ -450,4 +450,14 @@
         <item>纵向</item>
     </string-array>
     <string name="dashboard_page_full">无法移到第 %1$d 页：全屏小组件需要独占一页。</string>
+    <string name="dashboard_page_name">名称</string>
+    <string name="dashboard_page_name_none">未命名</string>
+    <string name="dashboard_page_rename_title">页面名称</string>
+    <string name="dashboard_page_duplicate">复制外观</string>
+    <string name="dashboard_page_copy_name">%1$s（副本）</string>
+    <string name="dashboard_page_in_cycle">参与自动翻页</string>
+    <string name="dashboard_page_named_widgets">小组件：%1$s</string>
+    <string name="dashboard_page_label_named">第 %1$d 页 · %2$s</string>
+    <string name="dashboard_page_cycle_help">不参与自动翻页的页面仍可通过滑动查看。“复制外观”会添加一个布局、方向和名称相同但为空的页面：一个小组件只能在一个页面上。</string>
+    <string name="panel_trigger_template">模板：%1$s</string>
 </resources>

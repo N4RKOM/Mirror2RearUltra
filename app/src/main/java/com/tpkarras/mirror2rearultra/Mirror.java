@@ -146,6 +146,8 @@ public class Mirror extends Activity implements
     private String appliedDashboardProfileId;
     /** The template the surroundings asked for, or null when none applies. */
     private String activeTriggerSlot;
+    /** The page the surroundings asked for, or 0 when none applies. */
+    private int activeTriggerPage;
     private boolean charging;
     private final Handler triggerHandler = new Handler(Looper.getMainLooper());
     private final Runnable triggerTick = new Runnable() {
@@ -257,6 +259,7 @@ public class Mirror extends Activity implements
         calibrationGrid.setClickable(false);
         dashboardView.setClickable(true);
         dashboardView.setDashboardSettings(dashboardSettings, sessionContentMode);
+        dashboardView.setTriggerPage(activeTriggerPage);
         mirrorControlOverlay = new MirrorControlOverlay(this, new MirrorControlOverlay.Listener() {
             @Override
             public void onToggleRequested() {
@@ -1288,17 +1291,25 @@ public class Mirror extends Activity implements
     /**
      * Re-reads the triggers and moves the panel if they now say something else.
      *
-     * <p>Charging and the clock name a saved template between them; when
-     * neither does, the panel goes back to the profile's own.
+     * <p>Charging and the clock name a saved template or a page between them.
+     * A page leaves the arrangement as it is and holds the panel on that page;
+     * a template replaces the arrangement. When neither applies, the panel
+     * goes back to the profile's own and to its main page.
      */
     private void refreshTriggers() {
         String wanted = PanelTriggers.activeSlot(this, charging, System.currentTimeMillis());
-        if (sameValue(wanted, activeTriggerSlot)) {
+        int page = PanelTriggers.pageOf(wanted);
+        activeTriggerPage = page;
+        if (dashboardView != null) {
+            dashboardView.setTriggerPage(page);
+        }
+        String template = page > 0 ? null : wanted;
+        if (sameValue(template, activeTriggerSlot)) {
             return;
         }
-        activeTriggerSlot = wanted;
-        if (wanted != null) {
-            applyDashboardSlot(wanted);
+        activeTriggerSlot = template;
+        if (template != null) {
+            applyDashboardSlot(template);
         } else if (activeProfile != null) {
             applyDashboardSlot(activeProfile.id);
         }

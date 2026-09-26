@@ -332,7 +332,7 @@
     <string name="panel_trigger_from">開始</string>
     <string name="panel_trigger_to">終了</string>
     <string name="panel_trigger_off">オフ</string>
-    <string name="panel_triggers_help">保存したテンプレートが自分から出てくるようにできます。充電は時刻より優先され、どちらも当てはまらないときはプロファイル自身のパネルに戻ります。トリガーが効いている間の変更はそのテンプレートに残ります。プロファイルが自分の分を保つのと同じです。</string>
+    <string name="panel_triggers_help">パネルのページや保存したテンプレートを自動で表示できます。ページを指定するとそのページで止まり、切り替わりません。テンプレートは配置全体を置き換えます。充電は時刻より優先され、どちらにも当てはまらないときはプロファイルのパネルに戻ります。テンプレート表示中の変更はそのテンプレートに保存されます。プロファイルが自分のパネルを保持するのと同じです。</string>
     <string name="dashboard_named_templates_help">配置を保存しておくと、プロファイルが何をしても、あとから戻ってこられます。</string>
     <string name="dashboard_named_templates_hint">テンプレートをタップすると適用されます。</string>
     <string name="dashboard_named_template_actions">%1$s の操作</string>
@@ -426,7 +426,7 @@
     <string name="dashboard_builder_pages_title">ページ</string>
     <string name="dashboard_page_add">ページを追加</string>
     <string name="dashboard_page_actions">%1$d ページ目の操作</string>
-    <string name="dashboard_page_home_description">%1$d ページ目（メイン）</string>
+    <string name="dashboard_page_home_description">%1$s（メイン）</string>
     <string name="dashboard_page_make_home">メインにする</string>
     <string name="dashboard_page_move_left">左へ移動</string>
     <string name="dashboard_page_move_right">右へ移動</string>
@@ -450,4 +450,14 @@
         <item>縦向き</item>
     </string-array>
     <string name="dashboard_page_full">%1$d ページ目には移動できません。全画面ウィジェットには専用のページが必要です。</string>
+    <string name="dashboard_page_name">名前</string>
+    <string name="dashboard_page_name_none">名前なし</string>
+    <string name="dashboard_page_rename_title">ページ名</string>
+    <string name="dashboard_page_duplicate">見た目を複製</string>
+    <string name="dashboard_page_copy_name">%1$s（コピー）</string>
+    <string name="dashboard_page_in_cycle">自動切り替えに含める</string>
+    <string name="dashboard_page_named_widgets">ウィジェット：%1$s</string>
+    <string name="dashboard_page_label_named">%1$d ページ目 · %2$s</string>
+    <string name="dashboard_page_cycle_help">自動切り替えから外したページもスワイプで表示できます。「見た目を複製」は同じレイアウト・向き・名前の空のページを追加します。ウィジェットは 1 つのページにしか置けません。</string>
+    <string name="panel_trigger_template">テンプレート：%1$s</string>
 </resources>

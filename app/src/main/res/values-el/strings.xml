@@ -332,7 +332,7 @@
     <string name="panel_trigger_from">Από</string>
     <string name="panel_trigger_to">Έως</string>
     <string name="panel_trigger_off">Ανενεργό</string>
-    <string name="panel_triggers_help">Ένα αποθηκευμένο πρότυπο μπορεί να εμφανίζεται μόνο του. Ο φορτιστής υπερισχύει του ρολογιού, και όταν δεν ισχύει κανένα ο πίνακας επιστρέφει σε αυτόν του προφίλ. Οι αλλαγές που γίνονται όσο ισχύει ένας ενεργοποιητής μένουν στο πρότυπό του, όπως ένα προφίλ κρατά το δικό του.</string>
+    <string name="panel_triggers_help">Μια σελίδα του πίνακα ή ένα αποθηκευμένο πρότυπο μπορεί να εμφανίζεται μόνο του. Η σελίδα κρατά τον πίνακα εκεί χωρίς εναλλαγή· το πρότυπο αντικαθιστά όλη τη διάταξη. Η φόρτιση υπερισχύει της ώρας, και όταν δεν ισχύει κανένα ο πίνακας επιστρέφει σε αυτόν του προφίλ. Οι αλλαγές όσο ισχύει ένα πρότυπο αποθηκεύονται σε αυτό, όπως ένα προφίλ κρατά το δικό του.</string>
     <string name="dashboard_named_templates_help">Αποθηκεύστε μια διάταξη για να επιστρέψετε σε αυτήν αργότερα, ό,τι κι αν κάνει το προφίλ.</string>
     <string name="dashboard_named_templates_hint">Πατήστε ένα πρότυπο για να το εφαρμόσετε.</string>
     <string name="dashboard_named_template_actions">Ενέργειες για το %1$s</string>
@@ -428,7 +428,7 @@
     <string name="dashboard_builder_pages_title">Σελίδες</string>
     <string name="dashboard_page_add">Προσθήκη σελίδας</string>
     <string name="dashboard_page_actions">Ενέργειες σελίδας %1$d</string>
-    <string name="dashboard_page_home_description">Σελίδα %1$d, κύρια</string>
+    <string name="dashboard_page_home_description">%1$s, κύρια</string>
     <string name="dashboard_page_make_home">Ορισμός ως κύρια</string>
     <string name="dashboard_page_move_left">Μετακίνηση αριστερά</string>
     <string name="dashboard_page_move_right">Μετακίνηση δεξιά</string>
@@ -452,4 +452,14 @@
         <item>Κατακόρυφος</item>
     </string-array>
     <string name="dashboard_page_full">Δεν γίνεται στη σελίδα %1$d: ένα γραφικό στοιχείο πλήρους οθόνης χρειάζεται δική του σελίδα.</string>
+    <string name="dashboard_page_name">Όνομα</string>
+    <string name="dashboard_page_name_none">Χωρίς όνομα</string>
+    <string name="dashboard_page_rename_title">Όνομα σελίδας</string>
+    <string name="dashboard_page_duplicate">Αντιγραφή εμφάνισης</string>
+    <string name="dashboard_page_copy_name">%1$s (αντίγραφο)</string>
+    <string name="dashboard_page_in_cycle">Στην αυτόματη εναλλαγή</string>
+    <string name="dashboard_page_named_widgets">Γραφικά στοιχεία: %1$s</string>
+    <string name="dashboard_page_label_named">Σελίδα %1$d · %2$s</string>
+    <string name="dashboard_page_cycle_help">Μια σελίδα εκτός αυτόματης εναλλαγής παραμένει διαθέσιμη με σάρωση. Η αντιγραφή εμφάνισης προσθέτει σελίδα με ίδια διάταξη, προσανατολισμό και όνομα, αλλά κενή: ένα γραφικό στοιχείο βρίσκεται σε μία μόνο σελίδα.</string>
+    <string name="panel_trigger_template">Πρότυπο: %1$s</string>
 </resources>

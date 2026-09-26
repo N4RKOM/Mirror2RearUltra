@@ -332,7 +332,7 @@
     <string name="panel_trigger_from">Ó</string>
     <string name="panel_trigger_to">Go dtí</string>
     <string name="panel_trigger_off">As</string>
-    <string name="panel_triggers_help">Is féidir le teimpléad sábháilte teacht aníos as a stuaim féin. Buann an luchtaire ar an gclog, agus nuair nach mbaineann ceachtar acu filleann an painéal ar cheann na próifíle. Fanann athruithe a rinneadh agus truicear i bhfeidhm ina theimpléad féin, mar a choinníonn próifíl a ceann féin.</string>
+    <string name="panel_triggers_help">Is féidir le leathanach den phainéal nó le teimpléad sábháilte teacht aníos leis féin. Coinníonn leathanach an painéal air gan athrú; cuireann teimpléad an socrú iomlán ina áit. Tá an luchtaire níos tábhachtaí ná an clog, agus nuair nach mbaineann ceachtar acu, filleann an painéal ar phainéal na próifíle. Coinnítear athruithe a dhéantar le linn teimpléid ann, mar a choinníonn próifíl a cuid féin.</string>
     <string name="dashboard_named_templates_help">Sábháil leagan amach chun filleadh air níos déanaí, is cuma cad a dhéanann an phróifíl.</string>
     <string name="dashboard_named_templates_hint">Tapáil teimpléad chun é a chur i bhfeidhm.</string>
     <string name="dashboard_named_template_actions">Gníomhartha do %1$s</string>
@@ -434,7 +434,7 @@
     <string name="dashboard_builder_pages_title">Leathanaigh</string>
     <string name="dashboard_page_add">Cuir leathanach leis</string>
     <string name="dashboard_page_actions">Gníomhartha leathanach %1$d</string>
-    <string name="dashboard_page_home_description">Leathanach %1$d, príomh</string>
+    <string name="dashboard_page_home_description">%1$s, príomh</string>
     <string name="dashboard_page_make_home">Déan príomhleathanach de</string>
     <string name="dashboard_page_move_left">Bog ar chlé</string>
     <string name="dashboard_page_move_right">Bog ar dheis</string>
@@ -458,4 +458,14 @@
         <item>Portráid</item>
     </string-array>
     <string name="dashboard_page_full">Ní féidir é a chur ar leathanach %1$d: teastaíonn leathanach dá cuid féin ó ghiuirléid lánscáileáin.</string>
+    <string name="dashboard_page_name">Ainm</string>
+    <string name="dashboard_page_name_none">Gan ainm</string>
+    <string name="dashboard_page_rename_title">Ainm an leathanaigh</string>
+    <string name="dashboard_page_duplicate">Dúbailt an chuma</string>
+    <string name="dashboard_page_copy_name">%1$s (cóip)</string>
+    <string name="dashboard_page_in_cycle">San athrú uathoibríoch</string>
+    <string name="dashboard_page_named_widgets">Giuirléidí: %1$s</string>
+    <string name="dashboard_page_label_named">Leathanach %1$d · %2$s</string>
+    <string name="dashboard_page_cycle_help">Tá leathanach atá fágtha as an athrú uathoibríoch fós ar fáil le svaidhpeáil. Cuireann Dúbailt an chuma leathanach leis a bhfuil an leagan amach, an treoshuíomh agus an t-ainm céanna air, ach folamh: ní bhíonn giuirléid ach ar leathanach amháin.</string>
+    <string name="panel_trigger_template">Teimpléad: %1$s</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.tpkarras.mirror2rearultra;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -41,5 +42,19 @@ public class PanelTriggersTest {
         int both = at(8, 0);
         assertFalse(PanelTriggers.within(at(8, 0), both, both));
         assertFalse(PanelTriggers.within(at(20, 0), both, both));
+    }
+
+    @Test
+    public void aPageSlotNamesItsPage() {
+        assertEquals(3, PanelTriggers.pageOf(PanelTriggers.pageSlot(3)));
+    }
+
+    @Test
+    public void templateSlotsAndNonsenseNameNoPage() {
+        assertEquals(0, PanelTriggers.pageOf(null));
+        assertEquals(0, PanelTriggers.pageOf("T_1789707125"));
+        assertEquals(0, PanelTriggers.pageOf("page:"));
+        assertEquals(0, PanelTriggers.pageOf("page:x"));
+        assertEquals(0, PanelTriggers.pageOf("page:-2"));
     }
 }

@@ -332,7 +332,7 @@
     <string name="panel_trigger_from">से</string>
     <string name="panel_trigger_to">तक</string>
     <string name="panel_trigger_off">बंद</string>
-    <string name="panel_triggers_help">सेव किया हुआ टेम्पलेट अपने आप आ सकता है। चार्जर घड़ी से ऊपर रहता है, और जब दोनों में से कोई लागू न हो तो पैनल प्रोफ़ाइल वाले पर लौट आता है। ट्रिगर चलने के दौरान किए गए बदलाव उसी टेम्पलेट में रहते हैं, जैसे प्रोफ़ाइल अपना रखती है।</string>
+    <string name="panel_triggers_help">पैनल का कोई पेज या सहेजा गया टेम्पलेट अपने आप आ सकता है। पेज पैनल को अपने ऊपर रोके रखता है और नहीं बदलता; टेम्पलेट पूरी व्यवस्था बदल देता है। चार्जर समय से ऊपर है, और जब कोई भी लागू न हो तो पैनल प्रोफ़ाइल वाले पर लौटता है। टेम्पलेट के चलते किए गए बदलाव उसी में रहते हैं, जैसे प्रोफ़ाइल अपना रखती है।</string>
     <string name="dashboard_named_templates_help">कोई सजावट सेव कर लें ताकि बाद में उस पर लौट सकें, प्रोफ़ाइल चाहे जो करे।</string>
     <string name="dashboard_named_templates_hint">लागू करने के लिए टेम्पलेट पर टैप करें।</string>
     <string name="dashboard_named_template_actions">%1$s के लिए कार्रवाइयाँ</string>
@@ -428,7 +428,7 @@
     <string name="dashboard_builder_pages_title">पेज</string>
     <string name="dashboard_page_add">पेज जोड़ें</string>
     <string name="dashboard_page_actions">पेज %1$d की कार्रवाइयाँ</string>
-    <string name="dashboard_page_home_description">पेज %1$d, मुख्य</string>
+    <string name="dashboard_page_home_description">%1$s, मुख्य</string>
     <string name="dashboard_page_make_home">मुख्य पेज बनाएँ</string>
     <string name="dashboard_page_move_left">बाएँ खिसकाएँ</string>
     <string name="dashboard_page_move_right">दाएँ खिसकाएँ</string>
@@ -452,4 +452,14 @@
         <item>पोर्ट्रेट</item>
     </string-array>
     <string name="dashboard_page_full">पेज %1$d पर नहीं जा सकता: पूरी स्क्रीन वाले विजेट को अलग पेज चाहिए।</string>
+    <string name="dashboard_page_name">नाम</string>
+    <string name="dashboard_page_name_none">कोई नाम नहीं</string>
+    <string name="dashboard_page_rename_title">पेज का नाम</string>
+    <string name="dashboard_page_duplicate">रूप की कॉपी</string>
+    <string name="dashboard_page_copy_name">%1$s (कॉपी)</string>
+    <string name="dashboard_page_in_cycle">अपने आप बदलने में</string>
+    <string name="dashboard_page_named_widgets">विजेट: %1$s</string>
+    <string name="dashboard_page_label_named">पेज %1$d · %2$s</string>
+    <string name="dashboard_page_cycle_help">अपने आप बदलने से बाहर रखा गया पेज स्वाइप से मिलता रहता है। रूप की कॉपी उसी लेआउट, ओरिएंटेशन और नाम वाला खाली पेज जोड़ती है: एक विजेट सिर्फ़ एक पेज पर होता है।</string>
+    <string name="panel_trigger_template">टेम्पलेट: %1$s</string>
 </resources>

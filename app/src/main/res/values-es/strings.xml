@@ -332,7 +332,7 @@
     <string name="panel_trigger_from">Desde</string>
     <string name="panel_trigger_to">Hasta</string>
     <string name="panel_trigger_off">Desactivado</string>
-    <string name="panel_triggers_help">Una plantilla guardada puede aparecer sola. El cargador gana al reloj, y cuando no se aplica ninguno el panel vuelve al del perfil. Los cambios hechos mientras un activador está vigente se guardan en su plantilla, igual que un perfil guarda el suyo.</string>
+    <string name="panel_triggers_help">Una página del panel o una plantilla guardada pueden aparecer solas. Una página mantiene el panel en ella sin pasar a otra; una plantilla sustituye toda la disposición. El cargador manda sobre la hora y, cuando no aplica ninguno, el panel vuelve al del perfil. Los cambios hechos mientras dura una plantilla se guardan en ella, igual que un perfil guarda el suyo.</string>
     <string name="dashboard_named_templates_help">Guarda una disposición para volver a ella más tarde, haga lo que haga el perfil.</string>
     <string name="dashboard_named_templates_hint">Toca una plantilla para aplicarla.</string>
     <string name="dashboard_named_template_actions">Acciones para %1$s</string>
@@ -428,7 +428,7 @@
     <string name="dashboard_builder_pages_title">Páginas</string>
     <string name="dashboard_page_add">Añadir página</string>
     <string name="dashboard_page_actions">Acciones de la página %1$d</string>
-    <string name="dashboard_page_home_description">Página %1$d, principal</string>
+    <string name="dashboard_page_home_description">%1$s, principal</string>
     <string name="dashboard_page_make_home">Hacer principal</string>
     <string name="dashboard_page_move_left">Mover a la izquierda</string>
     <string name="dashboard_page_move_right">Mover a la derecha</string>
@@ -452,4 +452,14 @@
         <item>Vertical</item>
     </string-array>
     <string name="dashboard_page_full">No cabe en la página %1$d: un widget a pantalla completa necesita una página para él solo.</string>
+    <string name="dashboard_page_name">Nombre</string>
+    <string name="dashboard_page_name_none">Sin nombre</string>
+    <string name="dashboard_page_rename_title">Nombre de la página</string>
+    <string name="dashboard_page_duplicate">Duplicar aspecto</string>
+    <string name="dashboard_page_copy_name">%1$s (copia)</string>
+    <string name="dashboard_page_in_cycle">Incluir en el cambio automático</string>
+    <string name="dashboard_page_named_widgets">Widgets: %1$s</string>
+    <string name="dashboard_page_label_named">Página %1$d · %2$s</string>
+    <string name="dashboard_page_cycle_help">Una página fuera del cambio automático sigue disponible deslizando. Duplicar aspecto añade una página con el mismo diseño, orientación y nombre, pero vacía: un widget solo está en una página.</string>
+    <string name="panel_trigger_template">Plantilla: %1$s</string>
 </resources>

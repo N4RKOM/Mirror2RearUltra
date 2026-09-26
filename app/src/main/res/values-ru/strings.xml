@@ -165,7 +165,7 @@
     <string name="panel_trigger_from">С</string>
     <string name="panel_trigger_to">До</string>
     <string name="panel_trigger_off">Выключено</string>
-    <string name="panel_triggers_help">Сохранённый шаблон может появляться сам. Зарядка важнее времени, а когда не подходит ни то ни другое, панель возвращается к панели профиля. Правки, сделанные пока держится триггер, сохраняются в его шаблон — так же, как профиль хранит свою.</string>
+    <string name="panel_triggers_help">Страница панели или сохранённый шаблон могут появляться сами. Страница удерживается на панели и не пролистывается; шаблон заменяет всю раскладку. Зарядка важнее времени, а когда не подходит ни то ни другое, панель возвращается к панели профиля. Правки, сделанные пока держится шаблон, сохраняются в него — так же, как профиль хранит свою.</string>
     <string name="dashboard_named_templates_help">Сохраните раскладку, чтобы вернуться к ней позже, независимо от профиля.</string>
     <string name="dashboard_named_templates_hint">Нажмите на шаблон, чтобы применить его.</string>
     <string name="dashboard_named_template_actions">Действия: %1$s</string>
@@ -452,7 +452,7 @@
     <string name="dashboard_builder_pages_title">Страницы</string>
     <string name="dashboard_page_add">Добавить страницу</string>
     <string name="dashboard_page_actions">Действия со страницей %1$d</string>
-    <string name="dashboard_page_home_description">Страница %1$d, основная</string>
+    <string name="dashboard_page_home_description">%1$s, основная</string>
     <string name="dashboard_page_make_home">Сделать основной</string>
     <string name="dashboard_page_move_left">Сдвинуть влево</string>
     <string name="dashboard_page_move_right">Сдвинуть вправо</string>
@@ -476,4 +476,14 @@
         <item>Вертикальная</item>
     </string-array>
     <string name="dashboard_page_full">На страницу %1$d нельзя: виджету на весь экран нужна отдельная страница.</string>
+    <string name="dashboard_page_name">Название</string>
+    <string name="dashboard_page_name_none">Без названия</string>
+    <string name="dashboard_page_rename_title">Название страницы</string>
+    <string name="dashboard_page_duplicate">Дублировать вид</string>
+    <string name="dashboard_page_copy_name">%1$s (копия)</string>
+    <string name="dashboard_page_in_cycle">В автолистании</string>
+    <string name="dashboard_page_named_widgets">Виджеты: %1$s</string>
+    <string name="dashboard_page_label_named">Страница %1$d · %2$s</string>
+    <string name="dashboard_page_cycle_help">Страница вне автолистания остаётся доступной свайпом. «Дублировать вид» добавляет страницу с тем же видом, ориентацией и названием, но пустую: виджет стоит только на одной странице.</string>
+    <string name="panel_trigger_template">Шаблон «%1$s»</string>
 </resources>

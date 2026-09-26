@@ -145,25 +145,37 @@ public class DashboardTemplatesActivity extends AppCompatActivity {
     }
 
     /**
-     * The rows that say when a saved template should come up by itself.
+     * The rows that say when a page or a saved template should come up by
+     * itself.
      *
-     * <p>Rebuilt whenever the templates are, because both rows are lists of
-     * them: one deleted there must stop being offered here. The two times are
-     * only shown once a template is chosen for them - a window with nothing
-     * to put in it is a question with no answer.
+     * <p>Rebuilt whenever the templates are, because both rows list them: one
+     * deleted there must stop being offered here. The pages of the
+     * arrangement in use come first - holding the panel on one of its own
+     * pages is the lighter thing to ask for. The two times are only shown once
+     * something is chosen for them - a window with nothing to put in it is a
+     * question with no answer.
      */
     private void renderTriggers() {
-        List<DashboardTemplateStore.Named> named = DashboardTemplateStore.listNamed(this);
-        String off = getString(R.string.panel_trigger_off);
-        String[] labels = new String[named.size() + 1];
-        labels[0] = off;
-        for (int index = 0; index < named.size(); index++) {
-            labels[index + 1] = named.get(index).name;
+        List<String> slots = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        slots.add(null);
+        labels.add(getString(R.string.panel_trigger_off));
+        int pageCount = DashboardWidgetLayout.loadPageCount(this);
+        for (int page = 1; page <= pageCount; page++) {
+            slots.add(PanelTriggers.pageSlot(page));
+            String name = DashboardWidgetLayout.loadPageName(this, page);
+            labels.add(name.isEmpty()
+                    ? getString(R.string.dashboard_builder_page_section, page)
+                    : getString(R.string.dashboard_page_label_named, page, name));
         }
-        bindTriggerRow(triggerChargingInput, labels, named,
-                PanelTriggers.chargingSlot(this), off, true);
-        bindTriggerRow(triggerTimeInput, labels, named,
-                PanelTriggers.timeSlot(this), off, false);
+        for (DashboardTemplateStore.Named named : DashboardTemplateStore.listNamed(this)) {
+            slots.add(named.id);
+            labels.add(getString(R.string.panel_trigger_template, named.name));
+        }
+        bindTriggerRow(triggerChargingInput, slots, labels,
+                PanelTriggers.chargingSlot(this), true);
+        bindTriggerRow(triggerTimeInput, slots, labels,
+                PanelTriggers.timeSlot(this), false);
         boolean timed = PanelTriggers.timeSlot(this) != null;
         triggerFromInput.setVisibility(timed ? android.view.View.VISIBLE : android.view.View.GONE);
         triggerToInput.setVisibility(timed ? android.view.View.VISIBLE : android.view.View.GONE);
@@ -171,20 +183,14 @@ public class DashboardTemplatesActivity extends AppCompatActivity {
         triggerToInput.setValue(clockLabel(PanelTriggers.toMinutes(this)));
     }
 
-    private void bindTriggerRow(HyperValueRow row, String[] labels,
-            List<DashboardTemplateStore.Named> named, @Nullable String current,
-            String off, boolean forCharging) {
-        row.setEntries(labels);
-        String label = off;
-        for (DashboardTemplateStore.Named candidate : named) {
-            if (candidate.id.equals(current)) {
-                label = candidate.name;
-            }
-        }
-        row.setValue(label);
+    private void bindTriggerRow(HyperValueRow row, List<String> slots, List<String> labels,
+            @Nullable String current, boolean forCharging) {
+        row.setEntries(labels.toArray(new String[0]));
+        int index = current == null ? 0 : Math.max(0, slots.indexOf(current));
+        row.setValue(labels.get(index));
         row.setOnItemSelectedListener(position -> {
-            String slot = position <= 0 || position > named.size()
-                    ? null : named.get(position - 1).id;
+            String slot = position <= 0 || position >= slots.size()
+                    ? null : slots.get(position);
             if (forCharging) {
                 PanelTriggers.setChargingSlot(this, slot);
             } else {
@@ -325,14 +331,18 @@ public class DashboardTemplatesActivity extends AppCompatActivity {
     /** The name sheet, shared by saving a new template and renaming one. */
     private void promptForTemplateName(int titleResource, String initial,
             java.util.function.Consumer<String> onNamed) {
+        // Inflated into a holder so its margins survive: without a parent
+        // the field ran edge to edge of the dialog.
+        android.widget.FrameLayout holder = new android.widget.FrameLayout(this);
         TextInputLayout inputLayout = (TextInputLayout) getLayoutInflater()
-                .inflate(R.layout.dialog_template_name, null, false);
+                .inflate(R.layout.dialog_template_name, holder, false);
+        holder.addView(inputLayout);
         TextInputEditText input = inputLayout.findViewById(R.id.template_name_input);
         input.setText(initial);
         input.setSelection(input.length());
         AlertDialog dialog = new MaterialAlertDialogBuilder(this)
                 .setTitle(titleResource)
-                .setView(inputLayout)
+                .setView(holder)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.save, null)
                 .create();

@@ -332,7 +332,7 @@
     <string name="panel_trigger_from">מ־</string>
     <string name="panel_trigger_to">עד</string>
     <string name="panel_trigger_off">כבוי</string>
-    <string name="panel_triggers_help">תבנית שמורה יכולה לעלות מעצמה. המטען גובר על השעון, וכששניהם אינם חלים הלוח חוזר לזה של הפרופיל. שינויים שנעשים בזמן שטריגר פעיל נשמרים בתבנית שלו, כפי שפרופיל שומר את שלו.</string>
+    <string name="panel_triggers_help">עמוד של הלוח או תבנית שמורה יכולים להופיע מעצמם. עמוד מחזיק את הלוח עליו ואינו מתחלף; תבנית מחליפה את כל הסידור. הטעינה גוברת על השעה, וכשאף אחד לא חל הלוח חוזר ללוח של הפרופיל. שינויים שנעשים בזמן תבנית נשמרים בה, כמו שפרופיל שומר את שלו.</string>
     <string name="dashboard_named_templates_help">כדאי לשמור סידור כדי לחזור אליו מאוחר יותר, לא משנה מה הפרופיל עושה.</string>
     <string name="dashboard_named_templates_hint">יש להקיש על תבנית כדי להחיל אותה.</string>
     <string name="dashboard_named_template_actions">פעולות עבור %1$s</string>
@@ -432,7 +432,7 @@
     <string name="dashboard_builder_pages_title">עמודים</string>
     <string name="dashboard_page_add">הוספת עמוד</string>
     <string name="dashboard_page_actions">פעולות לעמוד %1$d</string>
-    <string name="dashboard_page_home_description">עמוד %1$d, ראשי</string>
+    <string name="dashboard_page_home_description">%1$s, ראשי</string>
     <string name="dashboard_page_make_home">הגדרה כראשי</string>
     <string name="dashboard_page_move_left">הזזה שמאלה</string>
     <string name="dashboard_page_move_right">הזזה ימינה</string>
@@ -456,4 +456,14 @@
         <item>לאורך</item>
     </string-array>
     <string name="dashboard_page_full">אי אפשר לעמוד %1$d: ווידג׳ט במסך מלא צריך עמוד משלו.</string>
+    <string name="dashboard_page_name">שם</string>
+    <string name="dashboard_page_name_none">ללא שם</string>
+    <string name="dashboard_page_rename_title">שם העמוד</string>
+    <string name="dashboard_page_duplicate">שכפול מראה</string>
+    <string name="dashboard_page_copy_name">%1$s (עותק)</string>
+    <string name="dashboard_page_in_cycle">בהחלפה האוטומטית</string>
+    <string name="dashboard_page_named_widgets">ווידג׳טים: %1$s</string>
+    <string name="dashboard_page_label_named">עמוד %1$d · %2$s</string>
+    <string name="dashboard_page_cycle_help">עמוד שהוצא מההחלפה האוטומטית נשאר זמין בהחלקה. שכפול מראה מוסיף עמוד עם אותה פריסה, כיוון ושם, אבל ריק: ווידג׳ט נמצא בעמוד אחד בלבד.</string>
+    <string name="panel_trigger_template">תבנית: %1$s</string>
 </resources>

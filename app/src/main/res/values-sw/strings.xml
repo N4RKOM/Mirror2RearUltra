@@ -332,7 +332,7 @@
     <string name="panel_trigger_from">Kuanzia</string>
     <string name="panel_trigger_to">Hadi</string>
     <string name="panel_trigger_off">Imezimwa</string>
-    <string name="panel_triggers_help">Kiolezo kilichohifadhiwa kinaweza kujitokeza chenyewe. Chaja hushinda saa, na pasipo lolote kutumika paneli hurejea kwenye kile cha wasifu. Mabadiliko yaliyofanywa wakati kianzishi kinatumika hubaki katika kiolezo chake, kama vile wasifu hushika chake.</string>
+    <string name="panel_triggers_help">Ukurasa wa paneli au kiolezo kilichohifadhiwa kinaweza kujitokeza chenyewe. Ukurasa hushikilia paneli bila kubadilika; kiolezo hubadilisha mpangilio wote. Chaja ina kipaumbele juu ya saa, na visipotumika vyote paneli hurudi kwenye ya wasifu. Mabadiliko yanayofanywa kiolezo kikiwa kinatumika huhifadhiwa humo, kama wasifu unavyohifadhi wake.</string>
     <string name="dashboard_named_templates_help">Hifadhi mpangilio ili urudi kwake baadaye, hata wasifu ufanye nini.</string>
     <string name="dashboard_named_templates_hint">Gusa kiolezo ili kukitumia.</string>
     <string name="dashboard_named_template_actions">Vitendo vya %1$s</string>
@@ -428,7 +428,7 @@
     <string name="dashboard_builder_pages_title">Kurasa</string>
     <string name="dashboard_page_add">Ongeza ukurasa</string>
     <string name="dashboard_page_actions">Vitendo vya ukurasa %1$d</string>
-    <string name="dashboard_page_home_description">Ukurasa %1$d, mkuu</string>
+    <string name="dashboard_page_home_description">%1$s, mkuu</string>
     <string name="dashboard_page_make_home">Fanya kuwa mkuu</string>
     <string name="dashboard_page_move_left">Sogeza kushoto</string>
     <string name="dashboard_page_move_right">Sogeza kulia</string>
@@ -452,4 +452,14 @@
         <item>Wima</item>
     </string-array>
     <string name="dashboard_page_full">Haiwezekani kwenye ukurasa %1$d: wijeti ya skrini nzima inahitaji ukurasa wake peke yake.</string>
+    <string name="dashboard_page_name">Jina</string>
+    <string name="dashboard_page_name_none">Bila jina</string>
+    <string name="dashboard_page_rename_title">Jina la ukurasa</string>
+    <string name="dashboard_page_duplicate">Nakili mwonekano</string>
+    <string name="dashboard_page_copy_name">%1$s (nakala)</string>
+    <string name="dashboard_page_in_cycle">Katika kubadilisha kiotomatiki</string>
+    <string name="dashboard_page_named_widgets">Wijeti: %1$s</string>
+    <string name="dashboard_page_label_named">Ukurasa %1$d · %2$s</string>
+    <string name="dashboard_page_cycle_help">Ukurasa ulioondolewa kwenye kubadilisha kiotomatiki bado unafikiwa kwa kutelezesha. Nakili mwonekano huongeza ukurasa wenye mpangilio, mwelekeo na jina sawa, lakini tupu: wijeti iko kwenye ukurasa mmoja tu.</string>
+    <string name="panel_trigger_template">Kiolezo: %1$s</string>
 </resources>

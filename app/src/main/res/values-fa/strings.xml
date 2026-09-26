@@ -332,7 +332,7 @@
     <string name="panel_trigger_from">از</string>
     <string name="panel_trigger_to">تا</string>
     <string name="panel_trigger_off">خاموش</string>
-    <string name="panel_triggers_help">یک الگوی ذخیره‌شده می‌تواند خودش بالا بیاید. شارژر بر ساعت مقدم است، و وقتی هیچ‌کدام صدق نکند پنل به الگوی نمایه برمی‌گردد. تغییرهایی که هنگام فعال بودن یک راه‌انداز انجام می‌شود در الگوی خودش می‌ماند، همان‌طور که نمایه الگوی خودش را نگه می‌دارد.</string>
+    <string name="panel_triggers_help">یک صفحه از پنل یا یک الگوی ذخیره‌شده می‌تواند خودکار نمایش داده شود. صفحه پنل را روی خود نگه می‌دارد و ورق نمی‌خورد؛ الگو کل چیدمان را جایگزین می‌کند. شارژ بر زمان مقدم است و وقتی هیچ‌کدام برقرار نباشد پنل به پنل نمایه برمی‌گردد. تغییرات در مدتی که الگو برقرار است در همان ذخیره می‌شود، همان‌طور که نمایه پنل خودش را نگه می‌دارد.</string>
     <string name="dashboard_named_templates_help">چیدمانی را ذخیره کنید تا بعداً به آن برگردید، هر کاری که نمایه بکند.</string>
     <string name="dashboard_named_templates_hint">برای اعمال، روی الگو بزنید.</string>
     <string name="dashboard_named_template_actions">کارهای %1$s</string>
@@ -428,7 +428,7 @@
     <string name="dashboard_builder_pages_title">صفحه‌ها</string>
     <string name="dashboard_page_add">افزودن صفحه</string>
     <string name="dashboard_page_actions">کارهای صفحهٔ %1$d</string>
-    <string name="dashboard_page_home_description">صفحهٔ %1$d، اصلی</string>
+    <string name="dashboard_page_home_description">%1$s، اصلی</string>
     <string name="dashboard_page_make_home">اصلی کردن</string>
     <string name="dashboard_page_move_left">جابه‌جایی به چپ</string>
     <string name="dashboard_page_move_right">جابه‌جایی به راست</string>
@@ -452,4 +452,14 @@
         <item>عمودی</item>
     </string-array>
     <string name="dashboard_page_full">به صفحهٔ %1$d نمی‌شود: ابزارک تمام‌صفحه یک صفحهٔ جدا لازم دارد.</string>
+    <string name="dashboard_page_name">نام</string>
+    <string name="dashboard_page_name_none">بدون نام</string>
+    <string name="dashboard_page_rename_title">نام صفحه</string>
+    <string name="dashboard_page_duplicate">تکثیر ظاهر</string>
+    <string name="dashboard_page_copy_name">%1$s (کپی)</string>
+    <string name="dashboard_page_in_cycle">در ورق‌زدن خودکار</string>
+    <string name="dashboard_page_named_widgets">ابزارک‌ها: %1$s</string>
+    <string name="dashboard_page_label_named">صفحهٔ %1$d · %2$s</string>
+    <string name="dashboard_page_cycle_help">صفحه‌ای که از ورق‌زدن خودکار بیرون است، با کشیدن انگشت همچنان در دسترس است. «تکثیر ظاهر» صفحه‌ای با همان چیدمان، جهت و نام اضافه می‌کند، ولی خالی: هر ابزارک فقط در یک صفحه است.</string>
+    <string name="panel_trigger_template">الگو: %1$s</string>
 </resources>
