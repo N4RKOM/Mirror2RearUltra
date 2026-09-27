@@ -58,6 +58,8 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     private String[] idleModeLabels;
     private MaterialSwitch pocketLockSwitch;
     private MaterialSwitch shutterOnTapSwitch;
+    private HyperValueRow shutterDelayInput;
+    private String[] shutterDelayLabels;
     private MaterialSwitch tapVariantSwitch;
     private TextView shutterAccessStatus;
     private View shutterAccessButton;
@@ -89,6 +91,15 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         themeInput = findViewById(R.id.dashboard_theme_input);
         pocketLockSwitch = findViewById(R.id.dashboard_pocket_lock_switch);
         shutterOnTapSwitch = findViewById(R.id.dashboard_shutter_switch);
+        shutterDelayInput = findViewById(R.id.dashboard_shutter_delay_input);
+        shutterDelayLabels = new String[ShutterCountdown.CHOICES.length];
+        for (int index = 0; index < ShutterCountdown.CHOICES.length; index++) {
+            int seconds = ShutterCountdown.CHOICES[index];
+            shutterDelayLabels[index] = seconds == 0
+                    ? getString(R.string.shutter_countdown_off)
+                    : getString(R.string.shutter_countdown_seconds, seconds);
+        }
+        shutterDelayInput.setEntries(shutterDelayLabels);
         tapVariantSwitch = findViewById(R.id.dashboard_tap_variant_switch);
         shutterAccessStatus = findViewById(R.id.dashboard_shutter_access_status);
         shutterAccessButton = findViewById(R.id.dashboard_shutter_access_button);
@@ -204,6 +215,15 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                 DashboardWidgetLayout.setShutterOnTapEnabled(this, checked);
                 MirrorSettings.saveDashboardSettings(this,
                         MirrorSettings.loadDashboardSettings(this));
+                shutterDelayInput.setEnabled(checked);
+            }
+        });
+        // Read at the moment of the tap, so there is nothing to tell the
+        // running panel.
+        shutterDelayInput.setOnItemSelectedListener(position -> {
+            if (position >= 0 && position < ShutterCountdown.CHOICES.length) {
+                DashboardWidgetLayout.setShutterDelaySeconds(this,
+                        ShutterCountdown.CHOICES[position]);
             }
         });
         faceDownSwitch.setOnCheckedChangeListener((button, checked) -> {
@@ -270,6 +290,13 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         renderOwnFonts();
         pocketLockSwitch.setChecked(DashboardWidgetLayout.isPocketLockEnabled(this));
         shutterOnTapSwitch.setChecked(DashboardWidgetLayout.isShutterOnTapEnabled(this));
+        int delay = DashboardWidgetLayout.shutterDelaySeconds(this);
+        for (int index = 0; index < ShutterCountdown.CHOICES.length; index++) {
+            if (ShutterCountdown.CHOICES[index] == delay) {
+                shutterDelayInput.setValue(shutterDelayLabels[index]);
+            }
+        }
+        shutterDelayInput.setEnabled(shutterOnTapSwitch.isChecked());
         tapVariantSwitch.setChecked(DashboardWidgetLayout.isTapCyclesVariantEnabled(this));
         // Switched on in the system's own settings, so it is read afresh here
         // rather than remembered: this screen is where people come back to.

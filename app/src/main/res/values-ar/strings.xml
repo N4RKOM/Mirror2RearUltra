@@ -500,4 +500,7 @@
     <string name="dashboard_qr_password_hint">كلمة المرور</string>
     <string name="dashboard_qr_help">يشغل الرمز صفحة خاصة به. اللوحة صغيرة، لذا أمسك الهاتف الماسح على بعد بضعة سنتيمترات. اترك كلمة المرور فارغة للشبكة المفتوحة.</string>
     <string name="dashboard_qr_empty">حدد محتوى الرمز في قائمة الأدوات</string>
+    <string name="shutter_countdown_title">عد تنازلي قبل الالتقاط</string>
+    <string name="shutter_countdown_off">فورًا</string>
+    <string name="shutter_countdown_seconds">%1$d ث</string>
 </resources>

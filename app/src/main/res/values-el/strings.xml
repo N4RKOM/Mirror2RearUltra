@@ -492,4 +492,7 @@
     <string name="dashboard_qr_password_hint">Κωδικός πρόσβασης</string>
     <string name="dashboard_qr_help">Ο κωδικός πιάνει δική του σελίδα. Η οθόνη είναι μικρή, οπότε κρατήστε το τηλέφωνο που σαρώνει λίγα εκατοστά μακριά. Για ανοιχτό δίκτυο αφήστε τον κωδικό κενό.</string>
     <string name="dashboard_qr_empty">Ορίστε το περιεχόμενο του κωδικού στη λίστα γραφικών στοιχείων</string>
+    <string name="shutter_countdown_title">Αντίστροφη μέτρηση πριν τη λήψη</string>
+    <string name="shutter_countdown_off">Αμέσως</string>
+    <string name="shutter_countdown_seconds">%1$d δ</string>
 </resources>

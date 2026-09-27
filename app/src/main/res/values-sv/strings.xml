@@ -492,4 +492,7 @@
     <string name="dashboard_qr_password_hint">Lösenord</string>
     <string name="dashboard_qr_help">Koden får en egen sida. Panelen är liten, så håll telefonen som skannar några centimeter bort. Lämna lösenordet tomt för ett öppet nätverk.</string>
     <string name="dashboard_qr_empty">Ange kodens innehåll i widgetlistan</string>
+    <string name="shutter_countdown_title">Nedräkning före bilden</string>
+    <string name="shutter_countdown_off">Direkt</string>
+    <string name="shutter_countdown_seconds">%1$d s</string>
 </resources>

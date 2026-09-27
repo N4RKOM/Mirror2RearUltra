@@ -492,4 +492,7 @@
     <string name="dashboard_qr_password_hint">گذرواژه</string>
     <string name="dashboard_qr_help">کد یک صفحه جداگانه می‌گیرد. پنل کوچک است، پس گوشی اسکن‌کننده را چند سانتی‌متر دورتر نگه دارید. برای شبکه باز گذرواژه را خالی بگذارید.</string>
     <string name="dashboard_qr_empty">محتوای کد را در فهرست ابزارک‌ها تعیین کنید</string>
+    <string name="shutter_countdown_title">شمارش معکوس پیش از عکس</string>
+    <string name="shutter_countdown_off">بی‌درنگ</string>
+    <string name="shutter_countdown_seconds">%1$d ث</string>
 </resources>

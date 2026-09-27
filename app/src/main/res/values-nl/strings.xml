@@ -492,4 +492,7 @@
     <string name="dashboard_qr_password_hint">Wachtwoord</string>
     <string name="dashboard_qr_help">De code krijgt een eigen pagina. Het paneel is klein, dus houd de scannende telefoon op een paar centimeter. Laat het wachtwoord leeg voor een open netwerk.</string>
     <string name="dashboard_qr_empty">Stel de inhoud van de code in bij de widgetlijst</string>
+    <string name="shutter_countdown_title">Aftellen voor de foto</string>
+    <string name="shutter_countdown_off">Meteen</string>
+    <string name="shutter_countdown_seconds">%1$d s</string>
 </resources>

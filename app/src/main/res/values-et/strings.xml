@@ -492,4 +492,7 @@
     <string name="dashboard_qr_password_hint">Parool</string>
     <string name="dashboard_qr_help">Kood võtab eraldi lehe. Paneel on väike, seega hoia skannivat telefoni mõne sentimeetri kaugusel. Avatud võrgu puhul jäta parool tühjaks.</string>
     <string name="dashboard_qr_empty">Määra koodi sisu vidinate loendis</string>
+    <string name="shutter_countdown_title">Loendus enne pildistamist</string>
+    <string name="shutter_countdown_off">Kohe</string>
+    <string name="shutter_countdown_seconds">%1$d s</string>
 </resources>

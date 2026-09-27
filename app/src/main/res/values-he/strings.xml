@@ -496,4 +496,7 @@
     <string name="dashboard_qr_password_hint">סיסמה</string>
     <string name="dashboard_qr_help">הקוד תופס עמוד משלו. הלוח קטן, לכן החזיקו את הטלפון הסורק במרחק כמה סנטימטרים. לרשת פתוחה השאירו את הסיסמה ריקה.</string>
     <string name="dashboard_qr_empty">הגדירו את תוכן הקוד ברשימת הווידג׳טים</string>
+    <string name="shutter_countdown_title">ספירה לאחור לפני הצילום</string>
+    <string name="shutter_countdown_off">מיד</string>
+    <string name="shutter_countdown_seconds">%1$d ש׳</string>
 </resources>

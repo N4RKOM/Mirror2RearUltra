@@ -516,4 +516,7 @@
     <string name="dashboard_qr_password_hint">Пароль</string>
     <string name="dashboard_qr_help">Код занимает отдельную страницу. Панель маленькая, поэтому сканирующий телефон держите в нескольких сантиметрах. Для открытой сети оставьте пароль пустым.</string>
     <string name="dashboard_qr_empty">Задайте содержимое кода в списке виджетов</string>
+    <string name="shutter_countdown_title">Отсчёт перед снимком</string>
+    <string name="shutter_countdown_off">Сразу</string>
+    <string name="shutter_countdown_seconds">%1$d с</string>
 </resources>

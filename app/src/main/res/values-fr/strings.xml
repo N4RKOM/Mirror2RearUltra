@@ -492,4 +492,7 @@
     <string name="dashboard_qr_password_hint">Mot de passe</string>
     <string name="dashboard_qr_help">Le code occupe une page à lui seul. L’écran est petit : tenez le téléphone qui scanne à quelques centimètres. Laissez le mot de passe vide pour un réseau ouvert.</string>
     <string name="dashboard_qr_empty">Définissez le contenu du code dans la liste des widgets</string>
+    <string name="shutter_countdown_title">Compte à rebours avant la photo</string>
+    <string name="shutter_countdown_off">Tout de suite</string>
+    <string name="shutter_countdown_seconds">%1$d s</string>
 </resources>

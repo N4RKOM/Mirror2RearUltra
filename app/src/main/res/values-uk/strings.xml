@@ -496,4 +496,7 @@
     <string name="dashboard_qr_password_hint">Пароль</string>
     <string name="dashboard_qr_help">Код займає окрему сторінку. Панель маленька, тож тримайте телефон, що сканує, за кілька сантиметрів. Для відкритої мережі залиште пароль порожнім.</string>
     <string name="dashboard_qr_empty">Задайте вміст коду в списку віджетів</string>
+    <string name="shutter_countdown_title">Відлік перед знімком</string>
+    <string name="shutter_countdown_off">Одразу</string>
+    <string name="shutter_countdown_seconds">%1$d с</string>
 </resources>

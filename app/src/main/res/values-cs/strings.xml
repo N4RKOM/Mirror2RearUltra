@@ -496,4 +496,7 @@
     <string name="dashboard_qr_password_hint">Heslo</string>
     <string name="dashboard_qr_help">Kód zabírá vlastní stránku. Panel je malý, takže skenující telefon držte pár centimetrů od něj. U otevřené sítě nechte heslo prázdné.</string>
     <string name="dashboard_qr_empty">Obsah kódu nastavte v seznamu widgetů</string>
+    <string name="shutter_countdown_title">Odpočet před snímkem</string>
+    <string name="shutter_countdown_off">Hned</string>
+    <string name="shutter_countdown_seconds">%1$d s</string>
 </resources>

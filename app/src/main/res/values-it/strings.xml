@@ -492,4 +492,7 @@
     <string name="dashboard_qr_password_hint">Password</string>
     <string name="dashboard_qr_help">Il codice occupa una pagina tutta sua. Il pannello è piccolo: tieni il telefono che scansiona a pochi centimetri. Lascia vuota la password per una rete aperta.</string>
     <string name="dashboard_qr_empty">Imposta il contenuto del codice nell’elenco dei widget</string>
+    <string name="shutter_countdown_title">Conto alla rovescia prima dello scatto</string>
+    <string name="shutter_countdown_off">Subito</string>
+    <string name="shutter_countdown_seconds">%1$d s</string>
 </resources>

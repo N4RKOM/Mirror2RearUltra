@@ -492,4 +492,7 @@
     <string name="dashboard_qr_password_hint">Nenosiri</string>
     <string name="dashboard_qr_help">Msimbo huchukua ukurasa wake. Paneli ni ndogo, kwa hivyo shikilia simu inayochanganua sentimita chache. Acha nenosiri tupu kwa mtandao ulio wazi.</string>
     <string name="dashboard_qr_empty">Weka maudhui ya msimbo katika orodha ya wijeti</string>
+    <string name="shutter_countdown_title">Kuhesabu kabla ya picha</string>
+    <string name="shutter_countdown_off">Mara moja</string>
+    <string name="shutter_countdown_seconds">sek %1$d</string>
 </resources>

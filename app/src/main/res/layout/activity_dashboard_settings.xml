@@ -219,8 +219,15 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/dashboard_shutter_access_button"
-                    style="@style/HyperOS.ActionRow.Bottom"
+                    style="@style/HyperOS.ActionRow"
                     android:text="@string/shutter_service_open" />
+
+                <!-- After the service's status, which sat under it and read
+                     as though the countdown were what was switched off. -->
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_shutter_delay_input"
+                    style="@style/HyperOS.ValueRow.Bottom"
+                    app:rowTitle="@string/shutter_countdown_title" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

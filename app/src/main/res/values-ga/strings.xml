@@ -498,4 +498,7 @@
     <string name="dashboard_qr_password_hint">Pasfhocal</string>
     <string name="dashboard_qr_help">Tógann an cód leathanach dó féin. Tá an painéal beag, mar sin coinnigh an fón scanta cúpla ceintiméadar uaidh. Fág an pasfhocal folamh do líonra oscailte.</string>
     <string name="dashboard_qr_empty">Socraigh ábhar an chóid sa liosta giuirléidí</string>
+    <string name="shutter_countdown_title">Comhaireamh síos roimh an ngrianghraf</string>
+    <string name="shutter_countdown_off">Láithreach</string>
+    <string name="shutter_countdown_seconds">%1$d s</string>
 </resources>

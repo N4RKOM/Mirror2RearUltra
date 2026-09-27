@@ -511,4 +511,7 @@
     <string name="dashboard_qr_password_hint">Password</string>
     <string name="dashboard_qr_help">The code takes a page of its own. The panel is small, so hold the scanning phone a few centimetres away. Leave the password empty for an open network.</string>
     <string name="dashboard_qr_empty">Set what the code holds in the widget list</string>
+    <string name="shutter_countdown_title">Countdown before the shot</string>
+    <string name="shutter_countdown_off">At once</string>
+    <string name="shutter_countdown_seconds">%1$d s</string>
 </resources>

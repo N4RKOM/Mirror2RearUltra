@@ -492,4 +492,7 @@
     <string name="dashboard_qr_password_hint">Contraseña</string>
     <string name="dashboard_qr_help">El código ocupa una página propia. El panel es pequeño: acerca el teléfono que escanea a unos centímetros. Deja la contraseña vacía para una red abierta.</string>
     <string name="dashboard_qr_empty">Define el contenido del código en la lista de widgets</string>
+    <string name="shutter_countdown_title">Cuenta atrás antes de la foto</string>
+    <string name="shutter_countdown_off">Al instante</string>
+    <string name="shutter_countdown_seconds">%1$d s</string>
 </resources>

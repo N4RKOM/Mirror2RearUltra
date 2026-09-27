@@ -494,4 +494,7 @@
     <string name="dashboard_qr_password_hint">Parolă</string>
     <string name="dashboard_qr_help">Codul ocupă o pagină proprie. Panoul este mic, așa că țineți telefonul care scanează la câțiva centimetri. Lăsați parola goală pentru o rețea deschisă.</string>
     <string name="dashboard_qr_empty">Setați conținutul codului în lista de widgeturi</string>
+    <string name="shutter_countdown_title">Numărătoare inversă înainte de fotografie</string>
+    <string name="shutter_countdown_off">Imediat</string>
+    <string name="shutter_countdown_seconds">%1$d s</string>
 </resources>

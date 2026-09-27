@@ -34,6 +34,14 @@
         android:importantForAccessibility="no"
         android:visibility="gone" />
 
+    <!-- Under the brightness overlay, so it is dimmed with the image. -->
+    <com.tpkarras.mirror2rearultra.ShutterCountdownView
+        android:id="@+id/shutter_countdown"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
+
     <View
         android:id="@+id/brightness_overlay"
         android:layout_width="match_parent"

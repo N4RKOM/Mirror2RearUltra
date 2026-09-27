@@ -492,4 +492,7 @@
     <string name="dashboard_qr_password_hint">पासवर्ड</string>
     <string name="dashboard_qr_help">कोड अपना अलग पेज लेता है। पैनल छोटा है, इसलिए स्कैन करने वाले फ़ोन को कुछ सेंटीमीटर दूर रखें। खुले नेटवर्क के लिए पासवर्ड खाली छोड़ें।</string>
     <string name="dashboard_qr_empty">विजेट सूची में कोड की सामग्री सेट करें</string>
+    <string name="shutter_countdown_title">फ़ोटो से पहले उलटी गिनती</string>
+    <string name="shutter_countdown_off">तुरंत</string>
+    <string name="shutter_countdown_seconds">%1$d से</string>
 </resources>

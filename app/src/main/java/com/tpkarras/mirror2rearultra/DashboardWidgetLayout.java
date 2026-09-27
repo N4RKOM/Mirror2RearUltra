@@ -100,6 +100,7 @@ final class DashboardWidgetLayout {
     private static final String POCKET_LOCK = "pocket_lock";
     private static final String FACE_DOWN_OFF = "face_down_off";
     private static final String SHUTTER_ON_TAP = "shutter_on_tap";
+    private static final String SHUTTER_DELAY = "shutter_delay_seconds";
     private static final String TAP_CYCLES_VARIANT = "tap_cycles_variant";
 
     private DashboardWidgetLayout() {}
@@ -913,6 +914,16 @@ final class DashboardWidgetLayout {
 
     static void setShutterOnTapEnabled(Context context, boolean enabled) {
         prefs(context).edit().putBoolean(SHUTTER_ON_TAP, enabled).apply();
+    }
+
+    /** Seconds counted down on the panel before a tap takes the shot; nought for at once. */
+    static int shutterDelaySeconds(Context context) {
+        return ShutterCountdown.normalized(prefs(context).getInt(SHUTTER_DELAY, 0));
+    }
+
+    static void setShutterDelaySeconds(Context context, int seconds) {
+        prefs(context).edit()
+                .putInt(SHUTTER_DELAY, ShutterCountdown.normalized(seconds)).apply();
     }
 
     static boolean isFaceDownOffEnabled(Context context) {

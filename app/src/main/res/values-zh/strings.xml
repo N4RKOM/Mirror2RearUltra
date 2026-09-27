@@ -490,4 +490,7 @@
     <string name="dashboard_qr_password_hint">密码</string>
     <string name="dashboard_qr_help">二维码独占一页。面板很小，请将扫码的手机放在几厘米外。开放网络请将密码留空。</string>
     <string name="dashboard_qr_empty">请在小组件列表中设置二维码内容</string>
+    <string name="shutter_countdown_title">拍摄前倒计时</string>
+    <string name="shutter_countdown_off">立即</string>
+    <string name="shutter_countdown_seconds">%1$d 秒</string>
 </resources>

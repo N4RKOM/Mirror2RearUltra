@@ -492,4 +492,7 @@
     <string name="dashboard_qr_password_hint">Salasana</string>
     <string name="dashboard_qr_help">Koodi vie oman sivunsa. Paneeli on pieni, joten pidä skannaava puhelin muutaman sentin päässä. Jätä salasana tyhjäksi avoimelle verkolle.</string>
     <string name="dashboard_qr_empty">Aseta koodin sisältö widgetluettelossa</string>
+    <string name="shutter_countdown_title">Lähtölaskenta ennen kuvaa</string>
+    <string name="shutter_countdown_off">Heti</string>
+    <string name="shutter_countdown_seconds">%1$d s</string>
 </resources>

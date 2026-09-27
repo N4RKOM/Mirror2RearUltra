@@ -490,4 +490,7 @@
     <string name="dashboard_qr_password_hint">パスワード</string>
     <string name="dashboard_qr_help">コードは専用のページを使います。パネルが小さいので、読み取る端末を数センチまで近づけてください。オープンなネットワークではパスワードを空欄にします。</string>
     <string name="dashboard_qr_empty">コードの内容はウィジェット一覧で設定してください</string>
+    <string name="shutter_countdown_title">撮影前のカウントダウン</string>
+    <string name="shutter_countdown_off">すぐに</string>
+    <string name="shutter_countdown_seconds">%1$d 秒</string>
 </resources>

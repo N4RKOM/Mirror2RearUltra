@@ -79,6 +79,11 @@ public class Mirror extends Activity implements
     private CalibrationGridView calibrationGrid;
     private CropMaskView cropMask;
     private View shutterFlash;
+    private ShutterCountdownView shutterCountdown;
+    private final Handler countdownHandler = new Handler(Looper.getMainLooper());
+    /** When the counted shot is due, in uptime; meaningful only while one is counting. */
+    private long countdownEndsAt;
+    private final Runnable countdownTick = this::countdownTick;
     private PanelShutter panelShutter;
     /** Where the finger went down, for telling a tap from a swipe. */
     private float touchDownX;
@@ -252,6 +257,7 @@ public class Mirror extends Activity implements
         calibrationGrid = findViewById(R.id.calibration_grid);
         cropMask = findViewById(R.id.crop_mask);
         shutterFlash = findViewById(R.id.shutter_flash);
+        shutterCountdown = findViewById(R.id.shutter_countdown);
         panelShutter = new PanelShutter();
         dashboardView = findViewById(R.id.rear_dashboard);
         textureView.setClickable(false);
@@ -356,6 +362,9 @@ public class Mirror extends Activity implements
         if (cropFrameOverlay != null) {
             cropFrameOverlay.cancel();
         }
+        // A shot counted down on a panel that has gone would land in
+        // whatever is in front by the time the count ran out.
+        cancelShutterCountdown();
         unregisterRuntimeListeners();
         super.onStop();
     }
@@ -509,12 +518,83 @@ public class Mirror extends Activity implements
                         event.getX() - touchDownX, event.getY() - touchDownY);
                 boolean tap = moved <= SHUTTER_TAP_SLOP_PIXELS
                         && event.getEventTime() - touchDownAt <= SHUTTER_TAP_MILLIS;
-                if (tap && panelShutter != null && panelShutter.fire()) {
-                    flashShutter();
+                if (tap) {
+                    onShutterTap();
                 }
                 return true;
             default:
                 return true;
+        }
+    }
+
+    /**
+     * The shot at once, or a count first, set in the panel's settings.
+     *
+     * <p>The count is what makes the tap useful for a photo of oneself: the
+     * finger that pressed has time to get out of the picture and the phone
+     * time to stop shaking from the press. A second tap while it runs calls
+     * the shot off.
+     */
+    private void onShutterTap() {
+        if (panelShutter == null) {
+            return;
+        }
+        if (shutterCountdown != null && shutterCountdown.isRunning()) {
+            cancelShutterCountdown();
+            vibrate(VibrationEffect.EFFECT_DOUBLE_CLICK);
+            return;
+        }
+        int seconds = DashboardWidgetLayout.shutterDelaySeconds(this);
+        if (seconds <= 0 || shutterCountdown == null) {
+            if (panelShutter.fire()) {
+                flashShutter();
+            }
+            return;
+        }
+        countdownEndsAt = SystemClock.uptimeMillis() + seconds * 1_000L;
+        // Turned with the phone, so the figure reads upright to whoever is
+        // in front of it, which is who is waiting on it.
+        shutterCountdown.setRotation(ShutterCountdown.rotationFor(deviceQuarterTurn));
+        shutterCountdown.start(countdownEndsAt);
+        countdownTick();
+    }
+
+    /** One second of the count: a tick to feel, or at the end, the shot. */
+    private void countdownTick() {
+        countdownHandler.removeCallbacks(countdownTick);
+        if (shutterCountdown == null || !shutterCountdown.isRunning()) {
+            return;
+        }
+        // The camera may have gone, or the image with it, since the tap: the
+        // shot is called off rather than pressed on whatever came instead.
+        if (!shouldShowProjection() || !isCameraInFront()) {
+            cancelShutterCountdown();
+            return;
+        }
+        resetIdleTimer();
+        long remaining = countdownEndsAt - SystemClock.uptimeMillis();
+        if (remaining <= 0L) {
+            shutterCountdown.stop();
+            if (panelShutter != null && panelShutter.fire()) {
+                flashShutter();
+            }
+            return;
+        }
+        vibrate(VibrationEffect.EFFECT_TICK);
+        countdownHandler.postDelayed(countdownTick, ShutterCountdown.untilNextSecond(remaining));
+    }
+
+    private void cancelShutterCountdown() {
+        countdownHandler.removeCallbacks(countdownTick);
+        if (shutterCountdown != null) {
+            shutterCountdown.stop();
+        }
+    }
+
+    private void vibrate(int effect) {
+        Vibrator vibrator = getSystemService(Vibrator.class);
+        if (vibrator != null && vibrator.hasVibrator()) {
+            vibrator.vibrate(VibrationEffect.createPredefined(effect));
         }
     }
 
@@ -565,10 +645,7 @@ public class Mirror extends Activity implements
         shutterFlash.setVisibility(View.VISIBLE);
         shutterFlash.animate().alpha(0f).setDuration(220L)
                 .withEndAction(() -> shutterFlash.setVisibility(View.GONE));
-        Vibrator vibrator = getSystemService(Vibrator.class);
-        if (vibrator != null && vibrator.hasVibrator()) {
-            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
-        }
+        vibrate(VibrationEffect.EFFECT_CLICK);
     }
 
     /**
