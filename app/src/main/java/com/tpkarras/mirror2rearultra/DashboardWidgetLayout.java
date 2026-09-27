@@ -84,6 +84,8 @@ final class DashboardWidgetLayout {
     private static final String SCALE_PREFIX = "scale_";
     private static final String FREE_X_PREFIX = "free_x_";
     private static final String FREE_Y_PREFIX = "free_y_";
+    /** Set once a widget's free_x is its left edge rather than its middle. */
+    private static final String FREE_START_PREFIX = "free_start_";
     private static final String PAGE_LAYOUT_PREFIX = "layout_page_";
     private static final String PAGE_ORIENTATION_PREFIX = "orientation_page_";
     private static final String IDLE_MODE = "idle_mode";
@@ -182,6 +184,14 @@ final class DashboardWidgetLayout {
      * <p>Fractions rather than pixels: the builder's preview and the panel are
      * different sizes at different densities, and a widget placed by finger in
      * one has to land in the same place in the other.
+     *
+     * <p>The x is the widget's left edge and the y its middle. The x used to
+     * be the middle too, so a widget grew and shrank about its centre as its
+     * reading changed length - the steps went from 4820 to 0 and their icon
+     * slid right, a compass reading ran into the widget beside it - and a
+     * column lined up in the builder came apart on the panel. Positions stored
+     * the old way carry no {@link #isFreeXStart} mark and are converted where
+     * they are first drawn.
      */
     static boolean hasFreePosition(Context context, Widget widget) {
         return prefs(context).contains(FREE_X_PREFIX + widget.name());
@@ -203,13 +213,25 @@ final class DashboardWidgetLayout {
         // changes, and every one of those reports used to build an editor and
         // schedule a write.
         if (prefs.getInt(FREE_X_PREFIX + widget.name(), -1) == nextX
-                && prefs.getInt(FREE_Y_PREFIX + widget.name(), -1) == nextY) {
+                && prefs.getInt(FREE_Y_PREFIX + widget.name(), -1) == nextY
+                && prefs.getBoolean(FREE_START_PREFIX + widget.name(), false)) {
             return;
         }
         prefs.edit()
                 .putInt(FREE_X_PREFIX + widget.name(), nextX)
                 .putInt(FREE_Y_PREFIX + widget.name(), nextY)
+                .putBoolean(FREE_START_PREFIX + widget.name(), true)
                 .apply();
+    }
+
+    /** Whether the stored x is the left edge, as everything now writes it. */
+    static boolean isFreeXStart(Context context, Widget widget) {
+        return prefs(context).getBoolean(FREE_START_PREFIX + widget.name(), false);
+    }
+
+    /** For a template restoring a position stored before the x was an edge. */
+    static void setFreeXStart(Context context, Widget widget, boolean start) {
+        prefs(context).edit().putBoolean(FREE_START_PREFIX + widget.name(), start).apply();
     }
 
     /** Forgets a widget's place, so the free layout falls back to the column. */
@@ -217,6 +239,7 @@ final class DashboardWidgetLayout {
         prefs(context).edit()
                 .remove(FREE_X_PREFIX + widget.name())
                 .remove(FREE_Y_PREFIX + widget.name())
+                .remove(FREE_START_PREFIX + widget.name())
                 .apply();
     }
 

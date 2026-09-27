@@ -335,7 +335,7 @@ public final class RearDashboardView extends View {
                 continue;
             }
             DashboardWidgetLayout.saveFreePosition(getContext(), line.widget,
-                    line.bounds.centerX() / getWidth(),
+                    line.bounds.left / getWidth(),
                     line.bounds.centerY() / getHeight());
         }
     }
@@ -1517,9 +1517,11 @@ public final class RearDashboardView extends View {
         // it caught up.
         float edge = Math.min(6f * getResources().getDisplayMetrics().density, getWidth() * 0.04f);
         RectF box = boundsOf(draggedWidget);
-        float halfWidth = box == null ? 0f : box.width() / 2f;
+        float width = box == null ? 0f : box.width();
         float halfHeight = halfHeightOf(draggedWidget, 0f);
-        float placedX = clampBetween(x + dragOffsetX, edge + halfWidth, getWidth() - edge - halfWidth);
+        // The stored x is the left edge, so it may go as far right as leaves
+        // the whole widget on the panel.
+        float placedX = clampBetween(x + dragOffsetX, edge, getWidth() - edge - width);
         float placedY = clampBetween(y + dragOffsetY, edge + halfHeight, getHeight() - edge - halfHeight);
         if (DashboardWidgetLayout.isGridSnapEnabled(getContext())) {
             placedX = snapToGrid(placedX, getWidth());
@@ -2429,6 +2431,7 @@ public final class RearDashboardView extends View {
                     new RectF(padding, padding, getWidth() - padding, getHeight() - padding),
                     20f * density, 20f * density, panelPaint);
         }
+        convertCentredPositions(lines, clockSize, normalSize);
         float[][] fallback = freePlacement(lines, clockSize, normalSize, padding);
         boolean stale = false;
         for (int index = 0; index < lines.size(); index++) {
@@ -2445,28 +2448,27 @@ public final class RearDashboardView extends View {
                 x = fallback[index][0];
                 y = fallback[index][1];
             }
-            // Always centred on the stored point, whatever alignment the
-            // widget carries from a flowed layout. Everything else here
-            // already treats that point as the widget's middle - the drag
-            // stores it, the drag holds it inside the panel by half a width,
-            // the fallback placement hands back the middle of a free box -
-            // so honouring an edge alignment drew the widget half its width
-            // away from where it had been dropped. The builder leaves the
-            // alignment row off a free page for the same reason.
+            // Always drawn from the stored left edge, whatever alignment the
+            // widget carries from a flowed layout, so its icon stays put and
+            // its reading grows and shrinks to the right. The builder leaves
+            // the alignment row off a free page for the same reason.
             // The whole panel, not the room left between the anchor and the
             // nearer edge. Measuring from the anchor made the widget shrink as
             // it was dragged towards an edge - down to a fifth of its size,
             // where there was nothing left to put a finger on - and made
             // growing it near an edge do nothing at all.
             float available = Math.max(1f, getWidth() - padding * 2f);
-            // The stored point is the middle of the widget; text is drawn from
+            // The stored y is the middle of the widget; text is drawn from
             // its baseline, so the two have to be reconciled here.
             float half = halfHeightOf(line.widget,
                     (textPaint.descent() - textPaint.ascent()) / 2f);
             float clampedY = Math.max(padding + half,
                     Math.min(getHeight() - padding - half, y));
             float baseline = clampedY - (textPaint.ascent() + textPaint.descent()) / 2f;
-            drawLine(canvas, line, x, baseline, available, Alignment.CENTER, true);
+            boolean centred = DashboardWidgetLayout.hasFreePosition(getContext(), line.widget)
+                    && !DashboardWidgetLayout.isFreeXStart(getContext(), line.widget);
+            drawLine(canvas, line, x, baseline, available,
+                    centred ? Alignment.CENTER : Alignment.LEFT, true);
             stale |= Math.abs(line.bounds.height() / 2f - half) > 1f;
         }
         // The half height that keeps a widget off the edge comes from the
@@ -2485,7 +2487,39 @@ public final class RearDashboardView extends View {
     }
 
     /**
-     * Where the widgets that have never been dragged should go.
+     * Rewrites positions stored as a widget's middle into its left edge.
+     *
+     * <p>Done here because only a drawing knows how wide a widget is. The
+     * edge is put where the widget's left edge is drawn now, so converting
+     * moves nothing on screen; from then on the widget grows to the right.
+     *
+     * <p>Only in the builder's preview. The arrangement was lined up there,
+     * against its sample readings, and the panel's real ones are other
+     * lengths: converted on the panel, a widget reading 0 where the builder
+     * showed 4820 would keep the very offset this is meant to end. Until the
+     * builder has drawn it, the panel draws such a widget round its middle as
+     * before.
+     */
+    private void convertCentredPositions(List<Line> lines, float clockSize, float normalSize) {
+        if (getWidth() <= 0 || widgetSelectedListener == null) {
+            return;
+        }
+        for (Line line : lines) {
+            if (!DashboardWidgetLayout.hasFreePosition(getContext(), line.widget)
+                    || DashboardWidgetLayout.isFreeXStart(getContext(), line.widget)) {
+                continue;
+            }
+            float centre = DashboardWidgetLayout.loadFreeX(getContext(), line.widget) * getWidth();
+            float width = measuredWidth(line, clockSize, normalSize);
+            DashboardWidgetLayout.saveFreePosition(getContext(), line.widget,
+                    Math.max(0f, centre - width / 2f) / getWidth(),
+                    DashboardWidgetLayout.loadFreeY(getContext(), line.widget));
+        }
+    }
+
+    /**
+     * Where the widgets that have never been dragged should go, as a left
+     * edge and a middle.
      *
      * <p>They used to be spread down the column by their place in the list,
      * which ignores the ones already dragged somewhere. Switching a widget on
@@ -2502,19 +2536,15 @@ public final class RearDashboardView extends View {
             float padding) {
         int count = lines.size();
         float[][] result = new float[count][2];
-        boolean anyPlaced = false;
         boolean anyLoose = false;
         for (int index = 0; index < count; index++) {
-            boolean placed = DashboardWidgetLayout.hasFreePosition(
+            anyLoose |= !DashboardWidgetLayout.hasFreePosition(
                     getContext(), lines.get(index).widget);
-            anyPlaced |= placed;
-            anyLoose |= !placed;
-            result[index][0] = getWidth() / 2f;
             result[index][1] = getHeight() * (index + 1f) / (count + 1f);
         }
         // The usual case, and the one a drag spends every frame in: everything
         // has a place, so nothing needs measuring to find it one.
-        if (!anyPlaced || !anyLoose) {
+        if (!anyLoose) {
             return result;
         }
         float[] widths = new float[count];
@@ -2522,17 +2552,24 @@ public final class RearDashboardView extends View {
         for (int index = 0; index < count; index++) {
             widths[index] = measuredWidth(lines.get(index), clockSize, normalSize);
             heights[index] = textPaint.descent() - textPaint.ascent();
+            // The even spread, centred across the panel.
+            result[index][0] = (getWidth() - widths[index]) / 2f;
         }
         List<RectF> taken = new ArrayList<>();
+        boolean anyPlaced = false;
         for (int index = 0; index < count; index++) {
             if (DashboardWidgetLayout.hasFreePosition(getContext(), lines.get(index).widget)) {
-                taken.add(boxAt(
-                        DashboardWidgetLayout.loadFreeX(getContext(), lines.get(index).widget)
-                                * getWidth(),
+                anyPlaced = true;
+                float left = DashboardWidgetLayout.loadFreeX(getContext(), lines.get(index).widget)
+                        * getWidth();
+                taken.add(boxAt(left + widths[index] / 2f,
                         DashboardWidgetLayout.loadFreeY(getContext(), lines.get(index).widget)
                                 * getHeight(),
                         widths[index], heights[index]));
             }
+        }
+        if (!anyPlaced) {
+            return result;
         }
         for (int index = 0; index < count; index++) {
             if (DashboardWidgetLayout.hasFreePosition(getContext(), lines.get(index).widget)) {
@@ -2540,12 +2577,13 @@ public final class RearDashboardView extends View {
             }
             RectF spot = firstFreeBox(taken, widths[index], heights[index], padding);
             if (spot != null) {
-                result[index][0] = spot.centerX();
+                result[index][0] = spot.left;
                 result[index][1] = spot.centerY();
             }
             // Nothing free leaves the even-spread value, and the overflow note
             // already says the panel has run out of room.
-            taken.add(boxAt(result[index][0], result[index][1], widths[index], heights[index]));
+            taken.add(boxAt(result[index][0] + widths[index] / 2f, result[index][1],
+                    widths[index], heights[index]));
         }
         return result;
     }

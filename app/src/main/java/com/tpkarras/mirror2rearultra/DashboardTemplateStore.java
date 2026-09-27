@@ -112,6 +112,8 @@ final class DashboardTemplateStore {
                     Math.round(DashboardWidgetLayout.loadFreeX(context, widget) * 1000f));
             out.putInt(prefix + "free_y_" + widget.name(),
                     Math.round(DashboardWidgetLayout.loadFreeY(context, widget) * 1000f));
+            out.putBoolean(prefix + "free_start_" + widget.name(),
+                    DashboardWidgetLayout.isFreeXStart(context, widget));
         }
         out.putString(prefix + "order", serializedOrder.toString()).apply();
     }
@@ -201,6 +203,10 @@ final class DashboardTemplateStore {
                 DashboardWidgetLayout.saveFreePosition(context, widget,
                         in.getInt(prefix + "free_x_" + widget.name(), 500) / 1000f,
                         in.getInt(prefix + "free_y_" + widget.name(), 500) / 1000f);
+                // A template saved before the x was an edge holds a middle,
+                // which the panel converts the first time it draws it.
+                DashboardWidgetLayout.setFreeXStart(context, widget,
+                        in.getBoolean(prefix + "free_start_" + widget.name(), false));
             } else {
                 DashboardWidgetLayout.clearFreePosition(context, widget);
             }
