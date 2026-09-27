@@ -3256,6 +3256,7 @@ public final class RearDashboardView extends View {
         if (line.rotation != 0) {
             canvas.rotate(line.rotation, anchorX, baseline);
         }
+        drawingLineRotation = line.rotation;
         // The level turns to the accent the moment it is true, which is the
         // one thing its reader is waiting to see.
         boolean levelled = line.widget == DashboardWidgetLayout.Widget.LEVEL
@@ -3818,7 +3819,11 @@ public final class RearDashboardView extends View {
         LevelReading level = snapshot.level;
         int state = canvas.save();
         if (level != null) {
-            canvas.rotate(level.rollDegrees, body.centerX(), body.centerY());
+            // Whatever the canvas is already turned by comes off: the whole
+            // view when a page on its side is drawn turned round, and the
+            // widget's own rotation. What is left lies level in the world.
+            canvas.rotate(level.turnDegrees - getRotation() - drawingLineRotation,
+                    body.centerX(), body.centerY());
         }
         float reach = radius * 0.62f;
         canvas.drawLine(body.centerX() - reach, body.centerY(),
@@ -3830,6 +3835,22 @@ public final class RearDashboardView extends View {
             canvas.drawCircle(body.centerX(), body.centerY(),
                     iconPaint.getStrokeWidth() * 1.4f, iconPaint);
             iconPaint.setStyle(previous);
+        }
+    }
+
+    /** The rotation of the line being drawn, for the level's icon to undo. */
+    private int drawingLineRotation;
+
+    /**
+     * Redraws as well as turning. A view's rotation is applied to what it
+     * last drew, so without this the level kept the angle of the old turn
+     * until the next reading, and a phone held still gives none.
+     */
+    @Override
+    public void setRotation(float rotation) {
+        if (rotation != getRotation()) {
+            super.setRotation(rotation);
+            invalidate();
         }
     }
 

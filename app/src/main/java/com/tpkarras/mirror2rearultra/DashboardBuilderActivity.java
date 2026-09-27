@@ -1557,7 +1557,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 new ChargeReading(2_100, 8_200, 52 * 60_000L, false),
                 new SunTimes.Next(System.currentTimeMillis() - 4 * 3_600_000L,
                         System.currentTimeMillis() + 135 * 60_000L, false),
-                new LevelReading(2.4f, 6f),
+                new LevelReading(2.4f, 2.4f, 6f),
                 // Vibrate rather than ringing: a ringing phone drops the row
                 // unless it is set to stay, and the preview would be empty.
                 new SoundModeReading(SoundModeReading.Mode.VIBRATE, 60));

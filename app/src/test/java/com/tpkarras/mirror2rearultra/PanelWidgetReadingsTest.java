@@ -134,6 +134,24 @@ public class PanelWidgetReadingsTest {
                 (float) (-G * Math.sin(turn)), (float) (G * Math.cos(turn)), 0f);
         assertNotNull(reading);
         assertEquals(-3f, reading.rollDegrees, 0.01f);
+        assertEquals(-93f, reading.turnDegrees, 0.01f);
+    }
+
+    @Test
+    public void theLineTurnsSmoothlyThroughFortyFiveDegrees() {
+        // The figure changes which square it counts from at 45 degrees; the
+        // line's own angle must not jump there, or the icon flips a quarter
+        // turn on a page drawn on its side.
+        double before = Math.toRadians(44.5d);
+        double after = Math.toRadians(45.5d);
+        LevelReading first = LevelReading.fromGravity(
+                (float) (-G * Math.sin(before)), (float) (G * Math.cos(before)), 0f);
+        LevelReading second = LevelReading.fromGravity(
+                (float) (-G * Math.sin(after)), (float) (G * Math.cos(after)), 0f);
+        assertNotNull(first);
+        assertNotNull(second);
+        assertEquals(1f, second.turnDegrees - first.turnDegrees, 0.01f);
+        assertEquals(44.5f, Math.abs(second.rollDegrees), 0.01f);
     }
 
     @Test

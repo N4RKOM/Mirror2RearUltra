@@ -427,7 +427,7 @@ final class RearDashboardController implements
         // held still is what the widget is for: no reason to redraw for it.
         boolean unchanged = reading == null ? levelReading == null
                 : levelReading != null
-                && Math.abs(reading.rollDegrees - levelReading.rollDegrees) < 0.1f
+                && Math.abs(reading.turnDegrees - levelReading.turnDegrees) < 0.1f
                 && Math.abs(reading.pitchDegrees - levelReading.pitchDegrees) < 0.5f;
         if (unchanged) {
             return;
