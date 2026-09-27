@@ -41,7 +41,33 @@ final class NotificationWidgetState {
         }
     }
 
+    /**
+     * Hears a notification arrive, as opposed to the list changing.
+     *
+     * <p>Apart from {@link Listener}, which also fires when one is dismissed
+     * or quietly updated: the panel's notification light should answer only
+     * what would have made the phone buzz.
+     */
+    interface ArrivalListener {
+        void onNotificationArrived(String packageName);
+    }
+
     private static final Set<Listener> LISTENERS = new CopyOnWriteArraySet<>();
+    private static final Set<ArrivalListener> ARRIVAL_LISTENERS = new CopyOnWriteArraySet<>();
+
+    static void arrived(String packageName) {
+        for (ArrivalListener listener : ARRIVAL_LISTENERS) {
+            listener.onNotificationArrived(packageName);
+        }
+    }
+
+    static void addArrivalListener(ArrivalListener listener) {
+        ARRIVAL_LISTENERS.add(listener);
+    }
+
+    static void removeArrivalListener(ArrivalListener listener) {
+        ARRIVAL_LISTENERS.remove(listener);
+    }
     private static volatile Snapshot current = new Snapshot(0, "", "", "");
 
     private NotificationWidgetState() {

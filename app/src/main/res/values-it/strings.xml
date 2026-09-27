@@ -498,4 +498,6 @@
     <string name="mirror_grid">Griglia dei terzi sulla fotocamera</string>
     <string name="mirror_level">Livella dell’orizzonte sulla fotocamera</string>
     <string name="mirror_guides_help">Griglia e livella compaiono solo sulla fotocamera specchiata e sono disegnate solo sul pannello: non finiscono mai nella foto. La livella diventa gialla quando il telefono è dritto.</string>
+    <string name="notification_light">Luce delle notifiche</string>
+    <string name="notification_light_help">Con lo schermo principale spento, una nuova notifica illumina il pannello per qualche secondo con l’icona della sua app, al posto del LED che questo telefono non ha. Funziona finché il pannello è acceso, come in Always on Display, e usa lo stesso accesso alle notifiche dei widget delle notifiche. Non in tasca, a faccia in giù o con Non disturbare. Un tocco la spegne.</string>
 </resources>

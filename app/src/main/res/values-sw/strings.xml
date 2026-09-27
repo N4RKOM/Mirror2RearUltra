@@ -498,4 +498,6 @@
     <string name="mirror_grid">Gridi ya theluthi juu ya kamera</string>
     <string name="mirror_level">Kipimo cha upeo juu ya kamera</string>
     <string name="mirror_guides_help">Gridi na kipimo huonekana juu ya kamera inayoakisiwa tu na huchorwa kwenye paneli pekee: haviingii kwenye picha. Kipimo huwa njano simu ikiwa imenyooka.</string>
+    <string name="notification_light">Taa ya arifa</string>
+    <string name="notification_light_help">Skrini kuu ikiwa imezimwa, arifa mpya huwasha paneli kwa sekunde chache kwa aikoni ya programu yake, badala ya taa ya LED ambayo simu hii haina. Hufanya kazi paneli ikiwa imewashwa, kama katika Always on Display, na hutumia ruhusa ileile ya arifa kama wijeti za arifa. Haiwaki mfukoni, skrini ikiwa chini wala katika Usisumbue. Mguso huizima.</string>
 </resources>

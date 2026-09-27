@@ -103,6 +103,7 @@ final class DashboardWidgetLayout {
     private static final String SHUTTER_DELAY = "shutter_delay_seconds";
     private static final String MIRROR_GRID = "mirror_grid";
     private static final String MIRROR_LEVEL = "mirror_level";
+    private static final String NOTIFICATION_LIGHT = "notification_light";
     private static final String TAP_CYCLES_VARIANT = "tap_cycles_variant";
 
     private DashboardWidgetLayout() {}
@@ -930,6 +931,18 @@ final class DashboardWidgetLayout {
 
     static void setMirrorGridEnabled(Context context, boolean enabled) {
         prefs(context).edit().putBoolean(MIRROR_GRID, enabled).apply();
+    }
+
+    /**
+     * Whether the panel pulses for a notification while the main screen is
+     * off. Off by default: it lights the panel up at night.
+     */
+    static boolean isNotificationLightEnabled(Context context) {
+        return prefs(context).getBoolean(NOTIFICATION_LIGHT, false);
+    }
+
+    static void setNotificationLightEnabled(Context context, boolean enabled) {
+        prefs(context).edit().putBoolean(NOTIFICATION_LIGHT, enabled).apply();
     }
 
     /** Whether a mirrored camera gets a level line over it. */

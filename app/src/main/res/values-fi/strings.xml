@@ -498,4 +498,6 @@
     <string name="mirror_grid">Kolmasosaruudukko kameran päällä</string>
     <string name="mirror_level">Horisontin vesivaaka kameran päällä</string>
     <string name="mirror_guides_help">Ruudukko ja vesivaaka näkyvät vain peilatun kameran päällä ja piirretään vain paneeliin – kuvaan ne eivät päädy. Vesivaaka muuttuu keltaiseksi, kun puhelin on suorassa.</string>
+    <string name="notification_light">Ilmoitusvalo</string>
+    <string name="notification_light_help">Kun päänäyttö on pois päältä, uusi ilmoitus sytyttää paneelin muutamaksi sekunniksi sovelluksen kuvakkeella – LED-valon sijaan, jota tässä puhelimessa ei ole. Toimii, kun paneeli on päällä, esimerkiksi Always on Display -tilassa, ja käyttää samaa ilmoitusten käyttöoikeutta kuin ilmoituswidgetit. Ei toimi taskussa, näyttö alaspäin eikä Älä häiritse -tilassa. Kosketus sammuttaa sen.</string>
 </resources>

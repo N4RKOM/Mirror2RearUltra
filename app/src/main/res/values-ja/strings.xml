@@ -496,4 +496,6 @@
     <string name="mirror_grid">カメラに三分割グリッド</string>
     <string name="mirror_level">カメラに水平器</string>
     <string name="mirror_guides_help">グリッドと水平器はミラー表示中のカメラの上にだけ表示され、パネルにのみ描画されるため写真には写りません。端末がまっすぐになると水平器が黄色になります。</string>
+    <string name="notification_light">通知ランプ</string>
+    <string name="notification_light_help">メイン画面がオフのとき、新しい通知が数秒間アプリのアイコンでパネルを光らせます。この端末にない通知 LED の代わりです。Always on Display などでパネルがオンの間に動作し、通知ウィジェットと同じ通知へのアクセスを使います。ポケットの中、画面を下にしたとき、おやすみモード中は光りません。タップで消えます。</string>
 </resources>

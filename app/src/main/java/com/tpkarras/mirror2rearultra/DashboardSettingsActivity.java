@@ -61,6 +61,7 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     private HyperValueRow shutterDelayInput;
     private MaterialSwitch mirrorGridSwitch;
     private MaterialSwitch mirrorLevelSwitch;
+    private MaterialSwitch notificationLightSwitch;
     private String[] shutterDelayLabels;
     private MaterialSwitch tapVariantSwitch;
     private TextView shutterAccessStatus;
@@ -96,6 +97,7 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         shutterDelayInput = findViewById(R.id.dashboard_shutter_delay_input);
         mirrorGridSwitch = findViewById(R.id.dashboard_mirror_grid_switch);
         mirrorLevelSwitch = findViewById(R.id.dashboard_mirror_level_switch);
+        notificationLightSwitch = findViewById(R.id.dashboard_notification_light_switch);
         shutterDelayLabels = new String[ShutterCountdown.CHOICES.length];
         for (int index = 0; index < ShutterCountdown.CHOICES.length; index++) {
             int seconds = ShutterCountdown.CHOICES[index];
@@ -222,6 +224,13 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                 shutterDelayInput.setEnabled(checked);
             }
         });
+        // Read when a notification arrives, so there is nothing to tell the
+        // running panel.
+        notificationLightSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!bindingUi) {
+                DashboardWidgetLayout.setNotificationLightEnabled(this, checked);
+            }
+        });
         mirrorGridSwitch.setOnCheckedChangeListener((button, checked) -> {
             if (!bindingUi) {
                 DashboardWidgetLayout.setMirrorGridEnabled(this, checked);
@@ -317,6 +326,7 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         shutterDelayInput.setEnabled(shutterOnTapSwitch.isChecked());
         mirrorGridSwitch.setChecked(DashboardWidgetLayout.isMirrorGridEnabled(this));
         mirrorLevelSwitch.setChecked(DashboardWidgetLayout.isMirrorLevelEnabled(this));
+        notificationLightSwitch.setChecked(DashboardWidgetLayout.isNotificationLightEnabled(this));
         tapVariantSwitch.setChecked(DashboardWidgetLayout.isTapCyclesVariantEnabled(this));
         // Switched on in the system's own settings, so it is read afresh here
         // rather than remembered: this screen is where people come back to.

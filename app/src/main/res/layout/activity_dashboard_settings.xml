@@ -182,6 +182,20 @@
                 style="@style/HyperOS.GroupFootnote"
                 android:text="@string/dashboard_idle_mode_help" />
 
+            <LinearLayout
+                style="@style/HyperOS.Group"
+                android:layout_marginTop="@dimen/section_spacing">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_notification_light_switch"
+                    style="@style/HyperOS.Switch.Single"
+                    android:text="@string/notification_light" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/notification_light_help" />
+
             <!-- ===================== Touch and sensors =====================
                  What a finger on the panel, a pocket and a table do to it. -->
 

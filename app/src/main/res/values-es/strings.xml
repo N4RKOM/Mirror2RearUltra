@@ -498,4 +498,6 @@
     <string name="mirror_grid">Cuadrícula de tercios sobre la cámara</string>
     <string name="mirror_level">Nivel del horizonte sobre la cámara</string>
     <string name="mirror_guides_help">La cuadrícula y el nivel solo aparecen sobre la cámara reflejada y se dibujan únicamente en el panel: nunca llegan a la foto. El nivel se vuelve amarillo cuando el teléfono está recto.</string>
+    <string name="notification_light">Luz de notificaciones</string>
+    <string name="notification_light_help">Con la pantalla principal apagada, una notificación nueva ilumina el panel unos segundos con el icono de su app, en lugar del LED que este teléfono no tiene. Funciona mientras el panel está encendido, como en Always on Display, y usa el mismo acceso a notificaciones que los widgets de notificaciones. No se activa en el bolsillo, boca abajo ni con No molestar. Un toque la apaga.</string>
 </resources>

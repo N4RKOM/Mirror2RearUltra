@@ -500,4 +500,6 @@
     <string name="mirror_grid">Grilă a treimilor peste cameră</string>
     <string name="mirror_level">Nivelă a orizontului peste cameră</string>
     <string name="mirror_guides_help">Grila și nivela apar doar peste camera oglindită și sunt desenate numai pe panou: nu ajung niciodată în fotografie. Nivela devine galbenă când telefonul este drept.</string>
+    <string name="notification_light">Lumină pentru notificări</string>
+    <string name="notification_light_help">Cu ecranul principal stins, o notificare nouă aprinde panoul câteva secunde cu pictograma aplicației, în locul LED-ului pe care acest telefon nu îl are. Funcționează cât timp panoul este aprins, ca în Always on Display, și folosește același acces la notificări ca widgeturile de notificări. Nu în buzunar, cu ecranul în jos sau cu Nu deranja. O atingere o stinge.</string>
 </resources>

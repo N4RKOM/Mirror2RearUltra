@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 
@@ -120,6 +121,13 @@ public class Mirror extends Activity implements
     private boolean touchLocked;
     /** Set while the panel is the side lying on the table. */
     private boolean panelFacingDown;
+    /** In a pocket, by the posture sensor, whether or not touches are being locked for it. */
+    private boolean pocketed;
+    private NotificationPulseView notificationPulse;
+    /** Whether the gesture under way began on the notification light, and so is not passed on. */
+    private boolean swallowingPulseTouch;
+    private final NotificationWidgetState.ArrivalListener arrivalListener =
+            packageName -> runOnUiThread(() -> onNotificationArrived(packageName));
     /**
      * Which way up the phone is being held, in quarter turns clockwise.
      *
@@ -260,6 +268,7 @@ public class Mirror extends Activity implements
         shutterFlash = findViewById(R.id.shutter_flash);
         shutterCountdown = findViewById(R.id.shutter_countdown);
         mirrorGuides = findViewById(R.id.mirror_guides);
+        notificationPulse = findViewById(R.id.notification_pulse);
         panelShutter = new PanelShutter();
         dashboardView = findViewById(R.id.rear_dashboard);
         textureView.setClickable(false);
@@ -488,10 +497,57 @@ public class Mirror extends Activity implements
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             resetIdleTimer();
         }
+        if (handlePulseTouch(event)) {
+            return true;
+        }
         if (handleShutterTouch(event)) {
             return true;
         }
         return super.dispatchTouchEvent(event);
+    }
+
+    /**
+     * A touch on the notification light puts it out, and goes no further.
+     *
+     * <p>The whole gesture is kept back, from the finger going down to it
+     * coming up: the widgets never see its start, so there is no half-begun
+     * long press left behind to switch AOD on its own.
+     */
+    private boolean handlePulseTouch(MotionEvent event) {
+        int action = event.getActionMasked();
+        if (action == MotionEvent.ACTION_DOWN) {
+            swallowingPulseTouch = notificationPulse != null && notificationPulse.isRunning();
+            if (swallowingPulseTouch) {
+                notificationPulse.stop();
+            }
+        }
+        boolean swallowed = swallowingPulseTouch;
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            swallowingPulseTouch = false;
+        }
+        return swallowed;
+    }
+
+    /**
+     * Lights the panel for a notification that has just arrived, standing in
+     * for the LED this phone was built without.
+     */
+    private void onNotificationArrived(String packageName) {
+        if (notificationPulse == null) {
+            return;
+        }
+        PowerManager power = getSystemService(PowerManager.class);
+        boolean mainScreenOn = power == null || power.isInteractive();
+        if (!NotificationPulse.shouldPulse(
+                DashboardWidgetLayout.isNotificationLightEnabled(this),
+                mainScreenOn, pocketed, panelFacingDown,
+                CallWidgetState.get().ringing, shouldShowProjection())) {
+            return;
+        }
+        // Out of AOD first, so the pulse is seen at the panel's own brightness.
+        resetIdleTimer();
+        notificationPulse.setRotation(ShutterCountdown.rotationFor(deviceQuarterTurn));
+        notificationPulse.start(packageName);
     }
 
     /**
@@ -661,6 +717,7 @@ public class Mirror extends Activity implements
             deviceQuarterTurn = quarterTurn;
             applyDashboardOrientation();
         }
+        this.pocketed = pocketed;
         boolean lock = pocketed && DashboardWidgetLayout.isPocketLockEnabled(this);
         if (lock && !touchLocked && dashboardView != null) {
             // The lock may have come down mid-gesture, and the release that
@@ -797,6 +854,7 @@ public class Mirror extends Activity implements
             postureSensor.start();
         }
         CallWidgetState.addListener(callListener);
+        NotificationWidgetState.addArrivalListener(arrivalListener);
         listenersRegistered = true;
     }
 
@@ -821,6 +879,10 @@ public class Mirror extends Activity implements
         // is sent whether or not it has changed, so a stale answer here is
         // corrected within the second rather than believed.
         CallWidgetState.removeListener(callListener);
+        NotificationWidgetState.removeArrivalListener(arrivalListener);
+        if (notificationPulse != null) {
+            notificationPulse.stop();
+        }
         try {
             unregisterReceiver(chargingReceiver);
         } catch (IllegalArgumentException ignored) {

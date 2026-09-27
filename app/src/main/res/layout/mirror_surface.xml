@@ -43,6 +43,14 @@
         android:importantForAccessibility="no"
         android:visibility="gone" />
 
+    <!-- Over the widgets, under the dimming, which lifts as it starts. -->
+    <com.tpkarras.mirror2rearultra.NotificationPulseView
+        android:id="@+id/notification_pulse"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
+
     <!-- Under the brightness overlay, so it is dimmed with the image. -->
     <com.tpkarras.mirror2rearultra.ShutterCountdownView
         android:id="@+id/shutter_countdown"

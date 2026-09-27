@@ -498,4 +498,6 @@
     <string name="mirror_grid">Tredjedelsrutnät över kameran</string>
     <string name="mirror_level">Vattenpass över kameran</string>
     <string name="mirror_guides_help">Rutnätet och vattenpasset visas bara över en speglad kamera och ritas bara på panelen – de hamnar aldrig på bilden. Vattenpasset blir gult när telefonen är rak.</string>
+    <string name="notification_light">Aviseringslampa</string>
+    <string name="notification_light_help">När huvudskärmen är av tänder en ny avisering panelen i några sekunder med appens ikon – i stället för den lysdiod telefonen saknar. Fungerar så länge panelen är på, som i Always on Display, och använder samma aviseringsåtkomst som aviseringswidgetarna. Inte i fickan, med skärmen nedåt eller med Stör ej. En beröring släcker den.</string>
 </resources>

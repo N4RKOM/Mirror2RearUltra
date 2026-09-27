@@ -502,4 +502,6 @@
     <string name="mirror_grid">רשת שלישים מעל המצלמה</string>
     <string name="mirror_level">פלס אופק מעל המצלמה</string>
     <string name="mirror_guides_help">הרשת והפלס מופיעים רק מעל מראת המצלמה ומצוירים על הלוח בלבד — הם לא נכנסים לתמונה. הפלס מצהיב כשהטלפון ישר.</string>
+    <string name="notification_light">נורית התראות</string>
+    <string name="notification_light_help">כשהמסך הראשי כבוי, התראה חדשה מאירה את הלוח לכמה שניות עם סמל האפליקציה שלה — במקום נורית ה-LED שאין לטלפון הזה. פועל כל עוד הלוח דולק, למשל במצב Always on Display, ומשתמש באותה גישה להתראות כמו ווידג׳טי ההתראות. לא בכיס, לא כשהמסך כלפי מטה ולא במצב נא לא להפריע. נגיעה מכבה אותו.</string>
 </resources>

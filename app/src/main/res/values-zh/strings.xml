@@ -496,4 +496,6 @@
     <string name="mirror_grid">在相机上显示三分线</string>
     <string name="mirror_level">在相机上显示水平仪</string>
     <string name="mirror_guides_help">三分线和水平仪只在镜像的相机画面上显示，且只绘制在副屏上，不会出现在照片里。手机摆正时水平仪会变黄。</string>
+    <string name="notification_light">通知灯</string>
+    <string name="notification_light_help">主屏幕关闭时，新通知会让副屏以应用图标亮起几秒，代替这台手机没有的通知 LED。副屏开启时（如息屏显示）有效，使用与通知小组件相同的通知访问权限。放在口袋里、屏幕朝下或开启勿扰时不亮。触摸即可关闭。</string>
 </resources>

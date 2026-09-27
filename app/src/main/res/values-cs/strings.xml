@@ -502,4 +502,6 @@
     <string name="mirror_grid">Mřížka třetin přes fotoaparát</string>
     <string name="mirror_level">Vodováha přes fotoaparát</string>
     <string name="mirror_guides_help">Mřížka a vodováha se zobrazují jen přes zrcadlený fotoaparát a kreslí se pouze na panel – do snímku se nedostanou. Vodováha zežloutne, když je telefon rovně.</string>
+    <string name="notification_light">Světlo oznámení</string>
+    <string name="notification_light_help">Když je hlavní displej vypnutý, nové oznámení na pár sekund rozsvítí panel ikonou aplikace – místo LED, kterou tento telefon nemá. Funguje, dokud je panel zapnutý, třeba v režimu Always on Display, a využívá stejný přístup k oznámením jako widgety oznámení. Nespustí se v kapse, displejem dolů ani v režimu Nerušit. Dotyk ho zhasne.</string>
 </resources>

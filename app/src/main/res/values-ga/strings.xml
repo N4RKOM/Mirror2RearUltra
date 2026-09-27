@@ -504,4 +504,6 @@
     <string name="mirror_grid">Greille trian thar an gceamara</string>
     <string name="mirror_level">Leibhéal na spéire thar an gceamara</string>
     <string name="mirror_guides_help">Ní thaispeántar an ghreille ná an leibhéal ach thar an gceamara scáthánaithe, agus ar an bpainéal amháin a tharraingítear iad: ní shroicheann siad an grianghraf. Éiríonn an leibhéal buí nuair atá an fón díreach.</string>
+    <string name="notification_light">Solas fógraí</string>
+    <string name="notification_light_help">Nuair atá an príomhscáileán múchta, lasann fógra nua an painéal ar feadh cúpla soicind le deilbhín a aipe, in áit an LED nach bhfuil ag an bhfón seo. Oibríonn sé fad atá an painéal ar siúl, mar atá in Always on Display, agus úsáideann sé an rochtain chéanna ar fhógraí agus atá ag na giuirléidí fógraí. Ní oibríonn sé i bpóca, leis an scáileán síos ná le Ná cuir isteach orm. Múchann teagmháil é.</string>
 </resources>

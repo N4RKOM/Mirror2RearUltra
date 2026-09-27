@@ -498,4 +498,6 @@
     <string name="mirror_grid">Raster van derden over de camera</string>
     <string name="mirror_level">Waterpas over de camera</string>
     <string name="mirror_guides_help">Het raster en de waterpas verschijnen alleen over een gespiegelde camera en worden alleen op het paneel getekend: ze komen nooit op de foto. De waterpas wordt geel als de telefoon recht is.</string>
+    <string name="notification_light">Meldingslampje</string>
+    <string name="notification_light_help">Met het hoofdscherm uit laat een nieuwe melding het paneel een paar seconden oplichten met het pictogram van de app, in plaats van de led die deze telefoon niet heeft. Werkt zolang het paneel aan is, zoals bij Always on Display, en gebruikt dezelfde meldingstoegang als de meldingswidgets. Niet in een zak, met het scherm omlaag of bij Niet storen. Een aanraking dooft het.</string>
 </resources>

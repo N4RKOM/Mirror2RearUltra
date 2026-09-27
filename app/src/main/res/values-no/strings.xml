@@ -498,4 +498,6 @@
     <string name="mirror_grid">Tredjedelsrutenett over kameraet</string>
     <string name="mirror_level">Vater over kameraet</string>
     <string name="mirror_guides_help">Rutenettet og vateret vises bare over et speilet kamera og tegnes bare på panelet – de havner aldri på bildet. Vateret blir gult når telefonen står rett.</string>
+    <string name="notification_light">Varsellys</string>
+    <string name="notification_light_help">Når hovedskjermen er av, lyser et nytt varsel opp panelet i noen sekunder med appens ikon – i stedet for LED-lampen denne telefonen mangler. Virker så lenge panelet er på, som i Always on Display, og bruker samme varseltilgang som varselwidgetene. Ikke i lomma, med skjermen ned eller med Ikke forstyrr. Et trykk slukker det.</string>
 </resources>

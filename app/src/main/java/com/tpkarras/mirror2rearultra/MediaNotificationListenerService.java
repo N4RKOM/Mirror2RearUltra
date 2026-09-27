@@ -84,7 +84,43 @@ public class MediaNotificationListenerService extends NotificationListenerServic
         refreshNotifications();
         if (isMediaNotification(notification)) {
             refreshMedia();
+        } else if (isAlerting(notification)) {
+            NotificationWidgetState.arrived(notification.getPackageName());
         }
+    }
+
+    /**
+     * Whether this post is one the phone would announce, for the panel's
+     * notification light.
+     *
+     * <p>The counter's rules - no ongoing work, nothing quieter than the
+     * default - and three more that only matter at the moment of arrival: do
+     * not disturb holding it back, an update its app marked as not worth a
+     * second alert, which is how a download's progress keeps reposting
+     * without buzzing, and a ringing call, which the panel shows on its own.
+     */
+    private boolean isAlerting(StatusBarNotification item) {
+        Notification value = item.getNotification();
+        if (value == null || getPackageName().equals(item.getPackageName())
+                || (value.flags & Notification.FLAG_GROUP_SUMMARY) != 0
+                || (value.flags & UNDISMISSABLE) != 0
+                || (value.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0
+                || isRingingCall(value)) {
+            return false;
+        }
+        RankingMap map;
+        try {
+            map = getCurrentRanking();
+        } catch (RuntimeException error) {
+            return false;
+        }
+        if (map == null) {
+            return false;
+        }
+        Ranking ranking = new Ranking();
+        return map.getRanking(item.getKey(), ranking)
+                && ranking.matchesInterruptionFilter()
+                && ranking.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT;
     }
 
     @Override

@@ -517,4 +517,6 @@
     <string name="mirror_grid">Rule-of-thirds grid over the camera</string>
     <string name="mirror_level">Horizon level over the camera</string>
     <string name="mirror_guides_help">The grid and the level appear over a mirrored camera only, and are drawn on the panel alone: they never reach the photo. The level turns yellow when the phone is straight.</string>
+    <string name="notification_light">Notification light</string>
+    <string name="notification_light_help">While the main screen is off, a new notification lights the panel with the icon of its app for a few seconds, in place of the LED this phone does not have. It works while the panel is on, as in Always on Display, and uses the same notification access as the notification widgets. Not in a pocket, face down or with do not disturb on. A touch puts it out.</string>
 </resources>

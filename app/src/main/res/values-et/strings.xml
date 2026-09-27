@@ -498,4 +498,6 @@
     <string name="mirror_grid">Kolmandike ruudustik kaamera kohal</string>
     <string name="mirror_level">Horisondi lood kaamera kohal</string>
     <string name="mirror_guides_help">Ruudustik ja lood kuvatakse ainult peegeldatud kaamera kohal ning joonistatakse ainult paneelile – fotole need ei jõua. Lood muutub kollaseks, kui telefon on otse.</string>
+    <string name="notification_light">Märguannete tuli</string>
+    <string name="notification_light_help">Kui põhiekraan on väljas, süütab uus märguanne paneeli mõneks sekundiks rakenduse ikooniga – LED-i asemel, mida sellel telefonil pole. Töötab, kuni paneel on sees, näiteks Always on Display režiimis, ja kasutab sama märguannete juurdepääsu kui märguannete vidinad. Ei käivitu taskus, ekraaniga alaspidi ega režiimis Mitte segada. Puudutus kustutab selle.</string>
 </resources>

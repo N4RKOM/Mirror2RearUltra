@@ -498,4 +498,6 @@
     <string name="mirror_grid">Grille des tiers sur l’appareil photo</string>
     <string name="mirror_level">Niveau de l’horizon sur l’appareil photo</string>
     <string name="mirror_guides_help">La grille et le niveau n’apparaissent que sur l’appareil photo reflété et ne sont dessinés que sur l’écran arrière : ils n’arrivent jamais sur la photo. Le niveau devient jaune quand le téléphone est droit.</string>
+    <string name="notification_light">Voyant de notification</string>
+    <string name="notification_light_help">Écran principal éteint, une nouvelle notification allume le panneau quelques secondes avec l’icône de son application, à la place de la LED que ce téléphone n’a pas. Fonctionne tant que le panneau est allumé, comme en mode Always on Display, avec le même accès aux notifications que les widgets de notification. Pas dans une poche, face contre la table ni en mode Ne pas déranger. Un toucher l’éteint.</string>
 </resources>
