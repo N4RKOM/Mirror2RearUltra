@@ -220,6 +220,9 @@ public final class RearDashboardView extends View {
         iconPaint.setStyle(Paint.Style.STROKE);
         iconPaint.setStrokeCap(Paint.Cap.ROUND);
         iconPaint.setStrokeJoin(Paint.Join.ROUND);
+        // Figures of one width, where the face has them, so the clock does
+        // not change width from one minute to the next.
+        textPaint.setFontFeatureSettings("tnum");
     }
 
     void setDashboardSettings(DashboardSettings value, RearContentMode sessionMode) {
@@ -2556,7 +2559,7 @@ public final class RearDashboardView extends View {
         }
         float text = 0f;
         for (String part : line.text.split("\\n", -1)) {
-            text = Math.max(text, textPaint.measureText(part));
+            text = Math.max(text, textPaint.measureText(widestFigures(part)));
         }
         return icon + text;
     }
@@ -2886,8 +2889,11 @@ public final class RearDashboardView extends View {
         for (int index = 0; index < parts.length; index++) {
             fittedParts[index] = TextUtils.ellipsize(parts[index], textPaint, textSpace,
                     TextUtils.TruncateAt.END);
-            textWidth = Math.max(textWidth, textPaint.measureText(
-                    fittedParts[index], 0, fittedParts[index].length()));
+            // The width the line would have with its widest figures, so the
+            // box a reading sits in - and where a centred one starts - does
+            // not move as its figures change.
+            textWidth = Math.max(textWidth,
+                    textPaint.measureText(widestFigures(fittedParts[index])));
         }
         float totalWidth = iconSize + gap + textWidth;
         float startX;
@@ -2984,7 +2990,7 @@ public final class RearDashboardView extends View {
         width = Math.max(1f, width);
         float desired = 0f;
         for (String part : line.text.split("\\n", -1)) {
-            desired = Math.max(desired, textPaint.measureText(part));
+            desired = Math.max(desired, textPaint.measureText(widestFigures(part)));
         }
         if (desired <= width || desired <= 0f) return;
         // The rear panel is only 126 px wide on the target device. A hard 40% floor
@@ -2994,6 +3000,43 @@ public final class RearDashboardView extends View {
         // fractionally wider than measureText(), which otherwise triggers an ellipsis.
         float factor = Math.max(minimumFactor, width / desired * 0.94f);
         textPaint.setTextSize(originalSize * factor);
+    }
+
+    /**
+     * The text with every figure replaced by the face's widest one.
+     *
+     * <p>Measured instead of the text itself wherever a size or a box is
+     * decided. In a face with figures of different widths a reading of 11:11
+     * is narrower than 00:00, so a clock that had to be shrunk to fit came out
+     * at a different size every few minutes, and its box and its centre moved
+     * with it. The tabular figures asked for on the paint make this the same
+     * text in faces that have them; this covers the faces that do not.
+     */
+    private String widestFigures(CharSequence text) {
+        String value = text.toString();
+        boolean hasFigure = false;
+        for (int index = 0; index < value.length() && !hasFigure; index++) {
+            char character = value.charAt(index);
+            hasFigure = character >= '0' && character <= '9';
+        }
+        if (!hasFigure) {
+            return value;
+        }
+        char widest = '0';
+        float widestWidth = -1f;
+        for (char figure = '0'; figure <= '9'; figure++) {
+            float width = textPaint.measureText(String.valueOf(figure));
+            if (width > widestWidth) {
+                widestWidth = width;
+                widest = figure;
+            }
+        }
+        StringBuilder result = new StringBuilder(value.length());
+        for (int index = 0; index < value.length(); index++) {
+            char character = value.charAt(index);
+            result.append(character >= '0' && character <= '9' ? widest : character);
+        }
+        return result.toString();
     }
 
     private Alignment alignmentFor(Line line) {
