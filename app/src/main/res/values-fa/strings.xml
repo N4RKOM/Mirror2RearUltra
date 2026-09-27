@@ -495,4 +495,7 @@
     <string name="shutter_countdown_title">شمارش معکوس پیش از عکس</string>
     <string name="shutter_countdown_off">بی‌درنگ</string>
     <string name="shutter_countdown_seconds">%1$d ث</string>
+    <string name="mirror_grid">شبکه یک‌سوم روی دوربین</string>
+    <string name="mirror_level">تراز افق روی دوربین</string>
+    <string name="mirror_guides_help">شبکه و تراز فقط روی آینه دوربین نمایش داده می‌شوند و تنها روی پنل کشیده می‌شوند؛ در عکس نمی‌آیند. وقتی گوشی صاف باشد، تراز زرد می‌شود.</string>
 </resources>

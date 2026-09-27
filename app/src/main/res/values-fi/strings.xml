@@ -495,4 +495,7 @@
     <string name="shutter_countdown_title">Lähtölaskenta ennen kuvaa</string>
     <string name="shutter_countdown_off">Heti</string>
     <string name="shutter_countdown_seconds">%1$d s</string>
+    <string name="mirror_grid">Kolmasosaruudukko kameran päällä</string>
+    <string name="mirror_level">Horisontin vesivaaka kameran päällä</string>
+    <string name="mirror_guides_help">Ruudukko ja vesivaaka näkyvät vain peilatun kameran päällä ja piirretään vain paneeliin – kuvaan ne eivät päädy. Vesivaaka muuttuu keltaiseksi, kun puhelin on suorassa.</string>
 </resources>

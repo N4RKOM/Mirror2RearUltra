@@ -501,4 +501,7 @@
     <string name="shutter_countdown_title">Comhaireamh síos roimh an ngrianghraf</string>
     <string name="shutter_countdown_off">Láithreach</string>
     <string name="shutter_countdown_seconds">%1$d s</string>
+    <string name="mirror_grid">Greille trian thar an gceamara</string>
+    <string name="mirror_level">Leibhéal na spéire thar an gceamara</string>
+    <string name="mirror_guides_help">Ní thaispeántar an ghreille ná an leibhéal ach thar an gceamara scáthánaithe, agus ar an bpainéal amháin a tharraingítear iad: ní shroicheann siad an grianghraf. Éiríonn an leibhéal buí nuair atá an fón díreach.</string>
 </resources>

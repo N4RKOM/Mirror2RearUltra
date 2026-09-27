@@ -499,4 +499,7 @@
     <string name="shutter_countdown_title">ספירה לאחור לפני הצילום</string>
     <string name="shutter_countdown_off">מיד</string>
     <string name="shutter_countdown_seconds">%1$d ש׳</string>
+    <string name="mirror_grid">רשת שלישים מעל המצלמה</string>
+    <string name="mirror_level">פלס אופק מעל המצלמה</string>
+    <string name="mirror_guides_help">הרשת והפלס מופיעים רק מעל מראת המצלמה ומצוירים על הלוח בלבד — הם לא נכנסים לתמונה. הפלס מצהיב כשהטלפון ישר.</string>
 </resources>

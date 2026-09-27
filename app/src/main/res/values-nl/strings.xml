@@ -495,4 +495,7 @@
     <string name="shutter_countdown_title">Aftellen voor de foto</string>
     <string name="shutter_countdown_off">Meteen</string>
     <string name="shutter_countdown_seconds">%1$d s</string>
+    <string name="mirror_grid">Raster van derden over de camera</string>
+    <string name="mirror_level">Waterpas over de camera</string>
+    <string name="mirror_guides_help">Het raster en de waterpas verschijnen alleen over een gespiegelde camera en worden alleen op het paneel getekend: ze komen nooit op de foto. De waterpas wordt geel als de telefoon recht is.</string>
 </resources>

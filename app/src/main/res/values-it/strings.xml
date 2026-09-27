@@ -495,4 +495,7 @@
     <string name="shutter_countdown_title">Conto alla rovescia prima dello scatto</string>
     <string name="shutter_countdown_off">Subito</string>
     <string name="shutter_countdown_seconds">%1$d s</string>
+    <string name="mirror_grid">Griglia dei terzi sulla fotocamera</string>
+    <string name="mirror_level">Livella dell’orizzonte sulla fotocamera</string>
+    <string name="mirror_guides_help">Griglia e livella compaiono solo sulla fotocamera specchiata e sono disegnate solo sul pannello: non finiscono mai nella foto. La livella diventa gialla quando il telefono è dritto.</string>
 </resources>

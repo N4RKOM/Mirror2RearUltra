@@ -493,4 +493,7 @@
     <string name="shutter_countdown_title">拍摄前倒计时</string>
     <string name="shutter_countdown_off">立即</string>
     <string name="shutter_countdown_seconds">%1$d 秒</string>
+    <string name="mirror_grid">在相机上显示三分线</string>
+    <string name="mirror_level">在相机上显示水平仪</string>
+    <string name="mirror_guides_help">三分线和水平仪只在镜像的相机画面上显示，且只绘制在副屏上，不会出现在照片里。手机摆正时水平仪会变黄。</string>
 </resources>

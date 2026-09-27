@@ -499,4 +499,7 @@
     <string name="shutter_countdown_title">Odpočet před snímkem</string>
     <string name="shutter_countdown_off">Hned</string>
     <string name="shutter_countdown_seconds">%1$d s</string>
+    <string name="mirror_grid">Mřížka třetin přes fotoaparát</string>
+    <string name="mirror_level">Vodováha přes fotoaparát</string>
+    <string name="mirror_guides_help">Mřížka a vodováha se zobrazují jen přes zrcadlený fotoaparát a kreslí se pouze na panel – do snímku se nedostanou. Vodováha zežloutne, když je telefon rovně.</string>
 </resources>

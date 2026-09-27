@@ -59,6 +59,8 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     private MaterialSwitch pocketLockSwitch;
     private MaterialSwitch shutterOnTapSwitch;
     private HyperValueRow shutterDelayInput;
+    private MaterialSwitch mirrorGridSwitch;
+    private MaterialSwitch mirrorLevelSwitch;
     private String[] shutterDelayLabels;
     private MaterialSwitch tapVariantSwitch;
     private TextView shutterAccessStatus;
@@ -92,6 +94,8 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         pocketLockSwitch = findViewById(R.id.dashboard_pocket_lock_switch);
         shutterOnTapSwitch = findViewById(R.id.dashboard_shutter_switch);
         shutterDelayInput = findViewById(R.id.dashboard_shutter_delay_input);
+        mirrorGridSwitch = findViewById(R.id.dashboard_mirror_grid_switch);
+        mirrorLevelSwitch = findViewById(R.id.dashboard_mirror_level_switch);
         shutterDelayLabels = new String[ShutterCountdown.CHOICES.length];
         for (int index = 0; index < ShutterCountdown.CHOICES.length; index++) {
             int seconds = ShutterCountdown.CHOICES[index];
@@ -218,6 +222,20 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                 shutterDelayInput.setEnabled(checked);
             }
         });
+        mirrorGridSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!bindingUi) {
+                DashboardWidgetLayout.setMirrorGridEnabled(this, checked);
+                MirrorSettings.saveDashboardSettings(this,
+                        MirrorSettings.loadDashboardSettings(this));
+            }
+        });
+        mirrorLevelSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!bindingUi) {
+                DashboardWidgetLayout.setMirrorLevelEnabled(this, checked);
+                MirrorSettings.saveDashboardSettings(this,
+                        MirrorSettings.loadDashboardSettings(this));
+            }
+        });
         // Read at the moment of the tap, so there is nothing to tell the
         // running panel.
         shutterDelayInput.setOnItemSelectedListener(position -> {
@@ -297,6 +315,8 @@ public class DashboardSettingsActivity extends AppCompatActivity {
             }
         }
         shutterDelayInput.setEnabled(shutterOnTapSwitch.isChecked());
+        mirrorGridSwitch.setChecked(DashboardWidgetLayout.isMirrorGridEnabled(this));
+        mirrorLevelSwitch.setChecked(DashboardWidgetLayout.isMirrorLevelEnabled(this));
         tapVariantSwitch.setChecked(DashboardWidgetLayout.isTapCyclesVariantEnabled(this));
         // Switched on in the system's own settings, so it is read afresh here
         // rather than remembered: this screen is where people come back to.

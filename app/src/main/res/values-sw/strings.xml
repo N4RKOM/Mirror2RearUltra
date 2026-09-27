@@ -495,4 +495,7 @@
     <string name="shutter_countdown_title">Kuhesabu kabla ya picha</string>
     <string name="shutter_countdown_off">Mara moja</string>
     <string name="shutter_countdown_seconds">sek %1$d</string>
+    <string name="mirror_grid">Gridi ya theluthi juu ya kamera</string>
+    <string name="mirror_level">Kipimo cha upeo juu ya kamera</string>
+    <string name="mirror_guides_help">Gridi na kipimo huonekana juu ya kamera inayoakisiwa tu na huchorwa kwenye paneli pekee: haviingii kwenye picha. Kipimo huwa njano simu ikiwa imenyooka.</string>
 </resources>

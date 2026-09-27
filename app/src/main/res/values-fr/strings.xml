@@ -495,4 +495,7 @@
     <string name="shutter_countdown_title">Compte à rebours avant la photo</string>
     <string name="shutter_countdown_off">Tout de suite</string>
     <string name="shutter_countdown_seconds">%1$d s</string>
+    <string name="mirror_grid">Grille des tiers sur l’appareil photo</string>
+    <string name="mirror_level">Niveau de l’horizon sur l’appareil photo</string>
+    <string name="mirror_guides_help">La grille et le niveau n’apparaissent que sur l’appareil photo reflété et ne sont dessinés que sur l’écran arrière : ils n’arrivent jamais sur la photo. Le niveau devient jaune quand le téléphone est droit.</string>
 </resources>

@@ -495,4 +495,7 @@
     <string name="shutter_countdown_title">Αντίστροφη μέτρηση πριν τη λήψη</string>
     <string name="shutter_countdown_off">Αμέσως</string>
     <string name="shutter_countdown_seconds">%1$d δ</string>
+    <string name="mirror_grid">Πλέγμα τρίτων πάνω από την κάμερα</string>
+    <string name="mirror_level">Αλφάδι ορίζοντα πάνω από την κάμερα</string>
+    <string name="mirror_guides_help">Το πλέγμα και το αλφάδι εμφανίζονται μόνο πάνω από την κάμερα σε κατοπτρισμό και σχεδιάζονται μόνο στην οθόνη — δεν περνούν στη φωτογραφία. Το αλφάδι γίνεται κίτρινο όταν το τηλέφωνο είναι ίσιο.</string>
 </resources>

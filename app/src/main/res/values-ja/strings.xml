@@ -493,4 +493,7 @@
     <string name="shutter_countdown_title">撮影前のカウントダウン</string>
     <string name="shutter_countdown_off">すぐに</string>
     <string name="shutter_countdown_seconds">%1$d 秒</string>
+    <string name="mirror_grid">カメラに三分割グリッド</string>
+    <string name="mirror_level">カメラに水平器</string>
+    <string name="mirror_guides_help">グリッドと水平器はミラー表示中のカメラの上にだけ表示され、パネルにのみ描画されるため写真には写りません。端末がまっすぐになると水平器が黄色になります。</string>
 </resources>

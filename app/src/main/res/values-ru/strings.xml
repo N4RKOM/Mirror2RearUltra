@@ -519,4 +519,7 @@
     <string name="shutter_countdown_title">Отсчёт перед снимком</string>
     <string name="shutter_countdown_off">Сразу</string>
     <string name="shutter_countdown_seconds">%1$d с</string>
+    <string name="mirror_grid">Сетка третей поверх камеры</string>
+    <string name="mirror_level">Уровень горизонта поверх камеры</string>
+    <string name="mirror_guides_help">Сетка и уровень появляются только поверх зеркала камеры и рисуются на панели — в снимок они не попадают. Уровень желтеет, когда телефон стоит ровно.</string>
 </resources>

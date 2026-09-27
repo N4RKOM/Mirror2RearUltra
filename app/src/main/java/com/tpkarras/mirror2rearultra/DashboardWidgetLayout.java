@@ -101,6 +101,8 @@ final class DashboardWidgetLayout {
     private static final String FACE_DOWN_OFF = "face_down_off";
     private static final String SHUTTER_ON_TAP = "shutter_on_tap";
     private static final String SHUTTER_DELAY = "shutter_delay_seconds";
+    private static final String MIRROR_GRID = "mirror_grid";
+    private static final String MIRROR_LEVEL = "mirror_level";
     private static final String TAP_CYCLES_VARIANT = "tap_cycles_variant";
 
     private DashboardWidgetLayout() {}
@@ -919,6 +921,24 @@ final class DashboardWidgetLayout {
     /** Seconds counted down on the panel before a tap takes the shot; nought for at once. */
     static int shutterDelaySeconds(Context context) {
         return ShutterCountdown.normalized(prefs(context).getInt(SHUTTER_DELAY, 0));
+    }
+
+    /** Whether a mirrored camera gets a rule-of-thirds grid over it. */
+    static boolean isMirrorGridEnabled(Context context) {
+        return prefs(context).getBoolean(MIRROR_GRID, false);
+    }
+
+    static void setMirrorGridEnabled(Context context, boolean enabled) {
+        prefs(context).edit().putBoolean(MIRROR_GRID, enabled).apply();
+    }
+
+    /** Whether a mirrored camera gets a level line over it. */
+    static boolean isMirrorLevelEnabled(Context context) {
+        return prefs(context).getBoolean(MIRROR_LEVEL, false);
+    }
+
+    static void setMirrorLevelEnabled(Context context, boolean enabled) {
+        prefs(context).edit().putBoolean(MIRROR_LEVEL, enabled).apply();
     }
 
     static void setShutterDelaySeconds(Context context, int seconds) {

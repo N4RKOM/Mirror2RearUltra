@@ -495,4 +495,7 @@
     <string name="shutter_countdown_title">फ़ोटो से पहले उलटी गिनती</string>
     <string name="shutter_countdown_off">तुरंत</string>
     <string name="shutter_countdown_seconds">%1$d से</string>
+    <string name="mirror_grid">कैमरे पर तिहाई ग्रिड</string>
+    <string name="mirror_level">कैमरे पर क्षितिज स्तर</string>
+    <string name="mirror_guides_help">ग्रिड और स्तर केवल मिरर किए गए कैमरे पर दिखते हैं और केवल पैनल पर बनते हैं — फ़ोटो में नहीं आते। फ़ोन सीधा होने पर स्तर पीला हो जाता है।</string>
 </resources>

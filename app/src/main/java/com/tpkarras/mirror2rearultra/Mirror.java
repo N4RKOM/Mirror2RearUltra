@@ -80,6 +80,7 @@ public class Mirror extends Activity implements
     private CropMaskView cropMask;
     private View shutterFlash;
     private ShutterCountdownView shutterCountdown;
+    private MirrorGuidesView mirrorGuides;
     private final Handler countdownHandler = new Handler(Looper.getMainLooper());
     /** When the counted shot is due, in uptime; meaningful only while one is counting. */
     private long countdownEndsAt;
@@ -258,6 +259,7 @@ public class Mirror extends Activity implements
         cropMask = findViewById(R.id.crop_mask);
         shutterFlash = findViewById(R.id.shutter_flash);
         shutterCountdown = findViewById(R.id.shutter_countdown);
+        mirrorGuides = findViewById(R.id.mirror_guides);
         panelShutter = new PanelShutter();
         dashboardView = findViewById(R.id.rear_dashboard);
         textureView.setClickable(false);
@@ -983,6 +985,14 @@ public class Mirror extends Activity implements
 
     private void showCropMask(@Nullable CropFrame.Projection projection) {
         cropMaskWanted = projection != null;
+        if (mirrorGuides != null) {
+            // The grid divides the picture, not the black bars round it.
+            if (projection == null) {
+                mirrorGuides.setVisibleSize(0f, 0f);
+            } else {
+                mirrorGuides.setVisibleSize(projection.visibleWidth, projection.visibleHeight);
+            }
+        }
         if (cropMask == null) {
             return;
         }
@@ -1468,6 +1478,7 @@ public class Mirror extends Activity implements
             cropMask.setVisibility(cropMaskWanted && showProjection && !ringing
                     ? View.VISIBLE : View.GONE);
         }
+        updateMirrorGuides(showProjection && !ringing);
         prepareShutter();
         if (dashboardView != null) {
             // The widgets step aside for the image rather than sitting on
@@ -1486,6 +1497,20 @@ public class Mirror extends Activity implements
         if (!showProjection) {
             detachProjectionSurface();
         }
+    }
+
+    /**
+     * The grid and the level, over a camera only: they are for framing a
+     * shot, and over a map or a video they would just be lines in the way.
+     */
+    private void updateMirrorGuides(boolean imageShown) {
+        if (mirrorGuides == null) {
+            return;
+        }
+        mirrorGuides.configure(DashboardWidgetLayout.isMirrorGridEnabled(this),
+                DashboardWidgetLayout.isMirrorLevelEnabled(this));
+        mirrorGuides.setVisibility(imageShown && isCameraInFront() && mirrorGuides.hasAnything()
+                ? View.VISIBLE : View.GONE);
     }
 
     private boolean shouldShowProjection() {

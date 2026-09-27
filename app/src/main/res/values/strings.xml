@@ -514,4 +514,7 @@
     <string name="shutter_countdown_title">Countdown before the shot</string>
     <string name="shutter_countdown_off">At once</string>
     <string name="shutter_countdown_seconds">%1$d s</string>
+    <string name="mirror_grid">Rule-of-thirds grid over the camera</string>
+    <string name="mirror_level">Horizon level over the camera</string>
+    <string name="mirror_guides_help">The grid and the level appear over a mirrored camera only, and are drawn on the panel alone: they never reach the photo. The level turns yellow when the phone is straight.</string>
 </resources>

@@ -495,4 +495,7 @@
     <string name="shutter_countdown_title">Nedtelling før bildet</string>
     <string name="shutter_countdown_off">Med en gang</string>
     <string name="shutter_countdown_seconds">%1$d s</string>
+    <string name="mirror_grid">Tredjedelsrutenett over kameraet</string>
+    <string name="mirror_level">Vater over kameraet</string>
+    <string name="mirror_guides_help">Rutenettet og vateret vises bare over et speilet kamera og tegnes bare på panelet – de havner aldri på bildet. Vateret blir gult når telefonen står rett.</string>
 </resources>

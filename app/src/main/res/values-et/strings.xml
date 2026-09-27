@@ -495,4 +495,7 @@
     <string name="shutter_countdown_title">Loendus enne pildistamist</string>
     <string name="shutter_countdown_off">Kohe</string>
     <string name="shutter_countdown_seconds">%1$d s</string>
+    <string name="mirror_grid">Kolmandike ruudustik kaamera kohal</string>
+    <string name="mirror_level">Horisondi lood kaamera kohal</string>
+    <string name="mirror_guides_help">Ruudustik ja lood kuvatakse ainult peegeldatud kaamera kohal ning joonistatakse ainult paneelile – fotole need ei jõua. Lood muutub kollaseks, kui telefon on otse.</string>
 </resources>

@@ -497,4 +497,7 @@
     <string name="shutter_countdown_title">Numărătoare inversă înainte de fotografie</string>
     <string name="shutter_countdown_off">Imediat</string>
     <string name="shutter_countdown_seconds">%1$d s</string>
+    <string name="mirror_grid">Grilă a treimilor peste cameră</string>
+    <string name="mirror_level">Nivelă a orizontului peste cameră</string>
+    <string name="mirror_guides_help">Grila și nivela apar doar peste camera oglindită și sunt desenate numai pe panou: nu ajung niciodată în fotografie. Nivela devine galbenă când telefonul este drept.</string>
 </resources>

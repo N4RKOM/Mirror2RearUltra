@@ -495,4 +495,7 @@
     <string name="shutter_countdown_title">Cuenta atrás antes de la foto</string>
     <string name="shutter_countdown_off">Al instante</string>
     <string name="shutter_countdown_seconds">%1$d s</string>
+    <string name="mirror_grid">Cuadrícula de tercios sobre la cámara</string>
+    <string name="mirror_level">Nivel del horizonte sobre la cámara</string>
+    <string name="mirror_guides_help">La cuadrícula y el nivel solo aparecen sobre la cámara reflejada y se dibujan únicamente en el panel: nunca llegan a la foto. El nivel se vuelve amarillo cuando el teléfono está recto.</string>
 </resources>

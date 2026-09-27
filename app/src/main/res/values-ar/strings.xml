@@ -503,4 +503,7 @@
     <string name="shutter_countdown_title">عد تنازلي قبل الالتقاط</string>
     <string name="shutter_countdown_off">فورًا</string>
     <string name="shutter_countdown_seconds">%1$d ث</string>
+    <string name="mirror_grid">شبكة الأثلاث فوق الكاميرا</string>
+    <string name="mirror_level">مستوى الأفق فوق الكاميرا</string>
+    <string name="mirror_guides_help">تظهر الشبكة والمستوى فوق مرآة الكاميرا فقط وتُرسم على اللوحة وحدها، فلا تظهر في الصورة. يصبح المستوى أصفر عندما يكون الهاتف مستقيمًا.</string>
 </resources>

@@ -226,9 +226,23 @@
                      as though the countdown were what was switched off. -->
                 <com.tpkarras.mirror2rearultra.HyperValueRow
                     android:id="@+id/dashboard_shutter_delay_input"
-                    style="@style/HyperOS.ValueRow.Bottom"
+                    style="@style/HyperOS.ValueRow"
                     app:rowTitle="@string/shutter_countdown_title" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_mirror_grid_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/mirror_grid" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_mirror_level_switch"
+                    style="@style/HyperOS.Switch.Bottom"
+                    android:text="@string/mirror_level" />
             </LinearLayout>
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/mirror_guides_help" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

@@ -26,6 +26,15 @@
         android:importantForAccessibility="no"
         android:visibility="gone" />
 
+    <!-- Over the image and its mask, under the shutter's blink, the count
+         and the dimming. -->
+    <com.tpkarras.mirror2rearultra.MirrorGuidesView
+        android:id="@+id/mirror_guides"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
+
     <View
         android:id="@+id/shutter_flash"
         android:layout_width="match_parent"

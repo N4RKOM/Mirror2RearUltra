@@ -495,4 +495,7 @@
     <string name="shutter_countdown_title">Nedräkning före bilden</string>
     <string name="shutter_countdown_off">Direkt</string>
     <string name="shutter_countdown_seconds">%1$d s</string>
+    <string name="mirror_grid">Tredjedelsrutnät över kameran</string>
+    <string name="mirror_level">Vattenpass över kameran</string>
+    <string name="mirror_guides_help">Rutnätet och vattenpasset visas bara över en speglad kamera och ritas bara på panelen – de hamnar aldrig på bilden. Vattenpasset blir gult när telefonen är rak.</string>
 </resources>

@@ -499,4 +499,7 @@
     <string name="shutter_countdown_title">Відлік перед знімком</string>
     <string name="shutter_countdown_off">Одразу</string>
     <string name="shutter_countdown_seconds">%1$d с</string>
+    <string name="mirror_grid">Сітка третин поверх камери</string>
+    <string name="mirror_level">Рівень горизонту поверх камери</string>
+    <string name="mirror_guides_help">Сітка й рівень з’являються лише поверх дзеркала камери та малюються на панелі — у знімок вони не потрапляють. Рівень жовтіє, коли телефон стоїть рівно.</string>
 </resources>
