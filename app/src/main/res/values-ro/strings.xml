@@ -478,4 +478,20 @@
     <string name="dashboard_duration_hours">%1$d h %2$d min</string>
     <string name="dashboard_duration_minutes">%1$d min</string>
     <string name="dashboard_level_tilt">înclinare %1$d°</string>
+    <string name="dashboard_widget_sound_mode">Mod sunet</string>
+    <string name="dashboard_widget_world_clock">Al doilea fus orar</string>
+    <string name="dashboard_widget_qr_code">Cod QR</string>
+    <string name="dashboard_sound_on">Sunet</string>
+    <string name="dashboard_sound_vibrate">Vibrații</string>
+    <string name="dashboard_sound_silent">Silențios</string>
+    <string name="dashboard_sound_dnd">Nu deranja</string>
+    <string name="dashboard_sound_volume">sonerie %1$d%%</string>
+    <string name="dashboard_world_clock_zone">Oraș</string>
+    <string name="dashboard_world_clock_offset">%1$s, %2$s h</string>
+    <string name="dashboard_qr_wifi">Rețea Wi‑Fi</string>
+    <string name="dashboard_qr_text_hint">Text sau link</string>
+    <string name="dashboard_qr_ssid_hint">Numele rețelei</string>
+    <string name="dashboard_qr_password_hint">Parolă</string>
+    <string name="dashboard_qr_help">Codul ocupă o pagină proprie. Panoul este mic, așa că țineți telefonul care scanează la câțiva centimetri. Lăsați parola goală pentru o rețea deschisă.</string>
+    <string name="dashboard_qr_empty">Setați conținutul codului în lista de widgeturi</string>
 </resources>

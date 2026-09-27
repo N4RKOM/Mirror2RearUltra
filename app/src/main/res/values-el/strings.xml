@@ -476,4 +476,20 @@
     <string name="dashboard_duration_hours">%1$d ώ %2$d λ</string>
     <string name="dashboard_duration_minutes">%1$d λ</string>
     <string name="dashboard_level_tilt">κλίση %1$d°</string>
+    <string name="dashboard_widget_sound_mode">Λειτουργία ήχου</string>
+    <string name="dashboard_widget_world_clock">Δεύτερη ζώνη ώρας</string>
+    <string name="dashboard_widget_qr_code">Κωδικός QR</string>
+    <string name="dashboard_sound_on">Ήχος</string>
+    <string name="dashboard_sound_vibrate">Δόνηση</string>
+    <string name="dashboard_sound_silent">Σίγαση</string>
+    <string name="dashboard_sound_dnd">Μην ενοχλείτε</string>
+    <string name="dashboard_sound_volume">κουδούνισμα %1$d%%</string>
+    <string name="dashboard_world_clock_zone">Πόλη</string>
+    <string name="dashboard_world_clock_offset">%1$s, %2$s ώ</string>
+    <string name="dashboard_qr_wifi">Δίκτυο Wi‑Fi</string>
+    <string name="dashboard_qr_text_hint">Κείμενο ή σύνδεσμος</string>
+    <string name="dashboard_qr_ssid_hint">Όνομα δικτύου</string>
+    <string name="dashboard_qr_password_hint">Κωδικός πρόσβασης</string>
+    <string name="dashboard_qr_help">Ο κωδικός πιάνει δική του σελίδα. Η οθόνη είναι μικρή, οπότε κρατήστε το τηλέφωνο που σαρώνει λίγα εκατοστά μακριά. Για ανοιχτό δίκτυο αφήστε τον κωδικό κενό.</string>
+    <string name="dashboard_qr_empty">Ορίστε το περιεχόμενο του κωδικού στη λίστα γραφικών στοιχείων</string>
 </resources>

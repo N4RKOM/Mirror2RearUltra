@@ -476,4 +476,20 @@
     <string name="dashboard_duration_hours">%1$d h %2$d min</string>
     <string name="dashboard_duration_minutes">%1$d min</string>
     <string name="dashboard_level_tilt">kallistus %1$d°</string>
+    <string name="dashboard_widget_sound_mode">Äänitila</string>
+    <string name="dashboard_widget_world_clock">Toinen aikavyöhyke</string>
+    <string name="dashboard_widget_qr_code">QR-koodi</string>
+    <string name="dashboard_sound_on">Ääni</string>
+    <string name="dashboard_sound_vibrate">Värinä</string>
+    <string name="dashboard_sound_silent">Äänetön</string>
+    <string name="dashboard_sound_dnd">Älä häiritse</string>
+    <string name="dashboard_sound_volume">soittoääni %1$d%%</string>
+    <string name="dashboard_world_clock_zone">Kaupunki</string>
+    <string name="dashboard_world_clock_offset">%1$s, %2$s h</string>
+    <string name="dashboard_qr_wifi">Wi‑Fi-verkko</string>
+    <string name="dashboard_qr_text_hint">Teksti tai linkki</string>
+    <string name="dashboard_qr_ssid_hint">Verkon nimi</string>
+    <string name="dashboard_qr_password_hint">Salasana</string>
+    <string name="dashboard_qr_help">Koodi vie oman sivunsa. Paneeli on pieni, joten pidä skannaava puhelin muutaman sentin päässä. Jätä salasana tyhjäksi avoimelle verkolle.</string>
+    <string name="dashboard_qr_empty">Aseta koodin sisältö widgetluettelossa</string>
 </resources>

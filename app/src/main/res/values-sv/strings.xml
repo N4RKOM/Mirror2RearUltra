@@ -476,4 +476,20 @@
     <string name="dashboard_duration_hours">%1$d h %2$d min</string>
     <string name="dashboard_duration_minutes">%1$d min</string>
     <string name="dashboard_level_tilt">lutning %1$d°</string>
+    <string name="dashboard_widget_sound_mode">Ljudläge</string>
+    <string name="dashboard_widget_world_clock">Andra tidszon</string>
+    <string name="dashboard_widget_qr_code">QR-kod</string>
+    <string name="dashboard_sound_on">Ljud</string>
+    <string name="dashboard_sound_vibrate">Vibration</string>
+    <string name="dashboard_sound_silent">Tyst</string>
+    <string name="dashboard_sound_dnd">Stör ej</string>
+    <string name="dashboard_sound_volume">ringsignal %1$d%%</string>
+    <string name="dashboard_world_clock_zone">Stad</string>
+    <string name="dashboard_world_clock_offset">%1$s, %2$s h</string>
+    <string name="dashboard_qr_wifi">Wi‑Fi-nätverk</string>
+    <string name="dashboard_qr_text_hint">Text eller länk</string>
+    <string name="dashboard_qr_ssid_hint">Nätverksnamn</string>
+    <string name="dashboard_qr_password_hint">Lösenord</string>
+    <string name="dashboard_qr_help">Koden får en egen sida. Panelen är liten, så håll telefonen som skannar några centimeter bort. Lämna lösenordet tomt för ett öppet nätverk.</string>
+    <string name="dashboard_qr_empty">Ange kodens innehåll i widgetlistan</string>
 </resources>

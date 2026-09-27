@@ -476,4 +476,20 @@
     <string name="dashboard_duration_hours">%1$d u %2$d min</string>
     <string name="dashboard_duration_minutes">%1$d min</string>
     <string name="dashboard_level_tilt">helling %1$d°</string>
+    <string name="dashboard_widget_sound_mode">Geluidsmodus</string>
+    <string name="dashboard_widget_world_clock">Tweede tijdzone</string>
+    <string name="dashboard_widget_qr_code">QR-code</string>
+    <string name="dashboard_sound_on">Geluid</string>
+    <string name="dashboard_sound_vibrate">Trillen</string>
+    <string name="dashboard_sound_silent">Stil</string>
+    <string name="dashboard_sound_dnd">Niet storen</string>
+    <string name="dashboard_sound_volume">beltoon %1$d%%</string>
+    <string name="dashboard_world_clock_zone">Stad</string>
+    <string name="dashboard_world_clock_offset">%1$s, %2$s u</string>
+    <string name="dashboard_qr_wifi">Wifi-netwerk</string>
+    <string name="dashboard_qr_text_hint">Tekst of link</string>
+    <string name="dashboard_qr_ssid_hint">Netwerknaam</string>
+    <string name="dashboard_qr_password_hint">Wachtwoord</string>
+    <string name="dashboard_qr_help">De code krijgt een eigen pagina. Het paneel is klein, dus houd de scannende telefoon op een paar centimeter. Laat het wachtwoord leeg voor een open netwerk.</string>
+    <string name="dashboard_qr_empty">Stel de inhoud van de code in bij de widgetlijst</string>
 </resources>

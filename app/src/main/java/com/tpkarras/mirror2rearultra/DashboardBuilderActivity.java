@@ -40,6 +40,7 @@ import com.google.android.material.shape.ShapeAppearanceModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Arranges the rear panel one page at a time.
@@ -1106,6 +1107,38 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             column.addView(durationRow, spaced());
         }
 
+        // Which city, for the same reason as the timer's length.
+        if (widget == DashboardWidgetLayout.Widget.WORLD_CLOCK) {
+            long now = System.currentTimeMillis();
+            List<String> zones = WorldClock.sortedZones(now);
+            android.icu.text.TimeZoneNames names =
+                    android.icu.text.TimeZoneNames.getInstance(Locale.getDefault());
+            String[] zoneLabels = new String[zones.size()];
+            String chosen = DashboardWidgetLayout.worldClockZone(this);
+            int current = 0;
+            for (int index = 0; index < zones.size(); index++) {
+                String id = zones.get(index);
+                String city = names.getExemplarLocationName(id);
+                if (city == null || city.isEmpty()) city = WorldClock.fallbackName(id);
+                int offset = java.util.TimeZone.getTimeZone(id).getOffset(now) / 60_000;
+                zoneLabels[index] = city + " · " + WorldClock.utcLabel(offset);
+                if (id.equals(chosen)) current = index;
+            }
+            HyperValueRow zoneRow = (HyperValueRow) getLayoutInflater()
+                    .inflate(R.layout.widget_value_row_single, column, false);
+            zoneRow.setTitle(getString(R.string.dashboard_world_clock_zone));
+            zoneRow.setEntries(zoneLabels);
+            zoneRow.setValue(zoneLabels[current]);
+            zoneRow.setBackgroundResource(R.drawable.hyper_segment_track);
+            zoneRow.setOnItemSelectedListener(position -> {
+                if (position >= 0 && position < zones.size()) {
+                    DashboardWidgetLayout.setWorldClockZone(this, zones.get(position));
+                    notifyDashboardChanged();
+                }
+            });
+            column.addView(zoneRow, spaced());
+        }
+
         // Rarely changed, so after the four that shape the widget.
         column.addView(segmentedRow(R.string.dashboard_builder_rotation_label,
                 new String[]{"0°", "90°", "180°", "270°"},
@@ -1524,7 +1557,10 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 new ChargeReading(2_100, 8_200, 52 * 60_000L, false),
                 new SunTimes.Next(System.currentTimeMillis() - 4 * 3_600_000L,
                         System.currentTimeMillis() + 135 * 60_000L, false),
-                new LevelReading(2.4f, 6f));
+                new LevelReading(2.4f, 6f),
+                // Vibrate rather than ringing: a ringing phone drops the row
+                // unless it is set to stay, and the preview would be empty.
+                new SoundModeReading(SoundModeReading.Mode.VIBRATE, 60));
     }
 
     /**
@@ -1637,7 +1673,9 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 R.string.dashboard_widget_fullscreen_media,
                 R.string.dashboard_widget_last_notification,
                 R.string.dashboard_widget_timer, R.string.dashboard_widget_charging,
-                R.string.dashboard_widget_sun, R.string.dashboard_widget_level};
+                R.string.dashboard_widget_sun, R.string.dashboard_widget_level,
+                R.string.dashboard_widget_sound_mode, R.string.dashboard_widget_world_clock,
+                R.string.dashboard_widget_qr_code};
         // Indexed by ordinal, so a widget added without a label here would
         // take the whole screen down rather than show a blank row.
         int index = widget.ordinal();

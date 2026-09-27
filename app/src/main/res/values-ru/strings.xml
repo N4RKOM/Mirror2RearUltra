@@ -500,4 +500,20 @@
     <string name="dashboard_duration_hours">%1$d ч %2$d мин</string>
     <string name="dashboard_duration_minutes">%1$d мин</string>
     <string name="dashboard_level_tilt">наклон %1$d°</string>
+    <string name="dashboard_widget_sound_mode">Режим звука</string>
+    <string name="dashboard_widget_world_clock">Второй часовой пояс</string>
+    <string name="dashboard_widget_qr_code">QR-код</string>
+    <string name="dashboard_sound_on">Звук</string>
+    <string name="dashboard_sound_vibrate">Вибрация</string>
+    <string name="dashboard_sound_silent">Без звука</string>
+    <string name="dashboard_sound_dnd">Не беспокоить</string>
+    <string name="dashboard_sound_volume">звонок %1$d%%</string>
+    <string name="dashboard_world_clock_zone">Город</string>
+    <string name="dashboard_world_clock_offset">%1$s, %2$s ч</string>
+    <string name="dashboard_qr_wifi">Сеть Wi‑Fi</string>
+    <string name="dashboard_qr_text_hint">Текст или ссылка</string>
+    <string name="dashboard_qr_ssid_hint">Имя сети</string>
+    <string name="dashboard_qr_password_hint">Пароль</string>
+    <string name="dashboard_qr_help">Код занимает отдельную страницу. Панель маленькая, поэтому сканирующий телефон держите в нескольких сантиметрах. Для открытой сети оставьте пароль пустым.</string>
+    <string name="dashboard_qr_empty">Задайте содержимое кода в списке виджетов</string>
 </resources>

@@ -74,6 +74,11 @@
                     android:text="@string/dashboard_widget_date" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_world_clock_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_world_clock" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_next_alarm_switch"
                     style="@style/HyperOS.Switch"
                     android:text="@string/dashboard_widget_next_alarm" />
@@ -112,6 +117,11 @@
                     android:id="@+id/dashboard_charging_switch"
                     style="@style/HyperOS.Switch"
                     android:text="@string/dashboard_widget_charging" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_sound_mode_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_sound_mode" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_temperature_switch"
@@ -353,6 +363,84 @@
             <TextView
                 style="@style/HyperOS.GroupFootnote"
                 android:text="@string/dashboard_custom_text_help" />
+
+            <!-- The code's content sits under its switch, the way the custom
+                 text does: a text or link, or a Wi-Fi network to join. -->
+            <LinearLayout
+                style="@style/HyperOS.Group"
+                android:layout_marginTop="@dimen/section_spacing">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_qr_code_switch"
+                    style="@style/HyperOS.Switch.Top"
+                    android:text="@string/dashboard_widget_qr_code" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_qr_wifi_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_qr_wifi" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/dashboard_qr_text_container"
+                    style="@style/HyperOS.Field.Flat"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/dashboard_qr_text_hint"
+                    app:endIconMode="clear_text">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dashboard_qr_text_input"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionDone"
+                        android:inputType="textUri"
+                        android:maxLength="200"
+                        android:maxLines="1"
+                        android:textAppearance="@style/HyperOS.Text.RowTitle" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/dashboard_qr_ssid_container"
+                    style="@style/HyperOS.Field.Flat"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/dashboard_qr_ssid_hint"
+                    app:endIconMode="clear_text">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dashboard_qr_ssid_input"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionNext"
+                        android:inputType="text"
+                        android:maxLength="32"
+                        android:maxLines="1"
+                        android:textAppearance="@style/HyperOS.Text.RowTitle" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/dashboard_qr_password_container"
+                    style="@style/HyperOS.Field.Flat"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/dashboard_qr_password_hint"
+                    app:endIconMode="password_toggle">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dashboard_qr_password_input"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionDone"
+                        android:inputType="textPassword"
+                        android:maxLength="63"
+                        android:maxLines="1"
+                        android:textAppearance="@style/HyperOS.Text.RowTitle" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/dashboard_qr_help" />
 
             <!-- ===================== Units =====================
                  How the readings above are written, so it sits with them

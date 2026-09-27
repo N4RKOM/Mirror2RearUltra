@@ -20,7 +20,7 @@ final class DashboardWidgetLayout {
         COMPASS, SPEED, ALTITUDE, SESSION_TIMER, ACTIVE_PROFILE, CUSTOM_TEXT,
         NETWORK, MEMORY, STORAGE, NOTIFICATIONS, CALENDAR, STEPS,
         FULLSCREEN_WEATHER, FULLSCREEN_MEDIA, LAST_NOTIFICATION, TIMER,
-        CHARGING, SUN, LEVEL }
+        CHARGING, SUN, LEVEL, SOUND_MODE, WORLD_CLOCK, QR_CODE }
     enum Size { SMALL, NORMAL, LARGE }
 
     /**
@@ -80,6 +80,11 @@ final class DashboardWidgetLayout {
     private static final String IMPERIAL_UNITS = "imperial_units";
     private static final String IDLE_MODE_BEFORE_AOD = "idle_mode_before_aod";
     private static final String TIMER_MINUTES = "timer_minutes";
+    private static final String WORLD_CLOCK_ZONE = "world_clock_zone";
+    private static final String QR_WIFI = "qr_wifi";
+    private static final String QR_TEXT = "qr_text";
+    private static final String QR_WIFI_SSID = "qr_wifi_ssid";
+    private static final String QR_WIFI_PASSWORD = "qr_wifi_password";
     private static final String WIDGET_FONT_PREFIX = "font_";
     private static final String GRID_SNAP = "grid_snap";
     private static final String SCALE_PREFIX = "scale_";
@@ -333,6 +338,47 @@ final class DashboardWidgetLayout {
 
     static void setTimerMinutes(Context context, int minutes) {
         prefs(context).edit().putInt(TIMER_MINUTES, Math.max(0, Math.min(180, minutes))).apply();
+    }
+
+    static String worldClockZone(Context context) {
+        return prefs(context).getString(WORLD_CLOCK_ZONE, WorldClock.DEFAULT_ZONE);
+    }
+
+    static void setWorldClockZone(Context context, String zoneId) {
+        prefs(context).edit().putString(WORLD_CLOCK_ZONE, zoneId).apply();
+    }
+
+    /** Whether the QR widget shows a Wi-Fi network rather than its own text. */
+    static boolean isQrWifi(Context context) {
+        return prefs(context).getBoolean(QR_WIFI, false);
+    }
+
+    static String qrText(Context context) {
+        return prefs(context).getString(QR_TEXT, "");
+    }
+
+    static String qrWifiSsid(Context context) {
+        return prefs(context).getString(QR_WIFI_SSID, "");
+    }
+
+    static String qrWifiPassword(Context context) {
+        return prefs(context).getString(QR_WIFI_PASSWORD, "");
+    }
+
+    static void saveQr(Context context, boolean wifi, String text, String ssid, String password) {
+        prefs(context).edit()
+                .putBoolean(QR_WIFI, wifi)
+                .putString(QR_TEXT, text)
+                .putString(QR_WIFI_SSID, ssid)
+                .putString(QR_WIFI_PASSWORD, password)
+                .apply();
+    }
+
+    /** What the QR widget encodes, or empty while there is nothing set. */
+    static String qrPayload(Context context) {
+        if (!isQrWifi(context)) return qrText(context);
+        String ssid = qrWifiSsid(context);
+        return ssid.isEmpty() ? "" : QrContent.wifi(ssid, qrWifiPassword(context));
     }
 
     static boolean isGridSnapEnabled(Context context) {
@@ -659,6 +705,7 @@ final class DashboardWidgetLayout {
             case CHARGING:
             case SUN:
             case LEVEL:
+            case SOUND_MODE:
                 return true;
             default:
                 // The clock, the date and the session timer always have a
@@ -976,11 +1023,14 @@ final class DashboardWidgetLayout {
                 || widget == Widget.STEPS || widget == Widget.FULLSCREEN_WEATHER
                 || widget == Widget.FULLSCREEN_MEDIA || widget == Widget.LAST_NOTIFICATION
                 || widget == Widget.TIMER || widget == Widget.CHARGING
-                || widget == Widget.SUN || widget == Widget.LEVEL;
+                || widget == Widget.SUN || widget == Widget.LEVEL
+                || widget == Widget.SOUND_MODE || widget == Widget.WORLD_CLOCK
+                || widget == Widget.QR_CODE;
     }
 
     static boolean isFullscreenWidget(Widget widget) {
-        return widget == Widget.FULLSCREEN_WEATHER || widget == Widget.FULLSCREEN_MEDIA;
+        return widget == Widget.FULLSCREEN_WEATHER || widget == Widget.FULLSCREEN_MEDIA
+                || widget == Widget.QR_CODE;
     }
 
     private static void enforceExclusivePage(Context context, Widget changed, int requestedPage) {

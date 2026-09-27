@@ -36,6 +36,8 @@ final class RearDashboardSnapshot {
     @Nullable final SunTimes.Next sun;
     /** Null while the widget is off, or the phone lies too flat to have a horizon. */
     @Nullable final LevelReading level;
+    /** Null while the widget is off. */
+    @Nullable final SoundModeReading sound;
 
     RearDashboardSnapshot(
             long timestampMillis,
@@ -64,7 +66,7 @@ final class RearDashboardSnapshot {
                 null,
                 null,
                 0L,
-                "", "", -1, -1, "", null, -1, "", "", "", null, null, null
+                "", "", -1, -1, "", null, -1, "", "", "", null, null, null, null
         );
     }
 
@@ -92,7 +94,7 @@ final class RearDashboardSnapshot {
                 mediaTitle, mediaArtist, mediaPlaying, headingDegrees, speedMetersPerSecond,
                 altitudeMeters,
                 sessionElapsedMillis, activeProfileName, "", -1, -1, "", null, -1,
-                "", "", "", null, null, null);
+                "", "", "", null, null, null, null);
     }
 
     RearDashboardSnapshot(
@@ -105,7 +107,8 @@ final class RearDashboardSnapshot {
             int storagePercentFree, String calendarTitle, Long calendarStartMillis,
             int stepsToday, String notificationApp, String notificationTitle,
             String notificationText, @Nullable ChargeReading charge,
-            @Nullable SunTimes.Next sun, @Nullable LevelReading level
+            @Nullable SunTimes.Next sun, @Nullable LevelReading level,
+            @Nullable SoundModeReading sound
     ) {
         this.timestampMillis = timestampMillis;
         this.batteryPercent = batteryPercent;
@@ -136,5 +139,6 @@ final class RearDashboardSnapshot {
         this.charge = charge;
         this.sun = sun;
         this.level = level;
+        this.sound = sound;
     }
 }

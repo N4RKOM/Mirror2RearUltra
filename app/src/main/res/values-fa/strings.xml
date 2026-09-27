@@ -476,4 +476,20 @@
     <string name="dashboard_duration_hours">%1$d ساعت %2$d دقیقه</string>
     <string name="dashboard_duration_minutes">%1$d دقیقه</string>
     <string name="dashboard_level_tilt">شیب %1$d°</string>
+    <string name="dashboard_widget_sound_mode">حالت صدا</string>
+    <string name="dashboard_widget_world_clock">منطقه زمانی دوم</string>
+    <string name="dashboard_widget_qr_code">کد QR</string>
+    <string name="dashboard_sound_on">صدا</string>
+    <string name="dashboard_sound_vibrate">لرزش</string>
+    <string name="dashboard_sound_silent">بی‌صدا</string>
+    <string name="dashboard_sound_dnd">مزاحم نشوید</string>
+    <string name="dashboard_sound_volume">زنگ %1$d%%</string>
+    <string name="dashboard_world_clock_zone">شهر</string>
+    <string name="dashboard_world_clock_offset">%1$s، %2$s ساعت</string>
+    <string name="dashboard_qr_wifi">شبکه Wi‑Fi</string>
+    <string name="dashboard_qr_text_hint">متن یا پیوند</string>
+    <string name="dashboard_qr_ssid_hint">نام شبکه</string>
+    <string name="dashboard_qr_password_hint">گذرواژه</string>
+    <string name="dashboard_qr_help">کد یک صفحه جداگانه می‌گیرد. پنل کوچک است، پس گوشی اسکن‌کننده را چند سانتی‌متر دورتر نگه دارید. برای شبکه باز گذرواژه را خالی بگذارید.</string>
+    <string name="dashboard_qr_empty">محتوای کد را در فهرست ابزارک‌ها تعیین کنید</string>
 </resources>

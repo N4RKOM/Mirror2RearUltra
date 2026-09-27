@@ -476,4 +476,20 @@
     <string name="dashboard_duration_hours">%1$d h %2$d min</string>
     <string name="dashboard_duration_minutes">%1$d min</string>
     <string name="dashboard_level_tilt">inclinación %1$d°</string>
+    <string name="dashboard_widget_sound_mode">Modo de sonido</string>
+    <string name="dashboard_widget_world_clock">Segunda zona horaria</string>
+    <string name="dashboard_widget_qr_code">Código QR</string>
+    <string name="dashboard_sound_on">Sonido</string>
+    <string name="dashboard_sound_vibrate">Vibración</string>
+    <string name="dashboard_sound_silent">Silencio</string>
+    <string name="dashboard_sound_dnd">No molestar</string>
+    <string name="dashboard_sound_volume">timbre %1$d%%</string>
+    <string name="dashboard_world_clock_zone">Ciudad</string>
+    <string name="dashboard_world_clock_offset">%1$s, %2$s h</string>
+    <string name="dashboard_qr_wifi">Red Wi‑Fi</string>
+    <string name="dashboard_qr_text_hint">Texto o enlace</string>
+    <string name="dashboard_qr_ssid_hint">Nombre de la red</string>
+    <string name="dashboard_qr_password_hint">Contraseña</string>
+    <string name="dashboard_qr_help">El código ocupa una página propia. El panel es pequeño: acerca el teléfono que escanea a unos centímetros. Deja la contraseña vacía para una red abierta.</string>
+    <string name="dashboard_qr_empty">Define el contenido del código en la lista de widgets</string>
 </resources>

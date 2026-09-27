@@ -476,4 +476,20 @@
     <string name="dashboard_duration_hours">saa %1$d dak %2$d</string>
     <string name="dashboard_duration_minutes">dak %1$d</string>
     <string name="dashboard_level_tilt">mwinamo %1$d°</string>
+    <string name="dashboard_widget_sound_mode">Hali ya sauti</string>
+    <string name="dashboard_widget_world_clock">Saa ya eneo la pili</string>
+    <string name="dashboard_widget_qr_code">Msimbo wa QR</string>
+    <string name="dashboard_sound_on">Sauti</string>
+    <string name="dashboard_sound_vibrate">Mtetemo</string>
+    <string name="dashboard_sound_silent">Kimya</string>
+    <string name="dashboard_sound_dnd">Usisumbue</string>
+    <string name="dashboard_sound_volume">mlio %1$d%%</string>
+    <string name="dashboard_world_clock_zone">Jiji</string>
+    <string name="dashboard_world_clock_offset">%1$s, saa %2$s</string>
+    <string name="dashboard_qr_wifi">Mtandao wa Wi‑Fi</string>
+    <string name="dashboard_qr_text_hint">Maandishi au kiungo</string>
+    <string name="dashboard_qr_ssid_hint">Jina la mtandao</string>
+    <string name="dashboard_qr_password_hint">Nenosiri</string>
+    <string name="dashboard_qr_help">Msimbo huchukua ukurasa wake. Paneli ni ndogo, kwa hivyo shikilia simu inayochanganua sentimita chache. Acha nenosiri tupu kwa mtandao ulio wazi.</string>
+    <string name="dashboard_qr_empty">Weka maudhui ya msimbo katika orodha ya wijeti</string>
 </resources>

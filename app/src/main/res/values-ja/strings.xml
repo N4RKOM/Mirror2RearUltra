@@ -474,4 +474,20 @@
     <string name="dashboard_duration_hours">%1$d時間%2$d分</string>
     <string name="dashboard_duration_minutes">%1$d分</string>
     <string name="dashboard_level_tilt">傾き %1$d°</string>
+    <string name="dashboard_widget_sound_mode">サウンドモード</string>
+    <string name="dashboard_widget_world_clock">2つ目のタイムゾーン</string>
+    <string name="dashboard_widget_qr_code">QRコード</string>
+    <string name="dashboard_sound_on">サウンド</string>
+    <string name="dashboard_sound_vibrate">バイブ</string>
+    <string name="dashboard_sound_silent">サイレント</string>
+    <string name="dashboard_sound_dnd">おやすみモード</string>
+    <string name="dashboard_sound_volume">着信音 %1$d%%</string>
+    <string name="dashboard_world_clock_zone">都市</string>
+    <string name="dashboard_world_clock_offset">%1$s、%2$s 時間</string>
+    <string name="dashboard_qr_wifi">Wi‑Fi ネットワーク</string>
+    <string name="dashboard_qr_text_hint">テキストまたはリンク</string>
+    <string name="dashboard_qr_ssid_hint">ネットワーク名</string>
+    <string name="dashboard_qr_password_hint">パスワード</string>
+    <string name="dashboard_qr_help">コードは専用のページを使います。パネルが小さいので、読み取る端末を数センチまで近づけてください。オープンなネットワークではパスワードを空欄にします。</string>
+    <string name="dashboard_qr_empty">コードの内容はウィジェット一覧で設定してください</string>
 </resources>

@@ -474,4 +474,20 @@
     <string name="dashboard_duration_hours">%1$d 小时 %2$d 分</string>
     <string name="dashboard_duration_minutes">%1$d 分钟</string>
     <string name="dashboard_level_tilt">倾斜 %1$d°</string>
+    <string name="dashboard_widget_sound_mode">声音模式</string>
+    <string name="dashboard_widget_world_clock">第二时区</string>
+    <string name="dashboard_widget_qr_code">二维码</string>
+    <string name="dashboard_sound_on">响铃</string>
+    <string name="dashboard_sound_vibrate">振动</string>
+    <string name="dashboard_sound_silent">静音</string>
+    <string name="dashboard_sound_dnd">勿扰</string>
+    <string name="dashboard_sound_volume">铃声 %1$d%%</string>
+    <string name="dashboard_world_clock_zone">城市</string>
+    <string name="dashboard_world_clock_offset">%1$s，%2$s 小时</string>
+    <string name="dashboard_qr_wifi">Wi‑Fi 网络</string>
+    <string name="dashboard_qr_text_hint">文本或链接</string>
+    <string name="dashboard_qr_ssid_hint">网络名称</string>
+    <string name="dashboard_qr_password_hint">密码</string>
+    <string name="dashboard_qr_help">二维码独占一页。面板很小，请将扫码的手机放在几厘米外。开放网络请将密码留空。</string>
+    <string name="dashboard_qr_empty">请在小组件列表中设置二维码内容</string>
 </resources>

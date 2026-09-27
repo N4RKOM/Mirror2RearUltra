@@ -476,4 +476,20 @@
     <string name="dashboard_duration_hours">%1$d h %2$d min</string>
     <string name="dashboard_duration_minutes">%1$d min</string>
     <string name="dashboard_level_tilt">kalle %1$d°</string>
+    <string name="dashboard_widget_sound_mode">Helirežiim</string>
+    <string name="dashboard_widget_world_clock">Teine ajavöönd</string>
+    <string name="dashboard_widget_qr_code">QR-kood</string>
+    <string name="dashboard_sound_on">Heli</string>
+    <string name="dashboard_sound_vibrate">Värin</string>
+    <string name="dashboard_sound_silent">Hääletu</string>
+    <string name="dashboard_sound_dnd">Mitte segada</string>
+    <string name="dashboard_sound_volume">helin %1$d%%</string>
+    <string name="dashboard_world_clock_zone">Linn</string>
+    <string name="dashboard_world_clock_offset">%1$s, %2$s h</string>
+    <string name="dashboard_qr_wifi">WiFi-võrk</string>
+    <string name="dashboard_qr_text_hint">Tekst või link</string>
+    <string name="dashboard_qr_ssid_hint">Võrgu nimi</string>
+    <string name="dashboard_qr_password_hint">Parool</string>
+    <string name="dashboard_qr_help">Kood võtab eraldi lehe. Paneel on väike, seega hoia skannivat telefoni mõne sentimeetri kaugusel. Avatud võrgu puhul jäta parool tühjaks.</string>
+    <string name="dashboard_qr_empty">Määra koodi sisu vidinate loendis</string>
 </resources>

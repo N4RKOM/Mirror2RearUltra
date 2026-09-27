@@ -476,4 +476,20 @@
     <string name="dashboard_duration_hours">%1$d घं %2$d मि</string>
     <string name="dashboard_duration_minutes">%1$d मि</string>
     <string name="dashboard_level_tilt">झुकाव %1$d°</string>
+    <string name="dashboard_widget_sound_mode">ध्वनि मोड</string>
+    <string name="dashboard_widget_world_clock">दूसरा समय क्षेत्र</string>
+    <string name="dashboard_widget_qr_code">QR कोड</string>
+    <string name="dashboard_sound_on">ध्वनि</string>
+    <string name="dashboard_sound_vibrate">कंपन</string>
+    <string name="dashboard_sound_silent">मौन</string>
+    <string name="dashboard_sound_dnd">परेशान न करें</string>
+    <string name="dashboard_sound_volume">रिंग %1$d%%</string>
+    <string name="dashboard_world_clock_zone">शहर</string>
+    <string name="dashboard_world_clock_offset">%1$s, %2$s घं</string>
+    <string name="dashboard_qr_wifi">Wi‑Fi नेटवर्क</string>
+    <string name="dashboard_qr_text_hint">टेक्स्ट या लिंक</string>
+    <string name="dashboard_qr_ssid_hint">नेटवर्क का नाम</string>
+    <string name="dashboard_qr_password_hint">पासवर्ड</string>
+    <string name="dashboard_qr_help">कोड अपना अलग पेज लेता है। पैनल छोटा है, इसलिए स्कैन करने वाले फ़ोन को कुछ सेंटीमीटर दूर रखें। खुले नेटवर्क के लिए पासवर्ड खाली छोड़ें।</string>
+    <string name="dashboard_qr_empty">विजेट सूची में कोड की सामग्री सेट करें</string>
 </resources>

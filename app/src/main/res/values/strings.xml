@@ -495,4 +495,20 @@
     <string name="dashboard_duration_hours">%1$d h %2$d min</string>
     <string name="dashboard_duration_minutes">%1$d min</string>
     <string name="dashboard_level_tilt">tilt %1$d°</string>
+    <string name="dashboard_widget_sound_mode">Sound mode</string>
+    <string name="dashboard_widget_world_clock">Second time zone</string>
+    <string name="dashboard_widget_qr_code">QR code</string>
+    <string name="dashboard_sound_on">Sound on</string>
+    <string name="dashboard_sound_vibrate">Vibrate</string>
+    <string name="dashboard_sound_silent">Silent</string>
+    <string name="dashboard_sound_dnd">Do not disturb</string>
+    <string name="dashboard_sound_volume">ring %1$d%%</string>
+    <string name="dashboard_world_clock_zone">City</string>
+    <string name="dashboard_world_clock_offset">%1$s, %2$s h</string>
+    <string name="dashboard_qr_wifi">Wi‑Fi network</string>
+    <string name="dashboard_qr_text_hint">Text or link</string>
+    <string name="dashboard_qr_ssid_hint">Network name</string>
+    <string name="dashboard_qr_password_hint">Password</string>
+    <string name="dashboard_qr_help">The code takes a page of its own. The panel is small, so hold the scanning phone a few centimetres away. Leave the password empty for an open network.</string>
+    <string name="dashboard_qr_empty">Set what the code holds in the widget list</string>
 </resources>

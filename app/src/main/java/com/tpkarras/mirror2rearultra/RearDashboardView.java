@@ -1085,6 +1085,28 @@ public final class RearDashboardView extends View {
             }
             addLine(lines, DashboardWidgetLayout.Widget.LEVEL, level != null, value, Icon.LEVEL);
         }
+        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.SOUND_MODE)) {
+            SoundModeReading sound = snapshot.sound;
+            // Ringing is the ordinary state and says nothing, so like the
+            // other widgets with nothing to report it drops out unless set to
+            // stay: the row is there to warn that a call will not be heard.
+            boolean worthShowing = sound != null
+                    && (sound.mode != SoundModeReading.Mode.SOUND
+                    || DashboardWidgetLayout.loadPresence(getContext(),
+                    DashboardWidgetLayout.Widget.SOUND_MODE)
+                    == DashboardWidgetLayout.Presence.ALWAYS);
+            addLine(lines, DashboardWidgetLayout.Widget.SOUND_MODE, worthShowing,
+                    soundVariant(sound), soundIcon(sound));
+        }
+        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.WORLD_CLOCK)) {
+            lines.add(new Line(DashboardWidgetLayout.Widget.WORLD_CLOCK,
+                    worldClockVariant(locale), false, Icon.GLOBE));
+        }
+        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.QR_CODE)) {
+            // Drawn as a picture by drawFullscreenQr; the text is only what
+            // a page too full to hold the code would show in its place.
+            lines.add(new Line(DashboardWidgetLayout.Widget.QR_CODE, "QR", false, Icon.NONE));
+        }
         if (DashboardWidgetLayout.isExtraEnabled(
                 getContext(), DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER)) {
             String value = weatherVariant(DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER);
@@ -1699,17 +1721,147 @@ public final class RearDashboardView extends View {
     private void drawFullscreen(Canvas canvas, List<Line> lines, float density) {
         boolean weather = false;
         boolean media = false;
+        boolean qr = false;
         for (Line line : lines) {
             weather |= line.widget == DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER;
             media |= line.widget == DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA;
+            qr |= line.widget == DashboardWidgetLayout.Widget.QR_CODE;
         }
-        if (weather) {
+        if (qr) {
+            drawFullscreenQr(canvas, density);
+        } else if (weather) {
             drawFullscreenWeather(canvas, density);
         } else if (media) {
             drawFullscreenMedia(canvas, density);
         } else {
             drawStacked(canvas, lines, density);
         }
+    }
+
+    /** The last code drawn and what it encodes, since encoding on every frame is waste. */
+    private String qrPayload;
+    @Nullable private boolean[][] qrModules;
+
+    /**
+     * The code as large as the panel allows, with what it holds written
+     * beside or under it.
+     *
+     * <p>Dark modules on a light square whatever the panel's theme: a code
+     * drawn light on dark is read by some cameras and not by others. The light
+     * margin round it is the quiet zone a reader needs to find the edges,
+     * two modules wide rather than the four the standard asks for, since each
+     * module of margin costs the code itself a pixel on a panel this narrow.
+     * Modules are whole pixels, so the edges stay sharp.
+     */
+    private void drawFullscreenQr(Canvas canvas, float density) {
+        String payload = DashboardWidgetLayout.qrPayload(getContext());
+        if (!payload.equals(qrPayload)) {
+            qrPayload = payload;
+            qrModules = QrContent.encode(payload);
+        }
+        float pad = Math.min(6f * density, Math.min(getWidth(), getHeight()) * 0.04f);
+        RectF area = new RectF(pad, pad, getWidth() - pad, getHeight() - pad);
+        String caption = qrCaption(payload.isEmpty());
+        boolean wide = area.width() > area.height();
+        textPaint.setColor(currentPalette.text);
+        textPaint.setTypeface(panelTypeface);
+        if (qrModules == null) {
+            drawCaption(canvas, caption, area, density);
+            return;
+        }
+        int count = qrModules.length + 4;
+        float side = Math.min(area.width(), area.height());
+        // Room for a caption only where the code does not need all of it.
+        boolean captioned = !caption.isEmpty()
+                && (wide ? area.width() - side : area.height() - side) > 18f * density;
+        int module = Math.max(1, (int) Math.floor(side / count));
+        float size = module * count;
+        float left;
+        float top;
+        if (!captioned) {
+            left = area.centerX() - size / 2f;
+            top = area.centerY() - size / 2f;
+        } else if (wide) {
+            left = area.left;
+            top = area.centerY() - size / 2f;
+        } else {
+            left = area.centerX() - size / 2f;
+            top = area.top;
+        }
+        left = Math.round(left);
+        top = Math.round(top);
+        Paint.Style previous = iconPaint.getStyle();
+        iconPaint.setStyle(Paint.Style.FILL);
+        iconPaint.setColor(Color.WHITE);
+        canvas.drawRect(left, top, left + size, top + size, iconPaint);
+        iconPaint.setColor(Color.BLACK);
+        for (int y = 0; y < qrModules.length; y++) {
+            for (int x = 0; x < qrModules[y].length; x++) {
+                if (qrModules[y][x]) {
+                    float moduleLeft = left + (x + 2) * module;
+                    float moduleTop = top + (y + 2) * module;
+                    canvas.drawRect(moduleLeft, moduleTop,
+                            moduleLeft + module, moduleTop + module, iconPaint);
+                }
+            }
+        }
+        iconPaint.setStyle(previous);
+        if (captioned) {
+            float gap = 4f * density;
+            RectF rest = wide
+                    ? new RectF(left + size + gap, area.top, area.right, area.bottom)
+                    : new RectF(area.left, top + size + gap, area.right, area.bottom);
+            drawCaption(canvas, caption, rest, density);
+        }
+    }
+
+    /**
+     * The network's name for Wi-Fi, and the password too in the detailed
+     * form, for a guest whose phone will not read the code; the text itself
+     * otherwise. Compact is the code alone.
+     */
+    private String qrCaption(boolean empty) {
+        if (empty) {
+            return getResources().getString(R.string.dashboard_qr_empty);
+        }
+        DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.QR_CODE);
+        if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
+            return "";
+        }
+        if (!DashboardWidgetLayout.isQrWifi(getContext())) {
+            return DashboardWidgetLayout.qrText(getContext());
+        }
+        String ssid = DashboardWidgetLayout.qrWifiSsid(getContext());
+        String password = DashboardWidgetLayout.qrWifiPassword(getContext());
+        return variant == DashboardWidgetLayout.Variant.DETAILED && !password.isEmpty()
+                ? ssid + "\n" + password : ssid;
+    }
+
+    /** Up to three lines, as large as fits, centred in {@code area}. */
+    private void drawCaption(Canvas canvas, String caption, RectF area, float density) {
+        if (caption.isEmpty() || area.width() <= 0f || area.height() <= 0f) {
+            return;
+        }
+        String[] parts = caption.split("\\n", -1);
+        int lineCount = Math.min(3, parts.length);
+        String longest = "";
+        for (int index = 0; index < lineCount; index++) {
+            if (parts[index].length() > longest.length()) longest = parts[index];
+        }
+        float size = fitTextSize(longest, area.width(),
+                Math.min(area.height() / (lineCount * 1.3f), 16f * density), 7f * density);
+        textPaint.setTextSize(size);
+        textPaint.setColor(mutedColour());
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        float lineHeight = size * 1.25f;
+        float first = area.centerY() - (lineCount - 1) * lineHeight / 2f + size * 0.35f;
+        for (int index = 0; index < lineCount; index++) {
+            CharSequence fitted = TextUtils.ellipsize(parts[index], textPaint, area.width(),
+                    TextUtils.TruncateAt.END);
+            canvas.drawText(fitted.toString(), area.centerX(), first + index * lineHeight,
+                    textPaint);
+        }
+        textPaint.setTextAlign(Paint.Align.LEFT);
     }
 
     private boolean containsFullscreenWidget(List<Line> lines) {
@@ -2451,6 +2603,93 @@ public final class RearDashboardView extends View {
                     : R.string.dashboard_sun_sunset_in, wait);
         }
         return next;
+    }
+
+    /**
+     * The mode in a word. Compact gives the ring volume while the phone
+     * rings, and the word otherwise, since the volume of a phone that will
+     * not ring says nothing; detailed gives both.
+     */
+    private String soundVariant(@Nullable SoundModeReading sound) {
+        if (sound == null) {
+            return "";
+        }
+        int word;
+        switch (sound.mode) {
+            case VIBRATE: word = R.string.dashboard_sound_vibrate; break;
+            case SILENT: word = R.string.dashboard_sound_silent; break;
+            case DO_NOT_DISTURB: word = R.string.dashboard_sound_dnd; break;
+            default: word = R.string.dashboard_sound_on; break;
+        }
+        String name = getResources().getString(word);
+        DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.SOUND_MODE);
+        if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
+            return sound.mode == SoundModeReading.Mode.SOUND ? sound.volumePercent + "%" : name;
+        }
+        if (variant == DashboardWidgetLayout.Variant.DETAILED) {
+            return name + "\n" + getResources().getString(
+                    R.string.dashboard_sound_volume, sound.volumePercent);
+        }
+        return name;
+    }
+
+    private static Icon soundIcon(@Nullable SoundModeReading sound) {
+        if (sound == null) return Icon.SOUND_ON;
+        switch (sound.mode) {
+            case VIBRATE: return Icon.VIBRATE;
+            case SILENT: return Icon.SOUND_OFF;
+            case DO_NOT_DISTURB: return Icon.DO_NOT_DISTURB;
+            default: return Icon.SOUND_ON;
+        }
+    }
+
+    /** Zone ids to city names in the panel's language, which ICU looks up slowly. */
+    private final Map<String, String> cityNames = new HashMap<>();
+
+    private String cityName(String zoneId, Locale locale) {
+        String key = locale.toLanguageTag() + "|" + zoneId;
+        String cached = cityNames.get(key);
+        if (cached != null) {
+            return cached;
+        }
+        String name = null;
+        try {
+            name = android.icu.text.TimeZoneNames.getInstance(locale)
+                    .getExemplarLocationName(zoneId);
+        } catch (RuntimeException ignored) {
+            // Falls back to the zone's own name below.
+        }
+        if (name == null || name.isEmpty()) {
+            name = WorldClock.fallbackName(zoneId);
+        }
+        cityNames.put(key, name);
+        return name;
+    }
+
+    /**
+     * The time there and where there is. Compact is the time alone; detailed
+     * puts the city on its own line with how far ahead or behind it is.
+     */
+    private String worldClockVariant(Locale locale) {
+        String zoneId = DashboardWidgetLayout.worldClockZone(getContext());
+        java.util.TimeZone zone = java.util.TimeZone.getTimeZone(zoneId);
+        SimpleDateFormat format = new SimpleDateFormat(
+                android.text.format.DateFormat.is24HourFormat(getContext()) ? "HH:mm" : "h:mm",
+                locale);
+        format.setTimeZone(zone);
+        String time = format.format(new Date(snapshot.timestampMillis));
+        String city = cityName(zoneId, locale);
+        DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.WORLD_CLOCK);
+        if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
+            return time;
+        }
+        if (variant == DashboardWidgetLayout.Variant.DETAILED) {
+            int minutes = (zone.getOffset(snapshot.timestampMillis)
+                    - java.util.TimeZone.getDefault().getOffset(snapshot.timestampMillis)) / 60_000;
+            return time + "\n" + getResources().getString(R.string.dashboard_world_clock_offset,
+                    city, WorldClock.differenceLabel(minutes));
+        }
+        return time + "  " + city;
     }
 
     private String formatTimeOfDay(long millis, Locale locale) {
@@ -3454,6 +3693,38 @@ public final class RearDashboardView extends View {
             case LEVEL:
                 drawLevel(canvas, body);
                 break;
+            case SOUND_ON:
+            case SOUND_OFF:
+                drawSpeaker(canvas, body, icon == Icon.SOUND_ON);
+                break;
+            case VIBRATE:
+                // A phone with a buzz either side.
+                canvas.drawRoundRect(new RectF(body.left + body.width() * .30f, body.top,
+                                body.right - body.width() * .30f, body.bottom),
+                        body.width() * .08f, body.width() * .08f, iconPaint);
+                for (int side = -1; side <= 1; side += 2) {
+                    float x = body.centerX() + side * body.width() * .36f;
+                    float outer = body.centerX() + side * body.width() * .50f;
+                    canvas.drawLine(x, body.top + body.height() * .30f,
+                            x, body.bottom - body.height() * .30f, iconPaint);
+                    canvas.drawLine(outer, body.top + body.height() * .38f,
+                            outer, body.bottom - body.height() * .38f, iconPaint);
+                }
+                break;
+            case DO_NOT_DISTURB:
+                canvas.drawCircle(body.centerX(), body.centerY(), body.width() * .42f, iconPaint);
+                canvas.drawLine(body.left + body.width() * .28f, body.centerY(),
+                        body.right - body.width() * .28f, body.centerY(), iconPaint);
+                break;
+            case GLOBE:
+                canvas.drawCircle(body.centerX(), body.centerY(), body.width() * .42f, iconPaint);
+                canvas.drawOval(new RectF(body.centerX() - body.width() * .18f,
+                        body.centerY() - body.width() * .42f,
+                        body.centerX() + body.width() * .18f,
+                        body.centerY() + body.width() * .42f), iconPaint);
+                canvas.drawLine(body.centerX() - body.width() * .42f, body.centerY(),
+                        body.centerX() + body.width() * .42f, body.centerY(), iconPaint);
+                break;
             default:
                 break;
         }
@@ -3559,6 +3830,34 @@ public final class RearDashboardView extends View {
             canvas.drawCircle(body.centerX(), body.centerY(),
                     iconPaint.getStrokeWidth() * 1.4f, iconPaint);
             iconPaint.setStyle(previous);
+        }
+    }
+
+    /** A speaker with sound coming out of it, or struck through. */
+    private void drawSpeaker(Canvas canvas, RectF body, boolean sounding) {
+        Path speaker = new Path();
+        speaker.moveTo(body.left, body.top + body.height() * .36f);
+        speaker.lineTo(body.left + body.width() * .22f, body.top + body.height() * .36f);
+        speaker.lineTo(body.left + body.width() * .50f, body.top + body.height() * .12f);
+        speaker.lineTo(body.left + body.width() * .50f, body.bottom - body.height() * .12f);
+        speaker.lineTo(body.left + body.width() * .22f, body.bottom - body.height() * .36f);
+        speaker.lineTo(body.left, body.bottom - body.height() * .36f);
+        speaker.close();
+        canvas.drawPath(speaker, iconPaint);
+        if (sounding) {
+            canvas.drawArc(body.left + body.width() * .40f, body.top + body.height() * .30f,
+                    body.right - body.width() * .20f, body.bottom - body.height() * .30f,
+                    -50f, 100f, false, iconPaint);
+            canvas.drawArc(body.left + body.width() * .40f, body.top + body.height() * .10f,
+                    body.right, body.bottom - body.height() * .10f,
+                    -50f, 100f, false, iconPaint);
+        } else {
+            canvas.drawLine(body.right - body.width() * .34f, body.top + body.height() * .34f,
+                    body.right - body.width() * .02f, body.bottom - body.height() * .34f,
+                    iconPaint);
+            canvas.drawLine(body.right - body.width() * .02f, body.top + body.height() * .34f,
+                    body.right - body.width() * .34f, body.bottom - body.height() * .34f,
+                    iconPaint);
         }
     }
 
@@ -3766,6 +4065,7 @@ public final class RearDashboardView extends View {
         TEXT
         ,NETWORK, MEMORY, STORAGE, NOTIFICATIONS, MESSAGE, CALENDAR, STEPS
         ,CHARGE, SUNRISE, SUNSET, LEVEL
+        ,SOUND_ON, VIBRATE, SOUND_OFF, DO_NOT_DISTURB, GLOBE
     }
 
     private static final class Palette {

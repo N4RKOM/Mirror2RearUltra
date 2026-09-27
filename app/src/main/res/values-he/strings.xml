@@ -480,4 +480,20 @@
     <string name="dashboard_duration_hours">%1$d ש׳ %2$d דק׳</string>
     <string name="dashboard_duration_minutes">%1$d דק׳</string>
     <string name="dashboard_level_tilt">הטיה %1$d°</string>
+    <string name="dashboard_widget_sound_mode">מצב צליל</string>
+    <string name="dashboard_widget_world_clock">אזור זמן שני</string>
+    <string name="dashboard_widget_qr_code">קוד QR</string>
+    <string name="dashboard_sound_on">צליל</string>
+    <string name="dashboard_sound_vibrate">רטט</string>
+    <string name="dashboard_sound_silent">שקט</string>
+    <string name="dashboard_sound_dnd">נא לא להפריע</string>
+    <string name="dashboard_sound_volume">צלצול %1$d%%</string>
+    <string name="dashboard_world_clock_zone">עיר</string>
+    <string name="dashboard_world_clock_offset">%1$s, %2$s ש׳</string>
+    <string name="dashboard_qr_wifi">רשת Wi‑Fi</string>
+    <string name="dashboard_qr_text_hint">טקסט או קישור</string>
+    <string name="dashboard_qr_ssid_hint">שם הרשת</string>
+    <string name="dashboard_qr_password_hint">סיסמה</string>
+    <string name="dashboard_qr_help">הקוד תופס עמוד משלו. הלוח קטן, לכן החזיקו את הטלפון הסורק במרחק כמה סנטימטרים. לרשת פתוחה השאירו את הסיסמה ריקה.</string>
+    <string name="dashboard_qr_empty">הגדירו את תוכן הקוד ברשימת הווידג׳טים</string>
 </resources>

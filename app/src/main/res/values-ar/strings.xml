@@ -484,4 +484,20 @@
     <string name="dashboard_duration_hours">%1$d س %2$d د</string>
     <string name="dashboard_duration_minutes">%1$d د</string>
     <string name="dashboard_level_tilt">ميل %1$d°</string>
+    <string name="dashboard_widget_sound_mode">وضع الصوت</string>
+    <string name="dashboard_widget_world_clock">منطقة زمنية ثانية</string>
+    <string name="dashboard_widget_qr_code">رمز QR</string>
+    <string name="dashboard_sound_on">الصوت</string>
+    <string name="dashboard_sound_vibrate">اهتزاز</string>
+    <string name="dashboard_sound_silent">صامت</string>
+    <string name="dashboard_sound_dnd">عدم الإزعاج</string>
+    <string name="dashboard_sound_volume">الرنين %1$d%%</string>
+    <string name="dashboard_world_clock_zone">المدينة</string>
+    <string name="dashboard_world_clock_offset">%1$s، %2$s س</string>
+    <string name="dashboard_qr_wifi">شبكة Wi‑Fi</string>
+    <string name="dashboard_qr_text_hint">نص أو رابط</string>
+    <string name="dashboard_qr_ssid_hint">اسم الشبكة</string>
+    <string name="dashboard_qr_password_hint">كلمة المرور</string>
+    <string name="dashboard_qr_help">يشغل الرمز صفحة خاصة به. اللوحة صغيرة، لذا أمسك الهاتف الماسح على بعد بضعة سنتيمترات. اترك كلمة المرور فارغة للشبكة المفتوحة.</string>
+    <string name="dashboard_qr_empty">حدد محتوى الرمز في قائمة الأدوات</string>
 </resources>

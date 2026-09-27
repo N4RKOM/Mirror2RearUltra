@@ -476,4 +476,20 @@
     <string name="dashboard_duration_hours">%1$d t %2$d min</string>
     <string name="dashboard_duration_minutes">%1$d min</string>
     <string name="dashboard_level_tilt">helning %1$d°</string>
+    <string name="dashboard_widget_sound_mode">Lydmodus</string>
+    <string name="dashboard_widget_world_clock">Annen tidssone</string>
+    <string name="dashboard_widget_qr_code">QR-kode</string>
+    <string name="dashboard_sound_on">Lyd</string>
+    <string name="dashboard_sound_vibrate">Vibrering</string>
+    <string name="dashboard_sound_silent">Lydløs</string>
+    <string name="dashboard_sound_dnd">Ikke forstyrr</string>
+    <string name="dashboard_sound_volume">ringetone %1$d%%</string>
+    <string name="dashboard_world_clock_zone">By</string>
+    <string name="dashboard_world_clock_offset">%1$s, %2$s t</string>
+    <string name="dashboard_qr_wifi">Wi‑Fi-nettverk</string>
+    <string name="dashboard_qr_text_hint">Tekst eller lenke</string>
+    <string name="dashboard_qr_ssid_hint">Nettverksnavn</string>
+    <string name="dashboard_qr_password_hint">Passord</string>
+    <string name="dashboard_qr_help">Koden får en egen side. Panelet er lite, så hold telefonen som skanner noen centimeter unna. La passordet stå tomt for et åpent nettverk.</string>
+    <string name="dashboard_qr_empty">Angi innholdet i koden i widgetlisten</string>
 </resources>

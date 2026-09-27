@@ -63,6 +63,8 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
             // Time
             new WidgetRow(R.id.dashboard_clock_switch, DashboardWidgetLayout.Widget.CLOCK),
             new WidgetRow(R.id.dashboard_date_switch, DashboardWidgetLayout.Widget.DATE),
+            new WidgetRow(R.id.dashboard_world_clock_switch,
+                    DashboardWidgetLayout.Widget.WORLD_CLOCK),
             new WidgetRow(R.id.dashboard_next_alarm_switch, DashboardWidgetLayout.Widget.NEXT_ALARM),
             new WidgetRow(R.id.dashboard_session_timer_switch,
                     DashboardWidgetLayout.Widget.SESSION_TIMER),
@@ -71,6 +73,8 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
             // Device
             new WidgetRow(R.id.dashboard_battery_switch, DashboardWidgetLayout.Widget.BATTERY),
             new WidgetRow(R.id.dashboard_charging_switch, DashboardWidgetLayout.Widget.CHARGING),
+            new WidgetRow(R.id.dashboard_sound_mode_switch,
+                    DashboardWidgetLayout.Widget.SOUND_MODE),
             new WidgetRow(R.id.dashboard_temperature_switch,
                     DashboardWidgetLayout.Widget.TEMPERATURE),
             new WidgetRow(R.id.dashboard_memory_switch, DashboardWidgetLayout.Widget.MEMORY),
@@ -99,6 +103,7 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
                     DashboardWidgetLayout.Widget.ACTIVE_PROFILE),
             new WidgetRow(R.id.dashboard_custom_text_switch,
                     DashboardWidgetLayout.Widget.CUSTOM_TEXT),
+            new WidgetRow(R.id.dashboard_qr_code_switch, DashboardWidgetLayout.Widget.QR_CODE),
     };
 
     private final Map<DashboardWidgetLayout.Widget, MaterialSwitch> widgetSwitches =
@@ -108,6 +113,13 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
     private TextInputEditText weatherCityInput;
     private TextInputLayout customTextContainer;
     private TextInputEditText customTextInput;
+    private MaterialSwitch qrWifiSwitch;
+    private TextInputLayout qrTextContainer;
+    private TextInputEditText qrTextInput;
+    private TextInputLayout qrSsidContainer;
+    private TextInputEditText qrSsidInput;
+    private TextInputLayout qrPasswordContainer;
+    private TextInputEditText qrPasswordInput;
     private TextView locationAccessStatus;
     private TextView mediaAccessStatus;
     private TextView mediaNowPlaying;
@@ -147,6 +159,13 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
         imperialUnitsSwitch = findViewById(R.id.dashboard_imperial_units_switch);
         customTextContainer = findViewById(R.id.dashboard_custom_text_container);
         customTextInput = findViewById(R.id.dashboard_custom_text_input);
+        qrWifiSwitch = findViewById(R.id.dashboard_qr_wifi_switch);
+        qrTextContainer = findViewById(R.id.dashboard_qr_text_container);
+        qrTextInput = findViewById(R.id.dashboard_qr_text_input);
+        qrSsidContainer = findViewById(R.id.dashboard_qr_ssid_container);
+        qrSsidInput = findViewById(R.id.dashboard_qr_ssid_input);
+        qrPasswordContainer = findViewById(R.id.dashboard_qr_password_container);
+        qrPasswordInput = findViewById(R.id.dashboard_qr_password_input);
         locationAccessStatus = findViewById(R.id.dashboard_location_access_status);
         mediaAccessStatus = findViewById(R.id.dashboard_media_access_status);
         mediaNowPlaying = findViewById(R.id.dashboard_media_now_playing);
@@ -184,6 +203,7 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
     @Override
     protected void onPause() {
         saveTexts();
+        saveQr();
         super.onPause();
     }
 
@@ -245,6 +265,26 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
             return false;
         });
 
+        qrWifiSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (bindingUi) {
+                return;
+            }
+            saveQr();
+            updateQrFields();
+        });
+        for (TextInputEditText input : new TextInputEditText[]{
+                qrTextInput, qrSsidInput, qrPasswordInput}) {
+            input.setOnFocusChangeListener((view, hasFocus) -> {
+                if (!hasFocus) {
+                    saveQr();
+                }
+            });
+            input.setOnEditorActionListener((view, actionId, event) -> {
+                saveQr();
+                return false;
+            });
+        }
+
         locationAccessButton.setOnClickListener(view -> locationPermissionLauncher.launch(
                 Manifest.permission.ACCESS_FINE_LOCATION
         ));
@@ -261,6 +301,9 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
                 break;
             case CUSTOM_TEXT:
                 customTextContainer.setEnabled(checked);
+                break;
+            case QR_CODE:
+                updateQrFields();
                 break;
             case MEDIA:
             case FULLSCREEN_MEDIA:
@@ -301,7 +344,46 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
         customTextInput.setText(settings.customText);
         customTextContainer.setEnabled(isWidgetOn(DashboardWidgetLayout.Widget.CUSTOM_TEXT));
         imperialUnitsSwitch.setChecked(DashboardWidgetLayout.isImperialUnits(this));
+        qrWifiSwitch.setChecked(DashboardWidgetLayout.isQrWifi(this));
+        qrTextInput.setText(DashboardWidgetLayout.qrText(this));
+        qrSsidInput.setText(DashboardWidgetLayout.qrWifiSsid(this));
+        qrPasswordInput.setText(DashboardWidgetLayout.qrWifiPassword(this));
+        updateQrFields();
         bindingUi = false;
+    }
+
+    /** The text field or the network's two, whichever the code is made of. */
+    private void updateQrFields() {
+        boolean on = isWidgetOn(DashboardWidgetLayout.Widget.QR_CODE);
+        boolean wifi = qrWifiSwitch.isChecked();
+        qrWifiSwitch.setEnabled(on);
+        qrTextContainer.setVisibility(wifi ? View.GONE : View.VISIBLE);
+        qrSsidContainer.setVisibility(wifi ? View.VISIBLE : View.GONE);
+        qrPasswordContainer.setVisibility(wifi ? View.VISIBLE : View.GONE);
+        qrTextContainer.setEnabled(on);
+        qrSsidContainer.setEnabled(on);
+        qrPasswordContainer.setEnabled(on);
+    }
+
+    private void saveQr() {
+        boolean wifi = qrWifiSwitch.isChecked();
+        String text = textOf(qrTextInput);
+        String ssid = textOf(qrSsidInput);
+        String password = textOf(qrPasswordInput);
+        if (wifi == DashboardWidgetLayout.isQrWifi(this)
+                && text.equals(DashboardWidgetLayout.qrText(this))
+                && ssid.equals(DashboardWidgetLayout.qrWifiSsid(this))
+                && password.equals(DashboardWidgetLayout.qrWifiPassword(this))) {
+            return;
+        }
+        DashboardWidgetLayout.saveQr(this, wifi, text, ssid, password);
+        // Kept outside DashboardSettings, so re-saving is what tells the
+        // running panel to redraw.
+        MirrorSettings.saveDashboardSettings(this, MirrorSettings.loadDashboardSettings(this));
+    }
+
+    private static String textOf(TextInputEditText input) {
+        return input.getText() == null ? "" : input.getText().toString();
     }
 
     /**

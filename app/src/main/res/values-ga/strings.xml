@@ -482,4 +482,20 @@
     <string name="dashboard_duration_hours">%1$d u %2$d nóim</string>
     <string name="dashboard_duration_minutes">%1$d nóim</string>
     <string name="dashboard_level_tilt">claonadh %1$d°</string>
+    <string name="dashboard_widget_sound_mode">Mód fuaime</string>
+    <string name="dashboard_widget_world_clock">Dara crios ama</string>
+    <string name="dashboard_widget_qr_code">Cód QR</string>
+    <string name="dashboard_sound_on">Fuaim</string>
+    <string name="dashboard_sound_vibrate">Crith</string>
+    <string name="dashboard_sound_silent">Ciúin</string>
+    <string name="dashboard_sound_dnd">Ná cuir isteach orm</string>
+    <string name="dashboard_sound_volume">glao %1$d%%</string>
+    <string name="dashboard_world_clock_zone">Cathair</string>
+    <string name="dashboard_world_clock_offset">%1$s, %2$s u</string>
+    <string name="dashboard_qr_wifi">Líonra Wi‑Fi</string>
+    <string name="dashboard_qr_text_hint">Téacs nó nasc</string>
+    <string name="dashboard_qr_ssid_hint">Ainm an líonra</string>
+    <string name="dashboard_qr_password_hint">Pasfhocal</string>
+    <string name="dashboard_qr_help">Tógann an cód leathanach dó féin. Tá an painéal beag, mar sin coinnigh an fón scanta cúpla ceintiméadar uaidh. Fág an pasfhocal folamh do líonra oscailte.</string>
+    <string name="dashboard_qr_empty">Socraigh ábhar an chóid sa liosta giuirléidí</string>
 </resources>

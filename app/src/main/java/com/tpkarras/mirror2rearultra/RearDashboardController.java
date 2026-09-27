@@ -2,6 +2,7 @@ package com.tpkarras.mirror2rearultra;
 
 import android.Manifest;
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.AudioManager;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Handler;
@@ -84,6 +86,13 @@ final class RearDashboardController implements
             publish();
         }
     };
+    private final BroadcastReceiver soundReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context ignored, Intent intent) {
+            readSound();
+            publish();
+        }
+    };
     private final Runnable clockTick = new Runnable() {
         @Override
         public void run() {
@@ -116,6 +125,8 @@ final class RearDashboardController implements
     private float[] gravity;
     private LevelReading levelReading;
     private long levelPublishedAt;
+    private SoundModeReading soundReading;
+    private boolean soundReceiverRegistered;
     private String weatherRequestCity = "";
     private String weatherPlace = "";
     private Integer weatherTemperatureCelsius;
@@ -211,6 +222,7 @@ final class RearDashboardController implements
         } catch (IllegalArgumentException ignored) {
             // Receiver was already removed by the system.
         }
+        listenForSound(false);
         weatherExecutor.shutdownNow();
     }
 
@@ -259,10 +271,55 @@ final class RearDashboardController implements
                 batteryPercent, batteryFull);
     }
 
+    /**
+     * Follows the ringer, do not disturb and the ring volume while the sound
+     * widget is on. All three are announced, so nothing has to be polled.
+     */
+    private void listenForSound(boolean listen) {
+        if (listen == soundReceiverRegistered) {
+            return;
+        }
+        soundReceiverRegistered = listen;
+        if (!listen) {
+            soundReading = null;
+            try {
+                context.unregisterReceiver(soundReceiver);
+            } catch (IllegalArgumentException ignored) {
+                // Already gone.
+            }
+            return;
+        }
+        IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
+        filter.addAction(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED);
+        // Not in the SDK, but sent by every build of Android since 4.0; the
+        // widget's volume figure would otherwise only catch up on the next
+        // ringer change.
+        filter.addAction("android.media.VOLUME_CHANGED_ACTION");
+        ContextCompat.registerReceiver(context, soundReceiver, filter,
+                ContextCompat.RECEIVER_NOT_EXPORTED);
+        readSound();
+    }
+
+    private void readSound() {
+        AudioManager audio = context.getSystemService(AudioManager.class);
+        NotificationManager notifications = context.getSystemService(NotificationManager.class);
+        if (audio == null || notifications == null) {
+            soundReading = null;
+            return;
+        }
+        soundReading = new SoundModeReading(
+                SoundModeReading.modeOf(audio.getRingerMode(),
+                        notifications.getCurrentInterruptionFilter()),
+                SoundModeReading.percentOf(audio.getStreamVolume(AudioManager.STREAM_RING),
+                        audio.getStreamMaxVolume(AudioManager.STREAM_RING)));
+    }
+
     private void configureDynamicSources() {
         if (!started) {
             return;
         }
+        listenForSound(DashboardWidgetLayout.isExtraEnabled(
+                context, DashboardWidgetLayout.Widget.SOUND_MODE));
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
             if (settings.showCompass) {
@@ -614,7 +671,8 @@ final class RearDashboardController implements
                 notifications.text,
                 chargeReading,
                 sun,
-                levelReading
+                levelReading,
+                soundReading
         ));
     }
 
