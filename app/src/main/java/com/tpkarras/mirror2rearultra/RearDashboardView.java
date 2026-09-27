@@ -2559,7 +2559,7 @@ public final class RearDashboardView extends View {
                 watts < 10f ? String.format(locale, "%.1f", watts)
                         : String.valueOf(Math.round(watts)));
         boolean known = charge.fullInMillis > 0L;
-        String left = known ? formatHoursMinutes(charge.fullInMillis) : "";
+        String left = known ? formatDuration(charge.fullInMillis) : "";
         DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.CHARGING);
         if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
             return known ? power + "\n" + left : power;
@@ -2592,12 +2592,7 @@ public final class RearDashboardView extends View {
                     + formatTimeOfDay(sun.sunsetMillis, locale);
         }
         if (variant == DashboardWidgetLayout.Variant.DETAILED) {
-            long minutes = Math.max(0L,
-                    (sun.eventMillis() - snapshot.timestampMillis + 59_999L) / 60_000L);
-            String wait = minutes >= 60L
-                    ? getResources().getString(R.string.dashboard_duration_hours,
-                            minutes / 60L, minutes % 60L)
-                    : getResources().getString(R.string.dashboard_duration_minutes, minutes);
+            String wait = formatDuration(sun.eventMillis() - snapshot.timestampMillis);
             return next + "\n" + getResources().getString(sun.sunriseNext
                     ? R.string.dashboard_sun_sunrise_in
                     : R.string.dashboard_sun_sunset_in, wait);
@@ -2698,10 +2693,17 @@ public final class RearDashboardView extends View {
         return new SimpleDateFormat(pattern, locale).format(new Date(millis));
     }
 
-    /** Rounded up, so the last minute of a charge reads 0:01 and not 0:00. */
-    private static String formatHoursMinutes(long millis) {
+    /**
+     * A length of time in words, "18 h 13 min". Not "18:13", which read as a
+     * time of day beside the clock. Rounded up, so the last minute reads
+     * 1 min and not nothing.
+     */
+    private String formatDuration(long millis) {
         long minutes = Math.max(0L, (millis + 59_999L) / 60_000L);
-        return String.format(Locale.ROOT, "%d:%02d", minutes / 60L, minutes % 60L);
+        return minutes >= 60L
+                ? getResources().getString(R.string.dashboard_duration_hours,
+                        minutes / 60L, minutes % 60L)
+                : getResources().getString(R.string.dashboard_duration_minutes, minutes);
     }
 
     private static String formatElapsed(long elapsedMillis) {
