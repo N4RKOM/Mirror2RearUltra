@@ -1300,7 +1300,9 @@ public final class RearDashboardView extends View {
                     markPageInteraction();
                     return true;
                 }
-                if (!interactive && !swipe && cycleVariantAt(event.getX(), event.getY())) {
+                if (!interactive && !swipe
+                        && DashboardWidgetLayout.isTapCyclesVariantEnabled(getContext())
+                        && cycleVariantAt(event.getX(), event.getY())) {
                     markPageInteraction();
                     return true;
                 }

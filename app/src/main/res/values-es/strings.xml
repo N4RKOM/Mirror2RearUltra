@@ -463,4 +463,5 @@
     <string name="dashboard_page_cycle_help">Una página fuera del cambio automático sigue disponible deslizando. Duplicar aspecto añade una página con el mismo diseño, orientación y nombre, pero vacía: un widget solo está en una página.</string>
     <string name="panel_trigger_template">Plantilla: %1$s</string>
     <string name="dashboard_builder_size_percent">Tamaño: %1$d%%</string>
+    <string name="panel_tap_cycles_variant">Tocar un widget cambia su estilo</string>
 </resources>

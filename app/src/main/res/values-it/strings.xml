@@ -463,4 +463,5 @@
     <string name="dashboard_page_cycle_help">Una pagina esclusa dallo scorrimento automatico resta raggiungibile con uno scorrimento. Duplica aspetto aggiunge una pagina con lo stesso layout, orientamento e nome, ma vuota: un widget sta su una sola pagina.</string>
     <string name="panel_trigger_template">Modello: %1$s</string>
     <string name="dashboard_builder_size_percent">Dimensione: %1$d%%</string>
+    <string name="panel_tap_cycles_variant">Toccare un widget ne cambia lo stile</string>
 </resources>

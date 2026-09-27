@@ -92,6 +92,7 @@ final class DashboardWidgetLayout {
     private static final String POCKET_LOCK = "pocket_lock";
     private static final String FACE_DOWN_OFF = "face_down_off";
     private static final String SHUTTER_ON_TAP = "shutter_on_tap";
+    private static final String TAP_CYCLES_VARIANT = "tap_cycles_variant";
 
     private DashboardWidgetLayout() {}
 
@@ -818,6 +819,20 @@ final class DashboardWidgetLayout {
      * else, and the one thing worth doing with a viewfinder on the back of a
      * phone is taking the picture.
      */
+    /**
+     * Whether a tap on a widget on the panel steps it to its next style.
+     *
+     * <p>On by default, as it always was. Off for anyone who has settled on a
+     * style and keeps changing it by brushing the back of the phone.
+     */
+    static boolean isTapCyclesVariantEnabled(Context context) {
+        return prefs(context).getBoolean(TAP_CYCLES_VARIANT, true);
+    }
+
+    static void setTapCyclesVariantEnabled(Context context, boolean enabled) {
+        prefs(context).edit().putBoolean(TAP_CYCLES_VARIANT, enabled).apply();
+    }
+
     static boolean isShutterOnTapEnabled(Context context) {
         return prefs(context).getBoolean(SHUTTER_ON_TAP, true);
     }

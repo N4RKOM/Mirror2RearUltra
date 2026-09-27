@@ -59,6 +59,7 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     private MaterialSwitch imperialUnitsSwitch;
     private MaterialSwitch pocketLockSwitch;
     private MaterialSwitch shutterOnTapSwitch;
+    private MaterialSwitch tapVariantSwitch;
     private TextView shutterAccessStatus;
     private View shutterAccessButton;
     private MaterialSwitch faceDownSwitch;
@@ -103,6 +104,7 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         imperialUnitsSwitch = findViewById(R.id.dashboard_imperial_units_switch);
         pocketLockSwitch = findViewById(R.id.dashboard_pocket_lock_switch);
         shutterOnTapSwitch = findViewById(R.id.dashboard_shutter_switch);
+        tapVariantSwitch = findViewById(R.id.dashboard_tap_variant_switch);
         shutterAccessStatus = findViewById(R.id.dashboard_shutter_access_status);
         shutterAccessButton = findViewById(R.id.dashboard_shutter_access_button);
         faceDownSwitch = findViewById(R.id.dashboard_face_down_switch);
@@ -219,6 +221,13 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                 // Nowhere to send them; the row above still says how it stands.
             }
         });
+        tapVariantSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (!bindingUi) {
+                DashboardWidgetLayout.setTapCyclesVariantEnabled(this, checked);
+                MirrorSettings.saveDashboardSettings(this,
+                        MirrorSettings.loadDashboardSettings(this));
+            }
+        });
         shutterOnTapSwitch.setOnCheckedChangeListener((button, checked) -> {
             if (!bindingUi) {
                 DashboardWidgetLayout.setShutterOnTapEnabled(this, checked);
@@ -329,6 +338,7 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         imperialUnitsSwitch.setChecked(DashboardWidgetLayout.isImperialUnits(this));
         pocketLockSwitch.setChecked(DashboardWidgetLayout.isPocketLockEnabled(this));
         shutterOnTapSwitch.setChecked(DashboardWidgetLayout.isShutterOnTapEnabled(this));
+        tapVariantSwitch.setChecked(DashboardWidgetLayout.isTapCyclesVariantEnabled(this));
         // Switched on in the system's own settings, so it is read afresh here
         // rather than remembered: this screen is where people come back to.
         boolean access = PanelShutterService.isEnabled(this);

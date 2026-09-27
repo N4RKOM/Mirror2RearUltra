@@ -207,6 +207,11 @@
                     android:text="@string/panel_pocket_lock" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_tap_variant_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/panel_tap_cycles_variant" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_shutter_switch"
                     style="@style/HyperOS.Switch"
                     android:text="@string/panel_shutter_on_tap" />
