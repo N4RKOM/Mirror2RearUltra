@@ -462,4 +462,16 @@
     <string name="dashboard_units_title">单位</string>
     <string name="panel_screen_title">面板屏幕</string>
     <string name="panel_touch_title">触摸与传感器</string>
+    <string name="dashboard_widget_charging">充电</string>
+    <string name="dashboard_widget_sun">日出日落</string>
+    <string name="dashboard_widget_level">水平仪</string>
+    <string name="dashboard_charge_watts">%1$s W</string>
+    <string name="dashboard_charge_amps">%1$s A</string>
+    <string name="dashboard_charge_full_at">%1$s 充满</string>
+    <string name="dashboard_charge_full">已充满</string>
+    <string name="dashboard_sun_sunrise_in">%1$s 后日出</string>
+    <string name="dashboard_sun_sunset_in">%1$s 后日落</string>
+    <string name="dashboard_duration_hours">%1$d 小时 %2$d 分</string>
+    <string name="dashboard_duration_minutes">%1$d 分钟</string>
+    <string name="dashboard_level_tilt">倾斜 %1$d°</string>
 </resources>

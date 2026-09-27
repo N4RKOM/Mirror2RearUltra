@@ -19,7 +19,8 @@ final class DashboardWidgetLayout {
     enum Widget { CLOCK, DATE, BATTERY, TEMPERATURE, WEATHER, NEXT_ALARM, MEDIA,
         COMPASS, SPEED, ALTITUDE, SESSION_TIMER, ACTIVE_PROFILE, CUSTOM_TEXT,
         NETWORK, MEMORY, STORAGE, NOTIFICATIONS, CALENDAR, STEPS,
-        FULLSCREEN_WEATHER, FULLSCREEN_MEDIA, LAST_NOTIFICATION, TIMER }
+        FULLSCREEN_WEATHER, FULLSCREEN_MEDIA, LAST_NOTIFICATION, TIMER,
+        CHARGING, SUN, LEVEL }
     enum Size { SMALL, NORMAL, LARGE }
 
     /**
@@ -655,6 +656,9 @@ final class DashboardWidgetLayout {
             case STEPS:
             case FULLSCREEN_WEATHER:
             case FULLSCREEN_MEDIA:
+            case CHARGING:
+            case SUN:
+            case LEVEL:
                 return true;
             default:
                 // The clock, the date and the session timer always have a
@@ -971,7 +975,8 @@ final class DashboardWidgetLayout {
                 || widget == Widget.NOTIFICATIONS || widget == Widget.CALENDAR
                 || widget == Widget.STEPS || widget == Widget.FULLSCREEN_WEATHER
                 || widget == Widget.FULLSCREEN_MEDIA || widget == Widget.LAST_NOTIFICATION
-                || widget == Widget.TIMER;
+                || widget == Widget.TIMER || widget == Widget.CHARGING
+                || widget == Widget.SUN || widget == Widget.LEVEL;
     }
 
     static boolean isFullscreenWidget(Widget widget) {

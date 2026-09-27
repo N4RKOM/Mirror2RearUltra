@@ -1057,6 +1057,34 @@ public final class RearDashboardView extends View {
             addLine(lines, DashboardWidgetLayout.Widget.STEPS,
                     snapshot.stepsToday >= 0, value, Icon.STEPS);
         }
+        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.CHARGING)) {
+            addLine(lines, DashboardWidgetLayout.Widget.CHARGING, snapshot.charge != null,
+                    chargeVariant(snapshot.charge, locale), Icon.CHARGE);
+        }
+        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.SUN)) {
+            SunTimes.Next sun = snapshot.sun;
+            addLine(lines, DashboardWidgetLayout.Widget.SUN, sun != null,
+                    sunVariant(sun, locale),
+                    sun == null || sun.sunriseNext ? Icon.SUNRISE : Icon.SUNSET);
+        }
+        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.LEVEL)) {
+            LevelReading level = snapshot.level;
+            String value = "";
+            if (level != null) {
+                DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.LEVEL);
+                // Without a sign: the icon's line already leans the way to
+                // turn, and a minus sign costs width on a narrow panel.
+                float roll = Math.abs(level.rollDegrees);
+                value = variant == DashboardWidgetLayout.Variant.ALTERNATE
+                        ? String.format(locale, "%.1f°", roll)
+                        : Math.round(roll) + "°";
+                if (variant == DashboardWidgetLayout.Variant.DETAILED) {
+                    value += "\n" + getResources().getString(R.string.dashboard_level_tilt,
+                            Math.round(level.pitchDegrees));
+                }
+            }
+            addLine(lines, DashboardWidgetLayout.Widget.LEVEL, level != null, value, Icon.LEVEL);
+        }
         if (DashboardWidgetLayout.isExtraEnabled(
                 getContext(), DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER)) {
             String value = weatherVariant(DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER);
@@ -2362,6 +2390,81 @@ public final class RearDashboardView extends View {
         return percent + "%";
     }
 
+    /**
+     * Power first, since it is what says whether the charger is a fast one,
+     * then how long is left. Compact stacks the two; detailed adds the current
+     * and when the battery will be full, as a time of day.
+     */
+    private String chargeVariant(@Nullable ChargeReading charge, Locale locale) {
+        if (charge == null) {
+            return "";
+        }
+        if (charge.full) {
+            return getResources().getString(R.string.dashboard_charge_full);
+        }
+        float watts = charge.powerMilliwatts / 1_000f;
+        String power = getResources().getString(R.string.dashboard_charge_watts,
+                watts < 10f ? String.format(locale, "%.1f", watts)
+                        : String.valueOf(Math.round(watts)));
+        boolean known = charge.fullInMillis > 0L;
+        String left = known ? formatHoursMinutes(charge.fullInMillis) : "";
+        DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.CHARGING);
+        if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
+            return known ? power + "\n" + left : power;
+        }
+        if (variant == DashboardWidgetLayout.Variant.DETAILED) {
+            String amps = getResources().getString(R.string.dashboard_charge_amps,
+                    String.format(locale, "%.1f", charge.currentMilliamps / 1_000f));
+            String head = power + " · " + amps;
+            return known ? head + "\n" + getResources().getString(R.string.dashboard_charge_full_at,
+                    formatTimeOfDay(snapshot.timestampMillis + charge.fullInMillis, locale))
+                    : head;
+        }
+        return known ? power + " · " + left : power;
+    }
+
+    /**
+     * The next sunrise or sunset, which the icon tells apart. Compact gives
+     * the day's pair, sunrise over sunset; detailed says how long until the
+     * next one.
+     */
+    private String sunVariant(@Nullable SunTimes.Next sun, Locale locale) {
+        if (sun == null) {
+            return "";
+        }
+        String next = formatTimeOfDay(sun.eventMillis(), locale);
+        DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.SUN);
+        if (variant == DashboardWidgetLayout.Variant.ALTERNATE
+                && sun.sunriseMillis != SunTimes.NONE && sun.sunsetMillis != SunTimes.NONE) {
+            return formatTimeOfDay(sun.sunriseMillis, locale) + "\n"
+                    + formatTimeOfDay(sun.sunsetMillis, locale);
+        }
+        if (variant == DashboardWidgetLayout.Variant.DETAILED) {
+            long minutes = Math.max(0L,
+                    (sun.eventMillis() - snapshot.timestampMillis + 59_999L) / 60_000L);
+            String wait = minutes >= 60L
+                    ? getResources().getString(R.string.dashboard_duration_hours,
+                            minutes / 60L, minutes % 60L)
+                    : getResources().getString(R.string.dashboard_duration_minutes, minutes);
+            return next + "\n" + getResources().getString(sun.sunriseNext
+                    ? R.string.dashboard_sun_sunrise_in
+                    : R.string.dashboard_sun_sunset_in, wait);
+        }
+        return next;
+    }
+
+    private String formatTimeOfDay(long millis, Locale locale) {
+        String pattern = android.text.format.DateFormat.is24HourFormat(getContext())
+                ? "HH:mm" : "h:mm";
+        return new SimpleDateFormat(pattern, locale).format(new Date(millis));
+    }
+
+    /** Rounded up, so the last minute of a charge reads 0:01 and not 0:00. */
+    private static String formatHoursMinutes(long millis) {
+        long minutes = Math.max(0L, (millis + 59_999L) / 60_000L);
+        return String.format(Locale.ROOT, "%d:%02d", minutes / 60L, minutes % 60L);
+    }
+
     private static String formatElapsed(long elapsedMillis) {
         long totalSeconds = Math.max(0L, elapsedMillis / 1_000L);
         long hours = totalSeconds / 3_600L;
@@ -2914,7 +3017,11 @@ public final class RearDashboardView extends View {
         if (line.rotation != 0) {
             canvas.rotate(line.rotation, anchorX, baseline);
         }
-        if (line.style == DashboardWidgetLayout.Style.ACCENT) {
+        // The level turns to the accent the moment it is true, which is the
+        // one thing its reader is waiting to see.
+        boolean levelled = line.widget == DashboardWidgetLayout.Widget.LEVEL
+                && snapshot.level != null && snapshot.level.isLevel();
+        if (line.style == DashboardWidgetLayout.Style.ACCENT || levelled) {
             textPaint.setColor(MaterialColors.getColor(this,
                     androidx.appcompat.R.attr.colorPrimary, currentPalette.text));
         } else if (line.style == DashboardWidgetLayout.Style.MUTED) {
@@ -3327,6 +3434,26 @@ public final class RearDashboardView extends View {
                 canvas.drawOval(new RectF(body.centerX(), body.top,
                         body.right - body.width() * .08f, body.centerY()), iconPaint);
                 break;
+            case CHARGE:
+                // The bolt on its own: the battery widget already draws one
+                // inside a battery, and the two sit side by side.
+                Path charge = new Path();
+                charge.moveTo(body.left + body.width() * .60f, body.top);
+                charge.lineTo(body.left + body.width() * .20f, body.top + body.height() * .56f);
+                charge.lineTo(body.left + body.width() * .50f, body.top + body.height() * .56f);
+                charge.lineTo(body.left + body.width() * .40f, body.bottom);
+                charge.lineTo(body.left + body.width() * .80f, body.top + body.height() * .44f);
+                charge.lineTo(body.left + body.width() * .50f, body.top + body.height() * .44f);
+                charge.close();
+                canvas.drawPath(charge, iconPaint);
+                break;
+            case SUNRISE:
+            case SUNSET:
+                drawHorizonSun(canvas, body, icon == Icon.SUNRISE);
+                break;
+            case LEVEL:
+                drawLevel(canvas, body);
+                break;
             default:
                 break;
         }
@@ -3377,6 +3504,61 @@ public final class RearDashboardView extends View {
                     body.centerY() + (float) Math.sin(angle) * outer,
                     iconPaint
             );
+        }
+    }
+
+    /** Half a sun on the horizon, with a chevron under it for which way it is going. */
+    private void drawHorizonSun(Canvas canvas, RectF body, boolean rising) {
+        float horizon = body.top + body.height() * 0.66f;
+        float radius = body.width() * 0.22f;
+        canvas.drawArc(body.centerX() - radius, horizon - radius,
+                body.centerX() + radius, horizon + radius, 180f, 180f, false, iconPaint);
+        for (int index = 0; index < 5; index++) {
+            double angle = Math.PI + Math.PI * index / 4d;
+            float inner = radius * 1.45f;
+            float outer = radius * 1.95f;
+            canvas.drawLine(
+                    body.centerX() + (float) Math.cos(angle) * inner,
+                    horizon + (float) Math.sin(angle) * inner,
+                    body.centerX() + (float) Math.cos(angle) * outer,
+                    horizon + (float) Math.sin(angle) * outer,
+                    iconPaint
+            );
+        }
+        canvas.drawLine(body.left, horizon, body.right, horizon, iconPaint);
+        float half = body.width() * 0.14f;
+        float near = horizon + body.height() * 0.14f;
+        float far = body.bottom;
+        float tip = rising ? near : far;
+        float wings = rising ? far : near;
+        canvas.drawLine(body.centerX() - half, wings, body.centerX(), tip, iconPaint);
+        canvas.drawLine(body.centerX(), tip, body.centerX() + half, wings, iconPaint);
+    }
+
+    /**
+     * A ring with a line across it that stays level with the real horizon,
+     * so how far to turn the phone can be read at a glance without the figure.
+     * The ring is what the icon's size is measured from, so the line can turn
+     * freely inside it.
+     */
+    private void drawLevel(Canvas canvas, RectF body) {
+        float radius = body.width() * 0.42f;
+        canvas.drawCircle(body.centerX(), body.centerY(), radius, iconPaint);
+        LevelReading level = snapshot.level;
+        int state = canvas.save();
+        if (level != null) {
+            canvas.rotate(level.rollDegrees, body.centerX(), body.centerY());
+        }
+        float reach = radius * 0.62f;
+        canvas.drawLine(body.centerX() - reach, body.centerY(),
+                body.centerX() + reach, body.centerY(), iconPaint);
+        canvas.restoreToCount(state);
+        if (level != null && level.isLevel()) {
+            Paint.Style previous = iconPaint.getStyle();
+            iconPaint.setStyle(Paint.Style.FILL);
+            canvas.drawCircle(body.centerX(), body.centerY(),
+                    iconPaint.getStrokeWidth() * 1.4f, iconPaint);
+            iconPaint.setStyle(previous);
         }
     }
 
@@ -3583,6 +3765,7 @@ public final class RearDashboardView extends View {
         PROFILE,
         TEXT
         ,NETWORK, MEMORY, STORAGE, NOTIFICATIONS, MESSAGE, CALENDAR, STEPS
+        ,CHARGE, SUNRISE, SUNSET, LEVEL
     }
 
     private static final class Palette {

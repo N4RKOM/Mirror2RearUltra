@@ -464,4 +464,16 @@
     <string name="dashboard_units_title">Enheter</string>
     <string name="panel_screen_title">Panelskärm</string>
     <string name="panel_touch_title">Beröring och sensorer</string>
+    <string name="dashboard_widget_charging">Laddning</string>
+    <string name="dashboard_widget_sun">Soluppgång och solnedgång</string>
+    <string name="dashboard_widget_level">Vattenpass</string>
+    <string name="dashboard_charge_watts">%1$s W</string>
+    <string name="dashboard_charge_amps">%1$s A</string>
+    <string name="dashboard_charge_full_at">full kl. %1$s</string>
+    <string name="dashboard_charge_full">laddad</string>
+    <string name="dashboard_sun_sunrise_in">soluppgång om %1$s</string>
+    <string name="dashboard_sun_sunset_in">solnedgång om %1$s</string>
+    <string name="dashboard_duration_hours">%1$d h %2$d min</string>
+    <string name="dashboard_duration_minutes">%1$d min</string>
+    <string name="dashboard_level_tilt">lutning %1$d°</string>
 </resources>

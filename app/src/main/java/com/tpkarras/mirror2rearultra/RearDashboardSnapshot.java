@@ -1,5 +1,7 @@
 package com.tpkarras.mirror2rearultra;
 
+import androidx.annotation.Nullable;
+
 final class RearDashboardSnapshot {
     final long timestampMillis;
     final int batteryPercent;
@@ -28,6 +30,12 @@ final class RearDashboardSnapshot {
     final String notificationApp;
     final String notificationTitle;
     final String notificationText;
+    /** Null unless the phone is on a charger. */
+    @Nullable final ChargeReading charge;
+    /** Null until the weather city's forecast has come in. */
+    @Nullable final SunTimes.Next sun;
+    /** Null while the widget is off, or the phone lies too flat to have a horizon. */
+    @Nullable final LevelReading level;
 
     RearDashboardSnapshot(
             long timestampMillis,
@@ -56,7 +64,7 @@ final class RearDashboardSnapshot {
                 null,
                 null,
                 0L,
-                "", "", -1, -1, "", null, -1, "", "", ""
+                "", "", -1, -1, "", null, -1, "", "", "", null, null, null
         );
     }
 
@@ -84,7 +92,7 @@ final class RearDashboardSnapshot {
                 mediaTitle, mediaArtist, mediaPlaying, headingDegrees, speedMetersPerSecond,
                 altitudeMeters,
                 sessionElapsedMillis, activeProfileName, "", -1, -1, "", null, -1,
-                "", "", "");
+                "", "", "", null, null, null);
     }
 
     RearDashboardSnapshot(
@@ -96,7 +104,8 @@ final class RearDashboardSnapshot {
             String activeProfileName, String networkSummary, int memoryPercent,
             int storagePercentFree, String calendarTitle, Long calendarStartMillis,
             int stepsToday, String notificationApp, String notificationTitle,
-            String notificationText
+            String notificationText, @Nullable ChargeReading charge,
+            @Nullable SunTimes.Next sun, @Nullable LevelReading level
     ) {
         this.timestampMillis = timestampMillis;
         this.batteryPercent = batteryPercent;
@@ -124,5 +133,8 @@ final class RearDashboardSnapshot {
         this.notificationApp = notificationApp == null ? "" : notificationApp;
         this.notificationTitle = notificationTitle == null ? "" : notificationTitle;
         this.notificationText = notificationText == null ? "" : notificationText;
+        this.charge = charge;
+        this.sun = sun;
+        this.level = level;
     }
 }

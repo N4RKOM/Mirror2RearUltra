@@ -464,4 +464,16 @@
     <string name="dashboard_units_title">Unités</string>
     <string name="panel_screen_title">Écran du panneau</string>
     <string name="panel_touch_title">Toucher et capteurs</string>
+    <string name="dashboard_widget_charging">Charge</string>
+    <string name="dashboard_widget_sun">Lever et coucher du soleil</string>
+    <string name="dashboard_widget_level">Niveau de l’horizon</string>
+    <string name="dashboard_charge_watts">%1$s W</string>
+    <string name="dashboard_charge_amps">%1$s A</string>
+    <string name="dashboard_charge_full_at">pleine à %1$s</string>
+    <string name="dashboard_charge_full">chargée</string>
+    <string name="dashboard_sun_sunrise_in">lever dans %1$s</string>
+    <string name="dashboard_sun_sunset_in">coucher dans %1$s</string>
+    <string name="dashboard_duration_hours">%1$d h %2$d min</string>
+    <string name="dashboard_duration_minutes">%1$d min</string>
+    <string name="dashboard_level_tilt">inclinaison %1$d°</string>
 </resources>

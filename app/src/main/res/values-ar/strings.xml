@@ -472,4 +472,16 @@
     <string name="dashboard_units_title">الوحدات</string>
     <string name="panel_screen_title">شاشة اللوحة</string>
     <string name="panel_touch_title">اللمس والمستشعرات</string>
+    <string name="dashboard_widget_charging">الشحن</string>
+    <string name="dashboard_widget_sun">الشروق والغروب</string>
+    <string name="dashboard_widget_level">مستوى الأفق</string>
+    <string name="dashboard_charge_watts">%1$s واط</string>
+    <string name="dashboard_charge_amps">%1$s أمبير</string>
+    <string name="dashboard_charge_full_at">ممتلئة عند %1$s</string>
+    <string name="dashboard_charge_full">مشحونة</string>
+    <string name="dashboard_sun_sunrise_in">الشروق بعد %1$s</string>
+    <string name="dashboard_sun_sunset_in">الغروب بعد %1$s</string>
+    <string name="dashboard_duration_hours">%1$d س %2$d د</string>
+    <string name="dashboard_duration_minutes">%1$d د</string>
+    <string name="dashboard_level_tilt">ميل %1$d°</string>
 </resources>

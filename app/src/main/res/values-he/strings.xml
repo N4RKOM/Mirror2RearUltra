@@ -468,4 +468,16 @@
     <string name="dashboard_units_title">יחידות</string>
     <string name="panel_screen_title">מסך הלוח</string>
     <string name="panel_touch_title">מגע וחיישנים</string>
+    <string name="dashboard_widget_charging">טעינה</string>
+    <string name="dashboard_widget_sun">זריחה ושקיעה</string>
+    <string name="dashboard_widget_level">פלס אופק</string>
+    <string name="dashboard_charge_watts">%1$s ואט</string>
+    <string name="dashboard_charge_amps">%1$s אמפר</string>
+    <string name="dashboard_charge_full_at">מלאה ב-%1$s</string>
+    <string name="dashboard_charge_full">טעונה</string>
+    <string name="dashboard_sun_sunrise_in">זריחה בעוד %1$s</string>
+    <string name="dashboard_sun_sunset_in">שקיעה בעוד %1$s</string>
+    <string name="dashboard_duration_hours">%1$d ש׳ %2$d דק׳</string>
+    <string name="dashboard_duration_minutes">%1$d דק׳</string>
+    <string name="dashboard_level_tilt">הטיה %1$d°</string>
 </resources>

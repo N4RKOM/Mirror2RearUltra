@@ -55,6 +55,19 @@ final class RearDashboardController implements
     private static final long CLOCK_REFRESH_MILLIS = 1_000L;
     private static final long WEATHER_REFRESH_MILLIS = 30 * 60_000L;
     private static final int MAX_RESPONSE_BYTES = 256 * 1024;
+    /**
+     * How often the charging widget reads the current. The battery broadcast
+     * only comes when the level or the temperature moves, which on a slow
+     * charger is minutes apart.
+     */
+    private static final long CHARGE_REFRESH_MILLIS = 3_000L;
+    /**
+     * The level redraws at most this often. The sensor reports far faster,
+     * and every report redraws the whole panel.
+     */
+    private static final long LEVEL_REFRESH_MILLIS = 66L;
+    /** Each reading moves the level this far towards itself, to steady the hand. */
+    private static final float LEVEL_SMOOTHING = 0.3f;
 
     private final Context context;
     private final Listener listener;
@@ -82,8 +95,10 @@ final class RearDashboardController implements
             // timer does; without this it would step in half-minutes.
             boolean needsSeconds = settings.showSessionTimer
                     || TimerWidgetState.isRunning(context);
-            mainHandler.postDelayed(this, needsSeconds
-                    ? CLOCK_REFRESH_MILLIS : 30_000L);
+            boolean readsCharger = charging && DashboardWidgetLayout.isExtraEnabled(
+                    context, DashboardWidgetLayout.Widget.CHARGING);
+            mainHandler.postDelayed(this, needsSeconds ? CLOCK_REFRESH_MILLIS
+                    : readsCharger ? CHARGE_REFRESH_MILLIS : 30_000L);
         }
     };
 
@@ -92,6 +107,15 @@ final class RearDashboardController implements
     private int batteryPercent = -1;
     private int temperatureTenthsCelsius = -1;
     private boolean charging;
+    private boolean batteryFull;
+    private int voltageMillivolts;
+    private ChargeReading chargeReading;
+    private long chargeUpdatedAt;
+    /** Averaged over the last few reads: the current jumps by half from one to the next. */
+    private float smoothedMicroamps = Float.NaN;
+    private float[] gravity;
+    private LevelReading levelReading;
+    private long levelPublishedAt;
     private String weatherRequestCity = "";
     private String weatherPlace = "";
     private Integer weatherTemperatureCelsius;
@@ -201,6 +225,38 @@ final class RearDashboardController implements
         int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         charging = status == BatteryManager.BATTERY_STATUS_CHARGING
                 || status == BatteryManager.BATTERY_STATUS_FULL;
+        batteryFull = status == BatteryManager.BATTERY_STATUS_FULL;
+        voltageMillivolts = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0);
+        if (!charging) {
+            smoothedMicroamps = Float.NaN;
+        }
+    }
+
+    private void refreshCharge() {
+        if (!charging || !DashboardWidgetLayout.isExtraEnabled(
+                context, DashboardWidgetLayout.Widget.CHARGING)) {
+            chargeReading = null;
+            smoothedMicroamps = Float.NaN;
+            return;
+        }
+        long now = SystemClock.elapsedRealtime();
+        if (chargeReading != null && now - chargeUpdatedAt < CHARGE_REFRESH_MILLIS) {
+            return;
+        }
+        chargeUpdatedAt = now;
+        BatteryManager battery = context.getSystemService(BatteryManager.class);
+        if (battery == null) {
+            chargeReading = null;
+            return;
+        }
+        int microamps = Math.abs(battery.getIntProperty(
+                BatteryManager.BATTERY_PROPERTY_CURRENT_NOW));
+        smoothedMicroamps = Float.isNaN(smoothedMicroamps)
+                ? microamps : smoothedMicroamps * 0.6f + microamps * 0.4f;
+        chargeReading = ChargeReading.of(Math.round(smoothedMicroamps), voltageMillivolts,
+                battery.computeChargeTimeRemaining(),
+                battery.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER),
+                batteryPercent, batteryFull);
     }
 
     private void configureDynamicSources() {
@@ -214,6 +270,20 @@ final class RearDashboardController implements
                 if (rotation != null) {
                     sensorManager.registerListener(this, rotation, SensorManager.SENSOR_DELAY_NORMAL);
                 }
+            }
+            if (DashboardWidgetLayout.isExtraEnabled(context, DashboardWidgetLayout.Widget.LEVEL)) {
+                // Gravity alone, with the hand's shake already taken out;
+                // the raw accelerometer where a phone has no such sensor.
+                Sensor down = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+                if (down == null) {
+                    down = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                }
+                if (down != null) {
+                    sensorManager.registerListener(this, down, SensorManager.SENSOR_DELAY_UI);
+                }
+            } else {
+                gravity = null;
+                levelReading = null;
             }
             if (DashboardWidgetLayout.isExtraEnabled(context, DashboardWidgetLayout.Widget.STEPS)
                     && hasActivityPermission()) {
@@ -266,6 +336,11 @@ final class RearDashboardController implements
             publish();
             return;
         }
+        if (event.sensor.getType() == Sensor.TYPE_GRAVITY
+                || event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            updateLevel(event.values);
+            return;
+        }
         if (event.sensor.getType() != Sensor.TYPE_ROTATION_VECTOR) {
             return;
         }
@@ -275,6 +350,33 @@ final class RearDashboardController implements
         SensorManager.getOrientation(rotation, orientation);
         float degrees = (float) Math.toDegrees(orientation[0]);
         headingDegrees = (degrees + 360f) % 360f;
+        publish();
+    }
+
+    private void updateLevel(float[] values) {
+        if (gravity == null) {
+            gravity = new float[]{values[0], values[1], values[2]};
+        } else {
+            for (int axis = 0; axis < 3; axis++) {
+                gravity[axis] += (values[axis] - gravity[axis]) * LEVEL_SMOOTHING;
+            }
+        }
+        long now = SystemClock.elapsedRealtime();
+        if (now - levelPublishedAt < LEVEL_REFRESH_MILLIS) {
+            return;
+        }
+        LevelReading reading = LevelReading.fromGravity(gravity[0], gravity[1], gravity[2]);
+        // A tenth of a degree is nothing on a panel this size, and a phone
+        // held still is what the widget is for: no reason to redraw for it.
+        boolean unchanged = reading == null ? levelReading == null
+                : levelReading != null
+                && Math.abs(reading.rollDegrees - levelReading.rollDegrees) < 0.1f
+                && Math.abs(reading.pitchDegrees - levelReading.pitchDegrees) < 0.5f;
+        if (unchanged) {
+            return;
+        }
+        levelReading = reading;
+        levelPublishedAt = now;
         publish();
     }
 
@@ -325,7 +427,9 @@ final class RearDashboardController implements
     private void refreshWeatherIfNeeded(boolean force) {
         String city = settings.weatherCity;
         boolean weatherEnabled = settings.showWeather || DashboardWidgetLayout.isExtraEnabled(
-                context, DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER);
+                context, DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER)
+                || DashboardWidgetLayout.isExtraEnabled(
+                        context, DashboardWidgetLayout.Widget.SUN);
         if (!started || !weatherEnabled || city.isEmpty() || weatherLoading) {
             return;
         }
@@ -360,6 +464,7 @@ final class RearDashboardController implements
                 WeatherForecastState.set(finalResult.dates, finalResult.minimums,
                         finalResult.maximums, finalResult.codes,
                         finalResult.rainChances);
+                WeatherForecastState.setSun(finalResult.sunrises, finalResult.sunsets);
             }
             publish();
             mainHandler.postDelayed(() -> refreshWeatherIfNeeded(false), WEATHER_REFRESH_MILLIS);
@@ -389,7 +494,7 @@ final class RearDashboardController implements
                             + "&longitude=" + longitude
                             + "&current=temperature_2m,weather_code"
                             + "&daily=weather_code,temperature_2m_max,temperature_2m_min"
-                            + ",precipitation_probability_max"
+                            + ",precipitation_probability_max,sunrise,sunset"
                             + "&forecast_days=4&timezone=auto"
             );
             JSONObject current = forecast.getJSONObject("current");
@@ -400,24 +505,33 @@ final class RearDashboardController implements
             JSONArray codesJson = daily.getJSONArray("weather_code");
             // Not every place and season has this to give, so it is optional.
             JSONArray rainJson = daily.optJSONArray("precipitation_probability_max");
+            // Optional too: past the polar circles a day can have neither.
+            JSONArray sunriseJson = daily.optJSONArray("sunrise");
+            JSONArray sunsetJson = daily.optJSONArray("sunset");
             int count = Math.min(4, times.length());
             String[] dates = new String[count];
             int[] minimums = new int[count];
             int[] maximums = new int[count];
             int[] codes = new int[count];
             int[] rainChances = new int[count];
+            String[] sunriseTimes = new String[count];
+            String[] sunsetTimes = new String[count];
             for (int index = 0; index < count; index++) {
                 dates[index] = times.getString(index);
                 minimums[index] = (int) Math.round(minimumsJson.getDouble(index));
                 maximums[index] = (int) Math.round(maximumsJson.getDouble(index));
                 codes[index] = codesJson.getInt(index);
                 rainChances[index] = rainJson == null ? -1 : rainJson.optInt(index, -1);
+                sunriseTimes[index] = sunriseJson == null ? "" : sunriseJson.optString(index, "");
+                sunsetTimes[index] = sunsetJson == null ? "" : sunsetJson.optString(index, "");
             }
+            int offsetSeconds = forecast.optInt("utc_offset_seconds", 0);
             return new WeatherResult(
                     displayName,
                     (int) Math.round(current.getDouble("temperature_2m")),
                     current.getInt("weather_code"), dates, minimums, maximums, codes,
-                    rainChances
+                    rainChances, SunTimes.toInstants(sunriseTimes, offsetSeconds),
+                    SunTimes.toInstants(sunsetTimes, offsetSeconds)
             );
         } catch (JSONException error) {
             throw new IOException("Invalid weather data", error);
@@ -459,13 +573,20 @@ final class RearDashboardController implements
     private void publish() {
         refreshSystemStatsIfNeeded();
         refreshCalendar();
+        refreshCharge();
+        long now = System.currentTimeMillis();
+        SunTimes.Next sun = DashboardWidgetLayout.isExtraEnabled(
+                context, DashboardWidgetLayout.Widget.SUN)
+                ? SunTimes.next(now, WeatherForecastState.sunrises(),
+                        WeatherForecastState.sunsets())
+                : null;
         AlarmManager.AlarmClockInfo nextAlarm = settings.showNextAlarm && alarmManager != null
                 ? alarmManager.getNextAlarmClock()
                 : null;
         MediaWidgetState.Snapshot media = MediaWidgetState.get();
         NotificationWidgetState.Snapshot notifications = NotificationWidgetState.get();
         listener.onDashboardDataChanged(new RearDashboardSnapshot(
-                System.currentTimeMillis(),
+                now,
                 batteryPercent,
                 temperatureTenthsCelsius,
                 charging,
@@ -490,7 +611,10 @@ final class RearDashboardController implements
                 stepsToday,
                 notifications.app,
                 notifications.title,
-                notifications.text
+                notifications.text,
+                chargeReading,
+                sun,
+                levelReading
         ));
     }
 
@@ -544,10 +668,12 @@ final class RearDashboardController implements
         final int[] maximums;
         final int[] codes;
         final int[] rainChances;
+        final long[] sunrises;
+        final long[] sunsets;
 
         WeatherResult(String place, int temperatureCelsius, int weatherCode,
                 String[] dates, int[] minimums, int[] maximums, int[] codes,
-                int[] rainChances) {
+                int[] rainChances, long[] sunrises, long[] sunsets) {
             this.place = place;
             this.temperatureCelsius = temperatureCelsius;
             this.weatherCode = weatherCode;
@@ -556,6 +682,8 @@ final class RearDashboardController implements
             this.maximums = maximums;
             this.codes = codes;
             this.rainChances = rainChances;
+            this.sunrises = sunrises;
+            this.sunsets = sunsets;
         }
     }
 }

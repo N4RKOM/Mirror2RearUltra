@@ -1464,9 +1464,10 @@ public class DashboardBuilderActivity extends AppCompatActivity {
      *
      * <p>Battery, temperature, charging, the current track, the clock, the
      * profile name, the network, memory and storage are real. Weather,
-     * heading, speed, altitude, the next event and today's steps stand in:
-     * those come from sensors, a network fetch and a content query the builder
-     * does not start.
+     * heading, speed, altitude, the next event, today's steps, the charger,
+     * the sun and the level stand in: those come from sensors, a network
+     * fetch and a content query the builder does not start. The charger stands
+     * in even when unplugged, for the same reason as the counters below.
      *
      * <p>The system counters are stood in for rather than left at "no
      * reading": a widget with no reading is dropped, so a page made of them
@@ -1519,7 +1520,11 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                         : getString(R.string.dashboard_builder_sample_notification_app),
                 notification.hasContent() ? notification.title
                         : getString(R.string.dashboard_builder_sample_notification),
-                notification.hasContent() ? notification.text : "");
+                notification.hasContent() ? notification.text : "",
+                new ChargeReading(2_100, 8_200, 52 * 60_000L, false),
+                new SunTimes.Next(System.currentTimeMillis() - 4 * 3_600_000L,
+                        System.currentTimeMillis() + 135 * 60_000L, false),
+                new LevelReading(2.4f, 6f));
     }
 
     /**
@@ -1631,7 +1636,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 R.string.dashboard_widget_steps, R.string.dashboard_widget_fullscreen_weather,
                 R.string.dashboard_widget_fullscreen_media,
                 R.string.dashboard_widget_last_notification,
-                R.string.dashboard_widget_timer};
+                R.string.dashboard_widget_timer, R.string.dashboard_widget_charging,
+                R.string.dashboard_widget_sun, R.string.dashboard_widget_level};
         // Indexed by ordinal, so a widget added without a label here would
         // take the whole screen down rather than show a blank row.
         int index = widget.ordinal();

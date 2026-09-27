@@ -109,6 +109,11 @@
                     android:text="@string/dashboard_widget_battery" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_charging_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_charging" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_temperature_switch"
                     style="@style/HyperOS.Switch"
                     android:text="@string/dashboard_widget_temperature" />
@@ -169,10 +174,21 @@
                     style="@style/HyperOS.Switch"
                     android:text="@string/dashboard_widget_fullscreen_weather" />
 
+                <!-- Takes its place from the weather city above. -->
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_sun_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_sun" />
+
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_compass_switch"
                     style="@style/HyperOS.Switch"
                     android:text="@string/dashboard_widget_compass" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_level_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_level" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_speed_switch"

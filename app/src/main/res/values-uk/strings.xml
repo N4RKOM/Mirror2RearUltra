@@ -468,4 +468,16 @@
     <string name="dashboard_units_title">Одиниці вимірювання</string>
     <string name="panel_screen_title">Екран панелі</string>
     <string name="panel_touch_title">Дотики й датчики</string>
+    <string name="dashboard_widget_charging">Заряджання</string>
+    <string name="dashboard_widget_sun">Схід і захід сонця</string>
+    <string name="dashboard_widget_level">Рівень горизонту</string>
+    <string name="dashboard_charge_watts">%1$s Вт</string>
+    <string name="dashboard_charge_amps">%1$s А</string>
+    <string name="dashboard_charge_full_at">повна о %1$s</string>
+    <string name="dashboard_charge_full">заряджено</string>
+    <string name="dashboard_sun_sunrise_in">схід через %1$s</string>
+    <string name="dashboard_sun_sunset_in">захід через %1$s</string>
+    <string name="dashboard_duration_hours">%1$d год %2$d хв</string>
+    <string name="dashboard_duration_minutes">%1$d хв</string>
+    <string name="dashboard_level_tilt">нахил %1$d°</string>
 </resources>

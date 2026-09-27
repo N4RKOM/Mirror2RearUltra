@@ -470,4 +470,16 @@
     <string name="dashboard_units_title">Aonaid</string>
     <string name="panel_screen_title">Scáileán an phainéil</string>
     <string name="panel_touch_title">Teagmháil agus braiteoirí</string>
+    <string name="dashboard_widget_charging">Luchtú</string>
+    <string name="dashboard_widget_sun">Éirí agus luí na gréine</string>
+    <string name="dashboard_widget_level">Leibhéal na spéire</string>
+    <string name="dashboard_charge_watts">%1$s W</string>
+    <string name="dashboard_charge_amps">%1$s A</string>
+    <string name="dashboard_charge_full_at">lán ag %1$s</string>
+    <string name="dashboard_charge_full">luchtaithe</string>
+    <string name="dashboard_sun_sunrise_in">éirí i gceann %1$s</string>
+    <string name="dashboard_sun_sunset_in">luí i gceann %1$s</string>
+    <string name="dashboard_duration_hours">%1$d u %2$d nóim</string>
+    <string name="dashboard_duration_minutes">%1$d nóim</string>
+    <string name="dashboard_level_tilt">claonadh %1$d°</string>
 </resources>

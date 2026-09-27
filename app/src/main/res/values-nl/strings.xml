@@ -464,4 +464,16 @@
     <string name="dashboard_units_title">Eenheden</string>
     <string name="panel_screen_title">Paneelscherm</string>
     <string name="panel_touch_title">Aanraking en sensoren</string>
+    <string name="dashboard_widget_charging">Opladen</string>
+    <string name="dashboard_widget_sun">Zonsopkomst en -ondergang</string>
+    <string name="dashboard_widget_level">Waterpas</string>
+    <string name="dashboard_charge_watts">%1$s W</string>
+    <string name="dashboard_charge_amps">%1$s A</string>
+    <string name="dashboard_charge_full_at">vol om %1$s</string>
+    <string name="dashboard_charge_full">opgeladen</string>
+    <string name="dashboard_sun_sunrise_in">zonsopkomst over %1$s</string>
+    <string name="dashboard_sun_sunset_in">zonsondergang over %1$s</string>
+    <string name="dashboard_duration_hours">%1$d u %2$d min</string>
+    <string name="dashboard_duration_minutes">%1$d min</string>
+    <string name="dashboard_level_tilt">helling %1$d°</string>
 </resources>

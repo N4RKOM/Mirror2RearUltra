@@ -70,6 +70,7 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
             new WidgetRow(R.id.dashboard_calendar_switch, DashboardWidgetLayout.Widget.CALENDAR),
             // Device
             new WidgetRow(R.id.dashboard_battery_switch, DashboardWidgetLayout.Widget.BATTERY),
+            new WidgetRow(R.id.dashboard_charging_switch, DashboardWidgetLayout.Widget.CHARGING),
             new WidgetRow(R.id.dashboard_temperature_switch,
                     DashboardWidgetLayout.Widget.TEMPERATURE),
             new WidgetRow(R.id.dashboard_memory_switch, DashboardWidgetLayout.Widget.MEMORY),
@@ -79,7 +80,9 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
             new WidgetRow(R.id.dashboard_weather_switch, DashboardWidgetLayout.Widget.WEATHER),
             new WidgetRow(R.id.dashboard_fullscreen_weather_switch,
                     DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER),
+            new WidgetRow(R.id.dashboard_sun_switch, DashboardWidgetLayout.Widget.SUN),
             new WidgetRow(R.id.dashboard_compass_switch, DashboardWidgetLayout.Widget.COMPASS),
+            new WidgetRow(R.id.dashboard_level_switch, DashboardWidgetLayout.Widget.LEVEL),
             new WidgetRow(R.id.dashboard_speed_switch, DashboardWidgetLayout.Widget.SPEED),
             new WidgetRow(R.id.dashboard_altitude_switch, DashboardWidgetLayout.Widget.ALTITUDE),
             new WidgetRow(R.id.dashboard_steps_switch, DashboardWidgetLayout.Widget.STEPS),
@@ -253,9 +256,8 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
         switch (widget) {
             case WEATHER:
             case FULLSCREEN_WEATHER:
-                weatherCityContainer.setEnabled(
-                        isWidgetOn(DashboardWidgetLayout.Widget.WEATHER)
-                                || isWidgetOn(DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER));
+            case SUN:
+                weatherCityContainer.setEnabled(needsWeatherCity());
                 break;
             case CUSTOM_TEXT:
                 customTextContainer.setEnabled(checked);
@@ -295,8 +297,7 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
                     DashboardWidgetLayout.isWidgetEnabled(this, entry.getKey()));
         }
         weatherCityInput.setText(settings.weatherCity);
-        weatherCityContainer.setEnabled(isWidgetOn(DashboardWidgetLayout.Widget.WEATHER)
-                || isWidgetOn(DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER));
+        weatherCityContainer.setEnabled(needsWeatherCity());
         customTextInput.setText(settings.customText);
         customTextContainer.setEnabled(isWidgetOn(DashboardWidgetLayout.Widget.CUSTOM_TEXT));
         imperialUnitsSwitch.setChecked(DashboardWidgetLayout.isImperialUnits(this));
@@ -317,6 +318,13 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
             return;
         }
         MirrorSettings.saveDashboardSettings(this, current.withTexts(city, text));
+    }
+
+    /** The sun widget reads its times from the same forecast as the weather. */
+    private boolean needsWeatherCity() {
+        return isWidgetOn(DashboardWidgetLayout.Widget.WEATHER)
+                || isWidgetOn(DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER)
+                || isWidgetOn(DashboardWidgetLayout.Widget.SUN);
     }
 
     private boolean isWidgetOn(DashboardWidgetLayout.Widget widget) {

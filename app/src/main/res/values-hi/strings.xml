@@ -464,4 +464,16 @@
     <string name="dashboard_units_title">इकाइयाँ</string>
     <string name="panel_screen_title">पैनल स्क्रीन</string>
     <string name="panel_touch_title">स्पर्श और सेंसर</string>
+    <string name="dashboard_widget_charging">चार्जिंग</string>
+    <string name="dashboard_widget_sun">सूर्योदय और सूर्यास्त</string>
+    <string name="dashboard_widget_level">क्षितिज स्तर</string>
+    <string name="dashboard_charge_watts">%1$s W</string>
+    <string name="dashboard_charge_amps">%1$s A</string>
+    <string name="dashboard_charge_full_at">%1$s पर पूरा</string>
+    <string name="dashboard_charge_full">चार्ज हो गया</string>
+    <string name="dashboard_sun_sunrise_in">सूर्योदय %1$s में</string>
+    <string name="dashboard_sun_sunset_in">सूर्यास्त %1$s में</string>
+    <string name="dashboard_duration_hours">%1$d घं %2$d मि</string>
+    <string name="dashboard_duration_minutes">%1$d मि</string>
+    <string name="dashboard_level_tilt">झुकाव %1$d°</string>
 </resources>

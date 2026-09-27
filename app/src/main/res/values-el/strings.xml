@@ -464,4 +464,16 @@
     <string name="dashboard_units_title">Μονάδες</string>
     <string name="panel_screen_title">Οθόνη πίνακα</string>
     <string name="panel_touch_title">Αφή και αισθητήρες</string>
+    <string name="dashboard_widget_charging">Φόρτιση</string>
+    <string name="dashboard_widget_sun">Ανατολή και δύση</string>
+    <string name="dashboard_widget_level">Αλφάδι ορίζοντα</string>
+    <string name="dashboard_charge_watts">%1$s W</string>
+    <string name="dashboard_charge_amps">%1$s A</string>
+    <string name="dashboard_charge_full_at">πλήρης στις %1$s</string>
+    <string name="dashboard_charge_full">φορτίστηκε</string>
+    <string name="dashboard_sun_sunrise_in">ανατολή σε %1$s</string>
+    <string name="dashboard_sun_sunset_in">δύση σε %1$s</string>
+    <string name="dashboard_duration_hours">%1$d ώ %2$d λ</string>
+    <string name="dashboard_duration_minutes">%1$d λ</string>
+    <string name="dashboard_level_tilt">κλίση %1$d°</string>
 </resources>

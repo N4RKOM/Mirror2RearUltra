@@ -462,4 +462,16 @@
     <string name="dashboard_units_title">単位</string>
     <string name="panel_screen_title">パネルの画面</string>
     <string name="panel_touch_title">タッチとセンサー</string>
+    <string name="dashboard_widget_charging">充電</string>
+    <string name="dashboard_widget_sun">日の出と日の入り</string>
+    <string name="dashboard_widget_level">水平器</string>
+    <string name="dashboard_charge_watts">%1$s W</string>
+    <string name="dashboard_charge_amps">%1$s A</string>
+    <string name="dashboard_charge_full_at">%1$s に満充電</string>
+    <string name="dashboard_charge_full">充電完了</string>
+    <string name="dashboard_sun_sunrise_in">日の出まで %1$s</string>
+    <string name="dashboard_sun_sunset_in">日の入りまで %1$s</string>
+    <string name="dashboard_duration_hours">%1$d時間%2$d分</string>
+    <string name="dashboard_duration_minutes">%1$d分</string>
+    <string name="dashboard_level_tilt">傾き %1$d°</string>
 </resources>
