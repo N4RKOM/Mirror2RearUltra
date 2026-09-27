@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">Taispeáin d\'eolas féin ar an scáileán cúil, leis féin nó os cionn na híomhá scáthánaithe.</string>
     <string name="dashboard_customize">Saincheap an painéal</string>
     <string name="dashboard_settings_heading">Ábhar agus giuirléidí</string>
-    <string name="dashboard_settings_help">Roghnaigh cad a thaispeánann an scáileán cúil. Úsáideann an aimsir an chathair a chuireann tú isteach agus ní iarrann sí rochtain ar shuíomh.</string>
     <string name="dashboard_output_title">Mód aschuir</string>
     <string name="dashboard_mode_title">Ábhar an scáileáin chúil</string>
     <string name="dashboard_restart_notice">Atosaigh an t-aschur cúil chun an t-athrú móid seo a chur i bhfeidhm.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">Teocht an cheallra</string>
     <string name="dashboard_widget_weather">Aimsir</string>
     <string name="dashboard_weather_city">Cathair na haimsire</string>
-    <string name="dashboard_weather_help">Nuashonraítear an aimsir gach 30 nóiméad nó mar sin.</string>
+    <string name="dashboard_weather_help">Faightear an aimsir don chathair a chuirtear isteach anseo — ní iarrtar rochtain ar shuíomh — agus athnuachantar í thart ar gach 30 nóiméad.</string>
     <string name="dashboard_appearance_title">Cuma</string>
-    <string name="dashboard_layout_title">Leagan amach na ngiuirléidí</string>
     <string name="dashboard_theme_title">Stíl datha</string>
     <string name="dashboard_text_scale_value">Méid an téacs · %1$d%%</string>
     <string name="dashboard_text_scale_default">Méid an téacs · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">Teimhneacht na híomhá: 70%</string>
     <string name="dashboard_custom_image_opacity_value">Teimhneacht na híomhá: %1$d%%</string>
     <string name="dashboard_builder_title">Leagan amach na ngiuirléidí</string>
-    <string name="dashboard_builder_open">Socraigh na giuirléidí</string>
     <string name="dashboard_builder_sample_track">Rian samplach</string>
     <string name="dashboard_builder_small">Beag</string>
     <string name="dashboard_builder_normal">Gnáth</string>
@@ -470,4 +467,7 @@
     <string name="panel_trigger_template">Teimpléad: %1$s</string>
     <string name="dashboard_builder_size_percent">Méid: %1$d%%</string>
     <string name="panel_tap_cycles_variant">Athraíonn tapáil ar ghiuirléid a stíl</string>
+    <string name="dashboard_units_title">Aonaid</string>
+    <string name="panel_screen_title">Scáileán an phainéil</string>
+    <string name="panel_touch_title">Teagmháil agus braiteoirí</string>
 </resources>

@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">Afișați informații proprii pe ecranul din spate, singure sau peste imaginea oglindită.</string>
     <string name="dashboard_customize">Personalizează panoul</string>
     <string name="dashboard_settings_heading">Conținut și widgeturi</string>
-    <string name="dashboard_settings_help">Alegeți ce afișează ecranul din spate. Vremea folosește orașul introdus de dumneavoastră și nu cere acces la locație.</string>
     <string name="dashboard_output_title">Mod de ieșire</string>
     <string name="dashboard_mode_title">Conținutul ecranului din spate</string>
     <string name="dashboard_restart_notice">Reporniți ieșirea din spate pentru a aplica această schimbare de mod.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">Temperatura bateriei</string>
     <string name="dashboard_widget_weather">Vreme</string>
     <string name="dashboard_weather_city">Orașul pentru vreme</string>
-    <string name="dashboard_weather_help">Vremea se actualizează cam la fiecare 30 de minute.</string>
+    <string name="dashboard_weather_help">Vremea este luată pentru orașul introdus aici – fără acces la locație – și se actualizează cam la fiecare 30 de minute.</string>
     <string name="dashboard_appearance_title">Aspect</string>
-    <string name="dashboard_layout_title">Aranjarea widgeturilor</string>
     <string name="dashboard_theme_title">Stil de culoare</string>
     <string name="dashboard_text_scale_value">Dimensiunea textului · %1$d%%</string>
     <string name="dashboard_text_scale_default">Dimensiunea textului · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">Opacitatea imaginii: 70%</string>
     <string name="dashboard_custom_image_opacity_value">Opacitatea imaginii: %1$d%%</string>
     <string name="dashboard_builder_title">Aranjarea widgeturilor</string>
-    <string name="dashboard_builder_open">Aranjează widgeturile</string>
     <string name="dashboard_builder_sample_track">Piesă de exemplu</string>
     <string name="dashboard_builder_small">Mic</string>
     <string name="dashboard_builder_normal">Normal</string>
@@ -466,4 +463,7 @@
     <string name="panel_trigger_template">Șablon: %1$s</string>
     <string name="dashboard_builder_size_percent">Dimensiune: %1$d%%</string>
     <string name="panel_tap_cycles_variant">Atingerea unui widget îi schimbă stilul</string>
+    <string name="dashboard_units_title">Unități</string>
+    <string name="panel_screen_title">Ecranul panoului</string>
+    <string name="panel_touch_title">Atingere și senzori</string>
 </resources>

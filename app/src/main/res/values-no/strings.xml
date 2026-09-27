@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">Vis egen informasjon på bakskjermen, alene eller oppå det speilede bildet.</string>
     <string name="dashboard_customize">Tilpass dashbordet</string>
     <string name="dashboard_settings_heading">Innhold og moduler</string>
-    <string name="dashboard_settings_help">Velg hva bakskjermen viser. Været bruker byen du skriver inn, og ber ikke om posisjonstilgang.</string>
     <string name="dashboard_output_title">Utgangsmodus</string>
     <string name="dashboard_mode_title">Innhold på bakskjermen</string>
     <string name="dashboard_restart_notice">Start bakutgangen på nytt for å ta i bruk dette modusbyttet.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">Batteritemperatur</string>
     <string name="dashboard_widget_weather">Vær</string>
     <string name="dashboard_weather_city">By for været</string>
-    <string name="dashboard_weather_help">Været oppdateres omtrent hvert 30. minutt.</string>
+    <string name="dashboard_weather_help">Været hentes for byen som er skrevet inn her – det krever ikke posisjonstilgang – og oppdateres omtrent hvert 30. minutt.</string>
     <string name="dashboard_appearance_title">Utseende</string>
-    <string name="dashboard_layout_title">Modulplassering</string>
     <string name="dashboard_theme_title">Fargestil</string>
     <string name="dashboard_text_scale_value">Tekststørrelse · %1$d%%</string>
     <string name="dashboard_text_scale_default">Tekststørrelse · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">Bildets dekkevne: 70%</string>
     <string name="dashboard_custom_image_opacity_value">Bildets dekkevne: %1$d%%</string>
     <string name="dashboard_builder_title">Modulplassering</string>
-    <string name="dashboard_builder_open">Ordne modulene</string>
     <string name="dashboard_builder_sample_track">Eksempelspor</string>
     <string name="dashboard_builder_small">Liten</string>
     <string name="dashboard_builder_normal">Normal</string>
@@ -464,4 +461,7 @@
     <string name="panel_trigger_template">Mal: %1$s</string>
     <string name="dashboard_builder_size_percent">Størrelse: %1$d%%</string>
     <string name="panel_tap_cycles_variant">Trykk på en modul for å bytte stil</string>
+    <string name="dashboard_units_title">Enheter</string>
+    <string name="panel_screen_title">Panelskjerm</string>
+    <string name="panel_touch_title">Berøring og sensorer</string>
 </resources>

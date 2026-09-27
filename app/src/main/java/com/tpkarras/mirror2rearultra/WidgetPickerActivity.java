@@ -117,6 +117,7 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
 
     /** Guards the listeners while the UI is being written from stored state. */
     private boolean bindingUi;
+    private MaterialSwitch imperialUnitsSwitch;
     private ActivityResultLauncher<String> locationPermissionLauncher;
     /** Calendar and step counting each need their own runtime permission. */
     private ActivityResultLauncher<String> widgetPermissionLauncher;
@@ -140,6 +141,7 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
         }
         weatherCityContainer = findViewById(R.id.dashboard_weather_city_container);
         weatherCityInput = findViewById(R.id.dashboard_weather_city_input);
+        imperialUnitsSwitch = findViewById(R.id.dashboard_imperial_units_switch);
         customTextContainer = findViewById(R.id.dashboard_custom_text_container);
         customTextInput = findViewById(R.id.dashboard_custom_text_input);
         locationAccessStatus = findViewById(R.id.dashboard_location_access_status);
@@ -188,6 +190,15 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
     }
 
     private void bindInteractions() {
+        imperialUnitsSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (bindingUi) {
+                return;
+            }
+            DashboardWidgetLayout.setImperialUnits(this, checked);
+            // Lives outside DashboardSettings, so re-saving is what tells the
+            // running panel to pick the change up.
+            MirrorSettings.saveDashboardSettings(this, MirrorSettings.loadDashboardSettings(this));
+        });
         for (Map.Entry<DashboardWidgetLayout.Widget, MaterialSwitch> entry
                 : widgetSwitches.entrySet()) {
             DashboardWidgetLayout.Widget widget = entry.getKey();
@@ -288,6 +299,7 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
                 || isWidgetOn(DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER));
         customTextInput.setText(settings.customText);
         customTextContainer.setEnabled(isWidgetOn(DashboardWidgetLayout.Widget.CUSTOM_TEXT));
+        imperialUnitsSwitch.setChecked(DashboardWidgetLayout.isImperialUnits(this));
         bindingUi = false;
     }
 

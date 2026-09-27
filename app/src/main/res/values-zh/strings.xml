@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">在后屏上显示自己的信息，可以单独显示，也可以叠加在镜像画面之上。</string>
     <string name="dashboard_customize">自定义仪表盘</string>
     <string name="dashboard_settings_heading">内容与小组件</string>
-    <string name="dashboard_settings_help">选择后屏显示什么。天气使用您输入的城市，不会请求位置权限。</string>
     <string name="dashboard_output_title">输出模式</string>
     <string name="dashboard_mode_title">后屏内容</string>
     <string name="dashboard_restart_notice">请重新启动后屏输出以应用此模式更改。</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">电池温度</string>
     <string name="dashboard_widget_weather">天气</string>
     <string name="dashboard_weather_city">天气城市</string>
-    <string name="dashboard_weather_help">天气大约每 30 分钟刷新一次。</string>
+    <string name="dashboard_weather_help">天气按此处输入的城市获取，无需位置权限，大约每 30 分钟更新一次。</string>
     <string name="dashboard_appearance_title">外观</string>
-    <string name="dashboard_layout_title">小组件布局</string>
     <string name="dashboard_theme_title">配色风格</string>
     <string name="dashboard_text_scale_value">文字大小 · %1$d%%</string>
     <string name="dashboard_text_scale_default">文字大小 · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">图片不透明度：70%</string>
     <string name="dashboard_custom_image_opacity_value">图片不透明度：%1$d%%</string>
     <string name="dashboard_builder_title">小组件布局</string>
-    <string name="dashboard_builder_open">排布小组件</string>
     <string name="dashboard_builder_sample_track">示例曲目</string>
     <string name="dashboard_builder_small">小</string>
     <string name="dashboard_builder_normal">中</string>
@@ -462,4 +459,7 @@
     <string name="panel_trigger_template">模板：%1$s</string>
     <string name="dashboard_builder_size_percent">大小：%1$d%%</string>
     <string name="panel_tap_cycles_variant">轻点小组件切换其样式</string>
+    <string name="dashboard_units_title">单位</string>
+    <string name="panel_screen_title">面板屏幕</string>
+    <string name="panel_touch_title">触摸与传感器</string>
 </resources>

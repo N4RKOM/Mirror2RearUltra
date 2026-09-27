@@ -49,6 +49,7 @@ public final class RearDashboardView extends View {
     );
     private RearContentMode contentMode = RearContentMode.DASHBOARD;
     private Bitmap customImage;
+    private long customImageStamp;
     private Palette currentPalette = new Palette(Color.WHITE, Color.BLACK);
     private int selectedPage = 0;
     private float touchStartX;
@@ -228,7 +229,19 @@ public final class RearDashboardView extends View {
     void setDashboardSettings(DashboardSettings value, RearContentMode sessionMode) {
         settings = value;
         contentMode = sessionMode;
-        customImage = value.showCustomImage ? DashboardImageStore.load(getContext()) : null;
+        // Decoded again only when the file changed. Every change in the builder
+        // passes through here, the opacity slider's included, and decoding the
+        // picture on each step of a drag made the slider stutter.
+        if (!value.showCustomImage) {
+            customImage = null;
+            customImageStamp = 0L;
+        } else {
+            long stamp = DashboardImageStore.stamp(getContext());
+            if (customImage == null || stamp != customImageStamp) {
+                customImage = DashboardImageStore.load(getContext());
+                customImageStamp = stamp;
+            }
+        }
         invalidate();
     }
 

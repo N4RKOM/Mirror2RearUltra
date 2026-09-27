@@ -337,6 +337,23 @@
             <TextView
                 style="@style/HyperOS.GroupFootnote"
                 android:text="@string/dashboard_custom_text_help" />
+
+            <!-- ===================== Units =====================
+                 How the readings above are written, so it sits with them
+                 rather than with the panel's looks. -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/dashboard_units_title" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_imperial_units_switch"
+                    style="@style/HyperOS.Switch.Single"
+                    android:text="@string/dashboard_units_imperial" />
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

@@ -20,6 +20,12 @@ final class DashboardImageStore {
 
     private DashboardImageStore() {}
     static boolean exists(Context context) { return file(context).isFile(); }
+
+    /** Changes when the stored image does, or 0 when there is none. */
+    static long stamp(Context context) {
+        File image = file(context);
+        return image.isFile() ? image.lastModified() * 31L + image.length() : 0L;
+    }
     static Bitmap load(Context context) { return BitmapFactory.decodeFile(file(context).getAbsolutePath()); }
     static byte[] read(Context context) throws IOException {
         File image = file(context);

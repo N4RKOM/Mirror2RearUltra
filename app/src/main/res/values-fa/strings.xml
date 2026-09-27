@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">اطلاعات خودتان را روی صفحهٔ عقب نشان دهید، به‌تنهایی یا روی تصویر آینه‌شده.</string>
     <string name="dashboard_customize">سفارشی‌سازی داشبورد</string>
     <string name="dashboard_settings_heading">محتوا و ابزارک‌ها</string>
-    <string name="dashboard_settings_help">انتخاب کنید صفحهٔ عقب چه چیزی نشان دهد. آب‌وهوا از شهری که وارد می‌کنید استفاده می‌کند و دسترسی به موقعیت نمی‌خواهد.</string>
     <string name="dashboard_output_title">حالت خروجی</string>
     <string name="dashboard_mode_title">محتوای صفحهٔ عقب</string>
     <string name="dashboard_restart_notice">برای اعمال این تغییر حالت، خروجی پشت را دوباره راه‌اندازی کنید.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">دمای باتری</string>
     <string name="dashboard_widget_weather">آب‌وهوا</string>
     <string name="dashboard_weather_city">شهر آب‌وهوا</string>
-    <string name="dashboard_weather_help">آب‌وهوا تقریباً هر ۳۰ دقیقه تازه می‌شود.</string>
+    <string name="dashboard_weather_help">آب‌وهوا برای شهری که اینجا وارد می‌شود گرفته می‌شود — برای آن دسترسی به موقعیت مکانی لازم نیست — و تقریباً هر ۳۰ دقیقه به‌روز می‌شود.</string>
     <string name="dashboard_appearance_title">ظاهر</string>
-    <string name="dashboard_layout_title">چیدمان ابزارک‌ها</string>
     <string name="dashboard_theme_title">سبک رنگ</string>
     <string name="dashboard_text_scale_value">اندازهٔ متن · %1$d%%</string>
     <string name="dashboard_text_scale_default">اندازهٔ متن · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">کدری تصویر: 70%</string>
     <string name="dashboard_custom_image_opacity_value">کدری تصویر: %1$d%%</string>
     <string name="dashboard_builder_title">چیدمان ابزارک‌ها</string>
-    <string name="dashboard_builder_open">مرتب کردن ابزارک‌ها</string>
     <string name="dashboard_builder_sample_track">قطعهٔ نمونه</string>
     <string name="dashboard_builder_small">کوچک</string>
     <string name="dashboard_builder_normal">معمولی</string>
@@ -464,4 +461,7 @@
     <string name="panel_trigger_template">الگو: %1$s</string>
     <string name="dashboard_builder_size_percent">اندازه: %1$d%%</string>
     <string name="panel_tap_cycles_variant">ضربه روی ابزارک ظاهرش را عوض می‌کند</string>
+    <string name="dashboard_units_title">واحدها</string>
+    <string name="panel_screen_title">صفحهٔ پنل</string>
+    <string name="panel_touch_title">لمس و حسگرها</string>
 </resources>

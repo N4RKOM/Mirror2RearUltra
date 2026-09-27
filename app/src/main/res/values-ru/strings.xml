@@ -112,7 +112,6 @@
     <string name="dashboard_builder_move_down">Переместить %1$s ниже</string>
     <string name="dashboard_builder_move_up">Переместить %1$s выше</string>
     <string name="dashboard_builder_normal">Обычный</string>
-    <string name="dashboard_builder_open">Настроить порядок и размер</string>
     <string name="dashboard_builder_position">Изменить положение %1$s</string>
     <string name="dashboard_builder_position_label">Выравнивание</string>
     <string name="dashboard_builder_position_value">Позиция: %1$s</string>
@@ -212,7 +211,6 @@
     <string name="dashboard_device_temperature">%1$.1f°</string>
     <string name="dashboard_grant_location_access">Разрешить местоположение</string>
     <string name="dashboard_grant_media_access">Открыть доступ к уведомлениям</string>
-    <string name="dashboard_layout_title">Расположение виджетов</string>
     <string name="dashboard_location_access_granted">Доступ к местоположению включён</string>
     <string name="dashboard_location_access_optional">Местоположение используется только для скорости и высоты</string>
     <string name="dashboard_location_access_required">Для скорости и высоты нужно точное местоположение</string>
@@ -239,7 +237,6 @@
     <string name="dashboard_presets_title">Готовые шаблоны</string>
     <string name="dashboard_restart_notice">Перезапустите вывод на задний экран, чтобы применить новый режим.</string>
     <string name="dashboard_settings_heading">Содержимое и виджеты</string>
-    <string name="dashboard_settings_help">Выберите содержимое заднего экрана. Для погоды используется введённый город — доступ к геолокации не запрашивается.</string>
     <string name="dashboard_settings_title">Панель заднего экрана</string>
     <string name="dashboard_speed_short">%1$d км/ч</string>
     <string name="dashboard_speed_unit">км/ч</string>
@@ -248,7 +245,7 @@
     <string name="dashboard_theme_title">Цветовое оформление</string>
     <string name="dashboard_weather_city">Город для погоды</string>
     <string name="dashboard_weather_city_missing">Выберите город для погоды</string>
-    <string name="dashboard_weather_help">Погода обновляется примерно каждые 30 минут.</string>
+    <string name="dashboard_weather_help">Погода берётся для введённого города — доступ к геолокации для неё не нужен — и обновляется примерно каждые 30 минут.</string>
     <string name="dashboard_weather_loading">Загрузка погоды…</string>
     <string name="dashboard_weather_short">%1$d°</string>
     <string name="dashboard_weather_unavailable">Погода недоступна</string>
@@ -488,4 +485,7 @@
     <string name="panel_trigger_template">Шаблон «%1$s»</string>
     <string name="dashboard_builder_size_percent">Размер: %1$d%%</string>
     <string name="panel_tap_cycles_variant">Тап по виджету меняет его вид</string>
+    <string name="dashboard_units_title">Единицы измерения</string>
+    <string name="panel_screen_title">Экран панели</string>
+    <string name="panel_touch_title">Касания и датчики</string>
 </resources>

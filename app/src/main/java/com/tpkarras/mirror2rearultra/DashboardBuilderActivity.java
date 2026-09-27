@@ -1,6 +1,7 @@
 package com.tpkarras.mirror2rearultra;
 
 import android.content.ClipData;
+import android.net.Uri;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Point;
@@ -20,6 +21,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
@@ -60,6 +63,19 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private HyperValueRow orientationRow;
     private HyperValueRow pageNameRow;
     private MaterialSwitch pageInCycleSwitch;
+    private View autoPagesGroup;
+    private View autoPagesHelp;
+    private MaterialSwitch autoPagesSwitch;
+    private MaterialSwitch customImageSwitch;
+    private TextView customImageStatus;
+    private View customImageRemoveButton;
+    private HyperSlider customImageOpacitySlider;
+    private TextView customImageOpacityValue;
+    /** Guards the image controls while they are written from stored state. */
+    private boolean bindingImage;
+    private ActivityResultLauncher<String> imagePickerLauncher;
+    private final java.util.concurrent.ExecutorService imageExecutor =
+            java.util.concurrent.Executors.newSingleThreadExecutor();
     /** Guards the cycle switch while it is written from stored state. */
     private boolean bindingCycle;
     private TextView previewHint;
@@ -103,6 +119,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
 
     @Override protected void onCreate(@Nullable Bundle state) {
         super.onCreate(state);
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(), this::importImage);
         setContentView(R.layout.activity_dashboard_builder);
         toolbar = findViewById(R.id.dashboard_builder_toolbar);
         toolbar.setNavigationOnClickListener(view -> {
@@ -143,6 +161,18 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         orientationRow = findViewById(R.id.dashboard_builder_orientation);
         pageNameRow = findViewById(R.id.dashboard_builder_page_name);
         pageInCycleSwitch = findViewById(R.id.dashboard_builder_page_in_cycle);
+        autoPagesGroup = findViewById(R.id.dashboard_builder_auto_pages_group);
+        autoPagesHelp = findViewById(R.id.dashboard_builder_auto_pages_help);
+        autoPagesSwitch = findViewById(R.id.dashboard_builder_auto_pages);
+        // With the pages, where the question of turning them comes up; it
+        // used to sit on the panel settings screen, away from any page.
+        autoPagesSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (bindingCycle) {
+                return;
+            }
+            DashboardWidgetLayout.setAutoPageSwitchEnabled(this, checked);
+            notifyDashboardChanged();
+        });
         // Replaces the row's own chooser: a name is typed, not picked.
         pageNameRow.setOnClickListener(view -> promptPageName());
         pageInCycleSwitch.setOnCheckedChangeListener((button, checked) -> {
@@ -206,6 +236,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         findViewById(R.id.dashboard_builder_choose).setOnClickListener(view ->
                 startActivity(new Intent(this, WidgetPickerActivity.class)
                         .putExtra(WidgetPickerActivity.EXTRA_TARGET_PAGE, editedPage)));
+        bindCustomImage();
         findViewById(R.id.dashboard_builder_templates).setOnClickListener(view ->
                 startActivity(new Intent(this, DashboardTemplatesActivity.class)));
     }
@@ -222,6 +253,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     protected void onDestroy() {
         MediaWidgetState.removeListener(mediaListener);
         preview.setOnDrawnListener(null);
+        imageExecutor.shutdownNow();
         super.onDestroy();
     }
 
@@ -232,7 +264,92 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         editedPage = Math.max(1, Math.min(DashboardWidgetLayout.loadPageCount(this), editedPage));
         renderPageTabs();
         renderRows();
+        renderCustomImage();
         refreshPreview();
+    }
+
+    // ------------------------------------------------------------------
+    // Background image
+    // ------------------------------------------------------------------
+
+    /**
+     * The picture under the widgets, here rather than on the panel settings
+     * screen: the preview shows it under the arrangement being built, so its
+     * opacity can be judged against the widgets it sits behind.
+     */
+    private void bindCustomImage() {
+        customImageSwitch = findViewById(R.id.dashboard_custom_image_switch);
+        customImageStatus = findViewById(R.id.dashboard_custom_image_status);
+        customImageRemoveButton = findViewById(R.id.dashboard_custom_image_remove_button);
+        customImageOpacitySlider = findViewById(R.id.dashboard_custom_image_opacity_slider);
+        customImageOpacityValue = findViewById(R.id.dashboard_custom_image_opacity_value);
+        customImageSwitch.setOnCheckedChangeListener((button, checked) -> saveCustomImage());
+        findViewById(R.id.dashboard_custom_image_choose_button).setOnClickListener(view ->
+                imagePickerLauncher.launch("image/*"));
+        customImageRemoveButton.setOnClickListener(view -> {
+            DashboardImageStore.remove(this);
+            renderCustomImage();
+            saveCustomImage();
+        });
+        customImageOpacitySlider.addOnChangeListener((slider, value, fromUser) -> {
+            showCustomImageOpacity(Math.round(value));
+            if (fromUser) {
+                saveCustomImage();
+            }
+        });
+    }
+
+    private void renderCustomImage() {
+        DashboardSettings settings = MirrorSettings.loadDashboardSettings(this);
+        boolean exists = DashboardImageStore.exists(this);
+        bindingImage = true;
+        customImageSwitch.setEnabled(exists);
+        customImageSwitch.setChecked(settings.showCustomImage && exists);
+        customImageStatus.setText(exists ? R.string.dashboard_custom_image_selected
+                : R.string.dashboard_custom_image_not_selected);
+        customImageRemoveButton.setVisibility(exists ? View.VISIBLE : View.GONE);
+        customImageOpacitySlider.setValue(settings.customImageOpacityPercent);
+        showCustomImageOpacity(settings.customImageOpacityPercent);
+        bindingImage = false;
+    }
+
+    private void saveCustomImage() {
+        if (bindingImage) {
+            return;
+        }
+        MirrorSettings.saveDashboardSettings(this, MirrorSettings.loadDashboardSettings(this)
+                .withCustomImage(customImageSwitch.isChecked() && DashboardImageStore.exists(this),
+                        Math.round(customImageOpacitySlider.getValue())));
+        refreshPreview();
+    }
+
+    private void showCustomImageOpacity(int percent) {
+        String value = getString(R.string.dashboard_custom_image_opacity_value, percent);
+        customImageOpacityValue.setText(value);
+        customImageOpacitySlider.setContentDescription(value);
+    }
+
+    /** Copies a picked picture in off the main thread, then shows it. */
+    private void importImage(@Nullable Uri uri) {
+        if (uri == null) {
+            return;
+        }
+        customImageStatus.setText(R.string.dashboard_custom_image_loading);
+        imageExecutor.execute(() -> {
+            try {
+                DashboardImageStore.importFromUri(getApplicationContext(), uri);
+                runOnUiThread(() -> {
+                    renderCustomImage();
+                    bindingImage = true;
+                    customImageSwitch.setChecked(true);
+                    bindingImage = false;
+                    saveCustomImage();
+                });
+            } catch (java.io.IOException error) {
+                runOnUiThread(() ->
+                        customImageStatus.setText(R.string.dashboard_custom_image_error));
+            }
+        });
     }
 
     // ------------------------------------------------------------------
@@ -1264,9 +1381,15 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         pageInCycleSwitch.setVisibility(several ? View.VISIBLE : View.GONE);
         orientationRow.setBackgroundResource(several
                 ? R.drawable.hyper_row_bg_middle : R.drawable.hyper_row_bg_bottom);
+        autoPagesGroup.setVisibility(several ? View.VISIBLE : View.GONE);
+        autoPagesHelp.setVisibility(several ? View.VISIBLE : View.GONE);
+        boolean cycling = DashboardWidgetLayout.isAutoPageSwitchEnabled(this);
         bindingCycle = true;
         pageInCycleSwitch.setChecked(DashboardWidgetLayout.isPageInCycle(this, editedPage));
+        autoPagesSwitch.setChecked(cycling);
         bindingCycle = false;
+        // Leaving a page out of a cycle that is not running means nothing.
+        pageInCycleSwitch.setEnabled(cycling);
         boolean free = layout == DashboardSettings.Layout.FREE;
         previewHint.setText(free
                 ? R.string.dashboard_builder_preview_free_hint

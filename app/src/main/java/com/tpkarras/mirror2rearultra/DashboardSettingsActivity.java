@@ -18,19 +18,22 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import android.widget.Toast;
 import java.util.List;
 
 /**
- * The rear panel itself: what it shows, the background image, and appearance.
+ * The rear panel as a whole: what it shows, how it looks, when its screen
+ * dims and goes out, and what touch and the sensors do to it.
  *
- * <p>Choosing widgets is {@link WidgetPickerActivity} and arranging them is
- * {@link DashboardBuilderActivity}; this screen only leads to them, in that
- * order, because that is the order the two jobs are done in. The long widget
- * lists that used to live here moved to the picker, which is now the only
- * place a widget is switched on or off.
+ * <p>Everything about widgets is done in {@link DashboardBuilderActivity},
+ * which opens {@link WidgetPickerActivity} from its own list, so this screen
+ * leads only to the builder.
+ *
+ * <p>It used to carry a layout choice, a page-cycling switch and the
+ * background image as well, all the builder's business - the layout here was
+ * page one's layout under another name - and the units, which belong with
+ * the widget data in the picker. They live there now, and nothing is set in
+ * two places.
  */
 public class DashboardSettingsActivity extends AppCompatActivity {
 
@@ -41,7 +44,6 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     private static final int[] BURN_IN_SHIFTS_DP = {0, 1, 3, 6};
 
     private HyperValueRow modeInput;
-    private HyperValueRow layoutInput;
     private HyperValueRow themeInput;
     private HyperValueRow burnInInput;
     private HyperValueRow idleModeInput;
@@ -54,20 +56,12 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     private TextView aodMinBrightnessValue;
     private String[] burnInLabels;
     private String[] idleModeLabels;
-    private MaterialSwitch customImageSwitch;
-    private MaterialSwitch autoPagesSwitch;
-    private MaterialSwitch imperialUnitsSwitch;
     private MaterialSwitch pocketLockSwitch;
     private MaterialSwitch shutterOnTapSwitch;
     private MaterialSwitch tapVariantSwitch;
     private TextView shutterAccessStatus;
     private View shutterAccessButton;
     private MaterialSwitch faceDownSwitch;
-    private TextView customImageStatus;
-    private View customImageChooseButton;
-    private View customImageRemoveButton;
-    private HyperSlider customImageOpacitySlider;
-    private TextView customImageOpacityValue;
     private HyperSlider textScaleSlider;
     private HyperSlider backgroundOpacitySlider;
     private TextView textScaleValue;
@@ -76,12 +70,9 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     private ViewGroup content;
 
     private String[] modeLabels;
-    private String[] layoutLabels;
     private String[] themeLabels;
     /** Guards the listeners while the UI is being written from stored state. */
     private boolean bindingUi;
-    private ActivityResultLauncher<String> imagePickerLauncher;
-    private final ExecutorService imageExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -90,29 +81,18 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         // a generic type, and filtering by font/* hides it.
         fontPickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(), this::importFont);
-        imagePickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.GetContent(), this::importImage);
         setContentView(R.layout.activity_dashboard_settings);
 
         MaterialToolbar toolbar = findViewById(R.id.dashboard_settings_toolbar);
         toolbar.setNavigationOnClickListener(view -> finish());
         modeInput = findViewById(R.id.dashboard_mode_input);
-        layoutInput = findViewById(R.id.dashboard_layout_input);
         themeInput = findViewById(R.id.dashboard_theme_input);
-        customImageSwitch = findViewById(R.id.dashboard_custom_image_switch);
-        autoPagesSwitch = findViewById(R.id.dashboard_auto_pages_switch);
-        imperialUnitsSwitch = findViewById(R.id.dashboard_imperial_units_switch);
         pocketLockSwitch = findViewById(R.id.dashboard_pocket_lock_switch);
         shutterOnTapSwitch = findViewById(R.id.dashboard_shutter_switch);
         tapVariantSwitch = findViewById(R.id.dashboard_tap_variant_switch);
         shutterAccessStatus = findViewById(R.id.dashboard_shutter_access_status);
         shutterAccessButton = findViewById(R.id.dashboard_shutter_access_button);
         faceDownSwitch = findViewById(R.id.dashboard_face_down_switch);
-        customImageStatus = findViewById(R.id.dashboard_custom_image_status);
-        customImageChooseButton = findViewById(R.id.dashboard_custom_image_choose_button);
-        customImageRemoveButton = findViewById(R.id.dashboard_custom_image_remove_button);
-        customImageOpacitySlider = findViewById(R.id.dashboard_custom_image_opacity_slider);
-        customImageOpacityValue = findViewById(R.id.dashboard_custom_image_opacity_value);
         textScaleSlider = findViewById(R.id.dashboard_text_scale_slider);
         backgroundOpacitySlider = findViewById(R.id.dashboard_background_opacity_slider);
         textScaleValue = findViewById(R.id.dashboard_text_scale_value);
@@ -121,7 +101,6 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         content = findViewById(R.id.dashboard_settings_content);
 
         modeLabels = getResources().getStringArray(R.array.dashboard_mode_entries);
-        layoutLabels = getResources().getStringArray(R.array.dashboard_layout_entries);
         themeLabels = getResources().getStringArray(R.array.dashboard_theme_entries);
         burnInInput = findViewById(R.id.dashboard_burn_in_input);
         idleModeInput = findViewById(R.id.dashboard_idle_mode_input);
@@ -143,7 +122,6 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                 getString(R.string.dashboard_idle_always_on),
         };
         modeInput.setEntries(modeLabels);
-        layoutInput.setEntries(layoutLabels);
         themeInput.setEntries(themeLabels);
         burnInInput.setEntries(burnInLabels);
         idleModeInput.setEntries(idleModeLabels);
@@ -169,18 +147,11 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         super.onPause();
     }
 
-    @Override
-    protected void onDestroy() {
-        imageExecutor.shutdownNow();
-        super.onDestroy();
-    }
-
     private void bindInteractions() {
         modeInput.setOnItemSelectedListener(position -> {
             saveFromUi();
             restartNotice.setVisibility(MirrorState.isActive() ? View.VISIBLE : View.GONE);
         });
-        layoutInput.setOnItemSelectedListener(position -> saveFromUi());
         themeInput.setOnItemSelectedListener(position -> saveFromUi());
         burnInInput.setOnItemSelectedListener(position -> {
             if (position >= 0 && position < BURN_IN_SHIFTS_DP.length) {
@@ -242,20 +213,6 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                         MirrorSettings.loadDashboardSettings(this));
             }
         });
-        imperialUnitsSwitch.setOnCheckedChangeListener((button, checked) -> {
-            if (!bindingUi) {
-                DashboardWidgetLayout.setImperialUnits(this, checked);
-                MirrorSettings.saveDashboardSettings(this,
-                        MirrorSettings.loadDashboardSettings(this));
-            }
-        });
-        autoPagesSwitch.setOnCheckedChangeListener((button, checked) -> {
-            if (!bindingUi) {
-                DashboardWidgetLayout.setAutoPageSwitchEnabled(this, checked);
-                MirrorSettings.saveDashboardSettings(this,
-                        MirrorSettings.loadDashboardSettings(this));
-            }
-        });
         aodMinBrightnessSlider.addOnChangeListener((slider, value, fromUser) -> {
             int percent = Math.round(value);
             updateAodMinBrightnessValue(percent);
@@ -264,15 +221,6 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                 MirrorSettings.saveDashboardSettings(this,
                         MirrorSettings.loadDashboardSettings(this));
             }
-        });
-
-        customImageSwitch.setOnCheckedChangeListener((button, checked) -> saveIfReady());
-        customImageChooseButton.setOnClickListener(view -> imagePickerLauncher.launch("image/*"));
-        customImageRemoveButton.setOnClickListener(view -> {
-            DashboardImageStore.remove(this);
-            customImageSwitch.setChecked(false);
-            updateImageUi();
-            saveFromUi();
         });
 
         textScaleSlider.addOnChangeListener((slider, value, fromUser) -> {
@@ -287,21 +235,8 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                 saveIfReady();
             }
         });
-        customImageOpacitySlider.addOnChangeListener((slider, value, fromUser) -> {
-            updateCustomImageOpacityValue(Math.round(value));
-            if (fromUser) {
-                saveIfReady();
-            }
-        });
-
-        findViewById(R.id.dashboard_widgets_button).setOnClickListener(view ->
-                startActivity(new Intent(this, WidgetPickerActivity.class)));
         findViewById(R.id.dashboard_builder_button).setOnClickListener(view ->
                 startActivity(new Intent(this, DashboardBuilderActivity.class)));
-        findViewById(R.id.dashboard_done_button).setOnClickListener(view -> {
-            saveFromUi();
-            finish();
-        });
     }
 
     /**
@@ -319,7 +254,6 @@ public class DashboardSettingsActivity extends AppCompatActivity {
     private void render(DashboardSettings settings) {
         bindingUi = true;
         modeInput.setValue(labelAt(modeLabels, settings.contentMode.ordinal()));
-        layoutInput.setValue(labelAt(layoutLabels, settings.layout.ordinal()));
         themeInput.setValue(labelAt(themeLabels, settings.theme.ordinal()));
         int shiftDp = DashboardWidgetLayout.loadBurnInShiftDp(this);
         int burnInIndex = 2;
@@ -334,8 +268,6 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         idleModeInput.setValue(labelAt(idleModeLabels, idleMode.ordinal()));
         fontInput.setValue(labelAt(fontLabels, DashboardWidgetLayout.loadFont(this).ordinal()));
         renderOwnFonts();
-        autoPagesSwitch.setChecked(DashboardWidgetLayout.isAutoPageSwitchEnabled(this));
-        imperialUnitsSwitch.setChecked(DashboardWidgetLayout.isImperialUnits(this));
         pocketLockSwitch.setChecked(DashboardWidgetLayout.isPocketLockEnabled(this));
         shutterOnTapSwitch.setChecked(DashboardWidgetLayout.isShutterOnTapEnabled(this));
         tapVariantSwitch.setChecked(DashboardWidgetLayout.isTapCyclesVariantEnabled(this));
@@ -348,14 +280,10 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         int aodMinBrightness = DashboardWidgetLayout.loadAodMinBrightnessPercent(this);
         aodMinBrightnessSlider.setValue(aodMinBrightness);
         updateAodMinBrightnessValue(aodMinBrightness);
-        customImageSwitch.setChecked(settings.showCustomImage && DashboardImageStore.exists(this));
         textScaleSlider.setValue(settings.textScalePercent);
         backgroundOpacitySlider.setValue(settings.backgroundOpacityPercent);
-        customImageOpacitySlider.setValue(settings.customImageOpacityPercent);
         updateTextScaleValue(settings.textScalePercent);
         updateBackgroundOpacityValue(settings.backgroundOpacityPercent);
-        updateCustomImageOpacityValue(settings.customImageOpacityPercent);
-        updateImageUi();
         restartNotice.setVisibility(View.GONE);
         bindingUi = false;
     }
@@ -375,11 +303,6 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                 modeInput.getSelectedIndex(),
                 RearContentMode.MIRROR
         );
-        DashboardSettings.Layout layout = valueAt(
-                DashboardSettings.Layout.values(),
-                layoutInput.getSelectedIndex(),
-                DashboardSettings.Layout.STACKED
-        );
         DashboardSettings.Theme theme = valueAt(
                 DashboardSettings.Theme.values(),
                 themeInput.getSelectedIndex(),
@@ -387,11 +310,13 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         );
         // Widget flags and the two widget texts are carried over from storage,
         // not re-derived from this screen: the picker owns them, and rebuilding
-        // them here would overwrite whatever it just saved.
+        // them here would overwrite whatever it just saved. So are the layout,
+        // which is page one's, and the background image, both set in the
+        // builder.
         DashboardSettings current = MirrorSettings.loadDashboardSettings(this);
         MirrorSettings.saveDashboardSettings(this, new DashboardSettings(
                 mode,
-                layout,
+                current.layout,
                 theme,
                 current.showClock,
                 current.showDate,
@@ -410,8 +335,8 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                 current.customText,
                 Math.round(textScaleSlider.getValue()),
                 Math.round(backgroundOpacitySlider.getValue()),
-                customImageSwitch.isChecked() && DashboardImageStore.exists(this),
-                Math.round(customImageOpacitySlider.getValue())
+                current.showCustomImage,
+                current.customImageOpacityPercent
         ));
     }
 
@@ -434,14 +359,6 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         );
         backgroundOpacitySlider.setContentDescription(
                 getString(R.string.dashboard_background_opacity_value, percent)
-        );
-    }
-
-    private void updateCustomImageOpacityValue(int percent) {
-        customImageOpacityValue.setText(
-                getString(R.string.dashboard_custom_image_opacity_value, percent));
-        customImageOpacitySlider.setContentDescription(
-                getString(R.string.dashboard_custom_image_opacity_value, percent)
         );
     }
 
@@ -494,35 +411,6 @@ public class DashboardSettingsActivity extends AppCompatActivity {
                     MirrorSettings.loadDashboardSettings(this));
             Toast.makeText(this, getString(R.string.dashboard_font_removed, entry.label),
                     Toast.LENGTH_SHORT).show();
-        });
-    }
-
-    private void updateImageUi() {
-        boolean exists = DashboardImageStore.exists(this);
-        customImageStatus.setText(exists ? R.string.dashboard_custom_image_selected
-                : R.string.dashboard_custom_image_not_selected);
-        customImageRemoveButton.setVisibility(exists ? View.VISIBLE : View.GONE);
-        customImageSwitch.setEnabled(exists);
-    }
-
-    private void importImage(Uri uri) {
-        if (uri == null) {
-            return;
-        }
-        customImageStatus.setText(R.string.dashboard_custom_image_loading);
-        imageExecutor.execute(() -> {
-            try {
-                DashboardImageStore.importFromUri(getApplicationContext(), uri);
-                runOnUiThread(() -> {
-                    customImageSwitch.setEnabled(true);
-                    customImageSwitch.setChecked(true);
-                    updateImageUi();
-                    saveFromUi();
-                });
-            } catch (IOException error) {
-                runOnUiThread(() ->
-                        customImageStatus.setText(R.string.dashboard_custom_image_error));
-            }
         });
     }
 

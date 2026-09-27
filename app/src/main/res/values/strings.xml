@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">Show independent information on the rear display, by itself or over the mirrored image.</string>
     <string name="dashboard_customize">Customize dashboard</string>
     <string name="dashboard_settings_heading">Content and widgets</string>
-    <string name="dashboard_settings_help">Choose what the rear screen shows. Weather uses the city you enter and does not request location access.</string>
     <string name="dashboard_output_title">Output mode</string>
     <string name="dashboard_mode_title">Rear screen content</string>
     <string name="dashboard_restart_notice">Restart rear output to apply this mode change.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">Battery temperature</string>
     <string name="dashboard_widget_weather">Weather</string>
     <string name="dashboard_weather_city">Weather city</string>
-    <string name="dashboard_weather_help">Weather is refreshed about every 30 minutes.</string>
+    <string name="dashboard_weather_help">Weather comes from the city entered here - no location access is asked for it - and is refreshed about every 30 minutes.</string>
     <string name="dashboard_appearance_title">Appearance</string>
-    <string name="dashboard_layout_title">Widget layout</string>
     <string name="dashboard_theme_title">Color style</string>
     <string name="dashboard_text_scale_value">Text size · %1$d%%</string>
     <string name="dashboard_text_scale_default">Text size · 100%</string>
@@ -216,7 +214,6 @@
     <string name="dashboard_custom_image_opacity_default">Image opacity: 70%</string>
     <string name="dashboard_custom_image_opacity_value">Image opacity: %1$d%%</string>
     <string name="dashboard_builder_title">Widget layout</string>
-    <string name="dashboard_builder_open">Arrange widgets</string>
     <string name="dashboard_builder_sample_track">Sample track</string>
     <string name="dashboard_builder_small">Small</string>
     <string name="dashboard_builder_normal">Normal</string>
@@ -483,4 +480,7 @@
     <string name="panel_trigger_template">Template: %1$s</string>
     <string name="dashboard_builder_size_percent">Size: %1$d%%</string>
     <string name="panel_tap_cycles_variant">Tap a widget to change its style</string>
+    <string name="dashboard_units_title">Units</string>
+    <string name="panel_screen_title">Panel screen</string>
+    <string name="panel_touch_title">Touch and sensors</string>
 </resources>

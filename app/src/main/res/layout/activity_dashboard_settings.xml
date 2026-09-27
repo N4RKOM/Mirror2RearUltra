@@ -9,7 +9,10 @@
 
     The long widget lists that used to live on this page moved to the picker,
     which is now the only place a widget is switched on or off. What stays here
-    is the panel itself: the mode, the background image, and appearance.
+    is the panel as a whole: the mode, its appearance, when the screen dims and
+    goes out, and what touch and the sensors do. A page's layout and the
+    background image live in the builder, units beside the widget data in the
+    picker; none of them is repeated here.
 
     dashboard_settings_content stays a direct child of the NestedScrollView:
     DashboardSettingsActivity.constrainContentOnWideScreens casts its layout
@@ -64,73 +67,17 @@
                     android:textColor="@color/hyper_accent"
                     android:visibility="gone" />
 
-                <!-- Pick what appears, then arrange it: the two steps in the
-                     order they are done, both one level down. -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dashboard_widgets_button"
-                    style="@style/HyperOS.NavRow"
-                    android:text="@string/dashboard_widgets_title" />
-
+                <!-- Everything about widgets - which, where, how - is done in
+                     the builder, which opens the picker from its own list. -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/dashboard_builder_button"
                     style="@style/HyperOS.NavRow.Bottom"
-                    android:text="@string/dashboard_builder_open" />
+                    android:text="@string/dashboard_builder_title" />
             </LinearLayout>
 
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/dashboard_settings_help" />
-
-            <!-- ===================== Background image ===================== -->
-
-            <TextView
-                style="@style/HyperOS.SectionHeader"
-                android:layout_marginTop="@dimen/section_spacing"
-                android:text="@string/dashboard_custom_image_title" />
-
-            <LinearLayout style="@style/HyperOS.Group">
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/dashboard_custom_image_switch"
-                    style="@style/HyperOS.Switch.Top"
-                    android:text="@string/dashboard_custom_image_show" />
-
-                <TextView
-                    android:id="@+id/dashboard_custom_image_status"
-                    style="@style/HyperOS.RowSummary"
-                    android:accessibilityLiveRegion="polite"
-                    android:text="@string/dashboard_custom_image_not_selected" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dashboard_custom_image_choose_button"
-                    style="@style/HyperOS.ActionRow"
-                    android:text="@string/dashboard_custom_image_choose" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dashboard_custom_image_remove_button"
-                    style="@style/HyperOS.ActionRow.Destructive"
-                    android:text="@string/dashboard_custom_image_remove" />
-
-                <TextView
-                    android:id="@+id/dashboard_custom_image_opacity_value"
-                    style="@style/HyperOS.SliderLabel"
-                    android:labelFor="@id/dashboard_custom_image_opacity_slider"
-                    android:text="@string/dashboard_custom_image_opacity_default" />
-
-                <com.tpkarras.mirror2rearultra.HyperSlider
-                    android:id="@+id/dashboard_custom_image_opacity_slider"
-                    style="@style/HyperOS.Slider.Row"
-                    android:contentDescription="@string/dashboard_custom_image_opacity_default"
-                    app:hyperStepSize="5"
-                    app:hyperValueFrom="10"
-                    app:hyperValueTo="100" />
-            </LinearLayout>
-
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/dashboard_custom_image_help" />
-
-            <!-- ===================== Appearance ===================== -->
+            <!-- ===================== Appearance =====================
+                 How everything on the panel looks. How each widget looks, and
+                 how a page is laid out, belong to the builder. -->
 
             <TextView
                 style="@style/HyperOS.SectionHeader"
@@ -140,13 +87,8 @@
             <LinearLayout style="@style/HyperOS.Group">
 
                 <com.tpkarras.mirror2rearultra.HyperValueRow
-                    android:id="@+id/dashboard_layout_input"
-                    style="@style/HyperOS.ValueRow.Top"
-                    app:rowTitle="@string/dashboard_layout_title" />
-
-                <com.tpkarras.mirror2rearultra.HyperValueRow
                     android:id="@+id/dashboard_theme_input"
-                    style="@style/HyperOS.ValueRow"
+                    style="@style/HyperOS.ValueRow.Top"
                     app:rowTitle="@string/dashboard_theme_title" />
 
                 <com.tpkarras.mirror2rearultra.HyperValueRow
@@ -164,72 +106,6 @@
                     style="@style/HyperOS.ValueRow"
                     android:visibility="gone"
                     app:rowTitle="@string/dashboard_font_remove" />
-
-                <com.tpkarras.mirror2rearultra.HyperValueRow
-                    android:id="@+id/dashboard_idle_mode_input"
-                    style="@style/HyperOS.ValueRow"
-                    app:rowTitle="@string/dashboard_idle_mode_title" />
-
-                <TextView
-                    android:id="@+id/dashboard_aod_min_brightness_value"
-                    style="@style/HyperOS.SliderLabel"
-                    android:labelFor="@id/dashboard_aod_min_brightness_slider"
-                    android:text="@string/dashboard_aod_min_brightness_default" />
-
-                <com.tpkarras.mirror2rearultra.HyperSlider
-                    android:id="@+id/dashboard_aod_min_brightness_slider"
-                    style="@style/HyperOS.Slider.Row"
-                    android:contentDescription="@string/dashboard_aod_min_brightness_default"
-                    app:hyperStepSize="1"
-                    app:hyperValueFrom="1"
-                    app:hyperValueTo="30" />
-
-                <!-- The drift already existed at a fixed 3dp; this makes it a
-                     choice, including off. -->
-                <com.tpkarras.mirror2rearultra.HyperValueRow
-                    android:id="@+id/dashboard_burn_in_input"
-                    style="@style/HyperOS.ValueRow"
-                    app:rowTitle="@string/dashboard_burn_in_title" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/dashboard_auto_pages_switch"
-                    style="@style/HyperOS.Switch"
-                    android:text="@string/dashboard_auto_pages" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/dashboard_imperial_units_switch"
-                    style="@style/HyperOS.Switch"
-                    android:text="@string/dashboard_units_imperial" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/dashboard_pocket_lock_switch"
-                    style="@style/HyperOS.Switch"
-                    android:text="@string/panel_pocket_lock" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/dashboard_tap_variant_switch"
-                    style="@style/HyperOS.Switch"
-                    android:text="@string/panel_tap_cycles_variant" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/dashboard_shutter_switch"
-                    style="@style/HyperOS.Switch"
-                    android:text="@string/panel_shutter_on_tap" />
-
-                <TextView
-                    android:id="@+id/dashboard_shutter_access_status"
-                    style="@style/HyperOS.RowSummary"
-                    android:text="@string/shutter_service_off" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dashboard_shutter_access_button"
-                    style="@style/HyperOS.ActionRow"
-                    android:text="@string/shutter_service_open" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/dashboard_face_down_switch"
-                    style="@style/HyperOS.Switch"
-                    android:text="@string/panel_face_down_off" />
 
                 <TextView
                     android:id="@+id/dashboard_text_scale_value"
@@ -262,31 +138,91 @@
 
             <TextView
                 style="@style/HyperOS.GroupFootnote"
-                android:text="@string/dashboard_idle_mode_help" />
+                android:text="@string/dashboard_font_help" />
+
+            <!-- ===================== Panel screen =====================
+                 When the panel dims and goes out, and how it keeps from
+                 burning in while it stays on. -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/panel_screen_title" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_idle_mode_input"
+                    style="@style/HyperOS.ValueRow.Top"
+                    app:rowTitle="@string/dashboard_idle_mode_title" />
+
+                <TextView
+                    android:id="@+id/dashboard_aod_min_brightness_value"
+                    style="@style/HyperOS.SliderLabel"
+                    android:labelFor="@id/dashboard_aod_min_brightness_slider"
+                    android:text="@string/dashboard_aod_min_brightness_default" />
+
+                <com.tpkarras.mirror2rearultra.HyperSlider
+                    android:id="@+id/dashboard_aod_min_brightness_slider"
+                    style="@style/HyperOS.Slider.Row"
+                    android:contentDescription="@string/dashboard_aod_min_brightness_default"
+                    app:hyperStepSize="1"
+                    app:hyperValueFrom="1"
+                    app:hyperValueTo="30" />
+
+                <!-- The drift already existed at a fixed 3dp; this makes it a
+                     choice, including off. -->
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_burn_in_input"
+                    style="@style/HyperOS.ValueRow.Bottom"
+                    app:rowTitle="@string/dashboard_burn_in_title" />
+            </LinearLayout>
 
             <TextView
                 style="@style/HyperOS.GroupFootnote"
-                android:text="@string/dashboard_font_help" />
+                android:text="@string/dashboard_idle_mode_help" />
+
+            <!-- ===================== Touch and sensors =====================
+                 What a finger on the panel, a pocket and a table do to it. -->
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/panel_touch_title" />
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_tap_variant_switch"
+                    style="@style/HyperOS.Switch.Top"
+                    android:text="@string/panel_tap_cycles_variant" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_pocket_lock_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/panel_pocket_lock" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_face_down_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/panel_face_down_off" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_shutter_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/panel_shutter_on_tap" />
+
+                <TextView
+                    android:id="@+id/dashboard_shutter_access_status"
+                    style="@style/HyperOS.RowSummary"
+                    android:text="@string/shutter_service_off" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/dashboard_shutter_access_button"
+                    style="@style/HyperOS.ActionRow.Bottom"
+                    android:text="@string/shutter_service_open" />
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <View style="@style/HyperOS.BottomBarEdge" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/hyper_background"
-        android:orientation="vertical"
-        android:paddingStart="@dimen/page_margin_horizontal"
-        android:paddingTop="@dimen/spacing_sm"
-        android:paddingEnd="@dimen/page_margin_horizontal"
-        android:paddingBottom="@dimen/spacing_md">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/dashboard_done_button"
-            style="@style/HyperOS.Button.Primary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/done" />
-    </LinearLayout>
 </LinearLayout>

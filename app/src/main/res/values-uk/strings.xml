@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">Показуйте на задньому екрані власну інформацію — окремо або поверх дзеркального зображення.</string>
     <string name="dashboard_customize">Налаштувати панель</string>
     <string name="dashboard_settings_heading">Вміст і віджети</string>
-    <string name="dashboard_settings_help">Виберіть, що показує задній екран. Погода використовує введене вами місто й не запитує доступ до місцеположення.</string>
     <string name="dashboard_output_title">Режим виведення</string>
     <string name="dashboard_mode_title">Вміст заднього екрана</string>
     <string name="dashboard_restart_notice">Перезапустіть заднє виведення, щоб застосувати цю зміну режиму.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">Температура батареї</string>
     <string name="dashboard_widget_weather">Погода</string>
     <string name="dashboard_weather_city">Місто для погоди</string>
-    <string name="dashboard_weather_help">Погода оновлюється приблизно кожні 30 хвилин.</string>
+    <string name="dashboard_weather_help">Погода береться для введеного міста — доступ до геолокації для неї не потрібен — і оновлюється приблизно кожні 30 хвилин.</string>
     <string name="dashboard_appearance_title">Оформлення</string>
-    <string name="dashboard_layout_title">Розташування віджетів</string>
     <string name="dashboard_theme_title">Колірний стиль</string>
     <string name="dashboard_text_scale_value">Розмір тексту · %1$d%%</string>
     <string name="dashboard_text_scale_default">Розмір тексту · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">Непрозорість зображення: 70%</string>
     <string name="dashboard_custom_image_opacity_value">Непрозорість зображення: %1$d%%</string>
     <string name="dashboard_builder_title">Розташування віджетів</string>
-    <string name="dashboard_builder_open">Упорядкувати віджети</string>
     <string name="dashboard_builder_sample_track">Зразковий трек</string>
     <string name="dashboard_builder_small">Малий</string>
     <string name="dashboard_builder_normal">Звичайний</string>
@@ -468,4 +465,7 @@
     <string name="panel_trigger_template">Шаблон «%1$s»</string>
     <string name="dashboard_builder_size_percent">Розмір: %1$d%%</string>
     <string name="panel_tap_cycles_variant">Дотик до віджета змінює його вигляд</string>
+    <string name="dashboard_units_title">Одиниці вимірювання</string>
+    <string name="panel_screen_title">Екран панелі</string>
+    <string name="panel_touch_title">Дотики й датчики</string>
 </resources>

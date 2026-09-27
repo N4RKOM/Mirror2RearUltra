@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">אפשר להציג מידע משלך על המסך האחורי, לבדו או מעל התמונה המשוקפת.</string>
     <string name="dashboard_customize">התאמת הלוח</string>
     <string name="dashboard_settings_heading">תוכן וווידג׳טים</string>
-    <string name="dashboard_settings_help">יש לבחור מה יוצג במסך האחורי. מזג האוויר משתמש בעיר שהזנת ואינו מבקש גישה למיקום.</string>
     <string name="dashboard_output_title">מצב פלט</string>
     <string name="dashboard_mode_title">תוכן המסך האחורי</string>
     <string name="dashboard_restart_notice">יש להפעיל מחדש את הפלט האחורי כדי להחיל את שינוי המצב.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">טמפרטורת הסוללה</string>
     <string name="dashboard_widget_weather">מזג אוויר</string>
     <string name="dashboard_weather_city">עיר למזג האוויר</string>
-    <string name="dashboard_weather_help">מזג האוויר מתרענן בערך כל 30 דקות.</string>
+    <string name="dashboard_weather_help">מזג האוויר נלקח לעיר שהוזנה כאן — בלי צורך בגישה למיקום — ומתעדכן בערך כל 30 דקות.</string>
     <string name="dashboard_appearance_title">מראה</string>
-    <string name="dashboard_layout_title">פריסת הווידג׳טים</string>
     <string name="dashboard_theme_title">סגנון צבע</string>
     <string name="dashboard_text_scale_value">גודל הטקסט · %1$d%%</string>
     <string name="dashboard_text_scale_default">גודל הטקסט · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">אטימות התמונה: 70%</string>
     <string name="dashboard_custom_image_opacity_value">אטימות התמונה: %1$d%%</string>
     <string name="dashboard_builder_title">פריסת הווידג׳טים</string>
-    <string name="dashboard_builder_open">סידור הווידג׳טים</string>
     <string name="dashboard_builder_sample_track">רצועה לדוגמה</string>
     <string name="dashboard_builder_small">קטן</string>
     <string name="dashboard_builder_normal">רגיל</string>
@@ -468,4 +465,7 @@
     <string name="panel_trigger_template">תבנית: %1$s</string>
     <string name="dashboard_builder_size_percent">גודל: %1$d%%</string>
     <string name="panel_tap_cycles_variant">הקשה על ווידג׳ט משנה את הסגנון שלו</string>
+    <string name="dashboard_units_title">יחידות</string>
+    <string name="panel_screen_title">מסך הלוח</string>
+    <string name="panel_touch_title">מגע וחיישנים</string>
 </resources>

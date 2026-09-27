@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">اعرض معلوماتك الخاصة على الشاشة الخلفية، وحدها أو فوق الصورة المنسوخة.</string>
     <string name="dashboard_customize">تخصيص اللوحة</string>
     <string name="dashboard_settings_heading">المحتوى والأدوات</string>
-    <string name="dashboard_settings_help">اختر ما تعرضه الشاشة الخلفية. يستخدم الطقس المدينة التي تُدخلها ولا يطلب الوصول إلى الموقع.</string>
     <string name="dashboard_output_title">وضع الإخراج</string>
     <string name="dashboard_mode_title">محتوى الشاشة الخلفية</string>
     <string name="dashboard_restart_notice">أعد تشغيل الإخراج الخلفي لتطبيق تغيير الوضع هذا.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">حرارة البطارية</string>
     <string name="dashboard_widget_weather">الطقس</string>
     <string name="dashboard_weather_city">مدينة الطقس</string>
-    <string name="dashboard_weather_help">يُحدَّث الطقس كل 30 دقيقة تقريبًا.</string>
+    <string name="dashboard_weather_help">يُجلب الطقس للمدينة المُدخلة هنا — دون طلب الوصول إلى الموقع — ويُحدَّث كل 30 دقيقة تقريبًا.</string>
     <string name="dashboard_appearance_title">المظهر</string>
-    <string name="dashboard_layout_title">تخطيط الأدوات</string>
     <string name="dashboard_theme_title">نمط الألوان</string>
     <string name="dashboard_text_scale_value">حجم النص · %1$d%%</string>
     <string name="dashboard_text_scale_default">حجم النص · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">عتامة الصورة: 70%</string>
     <string name="dashboard_custom_image_opacity_value">عتامة الصورة: %1$d%%</string>
     <string name="dashboard_builder_title">تخطيط الأدوات</string>
-    <string name="dashboard_builder_open">ترتيب الأدوات</string>
     <string name="dashboard_builder_sample_track">مقطع نموذجي</string>
     <string name="dashboard_builder_small">صغير</string>
     <string name="dashboard_builder_normal">عادي</string>
@@ -472,4 +469,7 @@
     <string name="panel_trigger_template">القالب: %1$s</string>
     <string name="dashboard_builder_size_percent">الحجم: %1$d%%</string>
     <string name="panel_tap_cycles_variant">النقر على أداة يغيّر شكلها</string>
+    <string name="dashboard_units_title">الوحدات</string>
+    <string name="panel_screen_title">شاشة اللوحة</string>
+    <string name="panel_touch_title">اللمس والمستشعرات</string>
 </resources>

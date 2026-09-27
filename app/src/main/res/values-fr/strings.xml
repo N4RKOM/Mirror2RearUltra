@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">Affichez des informations indépendantes sur l\'écran arrière, seules ou par-dessus l\'image dupliquée.</string>
     <string name="dashboard_customize">Personnaliser le tableau de bord</string>
     <string name="dashboard_settings_heading">Contenu et widgets</string>
-    <string name="dashboard_settings_help">Choisissez ce qu\'affiche l\'écran arrière. La météo utilise la ville que vous saisissez et ne demande pas l\'accès à la position.</string>
     <string name="dashboard_output_title">Mode de sortie</string>
     <string name="dashboard_mode_title">Contenu de l\'écran arrière</string>
     <string name="dashboard_restart_notice">Redémarrez la sortie arrière pour appliquer ce changement de mode.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">Température de la batterie</string>
     <string name="dashboard_widget_weather">Météo</string>
     <string name="dashboard_weather_city">Ville pour la météo</string>
-    <string name="dashboard_weather_help">La météo est actualisée environ toutes les 30 minutes.</string>
+    <string name="dashboard_weather_help">La météo est celle de la ville saisie ici, sans accès à la position, et se met à jour environ toutes les 30 minutes.</string>
     <string name="dashboard_appearance_title">Apparence</string>
-    <string name="dashboard_layout_title">Disposition des widgets</string>
     <string name="dashboard_theme_title">Style de couleur</string>
     <string name="dashboard_text_scale_value">Taille du texte · %1$d%%</string>
     <string name="dashboard_text_scale_default">Taille du texte · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">Opacité de l\'image : 70%</string>
     <string name="dashboard_custom_image_opacity_value">Opacité de l\'image : %1$d%%</string>
     <string name="dashboard_builder_title">Disposition des widgets</string>
-    <string name="dashboard_builder_open">Organiser les widgets</string>
     <string name="dashboard_builder_sample_track">Piste d\'exemple</string>
     <string name="dashboard_builder_small">Petit</string>
     <string name="dashboard_builder_normal">Normal</string>
@@ -464,4 +461,7 @@
     <string name="panel_trigger_template">Modèle : %1$s</string>
     <string name="dashboard_builder_size_percent">Taille: %1$d%%</string>
     <string name="panel_tap_cycles_variant">Toucher un widget change son style</string>
+    <string name="dashboard_units_title">Unités</string>
+    <string name="panel_screen_title">Écran du panneau</string>
+    <string name="panel_touch_title">Toucher et capteurs</string>
 </resources>

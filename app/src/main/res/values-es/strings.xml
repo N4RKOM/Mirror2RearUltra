@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">Muestra información independiente en la pantalla trasera, sola o sobre la imagen duplicada.</string>
     <string name="dashboard_customize">Personalizar el panel</string>
     <string name="dashboard_settings_heading">Contenido y widgets</string>
-    <string name="dashboard_settings_help">Elige lo que muestra la pantalla trasera. El tiempo usa la ciudad que escribas y no pide acceso a la ubicación.</string>
     <string name="dashboard_output_title">Modo de salida</string>
     <string name="dashboard_mode_title">Contenido de la pantalla trasera</string>
     <string name="dashboard_restart_notice">Reinicia la salida trasera para aplicar este cambio de modo.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">Temperatura de la batería</string>
     <string name="dashboard_widget_weather">Tiempo</string>
     <string name="dashboard_weather_city">Ciudad para el tiempo</string>
-    <string name="dashboard_weather_help">El tiempo se actualiza cada 30 minutos aproximadamente.</string>
+    <string name="dashboard_weather_help">El tiempo se obtiene para la ciudad indicada aquí, sin pedir acceso a la ubicación, y se actualiza cada 30 minutos aproximadamente.</string>
     <string name="dashboard_appearance_title">Apariencia</string>
-    <string name="dashboard_layout_title">Disposición de los widgets</string>
     <string name="dashboard_theme_title">Estilo de color</string>
     <string name="dashboard_text_scale_value">Tamaño del texto · %1$d%%</string>
     <string name="dashboard_text_scale_default">Tamaño del texto · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">Opacidad de la imagen: 70%</string>
     <string name="dashboard_custom_image_opacity_value">Opacidad de la imagen: %1$d%%</string>
     <string name="dashboard_builder_title">Disposición de los widgets</string>
-    <string name="dashboard_builder_open">Organizar los widgets</string>
     <string name="dashboard_builder_sample_track">Pista de ejemplo</string>
     <string name="dashboard_builder_small">Pequeño</string>
     <string name="dashboard_builder_normal">Normal</string>
@@ -464,4 +461,7 @@
     <string name="panel_trigger_template">Plantilla: %1$s</string>
     <string name="dashboard_builder_size_percent">Tamaño: %1$d%%</string>
     <string name="panel_tap_cycles_variant">Tocar un widget cambia su estilo</string>
+    <string name="dashboard_units_title">Unidades</string>
+    <string name="panel_screen_title">Pantalla del panel</string>
+    <string name="panel_touch_title">Toques y sensores</string>
 </resources>

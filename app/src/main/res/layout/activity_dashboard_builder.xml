@@ -156,6 +156,27 @@
                         android:visibility="gone" />
                 </LinearLayout>
 
+                <!-- Whether the panel turns its pages by itself, for all of
+                     them; the switch above leaves one page out. Shown once
+                     there is more than one page. -->
+                <LinearLayout
+                    android:id="@+id/dashboard_builder_auto_pages_group"
+                    style="@style/HyperOS.Group"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:visibility="gone">
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/dashboard_builder_auto_pages"
+                        style="@style/HyperOS.Switch.Single"
+                        android:text="@string/dashboard_auto_pages" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/dashboard_builder_auto_pages_help"
+                    style="@style/HyperOS.GroupFootnote"
+                    android:text="@string/dashboard_auto_pages_help"
+                    android:visibility="gone" />
+
                 <!-- Only the free layout has anywhere to snap to, so the row
                      appears with it. Shown and hidden by the activity. -->
                 <LinearLayout
@@ -195,6 +216,57 @@
                     android:id="@+id/dashboard_builder_empty"
                     style="@style/HyperOS.GroupFootnote"
                     android:text="@string/dashboard_builder_list_hint" />
+
+                <!-- ===================== Background image =====================
+                     Under the widgets on every page, so it is set here where
+                     the preview shows it with them. -->
+
+                <TextView
+                    style="@style/HyperOS.SectionHeader"
+                    android:layout_marginTop="@dimen/section_spacing"
+                    android:text="@string/dashboard_custom_image_title" />
+
+                <LinearLayout style="@style/HyperOS.Group">
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/dashboard_custom_image_switch"
+                        style="@style/HyperOS.Switch.Top"
+                        android:text="@string/dashboard_custom_image_show" />
+
+                    <TextView
+                        android:id="@+id/dashboard_custom_image_status"
+                        style="@style/HyperOS.RowSummary"
+                        android:accessibilityLiveRegion="polite"
+                        android:text="@string/dashboard_custom_image_not_selected" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dashboard_custom_image_choose_button"
+                        style="@style/HyperOS.ActionRow"
+                        android:text="@string/dashboard_custom_image_choose" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dashboard_custom_image_remove_button"
+                        style="@style/HyperOS.ActionRow.Destructive"
+                        android:text="@string/dashboard_custom_image_remove" />
+
+                    <TextView
+                        android:id="@+id/dashboard_custom_image_opacity_value"
+                        style="@style/HyperOS.SliderLabel"
+                        android:labelFor="@id/dashboard_custom_image_opacity_slider"
+                        android:text="@string/dashboard_custom_image_opacity_default" />
+
+                    <com.tpkarras.mirror2rearultra.HyperSlider
+                        android:id="@+id/dashboard_custom_image_opacity_slider"
+                        style="@style/HyperOS.Slider.Row"
+                        android:contentDescription="@string/dashboard_custom_image_opacity_default"
+                        app:hyperStepSize="5"
+                        app:hyperValueFrom="10"
+                        app:hyperValueTo="100" />
+                </LinearLayout>
+
+                <TextView
+                    style="@style/HyperOS.GroupFootnote"
+                    android:text="@string/dashboard_custom_image_help" />
 
                 <!-- ===================== Templates ===================== -->
 

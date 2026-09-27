@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">Onyesha taarifa zako mwenyewe kwenye skrini ya nyuma, peke yake au juu ya picha iliyoakisiwa.</string>
     <string name="dashboard_customize">Boresha dashibodi</string>
     <string name="dashboard_settings_heading">Maudhui na wijeti</string>
-    <string name="dashboard_settings_help">Chagua kile skrini ya nyuma inachoonyesha. Hali ya hewa hutumia jiji unaloweka wala haiombi ufikiaji wa mahali.</string>
     <string name="dashboard_output_title">Hali ya utoaji</string>
     <string name="dashboard_mode_title">Maudhui ya skrini ya nyuma</string>
     <string name="dashboard_restart_notice">Anzisha upya utoaji wa nyuma ili mabadiliko haya ya hali yatumike.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">Joto la betri</string>
     <string name="dashboard_widget_weather">Hali ya hewa</string>
     <string name="dashboard_weather_city">Jiji la hali ya hewa</string>
-    <string name="dashboard_weather_help">Hali ya hewa husasishwa takriban kila dakika 30.</string>
+    <string name="dashboard_weather_help">Hali ya hewa huchukuliwa kwa jiji lililoandikwa hapa — haihitaji ruhusa ya mahali — na husasishwa takriban kila dakika 30.</string>
     <string name="dashboard_appearance_title">Muonekano</string>
-    <string name="dashboard_layout_title">Mpangilio wa wijeti</string>
     <string name="dashboard_theme_title">Mtindo wa rangi</string>
     <string name="dashboard_text_scale_value">Ukubwa wa maandishi · %1$d%%</string>
     <string name="dashboard_text_scale_default">Ukubwa wa maandishi · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">Ukolezi wa picha: 70%</string>
     <string name="dashboard_custom_image_opacity_value">Ukolezi wa picha: %1$d%%</string>
     <string name="dashboard_builder_title">Mpangilio wa wijeti</string>
-    <string name="dashboard_builder_open">Panga wijeti</string>
     <string name="dashboard_builder_sample_track">Wimbo wa mfano</string>
     <string name="dashboard_builder_small">Ndogo</string>
     <string name="dashboard_builder_normal">Ya kawaida</string>
@@ -464,4 +461,7 @@
     <string name="panel_trigger_template">Kiolezo: %1$s</string>
     <string name="dashboard_builder_size_percent">Ukubwa: %1$d%%</string>
     <string name="panel_tap_cycles_variant">Kugusa wijeti hubadilisha mtindo wake</string>
+    <string name="dashboard_units_title">Vipimo</string>
+    <string name="panel_screen_title">Skrini ya paneli</string>
+    <string name="panel_touch_title">Mguso na vihisi</string>
 </resources>

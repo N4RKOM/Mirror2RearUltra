@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">Toon eigen informatie op het achterscherm, op zichzelf of over het gespiegelde beeld heen.</string>
     <string name="dashboard_customize">Dashboard aanpassen</string>
     <string name="dashboard_settings_heading">Inhoud en widgets</string>
-    <string name="dashboard_settings_help">Kies wat het achterscherm toont. Het weer gebruikt de stad die je invoert en vraagt geen toegang tot je locatie.</string>
     <string name="dashboard_output_title">Uitvoermodus</string>
     <string name="dashboard_mode_title">Inhoud van het achterscherm</string>
     <string name="dashboard_restart_notice">Start de achteruitvoer opnieuw om deze moduswijziging toe te passen.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">Accutemperatuur</string>
     <string name="dashboard_widget_weather">Weer</string>
     <string name="dashboard_weather_city">Stad voor het weer</string>
-    <string name="dashboard_weather_help">Het weer wordt ongeveer elke 30 minuten ververst.</string>
+    <string name="dashboard_weather_help">Het weer komt van de stad die hier is ingevuld – daarvoor is geen locatietoegang nodig – en wordt ongeveer elke 30 minuten ververst.</string>
     <string name="dashboard_appearance_title">Uiterlijk</string>
-    <string name="dashboard_layout_title">Indeling van widgets</string>
     <string name="dashboard_theme_title">Kleurstijl</string>
     <string name="dashboard_text_scale_value">Tekstgrootte · %1$d%%</string>
     <string name="dashboard_text_scale_default">Tekstgrootte · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">Dekking van de afbeelding: 70%</string>
     <string name="dashboard_custom_image_opacity_value">Dekking van de afbeelding: %1$d%%</string>
     <string name="dashboard_builder_title">Indeling van widgets</string>
-    <string name="dashboard_builder_open">Widgets schikken</string>
     <string name="dashboard_builder_sample_track">Voorbeeldnummer</string>
     <string name="dashboard_builder_small">Klein</string>
     <string name="dashboard_builder_normal">Normaal</string>
@@ -464,4 +461,7 @@
     <string name="panel_trigger_template">Sjabloon: %1$s</string>
     <string name="dashboard_builder_size_percent">Grootte: %1$d%%</string>
     <string name="panel_tap_cycles_variant">Tik op een widget om de stijl te wisselen</string>
+    <string name="dashboard_units_title">Eenheden</string>
+    <string name="panel_screen_title">Paneelscherm</string>
+    <string name="panel_touch_title">Aanraking en sensoren</string>
 </resources>

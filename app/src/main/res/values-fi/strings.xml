@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">Näytä takanäytöllä omia tietoja, joko yksinään tai peilatun kuvan päällä.</string>
     <string name="dashboard_customize">Mukauta koontinäyttöä</string>
     <string name="dashboard_settings_heading">Sisältö ja widgetit</string>
-    <string name="dashboard_settings_help">Valitse, mitä takanäyttö näyttää. Sää käyttää antamaasi kaupunkia eikä pyydä sijainnin käyttöoikeutta.</string>
     <string name="dashboard_output_title">Toistotila</string>
     <string name="dashboard_mode_title">Takanäytön sisältö</string>
     <string name="dashboard_restart_notice">Käynnistä takatoisto uudelleen, jotta tilan vaihto tulee voimaan.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">Akun lämpötila</string>
     <string name="dashboard_widget_weather">Sää</string>
     <string name="dashboard_weather_city">Sään kaupunki</string>
-    <string name="dashboard_weather_help">Sää päivitetään noin 30 minuutin välein.</string>
+    <string name="dashboard_weather_help">Sää haetaan tähän kirjoitetulle kaupungille – sijaintilupaa ei tarvita – ja se päivittyy noin 30 minuutin välein.</string>
     <string name="dashboard_appearance_title">Ulkoasu</string>
-    <string name="dashboard_layout_title">Widgetien asettelu</string>
     <string name="dashboard_theme_title">Väriteema</string>
     <string name="dashboard_text_scale_value">Tekstin koko · %1$d%%</string>
     <string name="dashboard_text_scale_default">Tekstin koko · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">Kuvan peittävyys: 70%</string>
     <string name="dashboard_custom_image_opacity_value">Kuvan peittävyys: %1$d%%</string>
     <string name="dashboard_builder_title">Widgetien asettelu</string>
-    <string name="dashboard_builder_open">Järjestä widgetit</string>
     <string name="dashboard_builder_sample_track">Esimerkkikappale</string>
     <string name="dashboard_builder_small">Pieni</string>
     <string name="dashboard_builder_normal">Normaali</string>
@@ -464,4 +461,7 @@
     <string name="panel_trigger_template">Malli: %1$s</string>
     <string name="dashboard_builder_size_percent">Koko: %1$d%%</string>
     <string name="panel_tap_cycles_variant">Widgetin napautus vaihtaa sen tyylin</string>
+    <string name="dashboard_units_title">Yksiköt</string>
+    <string name="panel_screen_title">Paneelin näyttö</string>
+    <string name="panel_touch_title">Kosketus ja anturit</string>
 </resources>

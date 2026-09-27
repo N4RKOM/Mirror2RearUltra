@@ -138,7 +138,6 @@
     <string name="dashboard_card_help">Visa egen information på den bakre skärmen, för sig själv eller ovanpå den speglade bilden.</string>
     <string name="dashboard_customize">Anpassa instrumentpanelen</string>
     <string name="dashboard_settings_heading">Innehåll och widgetar</string>
-    <string name="dashboard_settings_help">Välj vad den bakre skärmen visar. Vädret använder staden du anger och begär ingen platsåtkomst.</string>
     <string name="dashboard_output_title">Utmatningsläge</string>
     <string name="dashboard_mode_title">Innehåll på bakre skärmen</string>
     <string name="dashboard_restart_notice">Starta om den bakre utmatningen för att tillämpa lägesbytet.</string>
@@ -149,9 +148,8 @@
     <string name="dashboard_widget_temperature">Batteritemperatur</string>
     <string name="dashboard_widget_weather">Väder</string>
     <string name="dashboard_weather_city">Stad för vädret</string>
-    <string name="dashboard_weather_help">Vädret uppdateras ungefär var 30:e minut.</string>
+    <string name="dashboard_weather_help">Vädret hämtas för staden som anges här – ingen platsbehörighet behövs – och uppdateras ungefär var 30:e minut.</string>
     <string name="dashboard_appearance_title">Utseende</string>
-    <string name="dashboard_layout_title">Widgetlayout</string>
     <string name="dashboard_theme_title">Färgstil</string>
     <string name="dashboard_text_scale_value">Textstorlek · %1$d%%</string>
     <string name="dashboard_text_scale_default">Textstorlek · 100%</string>
@@ -212,7 +210,6 @@
     <string name="dashboard_custom_image_opacity_default">Bildens opacitet: 70%</string>
     <string name="dashboard_custom_image_opacity_value">Bildens opacitet: %1$d%%</string>
     <string name="dashboard_builder_title">Widgetlayout</string>
-    <string name="dashboard_builder_open">Ordna widgetarna</string>
     <string name="dashboard_builder_sample_track">Exempelspår</string>
     <string name="dashboard_builder_small">Liten</string>
     <string name="dashboard_builder_normal">Normal</string>
@@ -464,4 +461,7 @@
     <string name="panel_trigger_template">Mall: %1$s</string>
     <string name="dashboard_builder_size_percent">Storlek: %1$d%%</string>
     <string name="panel_tap_cycles_variant">Tryck på en widget för att byta stil</string>
+    <string name="dashboard_units_title">Enheter</string>
+    <string name="panel_screen_title">Panelskärm</string>
+    <string name="panel_touch_title">Beröring och sensorer</string>
 </resources>
