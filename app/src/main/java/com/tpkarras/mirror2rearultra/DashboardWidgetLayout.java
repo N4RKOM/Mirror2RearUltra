@@ -20,7 +20,8 @@ final class DashboardWidgetLayout {
         COMPASS, SPEED, ALTITUDE, SESSION_TIMER, ACTIVE_PROFILE, CUSTOM_TEXT,
         NETWORK, MEMORY, STORAGE, NOTIFICATIONS, CALENDAR, STEPS,
         FULLSCREEN_WEATHER, FULLSCREEN_MEDIA, LAST_NOTIFICATION, TIMER,
-        CHARGING, SUN, LEVEL, SOUND_MODE, WORLD_CLOCK, QR_CODE }
+        CHARGING, SUN, LEVEL, SOUND_MODE, WORLD_CLOCK, QR_CODE,
+        UV_INDEX, AIR_QUALITY, NETWORK_SPEED, MOON, COUNTDOWN, PROGRESS, PRESSURE }
     enum Size { SMALL, NORMAL, LARGE }
 
     /**
@@ -81,6 +82,9 @@ final class DashboardWidgetLayout {
     private static final String IDLE_MODE_BEFORE_AOD = "idle_mode_before_aod";
     private static final String TIMER_MINUTES = "timer_minutes";
     private static final String WORLD_CLOCK_ZONE = "world_clock_zone";
+    private static final String COUNTDOWN_DAY = "countdown_day";
+    private static final String COUNTDOWN_LABEL = "countdown_label";
+    private static final String PROGRESS_PERIOD = "progress_period";
     private static final String QR_WIFI = "qr_wifi";
     private static final String QR_TEXT = "qr_text";
     private static final String QR_WIFI_SSID = "qr_wifi_ssid";
@@ -350,6 +354,41 @@ final class DashboardWidgetLayout {
 
     static void setWorldClockZone(Context context, String zoneId) {
         prefs(context).edit().putString(WORLD_CLOCK_ZONE, zoneId).apply();
+    }
+
+    /** The countdown's date as days since the epoch, or -1 while none is set. */
+    static long countdownDay(Context context) {
+        try {
+            return Long.parseLong(prefs(context).getString(COUNTDOWN_DAY, "-1"));
+        } catch (NumberFormatException error) {
+            return -1L;
+        }
+    }
+
+    /** Stored as text: the backup carries booleans, ints, text and sets, but not longs. */
+    static void setCountdownDay(Context context, long day) {
+        prefs(context).edit().putString(COUNTDOWN_DAY, String.valueOf(day)).apply();
+    }
+
+    static String countdownLabel(Context context) {
+        return prefs(context).getString(COUNTDOWN_LABEL, "");
+    }
+
+    static void setCountdownLabel(Context context, String label) {
+        prefs(context).edit().putString(COUNTDOWN_LABEL, label).apply();
+    }
+
+    static WidgetMath.Period progressPeriod(Context context) {
+        try {
+            return WidgetMath.Period.valueOf(prefs(context).getString(
+                    PROGRESS_PERIOD, WidgetMath.Period.DAY.name()));
+        } catch (IllegalArgumentException error) {
+            return WidgetMath.Period.DAY;
+        }
+    }
+
+    static void setProgressPeriod(Context context, WidgetMath.Period period) {
+        prefs(context).edit().putString(PROGRESS_PERIOD, period.name()).apply();
     }
 
     /** Whether the QR widget shows a Wi-Fi network rather than its own text. */
@@ -710,6 +749,11 @@ final class DashboardWidgetLayout {
             case SUN:
             case LEVEL:
             case SOUND_MODE:
+            case UV_INDEX:
+            case AIR_QUALITY:
+            case NETWORK_SPEED:
+            case COUNTDOWN:
+            case PRESSURE:
                 return true;
             default:
                 // The clock, the date and the session timer always have a
@@ -1069,7 +1113,10 @@ final class DashboardWidgetLayout {
                 || widget == Widget.TIMER || widget == Widget.CHARGING
                 || widget == Widget.SUN || widget == Widget.LEVEL
                 || widget == Widget.SOUND_MODE || widget == Widget.WORLD_CLOCK
-                || widget == Widget.QR_CODE;
+                || widget == Widget.QR_CODE || widget == Widget.UV_INDEX
+                || widget == Widget.AIR_QUALITY || widget == Widget.NETWORK_SPEED
+                || widget == Widget.MOON || widget == Widget.COUNTDOWN
+                || widget == Widget.PROGRESS || widget == Widget.PRESSURE;
     }
 
     static boolean isFullscreenWidget(Widget widget) {

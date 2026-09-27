@@ -133,6 +133,27 @@
                     app:rowTitle="@string/panel_trigger_charging" />
 
                 <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/panel_trigger_bluetooth_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_bluetooth" />
+
+                <!-- Which device; shown once the trigger has something to show. -->
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/panel_trigger_bluetooth_device_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_bluetooth_device" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/panel_trigger_wifi_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_wifi" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/panel_trigger_wifi_network_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_wifi_network" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
                     android:id="@+id/panel_trigger_time_input"
                     style="@style/HyperOS.ValueRow"
                     app:rowTitle="@string/panel_trigger_time" />

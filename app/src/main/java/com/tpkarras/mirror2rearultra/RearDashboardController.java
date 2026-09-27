@@ -63,6 +63,8 @@ final class RearDashboardController implements
      * charger is minutes apart.
      */
     private static final long CHARGE_REFRESH_MILLIS = 3_000L;
+    /** The network speed is a rate, so it is sampled at a steady pace. */
+    private static final long TRAFFIC_REFRESH_MILLIS = 2_000L;
     /**
      * The level redraws at most this often. The sensor reports far faster,
      * and every report redraws the whole panel.
@@ -106,7 +108,10 @@ final class RearDashboardController implements
                     || TimerWidgetState.isRunning(context);
             boolean readsCharger = charging && DashboardWidgetLayout.isExtraEnabled(
                     context, DashboardWidgetLayout.Widget.CHARGING);
+            boolean readsTraffic = DashboardWidgetLayout.isExtraEnabled(
+                    context, DashboardWidgetLayout.Widget.NETWORK_SPEED);
             mainHandler.postDelayed(this, needsSeconds ? CLOCK_REFRESH_MILLIS
+                    : readsTraffic ? TRAFFIC_REFRESH_MILLIS
                     : readsCharger ? CHARGE_REFRESH_MILLIS : 30_000L);
         }
     };
@@ -126,6 +131,15 @@ final class RearDashboardController implements
     private LevelReading levelReading;
     private long levelPublishedAt;
     private SoundModeReading soundReading;
+    private Float uvIndex;
+    private Integer airQuality;
+    private long trafficSampledAt;
+    private long lastRxBytes = -1L;
+    private long lastTxBytes = -1L;
+    private long downBytesPerSecond = -1L;
+    private long upBytesPerSecond = -1L;
+    private Float pressureHpa;
+    private int pressureTrend;
     private boolean soundReceiverRegistered;
     private String weatherRequestCity = "";
     private String weatherPlace = "";
@@ -192,10 +206,21 @@ final class RearDashboardController implements
             weatherTemperatureCelsius = null;
             weatherCode = null;
             weatherUpdatedAt = 0L;
+            uvIndex = null;
+            airQuality = null;
         }
+        // A UV or air widget switched on after the last fetch has nothing to
+        // show until the next, half an hour off. Fetched again at once - but
+        // not more than once a minute, since this runs on every settings save
+        // and the air service may simply have nothing for this place.
+        boolean missingReadings = System.currentTimeMillis() - weatherUpdatedAt > 60_000L
+                && ((uvIndex == null && DashboardWidgetLayout.isExtraEnabled(
+                        context, DashboardWidgetLayout.Widget.UV_INDEX))
+                || (airQuality == null && DashboardWidgetLayout.isExtraEnabled(
+                        context, DashboardWidgetLayout.Widget.AIR_QUALITY)));
         publish();
         configureDynamicSources();
-        refreshWeatherIfNeeded(cityChanged || weatherBecameVisible);
+        refreshWeatherIfNeeded(cityChanged || weatherBecameVisible || missingReadings);
     }
 
     void setActiveProfile(MirrorProfile profile) {
@@ -342,6 +367,16 @@ final class RearDashboardController implements
                 gravity = null;
                 levelReading = null;
             }
+            if (DashboardWidgetLayout.isExtraEnabled(
+                    context, DashboardWidgetLayout.Widget.PRESSURE)) {
+                Sensor barometer = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+                if (barometer != null) {
+                    sensorManager.registerListener(
+                            this, barometer, SensorManager.SENSOR_DELAY_NORMAL);
+                }
+            } else {
+                pressureHpa = null;
+            }
             if (DashboardWidgetLayout.isExtraEnabled(context, DashboardWidgetLayout.Widget.STEPS)
                     && hasActivityPermission()) {
                 Sensor steps = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
@@ -398,6 +433,10 @@ final class RearDashboardController implements
             updateLevel(event.values);
             return;
         }
+        if (event.sensor.getType() == Sensor.TYPE_PRESSURE) {
+            updatePressure(event.values[0]);
+            return;
+        }
         if (event.sensor.getType() != Sensor.TYPE_ROTATION_VECTOR) {
             return;
         }
@@ -435,6 +474,63 @@ final class RearDashboardController implements
         levelReading = reading;
         levelPublishedAt = now;
         publish();
+    }
+
+    /**
+     * Keeps the barometer's reading, and a sample every quarter of an hour
+     * for the trend, which needs to know what it read three hours ago - kept
+     * in the preferences, since a panel session rarely lasts that long.
+     */
+    private void updatePressure(float hpa) {
+        float smoothed = pressureHpa == null ? hpa : pressureHpa + (hpa - pressureHpa) * 0.1f;
+        long now = System.currentTimeMillis();
+        android.content.SharedPreferences prefs = context.getSharedPreferences(
+                "dashboard_pressure", Context.MODE_PRIVATE);
+        java.util.List<long[]> samples = PressureHistory.parse(prefs.getString("samples", ""));
+        if (samples.isEmpty() || now - samples.get(samples.size() - 1)[0] >= 15 * 60_000L) {
+            samples.add(new long[]{now, Math.round(smoothed * 10f)});
+            samples = PressureHistory.trimmed(samples, now);
+            prefs.edit().putString("samples", PressureHistory.format(samples)).apply();
+        }
+        Float earlier = PressureHistory.threeHoursBefore(samples, now);
+        int trend = earlier == null ? 0 : WidgetMath.pressureTrend(smoothed, earlier);
+        boolean changed = pressureHpa == null || Math.round(pressureHpa) != Math.round(smoothed)
+                || trend != pressureTrend;
+        pressureHpa = smoothed;
+        pressureTrend = trend;
+        if (changed) {
+            publish();
+        }
+    }
+
+    /** Bytes a second each way since the last sample, from the counters for the whole phone. */
+    private void refreshTraffic() {
+        if (!DashboardWidgetLayout.isExtraEnabled(
+                context, DashboardWidgetLayout.Widget.NETWORK_SPEED)) {
+            lastRxBytes = -1L;
+            downBytesPerSecond = -1L;
+            upBytesPerSecond = -1L;
+            return;
+        }
+        long now = SystemClock.elapsedRealtime();
+        if (lastRxBytes >= 0L && now - trafficSampledAt < 1_000L) {
+            return;
+        }
+        long rx = android.net.TrafficStats.getTotalRxBytes();
+        long tx = android.net.TrafficStats.getTotalTxBytes();
+        if (rx < 0L || tx < 0L) {
+            downBytesPerSecond = -1L;
+            upBytesPerSecond = -1L;
+            return;
+        }
+        if (lastRxBytes >= 0L && now > trafficSampledAt) {
+            long elapsed = now - trafficSampledAt;
+            downBytesPerSecond = Math.max(0L, (rx - lastRxBytes) * 1_000L / elapsed);
+            upBytesPerSecond = Math.max(0L, (tx - lastTxBytes) * 1_000L / elapsed);
+        }
+        lastRxBytes = rx;
+        lastTxBytes = tx;
+        trafficSampledAt = now;
     }
 
     private void updateSteps(int totalSinceBoot) {
@@ -486,7 +582,11 @@ final class RearDashboardController implements
         boolean weatherEnabled = settings.showWeather || DashboardWidgetLayout.isExtraEnabled(
                 context, DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER)
                 || DashboardWidgetLayout.isExtraEnabled(
-                        context, DashboardWidgetLayout.Widget.SUN);
+                        context, DashboardWidgetLayout.Widget.SUN)
+                || DashboardWidgetLayout.isExtraEnabled(
+                        context, DashboardWidgetLayout.Widget.UV_INDEX)
+                || DashboardWidgetLayout.isExtraEnabled(
+                        context, DashboardWidgetLayout.Widget.AIR_QUALITY);
         if (!started || !weatherEnabled || city.isEmpty() || weatherLoading) {
             return;
         }
@@ -522,6 +622,8 @@ final class RearDashboardController implements
                         finalResult.maximums, finalResult.codes,
                         finalResult.rainChances);
                 WeatherForecastState.setSun(finalResult.sunrises, finalResult.sunsets);
+                uvIndex = finalResult.uvIndex;
+                airQuality = finalResult.airQuality;
             }
             publish();
             mainHandler.postDelayed(() -> refreshWeatherIfNeeded(false), WEATHER_REFRESH_MILLIS);
@@ -549,7 +651,7 @@ final class RearDashboardController implements
             JSONObject forecast = requestJson(
                     "https://api.open-meteo.com/v1/forecast?latitude=" + latitude
                             + "&longitude=" + longitude
-                            + "&current=temperature_2m,weather_code"
+                            + "&current=temperature_2m,weather_code,uv_index"
                             + "&daily=weather_code,temperature_2m_max,temperature_2m_min"
                             + ",precipitation_probability_max,sunrise,sunset"
                             + "&forecast_days=4&timezone=auto"
@@ -583,15 +685,40 @@ final class RearDashboardController implements
                 sunsetTimes[index] = sunsetJson == null ? "" : sunsetJson.optString(index, "");
             }
             int offsetSeconds = forecast.optInt("utc_offset_seconds", 0);
+            Float uvIndex = current.has("uv_index") && !current.isNull("uv_index")
+                    ? (float) current.getDouble("uv_index") : null;
+            Integer airQuality = DashboardWidgetLayout.isExtraEnabled(
+                    context, DashboardWidgetLayout.Widget.AIR_QUALITY)
+                    ? requestAirQuality(latitude, longitude) : null;
             return new WeatherResult(
                     displayName,
                     (int) Math.round(current.getDouble("temperature_2m")),
                     current.getInt("weather_code"), dates, minimums, maximums, codes,
                     rainChances, SunTimes.toInstants(sunriseTimes, offsetSeconds),
-                    SunTimes.toInstants(sunsetTimes, offsetSeconds)
+                    SunTimes.toInstants(sunsetTimes, offsetSeconds), uvIndex, airQuality
             );
         } catch (JSONException error) {
             throw new IOException("Invalid weather data", error);
+        }
+    }
+
+    /**
+     * The European air quality index where the weather city is, or null.
+     *
+     * <p>A separate service of the same provider, and optional: the weather
+     * is not lost for want of it.
+     */
+    private static Integer requestAirQuality(double latitude, double longitude) {
+        try {
+            JSONObject air = requestJson(
+                    "https://air-quality-api.open-meteo.com/v1/air-quality?latitude="
+                            + latitude + "&longitude=" + longitude
+                            + "&current=european_aqi&timezone=auto");
+            JSONObject current = air.optJSONObject("current");
+            return current == null || current.isNull("european_aqi")
+                    ? null : (int) Math.round(current.getDouble("european_aqi"));
+        } catch (IOException | JSONException | RuntimeException unavailable) {
+            return null;
         }
     }
 
@@ -631,6 +758,7 @@ final class RearDashboardController implements
         refreshSystemStatsIfNeeded();
         refreshCalendar();
         refreshCharge();
+        refreshTraffic();
         long now = System.currentTimeMillis();
         SunTimes.Next sun = DashboardWidgetLayout.isExtraEnabled(
                 context, DashboardWidgetLayout.Widget.SUN)
@@ -672,7 +800,9 @@ final class RearDashboardController implements
                 chargeReading,
                 sun,
                 levelReading,
-                soundReading
+                soundReading,
+                new ExtraReadings(uvIndex, airQuality, downBytesPerSecond, upBytesPerSecond,
+                        pressureHpa, pressureTrend)
         ));
     }
 
@@ -728,10 +858,13 @@ final class RearDashboardController implements
         final int[] rainChances;
         final long[] sunrises;
         final long[] sunsets;
+        final Float uvIndex;
+        final Integer airQuality;
 
         WeatherResult(String place, int temperatureCelsius, int weatherCode,
                 String[] dates, int[] minimums, int[] maximums, int[] codes,
-                int[] rainChances, long[] sunrises, long[] sunsets) {
+                int[] rainChances, long[] sunrises, long[] sunsets,
+                Float uvIndex, Integer airQuality) {
             this.place = place;
             this.temperatureCelsius = temperatureCelsius;
             this.weatherCode = weatherCode;
@@ -742,6 +875,8 @@ final class RearDashboardController implements
             this.rainChances = rainChances;
             this.sunrises = sunrises;
             this.sunsets = sunsets;
+            this.uvIndex = uvIndex;
+            this.airQuality = airQuality;
         }
     }
 }

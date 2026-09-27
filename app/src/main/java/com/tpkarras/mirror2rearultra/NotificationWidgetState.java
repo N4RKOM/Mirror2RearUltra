@@ -49,15 +49,16 @@ final class NotificationWidgetState {
      * what would have made the phone buzz.
      */
     interface ArrivalListener {
-        void onNotificationArrived(String packageName);
+        /** @param colour the notification's own accent, or 0 when its app set none */
+        void onNotificationArrived(String packageName, int colour);
     }
 
     private static final Set<Listener> LISTENERS = new CopyOnWriteArraySet<>();
     private static final Set<ArrivalListener> ARRIVAL_LISTENERS = new CopyOnWriteArraySet<>();
 
-    static void arrived(String packageName) {
+    static void arrived(String packageName, int colour) {
         for (ArrivalListener listener : ARRIVAL_LISTENERS) {
-            listener.onNotificationArrived(packageName);
+            listener.onNotificationArrived(packageName, colour);
         }
     }
 

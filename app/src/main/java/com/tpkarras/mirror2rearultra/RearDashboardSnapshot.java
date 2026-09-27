@@ -38,6 +38,7 @@ final class RearDashboardSnapshot {
     @Nullable final LevelReading level;
     /** Null while the widget is off. */
     @Nullable final SoundModeReading sound;
+    final ExtraReadings extra;
 
     RearDashboardSnapshot(
             long timestampMillis,
@@ -66,7 +67,8 @@ final class RearDashboardSnapshot {
                 null,
                 null,
                 0L,
-                "", "", -1, -1, "", null, -1, "", "", "", null, null, null, null
+                "", "", -1, -1, "", null, -1, "", "", "", null, null, null, null,
+                ExtraReadings.NONE
         );
     }
 
@@ -94,7 +96,7 @@ final class RearDashboardSnapshot {
                 mediaTitle, mediaArtist, mediaPlaying, headingDegrees, speedMetersPerSecond,
                 altitudeMeters,
                 sessionElapsedMillis, activeProfileName, "", -1, -1, "", null, -1,
-                "", "", "", null, null, null, null);
+                "", "", "", null, null, null, null, ExtraReadings.NONE);
     }
 
     RearDashboardSnapshot(
@@ -108,7 +110,7 @@ final class RearDashboardSnapshot {
             int stepsToday, String notificationApp, String notificationTitle,
             String notificationText, @Nullable ChargeReading charge,
             @Nullable SunTimes.Next sun, @Nullable LevelReading level,
-            @Nullable SoundModeReading sound
+            @Nullable SoundModeReading sound, ExtraReadings extra
     ) {
         this.timestampMillis = timestampMillis;
         this.batteryPercent = batteryPercent;
@@ -140,5 +142,6 @@ final class RearDashboardSnapshot {
         this.sun = sun;
         this.level = level;
         this.sound = sound;
+        this.extra = extra == null ? ExtraReadings.NONE : extra;
     }
 }

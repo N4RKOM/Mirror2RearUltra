@@ -65,6 +65,8 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
             new WidgetRow(R.id.dashboard_date_switch, DashboardWidgetLayout.Widget.DATE),
             new WidgetRow(R.id.dashboard_world_clock_switch,
                     DashboardWidgetLayout.Widget.WORLD_CLOCK),
+            new WidgetRow(R.id.dashboard_countdown_switch, DashboardWidgetLayout.Widget.COUNTDOWN),
+            new WidgetRow(R.id.dashboard_progress_switch, DashboardWidgetLayout.Widget.PROGRESS),
             new WidgetRow(R.id.dashboard_next_alarm_switch, DashboardWidgetLayout.Widget.NEXT_ALARM),
             new WidgetRow(R.id.dashboard_session_timer_switch,
                     DashboardWidgetLayout.Widget.SESSION_TIMER),
@@ -80,15 +82,22 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
             new WidgetRow(R.id.dashboard_memory_switch, DashboardWidgetLayout.Widget.MEMORY),
             new WidgetRow(R.id.dashboard_storage_switch, DashboardWidgetLayout.Widget.STORAGE),
             new WidgetRow(R.id.dashboard_network_switch, DashboardWidgetLayout.Widget.NETWORK),
+            new WidgetRow(R.id.dashboard_network_speed_switch,
+                    DashboardWidgetLayout.Widget.NETWORK_SPEED),
             // Weather and sensors
             new WidgetRow(R.id.dashboard_weather_switch, DashboardWidgetLayout.Widget.WEATHER),
             new WidgetRow(R.id.dashboard_fullscreen_weather_switch,
                     DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER),
             new WidgetRow(R.id.dashboard_sun_switch, DashboardWidgetLayout.Widget.SUN),
+            new WidgetRow(R.id.dashboard_uv_index_switch, DashboardWidgetLayout.Widget.UV_INDEX),
+            new WidgetRow(R.id.dashboard_air_quality_switch,
+                    DashboardWidgetLayout.Widget.AIR_QUALITY),
+            new WidgetRow(R.id.dashboard_moon_switch, DashboardWidgetLayout.Widget.MOON),
             new WidgetRow(R.id.dashboard_compass_switch, DashboardWidgetLayout.Widget.COMPASS),
             new WidgetRow(R.id.dashboard_level_switch, DashboardWidgetLayout.Widget.LEVEL),
             new WidgetRow(R.id.dashboard_speed_switch, DashboardWidgetLayout.Widget.SPEED),
             new WidgetRow(R.id.dashboard_altitude_switch, DashboardWidgetLayout.Widget.ALTITUDE),
+            new WidgetRow(R.id.dashboard_pressure_switch, DashboardWidgetLayout.Widget.PRESSURE),
             new WidgetRow(R.id.dashboard_steps_switch, DashboardWidgetLayout.Widget.STEPS),
             // Media and notifications
             new WidgetRow(R.id.dashboard_media_switch, DashboardWidgetLayout.Widget.MEDIA),
@@ -297,6 +306,8 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
             case WEATHER:
             case FULLSCREEN_WEATHER:
             case SUN:
+            case UV_INDEX:
+            case AIR_QUALITY:
                 weatherCityContainer.setEnabled(needsWeatherCity());
                 break;
             case CUSTOM_TEXT:
@@ -402,11 +413,13 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
         MirrorSettings.saveDashboardSettings(this, current.withTexts(city, text));
     }
 
-    /** The sun widget reads its times from the same forecast as the weather. */
+    /** The sun, UV and air widgets read from the same forecast as the weather. */
     private boolean needsWeatherCity() {
         return isWidgetOn(DashboardWidgetLayout.Widget.WEATHER)
                 || isWidgetOn(DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER)
-                || isWidgetOn(DashboardWidgetLayout.Widget.SUN);
+                || isWidgetOn(DashboardWidgetLayout.Widget.SUN)
+                || isWidgetOn(DashboardWidgetLayout.Widget.UV_INDEX)
+                || isWidgetOn(DashboardWidgetLayout.Widget.AIR_QUALITY);
     }
 
     private boolean isWidgetOn(DashboardWidgetLayout.Widget widget) {

@@ -127,7 +127,20 @@ public class Mirror extends Activity implements
     /** Whether the gesture under way began on the notification light, and so is not passed on. */
     private boolean swallowingPulseTouch;
     private final NotificationWidgetState.ArrivalListener arrivalListener =
-            packageName -> runOnUiThread(() -> onNotificationArrived(packageName));
+            (packageName, colour) -> runOnUiThread(
+                    () -> onNotificationArrived(packageName, colour));
+    /**
+     * Notifications the light has shown since the main screen was last on,
+     * which is how many rings it draws. Seeing the main screen, or touching
+     * the light, counts as having looked.
+     */
+    private int unseenNotifications;
+    private final BroadcastReceiver screenOnReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            unseenNotifications = 0;
+        }
+    };
     /**
      * Which way up the phone is being held, in quarter turns clockwise.
      *
@@ -164,6 +177,14 @@ public class Mirror extends Activity implements
     private int activeTriggerPage;
     private boolean charging;
     private final Handler triggerHandler = new Handler(Looper.getMainLooper());
+    /** Bluetooth devices and the Wi-Fi network, for the triggers that wait on them. */
+    private PanelSurroundings surroundings;
+
+    /** Watches Bluetooth and Wi-Fi only for the triggers that are set. */
+    private void configureSurroundings() {
+        surroundings.configure(PanelTriggers.bluetoothSlot(this) != null,
+                PanelTriggers.wifiSlot(this) != null);
+    }
     private final Runnable triggerTick = new Runnable() {
         @Override
         public void run() {
@@ -268,6 +289,7 @@ public class Mirror extends Activity implements
         shutterFlash = findViewById(R.id.shutter_flash);
         shutterCountdown = findViewById(R.id.shutter_countdown);
         mirrorGuides = findViewById(R.id.mirror_guides);
+        surroundings = new PanelSurroundings(this, () -> runOnUiThread(this::refreshTriggers));
         notificationPulse = findViewById(R.id.notification_pulse);
         panelShutter = new PanelShutter();
         dashboardView = findViewById(R.id.rear_dashboard);
@@ -455,6 +477,14 @@ public class Mirror extends Activity implements
             // The switch lives outside the profile, so a running session only
             // learns about it here.
             startAutoBrightnessIfWanted();
+            // Likewise which of the Bluetooth and Wi-Fi triggers are set.
+            if (listenersRegistered) {
+                configureSurroundings();
+                // A trigger just set whose condition already holds - the car
+                // connected, home Wi-Fi in range - applies now, not at the
+                // next change.
+                refreshTriggers();
+            }
             AutoProfileState.Snapshot automatic = AutoProfileState.get();
             String automaticProfileId = automatic.packageName == null
                     ? null
@@ -519,6 +549,7 @@ public class Mirror extends Activity implements
             swallowingPulseTouch = notificationPulse != null && notificationPulse.isRunning();
             if (swallowingPulseTouch) {
                 notificationPulse.stop();
+                unseenNotifications = 0;
             }
         }
         boolean swallowed = swallowingPulseTouch;
@@ -532,7 +563,7 @@ public class Mirror extends Activity implements
      * Lights the panel for a notification that has just arrived, standing in
      * for the LED this phone was built without.
      */
-    private void onNotificationArrived(String packageName) {
+    private void onNotificationArrived(String packageName, int colour) {
         if (notificationPulse == null) {
             return;
         }
@@ -546,8 +577,9 @@ public class Mirror extends Activity implements
         }
         // Out of AOD first, so the pulse is seen at the panel's own brightness.
         resetIdleTimer();
+        unseenNotifications++;
         notificationPulse.setRotation(ShutterCountdown.rotationFor(deviceQuarterTurn));
-        notificationPulse.start(packageName);
+        notificationPulse.start(packageName, colour, unseenNotifications);
     }
 
     /**
@@ -849,12 +881,15 @@ public class Mirror extends Activity implements
                 : sticky.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         charging = status == BatteryManager.BATTERY_STATUS_CHARGING
                 || status == BatteryManager.BATTERY_STATUS_FULL;
+        configureSurroundings();
         triggerHandler.post(triggerTick);
         if (postureSensor != null) {
             postureSensor.start();
         }
         CallWidgetState.addListener(callListener);
         NotificationWidgetState.addArrivalListener(arrivalListener);
+        ContextCompat.registerReceiver(this, screenOnReceiver,
+                new IntentFilter(Intent.ACTION_SCREEN_ON), ContextCompat.RECEIVER_NOT_EXPORTED);
         listenersRegistered = true;
     }
 
@@ -869,6 +904,7 @@ public class Mirror extends Activity implements
             sensorManager.unregisterListener(this);
         }
         triggerHandler.removeCallbacks(triggerTick);
+        surroundings.stop();
         if (postureSensor != null) {
             postureSensor.stop();
         }
@@ -880,6 +916,11 @@ public class Mirror extends Activity implements
         // corrected within the second rather than believed.
         CallWidgetState.removeListener(callListener);
         NotificationWidgetState.removeArrivalListener(arrivalListener);
+        try {
+            unregisterReceiver(screenOnReceiver);
+        } catch (IllegalArgumentException never) {
+            // Registered together with the arrival listener; nothing to undo.
+        }
         if (notificationPulse != null) {
             notificationPulse.stop();
         }
@@ -1446,7 +1487,13 @@ public class Mirror extends Activity implements
      * goes back to the profile's own and to its main page.
      */
     private void refreshTriggers() {
-        String wanted = PanelTriggers.activeSlot(this, charging, System.currentTimeMillis());
+        String wanted = PanelTriggers.activeSlot(this, charging,
+                PanelTriggers.bluetoothSlot(this) != null && PanelTriggers.bluetoothMatches(
+                        PanelTriggers.bluetoothDevice(this), surroundings.connectedDevices()),
+                PanelTriggers.wifiSlot(this) != null && PanelTriggers.wifiMatches(
+                        PanelTriggers.wifiNetwork(this), surroundings.isOnWifi(),
+                        surroundings.wifiNetwork()),
+                System.currentTimeMillis());
         int page = PanelTriggers.pageOf(wanted);
         activeTriggerPage = page;
         if (dashboardView != null) {

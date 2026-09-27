@@ -79,6 +79,16 @@
                     android:text="@string/dashboard_widget_world_clock" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_countdown_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_countdown" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_progress_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_progress" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_next_alarm_switch"
                     style="@style/HyperOS.Switch"
                     android:text="@string/dashboard_widget_next_alarm" />
@@ -140,8 +150,13 @@
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_network_switch"
-                    style="@style/HyperOS.Switch.Bottom"
+                    style="@style/HyperOS.Switch"
                     android:text="@string/dashboard_widget_network" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_network_speed_switch"
+                    style="@style/HyperOS.Switch.Bottom"
+                    android:text="@string/dashboard_widget_net_speed" />
             </LinearLayout>
 
             <!-- ===================== Weather and sensors ===================== -->
@@ -191,6 +206,21 @@
                     android:text="@string/dashboard_widget_sun" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_uv_index_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_uv" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_air_quality_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_air" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_moon_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_moon" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_compass_switch"
                     style="@style/HyperOS.Switch"
                     android:text="@string/dashboard_widget_compass" />
@@ -209,6 +239,11 @@
                     android:id="@+id/dashboard_altitude_switch"
                     style="@style/HyperOS.Switch"
                     android:text="@string/dashboard_widget_altitude" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/dashboard_pressure_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/dashboard_widget_pressure" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dashboard_steps_switch"

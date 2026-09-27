@@ -1107,6 +1107,7 @@ public final class RearDashboardView extends View {
             // a page too full to hold the code would show in its place.
             lines.add(new Line(DashboardWidgetLayout.Widget.QR_CODE, "QR", false, Icon.NONE));
         }
+        addSmallWidgetLines(lines, locale);
         if (DashboardWidgetLayout.isExtraEnabled(
                 getContext(), DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER)) {
             String value = weatherVariant(DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER);
@@ -2687,6 +2688,181 @@ public final class RearDashboardView extends View {
         return time + "  " + city;
     }
 
+    /**
+     * The small widgets: UV, air, network speed, the moon, a countdown, how
+     * far through the day, and pressure. Each in three forms as the rest
+     * are - the reading, the bare figure, and the reading with a word.
+     */
+    private void addSmallWidgetLines(List<Line> lines, Locale locale) {
+        ExtraReadings extra = snapshot.extra;
+        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.UV_INDEX)) {
+            String value = "";
+            if (extra.uvIndex != null) {
+                String figure = String.valueOf(Math.round(extra.uvIndex));
+                DashboardWidgetLayout.Variant variant =
+                        variantOf(DashboardWidgetLayout.Widget.UV_INDEX);
+                String labelled = getResources().getString(R.string.dashboard_uv_value, figure);
+                value = variant == DashboardWidgetLayout.Variant.ALTERNATE ? figure
+                        : variant == DashboardWidgetLayout.Variant.DETAILED
+                        ? labelled + "\n" + getResources().getString(
+                                UV_BANDS[WidgetMath.uvBand(extra.uvIndex)])
+                        : labelled;
+            }
+            addLine(lines, DashboardWidgetLayout.Widget.UV_INDEX, extra.uvIndex != null,
+                    value, Icon.UV);
+        }
+        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.AIR_QUALITY)) {
+            String value = "";
+            if (extra.airQuality != null) {
+                String figure = String.valueOf(extra.airQuality);
+                DashboardWidgetLayout.Variant variant =
+                        variantOf(DashboardWidgetLayout.Widget.AIR_QUALITY);
+                String labelled = getResources().getString(R.string.dashboard_air_value, figure);
+                value = variant == DashboardWidgetLayout.Variant.ALTERNATE ? figure
+                        : variant == DashboardWidgetLayout.Variant.DETAILED
+                        ? labelled + "\n" + getResources().getString(
+                                AIR_BANDS[WidgetMath.airBand(extra.airQuality)])
+                        : labelled;
+            }
+            addLine(lines, DashboardWidgetLayout.Widget.AIR_QUALITY, extra.airQuality != null,
+                    value, Icon.AIR);
+        }
+        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.NETWORK_SPEED)) {
+            boolean hasData = extra.downBytesPerSecond >= 0L;
+            String value = "";
+            if (hasData) {
+                String down = android.text.format.Formatter.formatShortFileSize(
+                        getContext(), extra.downBytesPerSecond);
+                String up = android.text.format.Formatter.formatShortFileSize(
+                        getContext(), extra.upBytesPerSecond);
+                DashboardWidgetLayout.Variant variant =
+                        variantOf(DashboardWidgetLayout.Widget.NETWORK_SPEED);
+                value = variant == DashboardWidgetLayout.Variant.ALTERNATE
+                        ? "\u2193 " + down + "\n\u2191 " + up
+                        : variant == DashboardWidgetLayout.Variant.DETAILED
+                        ? "\u2193 " + perSecond(down) + "\n\u2191 " + perSecond(up)
+                        : "\u2193 " + perSecond(down);
+            }
+            addLine(lines, DashboardWidgetLayout.Widget.NETWORK_SPEED, hasData, value,
+                    Icon.NETWORK_SPEED);
+        }
+        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.MOON)) {
+            double age = WidgetMath.moonAge(snapshot.timestampMillis);
+            String name = getResources().getString(MOON_PHASES[WidgetMath.moonPhase(age)]);
+            String lit = Math.round(WidgetMath.moonIllumination(age) * 100d) + "%";
+            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.MOON);
+            String value = variant == DashboardWidgetLayout.Variant.ALTERNATE ? lit
+                    : variant == DashboardWidgetLayout.Variant.DETAILED ? name + "\n" + lit
+                    : name;
+            lines.add(new Line(DashboardWidgetLayout.Widget.MOON, value, false, Icon.MOON));
+        }
+        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.COUNTDOWN)) {
+            long target = DashboardWidgetLayout.countdownDay(getContext());
+            String value = "";
+            if (target >= 0L) {
+                long days = WidgetMath.daysUntil(snapshot.timestampMillis,
+                        java.util.TimeZone.getDefault(), target);
+                String label = DashboardWidgetLayout.countdownLabel(getContext());
+                String count = days == 0L
+                        ? getResources().getString(R.string.dashboard_countdown_today)
+                        : days > 0L
+                        ? getResources().getString(R.string.dashboard_countdown_days, days)
+                        : getResources().getString(R.string.dashboard_countdown_ago, -days);
+                DashboardWidgetLayout.Variant variant =
+                        variantOf(DashboardWidgetLayout.Widget.COUNTDOWN);
+                if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
+                    value = days == 0L ? count : String.valueOf(Math.abs(days));
+                } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
+                    String when = label.isEmpty()
+                            ? java.text.DateFormat.getDateInstance(
+                                    java.text.DateFormat.MEDIUM, locale)
+                                    .format(new Date(target * 86_400_000L
+                                            - java.util.TimeZone.getDefault()
+                                            .getOffset(target * 86_400_000L)))
+                            : label;
+                    value = count + "\n" + when;
+                } else {
+                    value = label.isEmpty() ? count : label + " \u00b7 " + count;
+                }
+            }
+            addLine(lines, DashboardWidgetLayout.Widget.COUNTDOWN, target >= 0L, value,
+                    Icon.COUNTDOWN);
+        }
+        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.PROGRESS)) {
+            WidgetMath.Period period = DashboardWidgetLayout.progressPeriod(getContext());
+            long[] bounds = WidgetMath.periodBounds(snapshot.timestampMillis, period,
+                    java.util.Calendar.getInstance(locale));
+            progressFraction = (float) WidgetMath.fraction(snapshot.timestampMillis, bounds);
+            String percent = Math.round(progressFraction * 100f) + "%";
+            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.PROGRESS);
+            String value;
+            if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
+                value = percent;
+            } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
+                long left = Math.max(0L, bounds[1] - snapshot.timestampMillis);
+                // Days past two of them: "2345 h" says nothing about a year.
+                String remaining = left > 48L * 3_600_000L
+                        ? getResources().getString(R.string.dashboard_countdown_days,
+                                (left + 86_399_999L) / 86_400_000L)
+                        : formatDuration(left);
+                value = percent + "\n" + getResources().getString(
+                        R.string.dashboard_progress_left, remaining);
+            } else {
+                value = getResources().getString(PERIOD_NAMES[period.ordinal()]) + " " + percent;
+            }
+            lines.add(new Line(DashboardWidgetLayout.Widget.PROGRESS, value, false, Icon.PROGRESS));
+        }
+        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.PRESSURE)) {
+            String value = "";
+            if (extra.pressureHpa != null) {
+                float hpa = extra.pressureHpa;
+                String main = imperialUnits()
+                        ? getResources().getString(R.string.dashboard_pressure_inhg,
+                                String.format(locale, "%.2f", WidgetMath.toInchesOfMercury(hpa)))
+                        : getResources().getString(R.string.dashboard_pressure_hpa,
+                                Math.round(hpa));
+                DashboardWidgetLayout.Variant variant =
+                        variantOf(DashboardWidgetLayout.Widget.PRESSURE);
+                if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
+                    value = getResources().getString(R.string.dashboard_pressure_mmhg,
+                            Math.round(WidgetMath.toMillimetresOfMercury(hpa)));
+                } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
+                    value = main + "\n" + getResources().getString(extra.pressureTrend > 0
+                            ? R.string.dashboard_pressure_rising : extra.pressureTrend < 0
+                            ? R.string.dashboard_pressure_falling
+                            : R.string.dashboard_pressure_steady);
+                } else {
+                    value = main;
+                }
+            }
+            addLine(lines, DashboardWidgetLayout.Widget.PRESSURE, extra.pressureHpa != null,
+                    value, Icon.PRESSURE);
+        }
+    }
+
+    private String perSecond(String size) {
+        return getResources().getString(R.string.dashboard_per_second, size);
+    }
+
+    private static final int[] UV_BANDS = {R.string.dashboard_uv_low,
+            R.string.dashboard_uv_moderate, R.string.dashboard_uv_high,
+            R.string.dashboard_uv_very_high, R.string.dashboard_uv_extreme};
+    private static final int[] AIR_BANDS = {R.string.dashboard_air_good,
+            R.string.dashboard_air_fair, R.string.dashboard_air_moderate,
+            R.string.dashboard_air_poor, R.string.dashboard_air_very_poor,
+            R.string.dashboard_air_extremely_poor};
+    private static final int[] MOON_PHASES = {R.string.dashboard_moon_new,
+            R.string.dashboard_moon_waxing_crescent, R.string.dashboard_moon_first_quarter,
+            R.string.dashboard_moon_waxing_gibbous, R.string.dashboard_moon_full,
+            R.string.dashboard_moon_waning_gibbous, R.string.dashboard_moon_last_quarter,
+            R.string.dashboard_moon_waning_crescent};
+    private static final int[] PERIOD_NAMES = {R.string.dashboard_progress_day,
+            R.string.dashboard_progress_week, R.string.dashboard_progress_month,
+            R.string.dashboard_progress_year};
+
+    /** How far through its period the progress widget is, for its icon to fill. */
+    private float progressFraction;
+
     private String formatTimeOfDay(long millis, Locale locale) {
         String pattern = android.text.format.DateFormat.is24HourFormat(getContext())
                 ? "HH:mm" : "h:mm";
@@ -3719,6 +3895,86 @@ public final class RearDashboardView extends View {
                 canvas.drawLine(body.left + body.width() * .28f, body.centerY(),
                         body.right - body.width() * .28f, body.centerY(), iconPaint);
                 break;
+            case UV:
+                // The sun, filled: strength rather than weather.
+                Paint.Style uvStyle = iconPaint.getStyle();
+                iconPaint.setStyle(Paint.Style.FILL);
+                canvas.drawCircle(body.centerX(), body.centerY(), body.width() * 0.2f, iconPaint);
+                iconPaint.setStyle(uvStyle);
+                for (int ray = 0; ray < 8; ray++) {
+                    double angle = Math.PI * ray / 4d;
+                    float inner = body.width() * 0.32f;
+                    float outer = body.width() * 0.48f;
+                    canvas.drawLine(
+                            body.centerX() + (float) Math.cos(angle) * inner,
+                            body.centerY() + (float) Math.sin(angle) * inner,
+                            body.centerX() + (float) Math.cos(angle) * outer,
+                            body.centerY() + (float) Math.sin(angle) * outer, iconPaint);
+                }
+                break;
+            case AIR:
+                // Three strokes of wind, the lower two curling at the end.
+                canvas.drawLine(body.left, body.top + body.height() * .25f,
+                        body.right - body.width() * .15f, body.top + body.height() * .25f, iconPaint);
+                Path wind = new Path();
+                wind.moveTo(body.left, body.centerY());
+                wind.lineTo(body.right - body.width() * .2f, body.centerY());
+                wind.quadTo(body.right, body.centerY(), body.right - body.width() * .08f,
+                        body.centerY() - body.height() * .14f);
+                wind.moveTo(body.left + body.width() * .15f, body.bottom - body.height() * .25f);
+                wind.lineTo(body.right - body.width() * .35f, body.bottom - body.height() * .25f);
+                wind.quadTo(body.right - body.width() * .15f, body.bottom - body.height() * .25f,
+                        body.right - body.width() * .22f, body.bottom - body.height() * .1f);
+                canvas.drawPath(wind, iconPaint);
+                break;
+            case NETWORK_SPEED:
+                float downX = body.left + body.width() * .3f;
+                float upX = body.right - body.width() * .3f;
+                float head = body.width() * .16f;
+                canvas.drawLine(downX, body.top, downX, body.bottom, iconPaint);
+                canvas.drawLine(downX - head, body.bottom - head, downX, body.bottom, iconPaint);
+                canvas.drawLine(downX + head, body.bottom - head, downX, body.bottom, iconPaint);
+                canvas.drawLine(upX, body.top, upX, body.bottom, iconPaint);
+                canvas.drawLine(upX - head, body.top + head, upX, body.top, iconPaint);
+                canvas.drawLine(upX + head, body.top + head, upX, body.top, iconPaint);
+                break;
+            case MOON:
+                drawMoon(canvas, body);
+                break;
+            case COUNTDOWN:
+                // An hourglass.
+                Path glass = new Path();
+                glass.moveTo(body.left + body.width() * .2f, body.top);
+                glass.lineTo(body.right - body.width() * .2f, body.top);
+                glass.lineTo(body.left + body.width() * .2f, body.bottom);
+                glass.lineTo(body.right - body.width() * .2f, body.bottom);
+                glass.close();
+                canvas.drawPath(glass, iconPaint);
+                break;
+            case PROGRESS:
+                RectF track = new RectF(body.left, body.top + body.height() * .3f,
+                        body.right, body.bottom - body.height() * .3f);
+                canvas.drawRoundRect(track, track.height() / 2f, track.height() / 2f, iconPaint);
+                RectF done = new RectF(track);
+                done.inset(iconPaint.getStrokeWidth() * 1.6f, iconPaint.getStrokeWidth() * 1.6f);
+                done.right = done.left + done.width() * Math.max(0f, Math.min(1f, progressFraction));
+                if (done.width() > 0f) {
+                    Paint.Style barStyle = iconPaint.getStyle();
+                    iconPaint.setStyle(Paint.Style.FILL);
+                    canvas.drawRoundRect(done, done.height() / 2f, done.height() / 2f, iconPaint);
+                    iconPaint.setStyle(barStyle);
+                }
+                break;
+            case PRESSURE:
+                // A barometer's dial and its hand.
+                canvas.drawCircle(body.centerX(), body.centerY(), body.width() * .42f, iconPaint);
+                canvas.drawLine(body.centerX(), body.centerY(),
+                        body.centerX() + body.width() * .22f, body.centerY() - body.height() * .2f,
+                        iconPaint);
+                canvas.drawLine(body.centerX() - body.width() * .3f, body.centerY() + body.height() * .22f,
+                        body.centerX() + body.width() * .3f, body.centerY() + body.height() * .22f,
+                        iconPaint);
+                break;
             case GLOBE:
                 canvas.drawCircle(body.centerX(), body.centerY(), body.width() * .42f, iconPaint);
                 canvas.drawOval(new RectF(body.centerX() - body.width() * .18f,
@@ -3838,6 +4094,43 @@ public final class RearDashboardView extends View {
                     iconPaint.getStrokeWidth() * 1.4f, iconPaint);
             iconPaint.setStyle(previous);
         }
+    }
+
+    /**
+     * The moon as it is tonight: a ring, and the lit part filled - on the
+     * right while it waxes and on the left as it wanes, as it is seen from
+     * the north. The ring is what the icon is measured by, so its size does
+     * not change with the phase.
+     */
+    private void drawMoon(Canvas canvas, RectF body) {
+        float radius = body.width() * 0.42f;
+        float centreX = body.centerX();
+        float centreY = body.centerY();
+        canvas.drawCircle(centreX, centreY, radius, iconPaint);
+        double age = WidgetMath.moonAge(snapshot.timestampMillis);
+        double lit = WidgetMath.moonIllumination(age);
+        if (lit < 0.02d) {
+            return;
+        }
+        boolean waxing = age < 0.5d;
+        float terminator = (float) (radius * Math.abs(Math.cos(2d * Math.PI * age)));
+        RectF disc = new RectF(centreX - radius, centreY - radius, centreX + radius, centreY + radius);
+        RectF edge = new RectF(centreX - terminator, centreY - radius,
+                centreX + terminator, centreY + radius);
+        Path shape = new Path();
+        shape.moveTo(centreX, centreY - radius);
+        // The lit half's outer edge, top to bottom round the lit side.
+        shape.arcTo(disc, -90f, waxing ? 180f : -180f);
+        // Back up the terminator: bulging towards the lit side for a
+        // crescent, away from it past the quarter.
+        boolean crescent = lit < 0.5d;
+        float sweep = (waxing == crescent) ? -180f : 180f;
+        shape.arcTo(edge, 90f, sweep);
+        shape.close();
+        Paint.Style previous = iconPaint.getStyle();
+        iconPaint.setStyle(Paint.Style.FILL);
+        canvas.drawPath(shape, iconPaint);
+        iconPaint.setStyle(previous);
     }
 
     /** The rotation of the line being drawn, for the level's icon to undo. */
@@ -4089,6 +4382,7 @@ public final class RearDashboardView extends View {
         ,NETWORK, MEMORY, STORAGE, NOTIFICATIONS, MESSAGE, CALENDAR, STEPS
         ,CHARGE, SUNRISE, SUNSET, LEVEL
         ,SOUND_ON, VIBRATE, SOUND_OFF, DO_NOT_DISTURB, GLOBE
+        ,UV, AIR, NETWORK_SPEED, MOON, COUNTDOWN, PROGRESS, PRESSURE
     }
 
     private static final class Palette {

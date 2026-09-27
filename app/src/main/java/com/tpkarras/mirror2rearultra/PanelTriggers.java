@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import androidx.annotation.Nullable;
 
 import java.util.Calendar;
+import java.util.Set;
 
 /**
  * Reasons other than the foreground app for the panel to change.
@@ -15,13 +16,23 @@ import java.util.Calendar;
  * a saved template, which replaces the arrangement while the condition holds,
  * or a page of the arrangement in use, which the panel then holds on.
  *
- * <p>Charging wins over the clock. Putting a phone on the charger is
- * something someone just did, and the night window is something that was
- * true already; the more recent intent should be the one on screen.
+ * <p>The more specific and the more recently done wins: a Bluetooth device
+ * connecting, then the charger, then the Wi-Fi network, then the clock.
+ * Getting into the car and its kit connecting says more about the next hour
+ * than being at home, and plugging in is something someone just did, where a
+ * network in range and the night window are things that were true already.
  */
 final class PanelTriggers {
     private static final String PREFS = "panel_triggers";
     private static final String CHARGING_SLOT = "charging_slot";
+    private static final String BLUETOOTH_SLOT = "bluetooth_slot";
+    /** The device's address, or empty for any device at all. */
+    private static final String BLUETOOTH_DEVICE = "bluetooth_device";
+    /** The device's name as it was when chosen, to label the choice by. */
+    private static final String BLUETOOTH_NAME = "bluetooth_name";
+    private static final String WIFI_SLOT = "wifi_slot";
+    /** The network's name, or empty for any Wi-Fi at all. */
+    private static final String WIFI_NETWORK = "wifi_network";
     private static final String TIME_SLOT = "time_slot";
     private static final String TIME_FROM = "time_from";
     private static final String TIME_TO = "time_to";
@@ -41,6 +52,68 @@ final class PanelTriggers {
 
     static void setChargingSlot(Context context, @Nullable String slot) {
         setSlot(context, CHARGING_SLOT, slot);
+    }
+
+    @Nullable
+    static String bluetoothSlot(Context context) {
+        return slot(context, BLUETOOTH_SLOT);
+    }
+
+    static void setBluetoothSlot(Context context, @Nullable String slot) {
+        setSlot(context, BLUETOOTH_SLOT, slot);
+    }
+
+    /** The address of the device the trigger waits for, or empty for any. */
+    static String bluetoothDevice(Context context) {
+        return prefs(context).getString(BLUETOOTH_DEVICE, "");
+    }
+
+    static String bluetoothDeviceName(Context context) {
+        return prefs(context).getString(BLUETOOTH_NAME, "");
+    }
+
+    static void setBluetoothDevice(Context context, String address, String name) {
+        prefs(context).edit()
+                .putString(BLUETOOTH_DEVICE, address)
+                .putString(BLUETOOTH_NAME, name)
+                .apply();
+    }
+
+    @Nullable
+    static String wifiSlot(Context context) {
+        return slot(context, WIFI_SLOT);
+    }
+
+    static void setWifiSlot(Context context, @Nullable String slot) {
+        setSlot(context, WIFI_SLOT, slot);
+    }
+
+    /** The network the trigger waits for, or empty for any. */
+    static String wifiNetwork(Context context) {
+        return prefs(context).getString(WIFI_NETWORK, "");
+    }
+
+    static void setWifiNetwork(Context context, String network) {
+        prefs(context).edit().putString(WIFI_NETWORK, network).apply();
+    }
+
+    /**
+     * Whether a connected device is the one waited for.
+     *
+     * @param connected addresses of every device connected now
+     */
+    static boolean bluetoothMatches(String wanted, Set<String> connected) {
+        return wanted.isEmpty() ? !connected.isEmpty() : connected.contains(wanted);
+    }
+
+    /**
+     * Whether the phone is on the network waited for.
+     *
+     * @param network the connected network's name, or null when there is none
+     *     or when the system will not say which it is
+     */
+    static boolean wifiMatches(String wanted, boolean onWifi, @Nullable String network) {
+        return onWifi && (wanted.isEmpty() || wanted.equals(network));
     }
 
     @Nullable
@@ -76,15 +149,39 @@ final class PanelTriggers {
      */
     @Nullable
     static String activeSlot(Context context, boolean charging, long nowMillis) {
-        String charged = chargingSlot(context);
-        if (charging && usable(context, charged)) {
-            return charged;
-        }
-        String timed = timeSlot(context);
-        if (usable(context, timed) && withinWindow(context, nowMillis)) {
-            return timed;
+        return activeSlot(context, charging, false, false, nowMillis);
+    }
+
+    /**
+     * @param bluetoothMatched the device waited for is connected, from
+     *     {@link #bluetoothMatches}
+     * @param wifiMatched the phone is on the network waited for, from
+     *     {@link #wifiMatches}
+     */
+    @Nullable
+    static String activeSlot(Context context, boolean charging, boolean bluetoothMatched,
+            boolean wifiMatched, long nowMillis) {
+        return pick(new String[]{
+                bluetoothMatched ? usableOrNull(context, bluetoothSlot(context)) : null,
+                charging ? usableOrNull(context, chargingSlot(context)) : null,
+                wifiMatched ? usableOrNull(context, wifiSlot(context)) : null,
+                withinWindow(context, nowMillis)
+                        ? usableOrNull(context, timeSlot(context)) : null,
+        });
+    }
+
+    /** The first slot that holds, in the order they outrank each other. */
+    @Nullable
+    static String pick(String[] inOrder) {
+        for (String slot : inOrder) {
+            if (slot != null) return slot;
         }
         return null;
+    }
+
+    @Nullable
+    private static String usableOrNull(Context context, @Nullable String slot) {
+        return usable(context, slot) ? slot : null;
     }
 
     static boolean withinWindow(Context context, long nowMillis) {
@@ -155,7 +252,7 @@ final class PanelTriggers {
      */
     static void remapPages(Context context, int[] map) {
         SharedPreferences.Editor editor = prefs(context).edit();
-        for (String key : new String[]{CHARGING_SLOT, TIME_SLOT}) {
+        for (String key : new String[]{CHARGING_SLOT, BLUETOOTH_SLOT, WIFI_SLOT, TIME_SLOT}) {
             int page = pageOf(slot(context, key));
             if (page <= 0) {
                 continue;

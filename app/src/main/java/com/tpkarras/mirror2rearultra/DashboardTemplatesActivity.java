@@ -34,6 +34,13 @@ public class DashboardTemplatesActivity extends AppCompatActivity {
     private enum Preset { CLOCK, TRIP, MUSIC, WEATHER }
 
     private HyperValueRow triggerChargingInput;
+    private HyperValueRow triggerBluetoothInput;
+    private HyperValueRow triggerBluetoothDeviceInput;
+    private HyperValueRow triggerWifiInput;
+    private HyperValueRow triggerWifiNetworkInput;
+    /** Paired devices and the precise location the Wi-Fi name needs; the rows redraw either way. */
+    private androidx.activity.result.ActivityResultLauncher<String> permissionLauncher;
+    private boolean askedForLocation;
     private HyperValueRow triggerTimeInput;
     private HyperValueRow triggerFromInput;
     private HyperValueRow triggerToInput;
@@ -79,7 +86,19 @@ public class DashboardTemplatesActivity extends AppCompatActivity {
         addNamedTemplateButton.setOnClickListener(view -> promptForNewTemplate());
         renderNamedTemplates();
 
+        permissionLauncher = registerForActivityResult(
+                new androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+                granted -> {
+                    renderTriggers();
+                    // The panel starts watching only once it is allowed to.
+                    MirrorSettings.saveDashboardSettings(this,
+                            MirrorSettings.loadDashboardSettings(this));
+                });
         triggerChargingInput = findViewById(R.id.panel_trigger_charging_input);
+        triggerBluetoothInput = findViewById(R.id.panel_trigger_bluetooth_input);
+        triggerBluetoothDeviceInput = findViewById(R.id.panel_trigger_bluetooth_device_input);
+        triggerWifiInput = findViewById(R.id.panel_trigger_wifi_input);
+        triggerWifiNetworkInput = findViewById(R.id.panel_trigger_wifi_network_input);
         triggerTimeInput = findViewById(R.id.panel_trigger_time_input);
         triggerFromInput = findViewById(R.id.panel_trigger_from_input);
         triggerToInput = findViewById(R.id.panel_trigger_to_input);
@@ -173,9 +192,23 @@ public class DashboardTemplatesActivity extends AppCompatActivity {
             labels.add(getString(R.string.panel_trigger_template, named.name));
         }
         bindTriggerRow(triggerChargingInput, slots, labels,
-                PanelTriggers.chargingSlot(this), true);
+                PanelTriggers.chargingSlot(this),
+                slot -> PanelTriggers.setChargingSlot(this, slot));
+        bindTriggerRow(triggerBluetoothInput, slots, labels,
+                PanelTriggers.bluetoothSlot(this), slot -> {
+                    PanelTriggers.setBluetoothSlot(this, slot);
+                    if (slot != null && !PanelSurroundings.canSeeBluetooth(this)
+                            && android.os.Build.VERSION.SDK_INT
+                            >= android.os.Build.VERSION_CODES.S) {
+                        permissionLauncher.launch(android.Manifest.permission.BLUETOOTH_CONNECT);
+                    }
+                });
+        bindTriggerRow(triggerWifiInput, slots, labels,
+                PanelTriggers.wifiSlot(this), slot -> PanelTriggers.setWifiSlot(this, slot));
         bindTriggerRow(triggerTimeInput, slots, labels,
-                PanelTriggers.timeSlot(this), false);
+                PanelTriggers.timeSlot(this), slot -> PanelTriggers.setTimeSlot(this, slot));
+        renderBluetoothDevices();
+        renderWifiNetworks();
         boolean timed = PanelTriggers.timeSlot(this) != null;
         triggerFromInput.setVisibility(timed ? android.view.View.VISIBLE : android.view.View.GONE);
         triggerToInput.setVisibility(timed ? android.view.View.VISIBLE : android.view.View.GONE);
@@ -184,21 +217,142 @@ public class DashboardTemplatesActivity extends AppCompatActivity {
     }
 
     private void bindTriggerRow(HyperValueRow row, List<String> slots, List<String> labels,
-            @Nullable String current, boolean forCharging) {
+            @Nullable String current, java.util.function.Consumer<String> save) {
         row.setEntries(labels.toArray(new String[0]));
         int index = current == null ? 0 : Math.max(0, slots.indexOf(current));
         row.setValue(labels.get(index));
         row.setOnItemSelectedListener(position -> {
             String slot = position <= 0 || position >= slots.size()
                     ? null : slots.get(position);
-            if (forCharging) {
-                PanelTriggers.setChargingSlot(this, slot);
-            } else {
-                PanelTriggers.setTimeSlot(this, slot);
-            }
+            save.accept(slot);
             renderTriggers();
             MirrorSettings.saveDashboardSettings(this, MirrorSettings.loadDashboardSettings(this));
         });
+    }
+
+    /**
+     * Any device, or one of those paired with the phone, by name.
+     *
+     * <p>Only once the trigger names something to show. Without the
+     * permission to see paired devices only "any" is offered, and the row
+     * says so rather than listing nothing.
+     */
+    private void renderBluetoothDevices() {
+        boolean set = PanelTriggers.bluetoothSlot(this) != null;
+        triggerBluetoothDeviceInput.setVisibility(set ? android.view.View.VISIBLE
+                : android.view.View.GONE);
+        if (!set) {
+            return;
+        }
+        List<String> addresses = new ArrayList<>();
+        List<String> names = new ArrayList<>();
+        addresses.add("");
+        names.add(getString(R.string.panel_trigger_any_device));
+        if (PanelSurroundings.canSeeBluetooth(this)) {
+            android.bluetooth.BluetoothManager manager =
+                    getSystemService(android.bluetooth.BluetoothManager.class);
+            android.bluetooth.BluetoothAdapter adapter =
+                    manager == null ? null : manager.getAdapter();
+            try {
+                if (adapter != null) {
+                    List<android.bluetooth.BluetoothDevice> paired =
+                            new ArrayList<>(adapter.getBondedDevices());
+                    paired.sort((a, b) -> String.valueOf(a.getName())
+                            .compareToIgnoreCase(String.valueOf(b.getName())));
+                    for (android.bluetooth.BluetoothDevice device : paired) {
+                        addresses.add(device.getAddress());
+                        names.add(device.getName() == null ? device.getAddress() : device.getName());
+                    }
+                }
+            } catch (SecurityException refused) {
+                // Leaves only "any device".
+            }
+        }
+        String chosen = PanelTriggers.bluetoothDevice(this);
+        if (!chosen.isEmpty() && !addresses.contains(chosen)) {
+            // Unpaired since, or not visible without the permission: still
+            // shown, so the choice is not silently changed.
+            addresses.add(chosen);
+            String name = PanelTriggers.bluetoothDeviceName(this);
+            names.add(name.isEmpty() ? chosen : name);
+        }
+        triggerBluetoothDeviceInput.setEntries(names.toArray(new String[0]));
+        triggerBluetoothDeviceInput.setValue(names.get(Math.max(0, addresses.indexOf(chosen))));
+        triggerBluetoothDeviceInput.setOnItemSelectedListener(position -> {
+            if (position < 0 || position >= addresses.size()) {
+                return;
+            }
+            PanelTriggers.setBluetoothDevice(this, addresses.get(position),
+                    position == 0 ? "" : names.get(position));
+            MirrorSettings.saveDashboardSettings(this, MirrorSettings.loadDashboardSettings(this));
+        });
+    }
+
+    /**
+     * Any network, the one the phone is on now, or the one chosen before.
+     *
+     * <p>There is no list of saved networks to offer: an app is not shown
+     * them. So a network is chosen by being on it. Its name needs the
+     * precise location; asked for when the trigger is set on a phone that
+     * has not given it.
+     */
+    private void renderWifiNetworks() {
+        boolean set = PanelTriggers.wifiSlot(this) != null;
+        triggerWifiNetworkInput.setVisibility(set ? android.view.View.VISIBLE
+                : android.view.View.GONE);
+        if (!set) {
+            return;
+        }
+        List<String> networks = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        networks.add("");
+        labels.add(getString(R.string.panel_trigger_any_network));
+        String current = currentWifiNetwork();
+        if (current != null) {
+            networks.add(current);
+            labels.add(getString(R.string.panel_trigger_current_network, current));
+        }
+        String chosen = PanelTriggers.wifiNetwork(this);
+        if (!chosen.isEmpty() && !networks.contains(chosen)) {
+            networks.add(chosen);
+            labels.add(chosen);
+        }
+        triggerWifiNetworkInput.setEntries(labels.toArray(new String[0]));
+        triggerWifiNetworkInput.setValue(labels.get(Math.max(0, networks.indexOf(chosen))));
+        triggerWifiNetworkInput.setOnItemSelectedListener(position -> {
+            if (position < 0 || position >= networks.size()) {
+                return;
+            }
+            PanelTriggers.setWifiNetwork(this, networks.get(position));
+            renderWifiNetworks();
+            MirrorSettings.saveDashboardSettings(this, MirrorSettings.loadDashboardSettings(this));
+        });
+        // Once per visit: the answer redraws these rows, and asking again on
+        // every redraw would put a refusal straight back on screen.
+        if (current == null && !askedForLocation
+                && androidx.core.content.ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            askedForLocation = true;
+            permissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
+    /** The network the phone is on, or null when none or when its name is withheld. */
+    @Nullable
+    @SuppressWarnings("deprecation")
+    private String currentWifiNetwork() {
+        android.net.wifi.WifiManager wifi = getApplicationContext()
+                .getSystemService(android.net.wifi.WifiManager.class);
+        if (wifi == null) {
+            return null;
+        }
+        try {
+            android.net.wifi.WifiInfo info = wifi.getConnectionInfo();
+            return info == null ? null : PanelSurroundings.cleanNetworkName(info.getSSID());
+        } catch (SecurityException refused) {
+            return null;
+        }
     }
 
     /** A time of day written the way the phone writes it. */

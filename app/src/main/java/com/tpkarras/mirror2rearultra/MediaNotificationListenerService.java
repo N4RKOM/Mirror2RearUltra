@@ -85,7 +85,8 @@ public class MediaNotificationListenerService extends NotificationListenerServic
         if (isMediaNotification(notification)) {
             refreshMedia();
         } else if (isAlerting(notification)) {
-            NotificationWidgetState.arrived(notification.getPackageName());
+            NotificationWidgetState.arrived(notification.getPackageName(),
+                    notification.getNotification().color);
         }
     }
 

@@ -1107,6 +1107,83 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             column.addView(durationRow, spaced());
         }
 
+        // The date counted to and what it is, with the widget like the timer's length.
+        if (widget == DashboardWidgetLayout.Widget.COUNTDOWN) {
+            HyperValueRow dateRow = (HyperValueRow) getLayoutInflater()
+                    .inflate(R.layout.widget_value_row_single, column, false);
+            dateRow.setTitle(getString(R.string.dashboard_countdown_date));
+            long day = DashboardWidgetLayout.countdownDay(this);
+            java.util.TimeZone zone = java.util.TimeZone.getDefault();
+            dateRow.setValue(day < 0L ? getString(R.string.dashboard_builder_choose_value)
+                    : java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM)
+                            .format(new java.util.Date(day * 86_400_000L
+                                    - zone.getOffset(day * 86_400_000L))));
+            dateRow.setBackgroundResource(R.drawable.hyper_segment_track);
+            dateRow.setOnClickListener(view -> {
+                java.util.Calendar shown = java.util.Calendar.getInstance();
+                long current = DashboardWidgetLayout.countdownDay(this);
+                if (current >= 0L) {
+                    shown.setTimeInMillis(current * 86_400_000L
+                            - zone.getOffset(current * 86_400_000L));
+                }
+                new android.app.DatePickerDialog(this, (picker, year, month, dayOfMonth) -> {
+                    java.util.Calendar picked = java.util.Calendar.getInstance();
+                    picked.set(year, month, dayOfMonth, 12, 0, 0);
+                    DashboardWidgetLayout.setCountdownDay(this, WidgetMath.dayNumber(
+                            picked.getTimeInMillis(), zone));
+                    dateRow.setValue(java.text.DateFormat.getDateInstance(
+                            java.text.DateFormat.MEDIUM).format(picked.getTime()));
+                    notifyDashboardChanged();
+                }, shown.get(java.util.Calendar.YEAR), shown.get(java.util.Calendar.MONTH),
+                        shown.get(java.util.Calendar.DAY_OF_MONTH)).show();
+            });
+            column.addView(dateRow, spaced());
+            HyperValueRow labelRow = (HyperValueRow) getLayoutInflater()
+                    .inflate(R.layout.widget_value_row_single, column, false);
+            labelRow.setTitle(getString(R.string.dashboard_countdown_label));
+            String label = DashboardWidgetLayout.countdownLabel(this);
+            labelRow.setValue(label.isEmpty() ? getString(R.string.dashboard_builder_choose_value)
+                    : label);
+            labelRow.setBackgroundResource(R.drawable.hyper_segment_track);
+            labelRow.setOnClickListener(view -> {
+                android.widget.EditText input = new android.widget.EditText(this);
+                input.setSingleLine(true);
+                input.setFilters(new android.text.InputFilter[]{
+                        new android.text.InputFilter.LengthFilter(30)});
+                input.setText(DashboardWidgetLayout.countdownLabel(this));
+                new MaterialAlertDialogBuilder(this)
+                        .setTitle(R.string.dashboard_countdown_label)
+                        .setView(input)
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            String typed = input.getText().toString().trim();
+                            DashboardWidgetLayout.setCountdownLabel(this, typed);
+                            labelRow.setValue(typed.isEmpty()
+                                    ? getString(R.string.dashboard_builder_choose_value) : typed);
+                            notifyDashboardChanged();
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show();
+            });
+            column.addView(labelRow, spaced());
+        }
+
+        // Which stretch of time to follow.
+        if (widget == DashboardWidgetLayout.Widget.PROGRESS) {
+            column.addView(segmentedRow(R.string.dashboard_progress_period,
+                    new String[]{
+                            getString(R.string.dashboard_progress_day),
+                            getString(R.string.dashboard_progress_week),
+                            getString(R.string.dashboard_progress_month),
+                            getString(R.string.dashboard_progress_year)},
+                    DashboardWidgetLayout.progressPeriod(this).ordinal(),
+                    getString(R.string.dashboard_progress_period),
+                    choice -> {
+                        DashboardWidgetLayout.setProgressPeriod(this,
+                                WidgetMath.Period.values()[choice]);
+                        notifyDashboardChanged();
+                    }));
+        }
+
         // Which city, for the same reason as the timer's length.
         if (widget == DashboardWidgetLayout.Widget.WORLD_CLOCK) {
             long now = System.currentTimeMillis();
@@ -1560,7 +1637,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 new LevelReading(2.4f, 2.4f, 6f),
                 // Vibrate rather than ringing: a ringing phone drops the row
                 // unless it is set to stay, and the preview would be empty.
-                new SoundModeReading(SoundModeReading.Mode.VIBRATE, 60));
+                new SoundModeReading(SoundModeReading.Mode.VIBRATE, 60),
+                new ExtraReadings(4.6f, 34, 1_250_000L, 42_000L, 1013.2f, 1));
     }
 
     /**
@@ -1675,7 +1753,10 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 R.string.dashboard_widget_timer, R.string.dashboard_widget_charging,
                 R.string.dashboard_widget_sun, R.string.dashboard_widget_level,
                 R.string.dashboard_widget_sound_mode, R.string.dashboard_widget_world_clock,
-                R.string.dashboard_widget_qr_code};
+                R.string.dashboard_widget_qr_code, R.string.dashboard_widget_uv,
+                R.string.dashboard_widget_air, R.string.dashboard_widget_net_speed,
+                R.string.dashboard_widget_moon, R.string.dashboard_widget_countdown,
+                R.string.dashboard_widget_progress, R.string.dashboard_widget_pressure};
         // Indexed by ordinal, so a widget added without a label here would
         // take the whole screen down rather than show a blank row.
         int index = widget.ordinal();
