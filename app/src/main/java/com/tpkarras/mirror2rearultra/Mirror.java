@@ -123,6 +123,7 @@ public class Mirror extends Activity implements
     private boolean touchLocked;
     /** Set while the panel is the side lying on the table. */
     private boolean panelFacingDown;
+    private int lastPanelState = Display.STATE_UNKNOWN;
     /** In a pocket, by the posture sensor, whether or not touches are being locked for it. */
     private boolean pocketed;
     private NotificationPulseView notificationPulse;
@@ -922,6 +923,18 @@ public class Mirror extends Activity implements
 
     @Override
     public void onDisplayChanged(int displayId) {
+        Display own = getDisplay();
+        if (own != null && own.getDisplayId() == displayId) {
+            // The firmware dozes this panel and wakes it again by itself, and
+            // each wake lights it at full brightness. Face down, that is a
+            // flicker: put it out again whenever it comes back on.
+            int state = own.getState();
+            boolean turnedOn = state == Display.STATE_ON && lastPanelState != Display.STATE_ON;
+            lastPanelState = state;
+            if (turnedOn && panelFacingDown && brightnessController != null) {
+                brightnessController.blank();
+            }
+        }
         if (displayId == Display.DEFAULT_DISPLAY) {
             // A frame drawn for the screen one way round means nothing once
             // it has turned: the same numbers crop a different part of it.
