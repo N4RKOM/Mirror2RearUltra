@@ -2798,6 +2798,11 @@ public final class RearDashboardView extends View {
         float nominal = textPaint.getTextSize();
         float iconSize = line.icon == WidgetIcon.NONE ? 0f : nominal * ICON_BOX;
         float gap = line.icon == WidgetIcon.NONE ? 0f : nominal * ICON_GAP;
+        // Where the caller means the middle of the figures to be: a stack is
+        // smaller than the size it was asked for, so it is centred on this
+        // rather than left to hang off the baseline of the larger one.
+        textPaint.getTextBounds("0", 0, 1, inkBounds);
+        float intendedMiddle = baseline + (inkBounds.top + inkBounds.bottom) / 2f;
         boolean multiline = line.text.indexOf('\n') >= 0;
         // A stack with a small line keeps its main line at full size; any other
         // stack is two or three lines of equal weight and every one is shrunk.
@@ -2841,7 +2846,8 @@ public final class RearDashboardView extends View {
         // Centred on the middle of the figures rather than of the font's line
         // box, which sits lower than the digits it holds.
         textPaint.getTextBounds("0", 0, 1, inkBounds);
-        float figureMiddle = baseline + (inkBounds.top + inkBounds.bottom) / 2f;
+        float figureMiddle = multiline ? intendedMiddle
+                : baseline + (inkBounds.top + inkBounds.bottom) / 2f;
         if (line.icon != WidgetIcon.NONE) {
             float centerY = figureMiddle;
             drawIcon(canvas, line.icon, new RectF(
@@ -2868,8 +2874,45 @@ public final class RearDashboardView extends View {
             }
             firstBaseline = baselines[0];
         } else {
+            // Figures have no descenders, so a stack of them closes up: the
+            // clock's hours over its minutes were a line and a half apart.
+            boolean figuresOnly = true;
+            for (CharSequence part : fittedParts) {
+                for (int at = 0; at < part.length(); at++) {
+                    figuresOnly &= !Character.isLetter(part.charAt(at));
+                }
+            }
+            float step = lineHeight * (figuresOnly ? 0.84f : 1.04f);
+            firstBaseline = baseline - (parts.length - 1) * step * 0.5f;
             for (int index = 0; index < parts.length; index++) {
-                baselines[index] = firstBaseline + index * lineHeight * 1.04f;
+                baselines[index] = firstBaseline + index * step;
+            }
+        }
+        if (parts.length > 1) {
+            // Put the stack's ink where the single line would have had it, so
+            // a stacked clock reaches the top of the panel as far as a flat one.
+            float blockTop = Float.MAX_VALUE;
+            float blockBottom = -Float.MAX_VALUE;
+            for (int index = 0; index < fittedParts.length; index++) {
+                if (fittedParts[index].length() == 0) {
+                    continue;
+                }
+                textPaint.setTextSize(small[index] ? mainSize * SMALL_LINE : mainSize);
+                textPaint.getTextBounds(fittedParts[index], 0, fittedParts[index].length(),
+                        inkBounds);
+                if (inkBounds.isEmpty()) {
+                    continue;
+                }
+                blockTop = Math.min(blockTop, baselines[index] + inkBounds.top);
+                blockBottom = Math.max(blockBottom, baselines[index] + inkBounds.bottom);
+            }
+            textPaint.setTextSize(mainSize);
+            if (blockTop <= blockBottom) {
+                float shift = intendedMiddle - (blockTop + blockBottom) / 2f;
+                for (int index = 0; index < baselines.length; index++) {
+                    baselines[index] += shift;
+                }
+                firstBaseline += shift;
             }
         }
         for (int index = 0; index < fittedParts.length; index++) {
