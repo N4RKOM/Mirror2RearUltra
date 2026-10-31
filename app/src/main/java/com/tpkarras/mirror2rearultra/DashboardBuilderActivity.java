@@ -20,7 +20,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
@@ -98,13 +97,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     /** The widget picked in the preview or the list, outlined in both. */
     @Nullable private DashboardWidgetLayout.Widget selectedWidget;
     private MaterialToolbar toolbar;
-    private View editor;
-    private TextView editorTitle;
-    private android.widget.ImageView editorIcon;
-    private View editorPrev;
-    private View editorNext;
-    private NestedScrollView editorScroll;
-    private LinearLayout editorRows;
+    /** The folded-open settings of the expanded widget, inside its own item of the list. */
+    @Nullable private LinearLayout editorRows;
     /** The widget the editor is open for, or null while it is closed. */
     @Nullable private DashboardWidgetLayout.Widget editingWidget;
     /** The three sections under the preview: widgets, this page, and what all pages share. */
@@ -118,11 +112,6 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private FrameLayout previewSlot;
     /** Brings an editor control back in line after a pinch in the preview. */
     @Nullable private Runnable editorSync;
-    private final OnBackPressedCallback closeEditorOnBack = new OnBackPressedCallback(false) {
-        @Override public void handleOnBackPressed() {
-            closeWidgetEditor();
-        }
-    };
     /**
      * The page being edited: the tab that is checked, the page the preview
      * shows, and the page the layout rows and the widget list belong to.
@@ -136,13 +125,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dashboard_builder);
         MiuixRows.install(this, R.id.dashboard_builder_choose, R.id.dashboard_builder_templates);
         toolbar = findViewById(R.id.dashboard_builder_toolbar);
-        toolbar.setNavigationOnClickListener(view -> {
-            if (editingWidget != null) {
-                closeWidgetEditor();
-            } else {
-                finish();
-            }
-        });
+        toolbar.setNavigationOnClickListener(view -> finish());
         toolbar.inflateMenu(R.menu.dashboard_builder);
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.dashboard_builder_menu_help) {
@@ -157,23 +140,11 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         });
 
         scroll = findViewById(R.id.dashboard_builder_scroll);
-        editor = findViewById(R.id.dashboard_builder_editor);
-        editorTitle = findViewById(R.id.dashboard_builder_editor_title);
-        editorIcon = findViewById(R.id.dashboard_builder_editor_icon);
-        editorPrev = findViewById(R.id.dashboard_builder_editor_prev);
-        editorNext = findViewById(R.id.dashboard_builder_editor_next);
-        editorScroll = findViewById(R.id.dashboard_builder_editor_scroll);
-        editorRows = findViewById(R.id.dashboard_builder_editor_rows);
-        findViewById(R.id.dashboard_builder_editor_done).setOnClickListener(view ->
-                closeWidgetEditor());
-        editorPrev.setOnClickListener(view -> stepEditor(-1));
-        editorNext.setOnClickListener(view -> stepEditor(1));
         previewSlot = findViewById(R.id.dashboard_builder_preview_slot);
         if (state != null) {
             section = state.getInt(STATE_SECTION, SECTION_WIDGETS);
         }
         bindSections();
-        getOnBackPressedDispatcher().addCallback(this, closeEditorOnBack);
         pageTabs = findViewById(R.id.dashboard_builder_page_tabs);
         addPageButton = findViewById(R.id.dashboard_builder_page_add);
         pageActionsButton = findViewById(R.id.dashboard_builder_page_actions);
@@ -823,19 +794,27 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 : R.string.dashboard_builder_list_hint_free);
         for (int index = 0; index < page.size(); index++) {
             DashboardWidgetLayout.Widget widget = page.get(index);
-            View row = getLayoutInflater().inflate(R.layout.widget_builder_item, rows, false);
-            row.setTag(widget);
+            // Each widget is a card of its own: the row, and under it the
+            // settings that fold open in place when the row is tapped.
+            LinearLayout item = new LinearLayout(this);
+            item.setOrientation(LinearLayout.VERTICAL);
+            item.setBackgroundResource(R.drawable.hyper_group_background);
+            item.setTag(widget);
+            View row = getLayoutInflater().inflate(R.layout.widget_builder_item, item, false);
             ((TextView) row.findViewById(R.id.builder_item_title)).setText(label(widget));
             ((TextView) row.findViewById(R.id.builder_item_summary))
                     .setText(widgetSummary(widget, free));
             ((android.widget.ImageView) row.findViewById(R.id.builder_item_icon))
                     .setImageResource(WidgetCatalog.icon(widget));
-            row.setBackgroundResource(page.size() == 1 ? R.drawable.hyper_row_bg_single
-                    : index == 0 ? R.drawable.hyper_row_bg_top
-                    : index == page.size() - 1 ? R.drawable.hyper_row_bg_bottom
-                    : R.drawable.hyper_row_bg_middle);
+            row.setBackgroundResource(R.drawable.hyper_row_bg_single);
             markSelected(row, widget == selectedWidget);
-            row.setOnClickListener(view -> openWidgetEditor(widget));
+            row.setOnClickListener(view -> {
+                if (widget == editingWidget) {
+                    closeWidgetEditor();
+                } else {
+                    openWidgetEditor(widget);
+                }
+            });
             View handle = row.findViewById(R.id.builder_item_handle);
             if (free) {
                 // A free page puts each widget where it was dropped in the
@@ -844,26 +823,39 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 handle.setVisibility(View.GONE);
                 row.setPaddingRelative(dp(16), 0, row.getPaddingEnd(), 0);
                 if (pages.size() > 1) {
-                    row.setOnLongClickListener(view -> startRowDrag(view, widget));
+                    row.setOnLongClickListener(view -> startRowDrag(item, widget));
                 }
             } else {
-                row.setOnLongClickListener(view -> startRowDrag(view, widget));
+                row.setOnLongClickListener(view -> startRowDrag(item, widget));
                 // The grip drags at once; a long press anywhere on the row does too.
                 handle.setOnTouchListener((view, event) ->
                         event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN
-                                && startRowDrag(row, widget));
+                                && startRowDrag(item, widget));
             }
             addMoveActions(row, widget, index, page.size(), pages.size(), free);
-            rows.addView(row, new LinearLayout.LayoutParams(-1, -2));
+            item.addView(row, new LinearLayout.LayoutParams(-1, -2));
+            LinearLayout holder = new LinearLayout(this);
+            holder.setOrientation(LinearLayout.VERTICAL);
+            holder.setPadding(dp(12), 0, dp(12), dp(14));
+            holder.setVisibility(View.GONE);
+            item.addView(holder, new LinearLayout.LayoutParams(-1, -2));
+            LinearLayout.LayoutParams itemParams = new LinearLayout.LayoutParams(-1, -2);
+            itemParams.topMargin = index == 0 ? 0 : dp(8);
+            rows.addView(item, itemParams);
         }
-        updateEditorNav();
+        // A rebuild keeps the open widget open, on the page it is still on;
+        // one that has moved to another page opens again when that page shows.
+        editorRows = null;
+        if (editingWidget != null && page.contains(editingWidget)) {
+            expandItem(editingWidget, false);
+        }
     }
 
-    private boolean startRowDrag(View row, DashboardWidgetLayout.Widget widget) {
+    private boolean startRowDrag(View item, DashboardWidgetLayout.Widget widget) {
         ClipData data = ClipData.newPlainText("widget", widget.name());
-        boolean started = row.startDragAndDrop(data, new View.DragShadowBuilder(row), widget, 0);
+        boolean started = item.startDragAndDrop(data, new View.DragShadowBuilder(item), widget, 0);
         if (started) {
-            row.setAlpha(0.35f);
+            item.setAlpha(0.35f);
         }
         return started;
     }
@@ -892,30 +884,6 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             parts.add(styles[style]);
         }
         return android.text.TextUtils.join(" · ", parts);
-    }
-
-    /** Moves the open editor to the widget before or after it on the page. */
-    private void stepEditor(int direction) {
-        if (editingWidget == null) {
-            return;
-        }
-        List<DashboardWidgetLayout.Widget> page = currentPages().get(editedPage - 1);
-        int target = page.indexOf(editingWidget) + direction;
-        if (target >= 0 && target < page.size()) {
-            openWidgetEditor(page.get(target));
-        }
-    }
-
-    private void updateEditorNav() {
-        if (editingWidget == null) {
-            return;
-        }
-        List<DashboardWidgetLayout.Widget> page = currentPages().get(editedPage - 1);
-        int index = page.indexOf(editingWidget);
-        editorPrev.setEnabled(index > 0);
-        editorPrev.setAlpha(index > 0 ? 1f : 0.3f);
-        editorNext.setEnabled(index >= 0 && index < page.size() - 1);
-        editorNext.setAlpha(editorNext.isEnabled() ? 1f : 0.3f);
     }
 
     private void addMoveActions(View row, DashboardWidgetLayout.Widget widget,
@@ -957,7 +925,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         for (int index = 0; index < rows.getChildCount(); index++) {
             View child = rows.getChildAt(index);
             if (child.getTag() instanceof DashboardWidgetLayout.Widget) {
-                markSelected(child, widget != null && child.getTag() == widget);
+                markSelected(((ViewGroup) child).getChildAt(0),
+                        widget != null && child.getTag() == widget);
             }
         }
     }
@@ -1029,62 +998,123 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     }
 
     // ------------------------------------------------------------------
-    // Widget editor
+    // Widget settings, folded open inside the widget's own row
     // ------------------------------------------------------------------
 
     /**
-     * Opens a widget's settings under the pinned preview.
+     * Opens a widget's settings under its row in the list.
      *
-     * <p>The settings replace the sections in place and the preview stays
-     * where it is, so the widget being changed is in sight however far the
-     * settings are scrolled. It used to be moved into the editor and back,
-     * which more than one copy of the view on screen could not share on
-     * HyperOS.
-     *
-     * <p>Tapping another widget in the preview while the editor is open
-     * switches the editor to it, and so do the arrows beside its title.
+     * <p>The way the panel blocks on the main screen open: the row's arrow
+     * turns, the settings fade in while the cards below slide to make room,
+     * and only one widget is open at a time. The preview stays pinned above,
+     * with the widget outlined, so it is in sight however far down the
+     * settings run. Tapping a widget in the preview opens its row too.
      */
     private void openWidgetEditor(DashboardWidgetLayout.Widget widget) {
         if (widget == editingWidget) {
             return;
         }
-        boolean opening = editingWidget == null;
-        editingWidget = widget;
-        editorTitle.setText(label(widget));
-        editorIcon.setImageResource(WidgetCatalog.icon(widget));
-        editorIcon.setImageTintList(ContextCompat.getColorStateList(this,
-                R.color.hyper_text_button_text));
-        editorRows.removeAllViews();
-        editorSync = null;
-        fillWidgetSheet(editorRows, widget);
-        editorScroll.scrollTo(0, 0);
-        if (opening) {
-            editor.setAlpha(0f);
-            editor.setVisibility(View.VISIBLE);
-            editor.animate().alpha(1f).setDuration(160L).start();
-            closeEditorOnBack.setEnabled(true);
-            toolbar.getMenu().setGroupVisible(0, false);
-            sectionGroup.setVisibility(View.GONE);
-        }
+        expandItem(widget, true);
         selectWidget(widget);
-        updateEditorNav();
     }
 
     private void closeWidgetEditor() {
         if (editingWidget == null) {
             return;
         }
+        DashboardWidgetLayout.Widget closing = editingWidget;
+        beginSectionTransition();
+        collapseOpenItem();
         editingWidget = null;
+        editorRows = null;
         editorSync = null;
-        closeEditorOnBack.setEnabled(false);
-        toolbar.getMenu().setGroupVisible(0, true);
-        sectionGroup.setVisibility(View.VISIBLE);
-        editor.animate().cancel();
-        editor.setVisibility(View.GONE);
-        editorRows.removeAllViews();
-        // The rows show what each widget is set to, which may have changed.
-        renderRows();
+        refreshItemSummary(closing);
         refreshPreview();
+    }
+
+    /** Shows the settings of [widget] in its item, folding any other one shut. */
+    private void expandItem(DashboardWidgetLayout.Widget widget, boolean animate) {
+        LinearLayout item = itemOf(widget);
+        if (item == null) {
+            return;
+        }
+        if (animate) {
+            beginSectionTransition();
+        }
+        DashboardWidgetLayout.Widget previous = editingWidget;
+        collapseOpenItem();
+        if (previous != null) {
+            refreshItemSummary(previous);
+        }
+        editingWidget = widget;
+        editorSync = null;
+        LinearLayout holder = (LinearLayout) item.getChildAt(1);
+        holder.removeAllViews();
+        editorRows = holder;
+        fillWidgetSheet(holder, widget);
+        holder.setVisibility(View.VISIBLE);
+        item.getChildAt(0).findViewById(R.id.builder_item_chevron).setRotation(180f);
+        if (animate) {
+            // After the slide, so the open widget lands in view rather than below it.
+            scroll.postDelayed(() -> {
+                if (!isFinishing() && editingWidget == widget && itemOf(widget) != null) {
+                    scroll.smoothScrollTo(0, Math.max(0, topWithin(itemOf(widget), scroll) - dp(8)));
+                }
+            }, 260L);
+        }
+    }
+
+    private void collapseOpenItem() {
+        LinearLayout item = editingWidget == null ? null : itemOf(editingWidget);
+        if (item != null) {
+            LinearLayout holder = (LinearLayout) item.getChildAt(1);
+            holder.setVisibility(View.GONE);
+            holder.removeAllViews();
+            item.getChildAt(0).findViewById(R.id.builder_item_chevron).setRotation(0f);
+        }
+    }
+
+    private void beginSectionTransition() {
+        android.transition.TransitionManager.beginDelayedTransition(
+                (ViewGroup) scroll.getChildAt(0),
+                new android.transition.TransitionSet()
+                        .addTransition(new android.transition.Fade())
+                        .addTransition(new android.transition.ChangeBounds())
+                        .setDuration(240L));
+    }
+
+    @Nullable
+    private LinearLayout itemOf(DashboardWidgetLayout.Widget widget) {
+        for (int index = 0; index < rows.getChildCount(); index++) {
+            View child = rows.getChildAt(index);
+            if (child.getTag() == widget) {
+                return (LinearLayout) child;
+            }
+        }
+        return null;
+    }
+
+    /** How far down the scrolled content [view] starts. */
+    private static int topWithin(View view, View container) {
+        int top = 0;
+        View current = view;
+        while (current != null && current != container) {
+            top += current.getTop();
+            current = current.getParent() instanceof View ? (View) current.getParent() : null;
+        }
+        return top;
+    }
+
+    /** What the row says the widget is set to, after a change made under it. */
+    private void refreshItemSummary(DashboardWidgetLayout.Widget widget) {
+        LinearLayout item = itemOf(widget);
+        if (item == null) {
+            return;
+        }
+        boolean free = DashboardWidgetLayout.loadPageLayout(this, editedPage,
+                MirrorSettings.loadDashboardSettings(this).layout) == DashboardSettings.Layout.FREE;
+        ((TextView) item.getChildAt(0).findViewById(R.id.builder_item_summary))
+                .setText(widgetSummary(widget, free));
     }
 
     private void fillWidgetSheet(LinearLayout column, DashboardWidgetLayout.Widget widget) {
@@ -1436,9 +1466,13 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             DashboardWidgetLayout.resetAppearance(this, widget);
             notifyDashboardChanged();
             // The controls are rebuilt so every one shows the default again.
-            editorRows.removeAllViews();
-            editorSync = null;
-            fillWidgetSheet(editorRows, widget);
+            LinearLayout target = editorRows;
+            if (target != null) {
+                target.removeAllViews();
+                editorSync = null;
+                fillWidgetSheet(target, widget);
+                refreshItemSummary(widget);
+            }
         });
         column.addView(reset, spaced(16));
 
@@ -1457,8 +1491,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private LinearLayout settingsCard() {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackgroundResource(R.drawable.hyper_group_background);
-        card.setPadding(dp(14), dp(2), dp(14), dp(14));
+        // The widget's own card is the surface; these only group.
+        card.setPadding(0, 0, 0, dp(4));
         return card;
     }
 
@@ -1744,6 +1778,9 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private void notifyDashboardChanged() {
         MirrorSettings.saveDashboardSettings(this, MirrorSettings.loadDashboardSettings(this));
         refreshPreview();
+        if (editingWidget != null) {
+            refreshItemSummary(editingWidget);
+        }
     }
 
     private void refreshPreview() {
@@ -1838,6 +1875,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 // or resized, and no row shows either.
                 refreshPreview();
                 selectWidget(widget);
+                refreshItemSummary(widget);
                 if (editorSync != null) {
                     editorSync.run();
                 }
