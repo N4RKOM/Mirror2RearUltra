@@ -1088,6 +1088,12 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     }
 
     private void fillWidgetSheet(LinearLayout column, DashboardWidgetLayout.Widget widget) {
+        // Where it sits, how it looks, what only this widget has, and the
+        // rarely touched rest - each a card under its own heading.
+        LinearLayout place = settingsCard();
+        LinearLayout look = settingsCard();
+        LinearLayout special = settingsCard();
+        LinearLayout more = settingsCard();
         int pageCount = DashboardWidgetLayout.loadPageCount(this);
         if (pageCount > 1) {
             String[] pageLabels = new String[pageCount];
@@ -1118,7 +1124,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 segments.getChildAt(page - 1).setEnabled(page == current
                         || DashboardWidgetLayout.canMoveTo(this, widget, page));
             }
-            column.addView(pageRow);
+            place.addView(pageRow);
         }
 
         boolean freeLayout = DashboardWidgetLayout.loadPageLayout(this, editedPage,
@@ -1126,7 +1132,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         // The free layout places a widget by hand in the preview, so the
         // flowed layouts' alignment is left out there.
         if (!freeLayout) {
-            column.addView(segmentedRow(R.string.dashboard_builder_position_label,
+            place.addView(segmentedRow(R.string.dashboard_builder_position_label,
                     new String[]{
                             getString(R.string.dashboard_builder_left),
                             getString(R.string.dashboard_builder_center),
@@ -1146,9 +1152,9 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         // free page the size is continuous, so it gets a slider rather than
         // three steps that could only ever show the nearest one.
         if (freeLayout) {
-            column.addView(sizeSlider(widget));
+            place.addView(sizeSlider(widget));
         } else {
-            column.addView(segmentedRow(R.string.dashboard_builder_size_label,
+            place.addView(segmentedRow(R.string.dashboard_builder_size_label,
                     new String[]{
                             getString(R.string.dashboard_builder_small),
                             getString(R.string.dashboard_builder_normal),
@@ -1163,8 +1169,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         }
 
         if (DashboardWidgetLayout.supportsVariant(widget)) {
-            column.addView(segmentedRow(R.string.dashboard_builder_variant_label,
-                    variantLabels(widget),
+            look.addView(choiceTiles(R.string.dashboard_builder_variant_label,
+                    variantCaptions(widget), variantSamples(widget), null,
                     DashboardWidgetLayout.loadVariant(this, widget).ordinal(),
                     getString(R.string.dashboard_builder_variant, label(widget)),
                     choice -> {
@@ -1174,11 +1180,17 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     }));
         }
 
-        column.addView(segmentedRow(R.string.dashboard_builder_style_label,
+        // The sample is the colour itself, so the choice reads without words.
+        int[] styleColours = {
+                ContextCompat.getColor(this, R.color.hyper_text_primary),
+                ContextCompat.getColor(this, R.color.hyper_accent),
+                ContextCompat.getColor(this, R.color.hyper_text_tertiary)};
+        look.addView(choiceTiles(R.string.dashboard_builder_style_label,
                 new String[]{
                         getString(R.string.dashboard_builder_style_default),
                         getString(R.string.dashboard_builder_style_accent),
                         getString(R.string.dashboard_builder_style_muted)},
+                new String[]{"Aa", "Aa", "Aa"}, styleColours,
                 DashboardWidgetLayout.loadStyle(this, widget).ordinal(),
                 getString(R.string.dashboard_builder_style, label(widget)),
                 choice -> {
@@ -1221,7 +1233,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     notifyDashboardChanged();
                 }
             });
-            column.addView(durationRow, spaced());
+            special.addView(durationRow, spaced());
         }
 
         // The date counted to and what it is, with the widget like the timer's length.
@@ -1254,7 +1266,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 }, shown.get(java.util.Calendar.YEAR), shown.get(java.util.Calendar.MONTH),
                         shown.get(java.util.Calendar.DAY_OF_MONTH)).show();
             });
-            column.addView(dateRow, spaced());
+            special.addView(dateRow, spaced());
             HyperValueRow labelRow = (HyperValueRow) getLayoutInflater()
                     .inflate(R.layout.widget_value_row_single, column, false);
             labelRow.setTitle(getString(R.string.dashboard_countdown_label));
@@ -1281,12 +1293,12 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                         .setNegativeButton(android.R.string.cancel, null)
                         .show();
             });
-            column.addView(labelRow, spaced());
+            special.addView(labelRow, spaced());
         }
 
         // Which stretch of time to follow.
         if (widget == DashboardWidgetLayout.Widget.PROGRESS) {
-            column.addView(segmentedRow(R.string.dashboard_progress_period,
+            special.addView(segmentedRow(R.string.dashboard_progress_period,
                     new String[]{
                             getString(R.string.dashboard_progress_day),
                             getString(R.string.dashboard_progress_week),
@@ -1330,11 +1342,11 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     notifyDashboardChanged();
                 }
             });
-            column.addView(zoneRow, spaced());
+            special.addView(zoneRow, spaced());
         }
 
         // Rarely changed, so after the four that shape the widget.
-        column.addView(segmentedRow(R.string.dashboard_builder_rotation_label,
+        more.addView(segmentedRow(R.string.dashboard_builder_rotation_label,
                 new String[]{"0°", "90°", "180°", "270°"},
                 DashboardWidgetLayout.loadRotation(this, widget) / 90,
                 getString(R.string.dashboard_builder_rotation, label(widget)),
@@ -1346,7 +1358,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         // Only the widgets that can run out of data have anything to decide
         // here; the clock always has a value.
         if (DashboardWidgetLayout.canBeEmpty(widget)) {
-            column.addView(segmentedRow(R.string.dashboard_builder_presence_label,
+            more.addView(segmentedRow(R.string.dashboard_builder_presence_label,
                     new String[]{
                             getString(R.string.dashboard_builder_presence_when_data),
                             getString(R.string.dashboard_builder_presence_always)},
@@ -1359,7 +1371,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     }));
         }
 
-        column.addView(segmentedRow(R.string.dashboard_builder_gap_label,
+        more.addView(segmentedRow(R.string.dashboard_builder_gap_label,
                 new String[]{
                         getString(R.string.dashboard_builder_gap_none),
                         getString(R.string.dashboard_builder_gap_small),
@@ -1411,7 +1423,24 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             notifyDashboardChanged();
         });
         group.addView(iconSwitch);
-        column.addView(group, spaced(16));
+        more.addView(group, spaced());
+
+        addSettingsGroup(column, R.string.dashboard_builder_group_place, place);
+        addSettingsGroup(column, R.string.dashboard_builder_group_look, look);
+        addSettingsGroup(column, R.string.dashboard_builder_group_widget, special);
+        addSettingsGroup(column, R.string.dashboard_builder_group_more, more);
+
+        MaterialButton reset = (MaterialButton) getLayoutInflater()
+                .inflate(R.layout.widget_builder_reset_button, column, false);
+        reset.setOnClickListener(view -> {
+            DashboardWidgetLayout.resetAppearance(this, widget);
+            notifyDashboardChanged();
+            // The controls are rebuilt so every one shows the default again.
+            editorRows.removeAllViews();
+            editorSync = null;
+            fillWidgetSheet(editorRows, widget);
+        });
+        column.addView(reset, spaced(16));
 
         MaterialButton remove = (MaterialButton) getLayoutInflater()
                 .inflate(R.layout.widget_builder_remove_button, column, false);
@@ -1421,7 +1450,130 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             selectWidget(null);
             reload();
         });
-        column.addView(remove, spaced(12));
+        column.addView(remove, spaced(4));
+    }
+
+    /** A rounded card the editor's controls of one kind sit in. */
+    private LinearLayout settingsCard() {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackgroundResource(R.drawable.hyper_group_background);
+        card.setPadding(dp(14), dp(2), dp(14), dp(14));
+        return card;
+    }
+
+    /** Adds a card under its heading, unless nothing was put in it. */
+    private void addSettingsGroup(LinearLayout column, int titleResource, LinearLayout card) {
+        if (card.getChildCount() == 0) {
+            return;
+        }
+        TextView title = new TextView(this);
+        title.setTextAppearance(R.style.HyperOS_Text_SectionHeader);
+        title.setText(titleResource);
+        title.setPadding(dp(4), 0, dp(4), 0);
+        column.addView(title, spaced(16));
+        column.addView(card, spaced(6));
+    }
+
+    /**
+     * A row of tiles that each show what they would give.
+     *
+     * <p>Words alone make you pick a variant to find out what it looks like;
+     * a sample on the tile, in the colour it would be drawn in, does not.
+     */
+    private LinearLayout choiceTiles(int labelResource, String[] names,
+            @Nullable String[] samples, @Nullable int[] sampleColours, int selectedIndex,
+            String accessibilityName, java.util.function.IntConsumer onChosen) {
+        LinearLayout column = new LinearLayout(this);
+        column.setOrientation(LinearLayout.VERTICAL);
+        column.setLayoutParams(spaced());
+        TextView label = (TextView) getLayoutInflater()
+                .inflate(R.layout.widget_segment_label, column, false);
+        label.setText(labelResource);
+        column.addView(label);
+
+        LinearLayout tiles = new LinearLayout(this);
+        tiles.setOrientation(LinearLayout.HORIZONTAL);
+        tiles.setContentDescription(accessibilityName);
+        LinearLayout[] all = new LinearLayout[names.length];
+        for (int index = 0; index < names.length; index++) {
+            LinearLayout tile = new LinearLayout(this);
+            tile.setOrientation(LinearLayout.VERTICAL);
+            tile.setGravity(Gravity.CENTER);
+            tile.setPadding(dp(4), dp(10), dp(4), dp(8));
+            tile.setMinimumHeight(dp(64));
+            if (samples != null && samples[index] != null) {
+                TextView sample = new TextView(this);
+                sample.setText(samples[index]);
+                sample.setGravity(Gravity.CENTER);
+                sample.setTextSize(samples[index].length() > 6 ? 14f : 17f);
+                sample.setTypeface(sample.getTypeface(), android.graphics.Typeface.BOLD);
+                sample.setTextColor(sampleColours != null ? sampleColours[index]
+                        : ContextCompat.getColor(this, R.color.hyper_text_primary));
+                tile.addView(sample, new LinearLayout.LayoutParams(-2, -2));
+            }
+            TextView name = new TextView(this);
+            name.setText(names[index]);
+            name.setGravity(Gravity.CENTER);
+            name.setTextSize(11.5f);
+            name.setMaxLines(2);
+            name.setTextColor(ContextCompat.getColor(this, R.color.hyper_text_secondary));
+            LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(-2, -2);
+            nameParams.topMargin = samples != null && samples[index] != null ? dp(4) : 0;
+            tile.addView(name, nameParams);
+            tile.setContentDescription(names[index]);
+            tile.setClickable(true);
+            tile.setFocusable(true);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, -2, 1f);
+            if (index > 0) {
+                params.setMarginStart(dp(8));
+            }
+            all[index] = tile;
+            final int chosen = index;
+            tile.setOnClickListener(view -> {
+                for (int other = 0; other < all.length; other++) {
+                    paintTile(all[other], other == chosen);
+                }
+                onChosen.accept(chosen);
+            });
+            tiles.addView(tile, params);
+        }
+        for (int index = 0; index < all.length; index++) {
+            paintTile(all[index], index == selectedIndex);
+        }
+        column.addView(tiles);
+        return column;
+    }
+
+    private void paintTile(View tile, boolean selected) {
+        android.graphics.drawable.GradientDrawable shape =
+                new android.graphics.drawable.GradientDrawable();
+        shape.setCornerRadius(dp(14));
+        shape.setColor(ContextCompat.getColor(this,
+                selected ? R.color.hyper_accent_container : R.color.hyper_field));
+        shape.setStroke(dp(selected ? 2 : 1), ContextCompat.getColor(this,
+                selected ? R.color.hyper_accent : R.color.hyper_field));
+        tile.setBackground(shape);
+        tile.setSelected(selected);
+    }
+
+    /** What each variant of a widget looks like, where there is something to show. */
+    @Nullable
+    private String[] variantSamples(DashboardWidgetLayout.Widget widget) {
+        java.util.Date now = new java.util.Date();
+        if (widget == DashboardWidgetLayout.Widget.CLOCK) {
+            return new String[]{
+                    new java.text.SimpleDateFormat("HH:mm", Locale.getDefault()).format(now),
+                    new java.text.SimpleDateFormat("HH\nmm", Locale.getDefault()).format(now),
+                    new java.text.SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(now)};
+        }
+        if (widget == DashboardWidgetLayout.Widget.DATE) {
+            return new String[]{
+                    new java.text.SimpleDateFormat("d MMM", Locale.getDefault()).format(now),
+                    new java.text.SimpleDateFormat("dd.MM", Locale.getDefault()).format(now),
+                    new java.text.SimpleDateFormat("dd.MM.yy", Locale.getDefault()).format(now)};
+        }
+        return null;
     }
 
     /** The free page's size control: a label with the percentage, and a slider. */
@@ -1459,6 +1611,23 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
         params.topMargin = dp(topDp);
         return params;
+    }
+
+    /** What each variant is called on its tile, where the tile already shows a sample of it. */
+    private String[] variantCaptions(DashboardWidgetLayout.Widget widget) {
+        if (widget == DashboardWidgetLayout.Widget.CLOCK) {
+            return new String[]{
+                    getString(R.string.dashboard_variant_clock_inline_caption),
+                    getString(R.string.dashboard_variant_clock_stacked_caption),
+                    getString(R.string.dashboard_variant_clock_seconds_caption)};
+        }
+        if (widget == DashboardWidgetLayout.Widget.DATE) {
+            return new String[]{
+                    getString(R.string.dashboard_variant_date_text_caption),
+                    getString(R.string.dashboard_variant_date_numeric_caption),
+                    getString(R.string.dashboard_variant_date_year_caption)};
+        }
+        return variantLabels(widget);
     }
 
     private String[] variantLabels(DashboardWidgetLayout.Widget widget) {

@@ -402,6 +402,12 @@
     <string name="dashboard_variant_date_text">7 Sep</string>
     <string name="dashboard_variant_date_numeric">07.09</string>
     <string name="dashboard_variant_date_year">With year</string>
+    <string name="dashboard_variant_clock_inline_caption">In a row</string>
+    <string name="dashboard_variant_clock_stacked_caption">Stacked</string>
+    <string name="dashboard_variant_clock_seconds_caption">Seconds</string>
+    <string name="dashboard_variant_date_text_caption">Text</string>
+    <string name="dashboard_variant_date_numeric_caption">Numbers</string>
+    <string name="dashboard_variant_date_year_caption">With year</string>
     <string name="dashboard_variant_default">Standard</string>
     <string name="dashboard_variant_alternate">Compact</string>
     <string name="dashboard_variant_detailed">Detailed</string>
@@ -464,6 +470,11 @@
     <string name="dashboard_builder_page_empty_hint">Nothing on this page yet. Add widgets, or move one here from another page.</string>
     <string name="dashboard_widget_page_label">Page</string>
     <string name="dashboard_widget_remove">Remove from panel</string>
+    <string name="dashboard_builder_group_place">Placement</string>
+    <string name="dashboard_builder_group_look">Look</string>
+    <string name="dashboard_builder_group_widget">Widget settings</string>
+    <string name="dashboard_builder_group_more">More</string>
+    <string name="dashboard_builder_reset_widget">Reset widget settings</string>
     <string name="dashboard_builder_move_to_page">Move %1$s to page %2$d</string>
     <string name="dashboard_templates_title">Templates and triggers</string>
     <string name="dashboard_templates_help">Ready-made layouts, saved arrangements, and when one comes up by itself.</string>

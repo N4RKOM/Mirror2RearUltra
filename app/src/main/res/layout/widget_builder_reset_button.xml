@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Puts a widget's own settings back to their defaults, in the builder's widget editor. -->
+<com.google.android.material.button.MaterialButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/HyperOS.Button.Text"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="@string/dashboard_builder_reset_widget" />

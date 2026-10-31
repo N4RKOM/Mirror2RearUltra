@@ -405,6 +405,12 @@
     <string name="dashboard_variant_date_text">7 сент.</string>
     <string name="dashboard_variant_date_numeric">07.09</string>
     <string name="dashboard_variant_date_year">С годом</string>
+    <string name="dashboard_variant_clock_inline_caption">В строку</string>
+    <string name="dashboard_variant_clock_stacked_caption">Столбиком</string>
+    <string name="dashboard_variant_clock_seconds_caption">Секунды</string>
+    <string name="dashboard_variant_date_text_caption">Текстом</string>
+    <string name="dashboard_variant_date_numeric_caption">Числами</string>
+    <string name="dashboard_variant_date_year_caption">С годом</string>
     <string name="dashboard_variant_default">Обычный</string>
     <string name="dashboard_variant_alternate">Компактный</string>
     <string name="dashboard_variant_detailed">Подробный</string>
@@ -468,6 +474,11 @@
     <string name="dashboard_builder_page_empty_hint">На этой странице пока ничего нет. Добавьте виджеты или перенесите сюда виджет с другой страницы.</string>
     <string name="dashboard_widget_page_label">Страница</string>
     <string name="dashboard_widget_remove">Убрать с панели</string>
+    <string name="dashboard_builder_group_place">Расположение</string>
+    <string name="dashboard_builder_group_look">Вид</string>
+    <string name="dashboard_builder_group_widget">Настройки виджета</string>
+    <string name="dashboard_builder_group_more">Дополнительно</string>
+    <string name="dashboard_builder_reset_widget">Сбросить настройки виджета</string>
     <string name="dashboard_builder_move_to_page">Перенести %1$s на страницу %2$d</string>
     <string name="dashboard_templates_title">Шаблоны и триггеры</string>
     <string name="dashboard_templates_help">Готовые раскладки, сохранённые шаблоны и их автоматическое включение.</string>

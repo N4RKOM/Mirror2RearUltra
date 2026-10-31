@@ -165,6 +165,31 @@ final class DashboardWidgetLayout {
                 .apply();
     }
 
+    /**
+     * Puts one widget's own settings back to their defaults.
+     *
+     * <p>Its page, and whether it is on at all, stay as they are: those are
+     * where it lives, not how it looks.
+     */
+    static void resetAppearance(Context context, Widget widget) {
+        String name = widget.name();
+        prefs(context).edit()
+                .remove(SIZE_PREFIX + name)
+                .remove(SCALE_PREFIX + name)
+                .remove(POSITION_PREFIX + name)
+                .remove(VARIANT_PREFIX + name)
+                .remove(STYLE_PREFIX + name)
+                .remove(ROTATION_PREFIX + name)
+                .remove(PRESENCE_PREFIX + name)
+                .remove(GAP_PREFIX + name)
+                .remove(WIDGET_FONT_PREFIX + name)
+                .remove(ICON_HIDDEN_PREFIX + name)
+                .remove(FREE_X_PREFIX + name)
+                .remove(FREE_Y_PREFIX + name)
+                .remove(FREE_START_PREFIX + name)
+                .apply();
+    }
+
     /** Smallest and largest a widget may be scaled to by hand. */
     static final float MIN_SCALE = 0.4f;
     static final float MAX_SCALE = 2.2f;
