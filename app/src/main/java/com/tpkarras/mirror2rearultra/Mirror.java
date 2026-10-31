@@ -1891,12 +1891,15 @@ public class Mirror extends Activity implements
         dashboardView.setLayoutParams(params);
         dashboardView.setPivotX(params.width > 0 ? params.width / 2f : dashboardView.getWidth() / 2f);
         dashboardView.setPivotY(params.height > 0 ? params.height / 2f : dashboardView.getHeight() / 2f);
-        // Which way round a rotated page is drawn follows the phone. Leaning
-        // on its right edge turns the page the other way, so it still reads
-        // the right way up; lying flat the phone leans no way at all, and the
-        // last answer stands rather than the page spinning under the reader.
+        // Which way round a rotated page is drawn follows the phone. Held
+        // upright with the panel facing the reader, the panel's own frame is
+        // turned a quarter against the phone's, and upside down the page
+        // takes the opposite turn to still read the right way up. Lying flat
+        // the phone leans no way at all, and the last answer stands rather
+        // than the page spinning under the reader; before there is one,
+        // upright is assumed.
         dashboardView.setRotation(rotate
-                ? (deviceQuarterTurn == 3 ? 270f : 90f)
+                ? (deviceQuarterTurn == 1 || deviceQuarterTurn == 2 ? 90f : 270f)
                 : 0f);
     }
 
