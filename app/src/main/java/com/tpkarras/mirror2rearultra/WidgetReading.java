@@ -23,8 +23,16 @@ final class WidgetReading {
     /** The widget wants the panel to buzz: a countdown has just run out. */
     final boolean buzz;
 
+    /** How much the figure deserves a glance; it tints the row. */
+    final Severity severity;
+
     private WidgetReading(String text, WidgetIcon icon, boolean primary, boolean gated,
             boolean hasData, float progress, boolean buzz) {
+        this(text, icon, primary, gated, hasData, progress, buzz, Severity.NORMAL);
+    }
+
+    private WidgetReading(String text, WidgetIcon icon, boolean primary, boolean gated,
+            boolean hasData, float progress, boolean buzz, Severity severity) {
         this.text = text;
         this.icon = icon;
         this.primary = primary;
@@ -32,6 +40,11 @@ final class WidgetReading {
         this.hasData = hasData;
         this.progress = progress;
         this.buzz = buzz;
+        this.severity = severity;
+    }
+
+    WidgetReading withSeverity(Severity level) {
+        return new WidgetReading(text, icon, primary, gated, hasData, progress, buzz, level);
     }
 
     /** A row that is always drawn as it stands. */
@@ -54,10 +67,10 @@ final class WidgetReading {
     }
 
     WidgetReading withProgress(float fraction) {
-        return new WidgetReading(text, icon, primary, gated, hasData, fraction, buzz);
+        return new WidgetReading(text, icon, primary, gated, hasData, fraction, buzz, severity);
     }
 
     WidgetReading withBuzz(boolean buzzes) {
-        return new WidgetReading(text, icon, primary, gated, hasData, progress, buzzes);
+        return new WidgetReading(text, icon, primary, gated, hasData, progress, buzzes, severity);
     }
 }

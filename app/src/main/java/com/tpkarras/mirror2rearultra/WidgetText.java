@@ -32,7 +32,27 @@ final class WidgetText {
         return h24 ? "HH:mm" : "h:mm";
     }
 
+    /**
+     * Starts a line that is drawn smaller than the one above it: the seconds
+     * under the clock, the date under the weekday. A stacked reading
+     * otherwise shrinks all its lines alike.
+     */
+    static final String SMALL = "\u0001";
+
     static String clock(Variant variant, boolean h24, Date date, Locale locale) {
+        return clock(variant, h24, date, locale, "d MMM");
+    }
+
+    /** @param dayMonth how this locale writes a day and month, for the clock that carries the date */
+    static String clock(Variant variant, boolean h24, Date date, Locale locale, String dayMonth) {
+        if (variant == Variant.FOURTH) {
+            return new SimpleDateFormat(timeOfDay(h24), locale).format(date)
+                    + "\n" + SMALL + new SimpleDateFormat(dayMonth, locale).format(date);
+        }
+        if (variant == Variant.FIFTH) {
+            return new SimpleDateFormat(timeOfDay(h24), locale).format(date)
+                    + "\n" + SMALL + new SimpleDateFormat("ss", locale).format(date);
+        }
         String pattern = variant == Variant.ALTERNATE ? (h24 ? "HH\nmm" : "h\nmm")
                 : variant == Variant.DETAILED ? (h24 ? "HH:mm:ss" : "h:mm:ss")
                 : timeOfDay(h24);
@@ -40,8 +60,17 @@ final class WidgetText {
     }
 
     static String date(Variant variant, Date date, Locale locale) {
+        return date(variant, date, locale, "d MMM");
+    }
+
+    /** @param dayMonth how this locale writes a day and month; "d MMM" reads wrong in some */
+    static String date(Variant variant, Date date, Locale locale, String dayMonth) {
+        if (variant == Variant.FOURTH) {
+            return new SimpleDateFormat("EEEE", locale).format(date)
+                    + "\n" + SMALL + new SimpleDateFormat(dayMonth, locale).format(date);
+        }
         String pattern = variant == Variant.ALTERNATE ? "dd.MM"
-                : variant == Variant.DETAILED ? "dd.MM.yyyy" : "d MMM";
+                : variant == Variant.DETAILED ? "dd.MM.yyyy" : dayMonth;
         return new SimpleDateFormat(pattern, locale).format(date);
     }
 
@@ -170,6 +199,15 @@ final class WidgetText {
      * the message in front of the room.
      */
     static String lastNotification(Variant variant, String app, String title, String text) {
+        return lastNotification(variant, app, title, text, true);
+    }
+
+    /** @param showText whether the message itself may be printed, not only who sent it */
+    static String lastNotification(Variant variant, String app, String title, String text,
+            boolean showText) {
+        if (!showText) {
+            text = "";
+        }
         if (variant == Variant.ALTERNATE) {
             return app.isEmpty() ? title : app;
         }
@@ -180,19 +218,30 @@ final class WidgetText {
         return title.isEmpty() ? app.isEmpty() ? text : app : title;
     }
 
-    static String calendar(Variant variant, boolean h24, long startMillis, String title,
-            Locale locale) {
-        String value = new SimpleDateFormat(timeOfDay(h24), locale).format(new Date(startMillis));
-        if (!title.isEmpty()) {
-            value += "  " + title;
-        }
+    /**
+     * The next event, said as what it is now: one that has begun reads "until"
+     * its end, one still to come reads its start, and a day with more than one
+     * says how many are behind it.
+     *
+     * @param more how many events follow the one shown
+     */
+    static String calendar(Variant variant, boolean h24, long startMillis, long endMillis,
+            long nowMillis, String title, int more, Locale locale, Words words) {
+        boolean ongoing = startMillis <= nowMillis && endMillis > nowMillis;
+        String stamp = ongoing
+                ? words.get(R.string.dashboard_calendar_until,
+                        new SimpleDateFormat(timeOfDay(h24), locale).format(new Date(endMillis)))
+                : new SimpleDateFormat(timeOfDay(h24), locale).format(new Date(startMillis));
+        String rest = more > 0 ? words.get(R.string.dashboard_calendar_more, more) : "";
         if (variant == Variant.ALTERNATE && !title.isEmpty()) {
-            return title;
+            return rest.isEmpty() ? title : title + " " + rest;
         }
         if (variant == Variant.DETAILED && !title.isEmpty()) {
-            return value.replace("  ", "\n");
+            String value = stamp + "\n" + title;
+            return rest.isEmpty() ? value : value + "\n" + rest;
         }
-        return value;
+        String value = title.isEmpty() ? stamp : stamp + "  " + title;
+        return rest.isEmpty() ? value : value + " " + rest;
     }
 
     /**
@@ -385,6 +434,21 @@ final class WidgetText {
                     city, WorldClock.differenceLabel(minutes));
         }
         return time + "  " + city;
+    }
+
+    /** Every zone of the world clock, one under another. */
+    static String worldClocks(Variant variant, java.util.List<java.util.TimeZone> zones,
+            java.util.List<String> cities, long nowMillis, boolean h24, Locale locale,
+            Words words) {
+        StringBuilder text = new StringBuilder();
+        for (int index = 0; index < zones.size(); index++) {
+            if (index > 0) {
+                text.append('\n');
+            }
+            text.append(worldClock(variant, zones.get(index), cities.get(index), nowMillis, h24,
+                    locale, words));
+        }
+        return text.toString();
     }
 
     // The small widgets

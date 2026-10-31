@@ -157,6 +157,9 @@ final class RearDashboardController implements
     private Float headingDegrees;
     private Float speedMetersPerSecond;
     private Double altitudeMeters;
+    /** When the last fix arrived, on the elapsed-realtime clock; 0 before any. */
+    private long locationAtMillis;
+    private static final long LOCATION_LOST_MILLIS = 12_000L;
     private MirrorProfile activeProfile;
     private long systemStatsUpdatedAt;
     private String networkSummary = "";
@@ -169,6 +172,8 @@ final class RearDashboardController implements
     private java.util.List<long[]> pressureSamples;
     private String calendarTitle = "";
     private Long calendarStartMillis;
+    private long calendarEndMillis = -1L;
+    private int calendarMore;
     private long calendarUpdatedAt;
     private int stepsToday = -1;
 
@@ -461,7 +466,9 @@ final class RearDashboardController implements
                     locationManager.requestLocationUpdates(
                             LocationManager.GPS_PROVIDER,
                             1_000L,
-                            1f,
+                            // Nought, so a phone standing still keeps reporting that it
+                            // is: otherwise a fix gone quiet and a stop look the same.
+                            0f,
                             this,
                             Looper.getMainLooper()
                     );
@@ -472,10 +479,12 @@ final class RearDashboardController implements
                 } catch (SecurityException | IllegalArgumentException ignored) {
                     speedMetersPerSecond = null;
                     altitudeMeters = null;
+                    locationAtMillis = 0L;
                 }
             } else {
                 speedMetersPerSecond = null;
                 altitudeMeters = null;
+                locationAtMillis = 0L;
             }
         }
     }
@@ -621,10 +630,19 @@ final class RearDashboardController implements
         String day = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
         android.content.SharedPreferences prefs = context.getSharedPreferences(
                 "dashboard_steps", Context.MODE_PRIVATE);
-        if (!day.equals(prefs.getString("day", "")) || totalSinceBoot < prefs.getInt("base", 0)) {
-            prefs.edit().putString("day", day).putInt("base", totalSinceBoot).apply();
+        StepTally previous = prefs.contains("day")
+                ? new StepTally(prefs.getString("day", ""), prefs.getInt("base", 0),
+                        prefs.getInt("carried", 0), prefs.getInt("last", 0),
+                        prefs.getInt("today", 0))
+                : null;
+        StepTally tally = StepTally.update(previous, day, totalSinceBoot);
+        if (previous == null || tally.base != previous.base || tally.carried != previous.carried
+                || tally.today != previous.today || !tally.day.equals(previous.day)) {
+            prefs.edit().putString("day", tally.day).putInt("base", tally.base)
+                    .putInt("carried", tally.carried).putInt("last", tally.lastTotal)
+                    .putInt("today", tally.today).apply();
         }
-        stepsToday = Math.max(0, totalSinceBoot - prefs.getInt("base", totalSinceBoot));
+        stepsToday = tally.today;
     }
 
     @Override
@@ -633,6 +651,7 @@ final class RearDashboardController implements
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
+        locationAtMillis = location.getElapsedRealtimeNanos() / 1_000_000L;
         speedMetersPerSecond = location.hasSpeed() ? location.getSpeed() : null;
         altitudeMeters = location.hasAltitude() ? location.getAltitude() : null;
         publish();
@@ -905,6 +924,10 @@ final class RearDashboardController implements
                         WeatherForecastState.sunsets())
                 : null;
         Long nextAlarm = nextAlarmTime();
+        // A fix that has gone quiet is not a phone standing still: the speed
+        // it last read would otherwise stay on the panel for good.
+        boolean lost = locationAtMillis != 0L
+                && SystemClock.elapsedRealtime() - locationAtMillis > LOCATION_LOST_MILLIS;
         MediaWidgetState.Snapshot media = MediaWidgetState.get();
         NotificationWidgetState.Snapshot notifications = NotificationWidgetState.get();
         listener.onDashboardDataChanged(new RearDashboardSnapshot(
@@ -941,7 +964,8 @@ final class RearDashboardController implements
                 new ExtraReadings(uvIndex, airQuality, downBytesPerSecond, upBytesPerSecond,
                         pressureHpa, pressureTrend,
                         weatherSucceededAt > 0L
-                                && now - weatherSucceededAt > WEATHER_STALE_MILLIS)
+                                && now - weatherSucceededAt > WEATHER_STALE_MILLIS,
+                        calendarEndMillis, calendarMore, lost)
         ));
     }
 
@@ -976,17 +1000,22 @@ final class RearDashboardController implements
         calendarUpdatedAt = elapsed;
         calendarTitle = "";
         calendarStartMillis = null;
+        calendarEndMillis = -1L;
+        calendarMore = 0;
         long now = System.currentTimeMillis();
         Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
         android.content.ContentUris.appendId(builder, now);
         android.content.ContentUris.appendId(builder, now + 24L * 60L * 60L * 1000L);
-        String[] columns = {CalendarContract.Instances.TITLE, CalendarContract.Instances.BEGIN};
+        String[] columns = {CalendarContract.Instances.TITLE, CalendarContract.Instances.BEGIN,
+                CalendarContract.Instances.END};
         try (Cursor cursor = context.getContentResolver().query(builder.build(), columns,
                 CalendarContract.Instances.END + ">?", new String[]{String.valueOf(now)},
                 CalendarContract.Instances.BEGIN + " ASC")) {
             if (cursor != null && cursor.moveToFirst()) {
                 calendarTitle = cursor.getString(0);
                 calendarStartMillis = cursor.getLong(1);
+                calendarEndMillis = cursor.getLong(2);
+                calendarMore = Math.max(0, cursor.getCount() - 1);
             }
         } catch (SecurityException ignored) {
             calendarTitle = "";

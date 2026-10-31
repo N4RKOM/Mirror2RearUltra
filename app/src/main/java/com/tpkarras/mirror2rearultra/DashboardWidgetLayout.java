@@ -55,7 +55,12 @@ final class DashboardWidgetLayout {
      */
     enum Font { SYSTEM, THEME, PLAIN }
     /** Widget-specific presentation: normal, compact alternative, or detailed. */
-    enum Variant { DEFAULT, ALTERNATE, DETAILED }
+    enum Variant { DEFAULT, ALTERNATE, DETAILED, FOURTH, FIFTH }
+
+    /** How many of the variants a widget offers; the clock and the date have more than three. */
+    static int variantCount(Widget widget) {
+        return widget == Widget.CLOCK ? 5 : widget == Widget.DATE ? 4 : 3;
+    }
 
     private static final String PREFS = "dashboard_widget_layout";
     private static final String ORDER = "order";
@@ -382,6 +387,42 @@ final class DashboardWidgetLayout {
 
     static void setWorldClockZone(Context context, String zoneId) {
         prefs(context).edit().putString(WORLD_CLOCK_ZONE, zoneId).apply();
+    }
+
+    /** The second and third zone of the world clock: empty where none is chosen. */
+    static String worldClockExtraZone(Context context, int index) {
+        return prefs(context).getString(WORLD_CLOCK_ZONE + "_" + index, "");
+    }
+
+    static void setWorldClockExtraZone(Context context, int index, String zoneId) {
+        prefs(context).edit().putString(WORLD_CLOCK_ZONE + "_" + index, zoneId).apply();
+    }
+
+    /** Every zone the world clock shows, the first always and up to two more. */
+    static java.util.List<String> worldClockZones(Context context) {
+        java.util.List<String> zones = new java.util.ArrayList<>();
+        zones.add(worldClockZone(context));
+        for (int index = 2; index <= 3; index++) {
+            String extra = worldClockExtraZone(context, index);
+            if (!extra.isEmpty() && !zones.contains(extra)) {
+                zones.add(extra);
+            }
+        }
+        return zones;
+    }
+
+    private static final String NOTIFICATION_TEXT_SHOWN = "last_notification_text";
+
+    /**
+     * Whether the last-notification widget may print the message itself. Off
+     * by default: the panel faces the room, and a message is not for the room.
+     */
+    static boolean isNotificationTextShown(Context context) {
+        return prefs(context).getBoolean(NOTIFICATION_TEXT_SHOWN, false);
+    }
+
+    static void setNotificationTextShown(Context context, boolean shown) {
+        prefs(context).edit().putBoolean(NOTIFICATION_TEXT_SHOWN, shown).apply();
     }
 
     /** The countdown's date as days since the epoch, or -1 while none is set. */

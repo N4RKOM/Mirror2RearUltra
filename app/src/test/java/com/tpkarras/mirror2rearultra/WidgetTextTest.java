@@ -177,22 +177,65 @@ public class WidgetTextTest {
                 WidgetText.level(Variant.DETAILED, -3.2f, 10f, EN, WORDS));
     }
 
+    private static final long HOUR = 3_600_000L;
+
     @Test
     public void calendarTitleReplacesTheTimeInTheCompactForm() {
-        java.util.TimeZone previous = java.util.TimeZone.getDefault();
-        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("UTC"));
-        try {
-            assertEquals("14:07  Stand-up",
-                    WidgetText.calendar(Variant.DEFAULT, true, NOON, "Stand-up", EN));
-            assertEquals("Stand-up",
-                    WidgetText.calendar(Variant.ALTERNATE, true, NOON, "Stand-up", EN));
-            assertEquals("14:07\nStand-up",
-                    WidgetText.calendar(Variant.DETAILED, true, NOON, "Stand-up", EN));
+        inUtc(() -> {
+            long before = NOON - HOUR;
+            assertEquals("14:07  Stand-up", WidgetText.calendar(Variant.DEFAULT, true, NOON,
+                    NOON + HOUR, before, "Stand-up", 0, EN, WORDS));
+            assertEquals("Stand-up", WidgetText.calendar(Variant.ALTERNATE, true, NOON,
+                    NOON + HOUR, before, "Stand-up", 0, EN, WORDS));
+            assertEquals("14:07\nStand-up", WidgetText.calendar(Variant.DETAILED, true, NOON,
+                    NOON + HOUR, before, "Stand-up", 0, EN, WORDS));
             // An event without a title is just its time, in every form.
-            assertEquals("14:07", WidgetText.calendar(Variant.ALTERNATE, true, NOON, "", EN));
-        } finally {
-            java.util.TimeZone.setDefault(previous);
-        }
+            assertEquals("14:07", WidgetText.calendar(Variant.ALTERNATE, true, NOON,
+                    NOON + HOUR, before, "", 0, EN, WORDS));
+            return null;
+        });
+    }
+
+    @Test
+    public void calendarOngoingEventReadsUntilItsEndAndCountsTheRest() {
+        inUtc(() -> {
+            assertEquals(w(R.string.dashboard_calendar_until, "15:07") + "  Stand-up",
+                    WidgetText.calendar(Variant.DEFAULT, true, NOON, NOON + HOUR, NOON + 1,
+                            "Stand-up", 0, EN, WORDS));
+            assertEquals("14:07  Stand-up " + w(R.string.dashboard_calendar_more, 2),
+                    WidgetText.calendar(Variant.DEFAULT, true, NOON, NOON + HOUR, NOON - 1,
+                            "Stand-up", 2, EN, WORDS));
+            return null;
+        });
+    }
+
+    @Test
+    public void clockCanCarryTheDateOrSmallSeconds() {
+        inUtc(() -> {
+            assertEquals("14:07\n" + WidgetText.SMALL + "5 Mar",
+                    WidgetText.clock(Variant.FOURTH, true, at(), EN, "d MMM"));
+            assertEquals("14:07\n" + WidgetText.SMALL + "09",
+                    WidgetText.clock(Variant.FIFTH, true, at(), EN, "d MMM"));
+            return null;
+        });
+    }
+
+    @Test
+    public void dateCanNameTheWeekday() {
+        inUtc(() -> {
+            assertEquals("Thursday\n" + WidgetText.SMALL + "5 Mar",
+                    WidgetText.date(Variant.FOURTH, at(), EN, "d MMM"));
+            assertEquals("Mar 5", WidgetText.date(Variant.DEFAULT, at(), EN, "MMM d"));
+            return null;
+        });
+    }
+
+    @Test
+    public void lastNotificationKeepsTheMessageToItselfUnlessAsked() {
+        assertEquals("Anna · Hi",
+                WidgetText.lastNotification(Variant.DETAILED, "Anna", "Hi", "secret", false));
+        assertEquals("Anna · Hi\nsecret",
+                WidgetText.lastNotification(Variant.DETAILED, "Anna", "Hi", "secret", true));
     }
 
     private static String w(int id, Object... arguments) {

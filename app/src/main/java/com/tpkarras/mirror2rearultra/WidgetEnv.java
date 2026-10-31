@@ -23,6 +23,8 @@ final class WidgetEnv {
     final boolean h24;
     final boolean imperial;
     final WidgetText.Words words;
+    /** How this locale writes a day and a month, which "d MMM" gets wrong for some. */
+    final String dayMonth;
     /** Zone ids to city names in the panel's language, which ICU looks up slowly. */
     private final Map<String, String> cityNames;
 
@@ -35,6 +37,13 @@ final class WidgetEnv {
         this.cityNames = cityNames;
         this.h24 = android.text.format.DateFormat.is24HourFormat(context);
         this.imperial = DashboardWidgetLayout.isImperialUnits(context);
+        String pattern;
+        try {
+            pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, "dMMM");
+        } catch (RuntimeException error) {
+            pattern = "d MMM";
+        }
+        this.dayMonth = pattern == null || pattern.isEmpty() ? "d MMM" : pattern;
     }
 
     long now() {

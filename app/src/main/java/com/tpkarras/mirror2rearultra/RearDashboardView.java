@@ -52,6 +52,8 @@ public final class RearDashboardView extends View {
     private RearContentMode contentMode = RearContentMode.DASHBOARD;
     private Bitmap customImage;
     private long customImageStamp;
+    private static final int NOTICE_COLOUR = 0xFFF2A93B;
+    private static final int ALERT_COLOUR = 0xFFEF5350;
     private Palette currentPalette = new Palette(Color.WHITE, Color.BLACK);
     private int selectedPage = 0;
     private float touchStartX;
@@ -269,7 +271,8 @@ public final class RearDashboardView extends View {
     private void redrawWhatChanged() {
         Map<DashboardWidgetLayout.Widget, String> now = new LinkedHashMap<>();
         for (Line line : createLines()) {
-            now.put(line.widget, line.text + '\u0000' + line.primary + '\u0000' + line.icon);
+            now.put(line.widget, line.text + '\u0000' + line.primary + '\u0000' + line.icon
+                    + '\u0000' + line.severity);
         }
         long visualNow = visualFingerprint(snapshot);
         Map<DashboardWidgetLayout.Widget, String> before = lastSignature;
@@ -852,12 +855,13 @@ public final class RearDashboardView extends View {
      * the dash back.
      */
     private void addLine(List<Line> lines, DashboardWidgetLayout.Widget widget,
-            boolean hasData, String value, WidgetIcon icon) {
+            boolean hasData, String value, WidgetIcon icon, Severity severity) {
         if (!hasData && DashboardWidgetLayout.loadPresence(getContext(), widget)
                 == DashboardWidgetLayout.Presence.WHEN_DATA) {
             return;
         }
-        lines.add(new Line(widget, hasData ? value : "—", false, icon));
+        lines.add(new Line(widget, hasData ? value : "—", false, icon,
+                hasData ? severity : Severity.NORMAL));
     }
 
     /** Adds a widget's row the way its reading asks for it. */
@@ -873,9 +877,9 @@ public final class RearDashboardView extends View {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         }
         if (reading.gated) {
-            addLine(lines, widget, reading.hasData, reading.text, reading.icon);
+            addLine(lines, widget, reading.hasData, reading.text, reading.icon, reading.severity);
         } else {
-            lines.add(new Line(widget, reading.text, reading.primary, reading.icon));
+            lines.add(new Line(widget, reading.text, reading.primary, reading.icon, reading.severity));
         }
     }
 
@@ -1219,8 +1223,9 @@ public final class RearDashboardView extends View {
             return true;
         }
         DashboardWidgetLayout.Variant[] all = DashboardWidgetLayout.Variant.values();
+        int count = DashboardWidgetLayout.variantCount(hit);
         DashboardWidgetLayout.Variant next =
-                all[(variantOf(hit).ordinal() + 1) % all.length];
+                all[(variantOf(hit).ordinal() + 1) % count];
         DashboardWidgetLayout.saveVariant(getContext(), hit, next);
         performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
         invalidate();
@@ -2458,12 +2463,13 @@ public final class RearDashboardView extends View {
         textPaint.setFakeBoldText(line.primary);
         float icon = line.icon == WidgetIcon.NONE ? 0f
                 : textPaint.getTextSize() * (ICON_BOX + ICON_GAP);
-        if (line.text.indexOf('\n') >= 0) {
+        boolean hasSmall = line.text.indexOf(WidgetText.SMALL) >= 0;
+        if (line.text.indexOf('\n') >= 0 && !hasSmall) {
             textPaint.setTextSize(textPaint.getTextSize() * 0.58f);
         }
         float text = 0f;
         for (String part : line.text.split("\\n", -1)) {
-            text = Math.max(text, textPaint.measureText(widestFigures(part)));
+            text = Math.max(text, measurePart(part));
         }
         return icon + text;
     }
@@ -2770,7 +2776,11 @@ public final class RearDashboardView extends View {
         // one thing its reader is waiting to see.
         boolean levelled = line.widget == DashboardWidgetLayout.Widget.LEVEL
                 && snapshot.level != null && snapshot.level.isLevel();
-        if (line.style == DashboardWidgetLayout.Style.ACCENT || levelled) {
+        if (line.severity != Severity.NORMAL) {
+            // A figure past its limit says so in a colour of its own, whatever
+            // the widget's style: the warning is the point of the colour.
+            textPaint.setColor(line.severity == Severity.ALERT ? ALERT_COLOUR : NOTICE_COLOUR);
+        } else if (line.style == DashboardWidgetLayout.Style.ACCENT || levelled) {
             textPaint.setColor(MaterialColors.getColor(this,
                     androidx.appcompat.R.attr.colorPrimary, currentPalette.text));
         } else if (line.style == DashboardWidgetLayout.Style.MUTED) {
@@ -2789,13 +2799,21 @@ public final class RearDashboardView extends View {
         float iconSize = line.icon == WidgetIcon.NONE ? 0f : nominal * ICON_BOX;
         float gap = line.icon == WidgetIcon.NONE ? 0f : nominal * ICON_GAP;
         boolean multiline = line.text.indexOf('\n') >= 0;
-        if (multiline) textPaint.setTextSize(textPaint.getTextSize() * 0.58f);
+        // A stack with a small line keeps its main line at full size; any other
+        // stack is two or three lines of equal weight and every one is shrunk.
+        boolean hasSmall = line.text.indexOf(WidgetText.SMALL) >= 0;
+        if (multiline && !hasSmall) textPaint.setTextSize(textPaint.getTextSize() * 0.58f);
         fitTextToWidth(line, width - iconSize - gap);
         float textSpace = Math.max(1f, width - iconSize - gap);
         String[] parts = line.text.split("\\n", -1);
+        boolean[] small = new boolean[parts.length];
+        float mainSize = textPaint.getTextSize();
         CharSequence[] fittedParts = new CharSequence[parts.length];
         float textWidth = 0f;
         for (int index = 0; index < parts.length; index++) {
+            small[index] = parts[index].startsWith(WidgetText.SMALL);
+            if (small[index]) parts[index] = parts[index].substring(WidgetText.SMALL.length());
+            textPaint.setTextSize(small[index] ? mainSize * SMALL_LINE : mainSize);
             fittedParts[index] = TextUtils.ellipsize(parts[index], textPaint, textSpace,
                     TextUtils.TruncateAt.END);
             // The width the line would have with its widest figures, so the
@@ -2804,6 +2822,7 @@ public final class RearDashboardView extends View {
             textWidth = Math.max(textWidth,
                     textPaint.measureText(widestFigures(fittedParts[index])));
         }
+        textPaint.setTextSize(mainSize);
         float totalWidth = iconSize + gap + textWidth;
         float startX;
         if (alignment == Alignment.LEFT) {
@@ -2835,15 +2854,33 @@ public final class RearDashboardView extends View {
         textPaint.setTextAlign(Paint.Align.LEFT);
         float lineHeight = textPaint.descent() - textPaint.ascent();
         float firstBaseline = baseline - (parts.length - 1) * lineHeight * 0.52f;
+        // Where each line stands. Lines of one size are spaced evenly about the
+        // widget's baseline; with a small line the main one keeps its place and
+        // the small one is tucked under it by the two heights.
+        float[] baselines = new float[parts.length];
+        if (hasSmall) {
+            baselines[0] = baseline - (parts.length > 1 ? 0.28f * lineHeight : 0f);
+            for (int index = 1; index < parts.length; index++) {
+                float above = small[index - 1] ? lineHeight * SMALL_LINE : lineHeight;
+                float here = small[index] ? lineHeight * SMALL_LINE : lineHeight;
+                baselines[index] = baselines[index - 1] + above * 0.46f + here * 0.62f;
+            }
+            firstBaseline = baselines[0];
+        } else {
+            for (int index = 0; index < parts.length; index++) {
+                baselines[index] = firstBaseline + index * lineHeight * 1.04f;
+            }
+        }
         for (int index = 0; index < fittedParts.length; index++) {
+            textPaint.setTextSize(small[index] ? mainSize * SMALL_LINE : mainSize);
             float partWidth = textPaint.measureText(fittedParts[index], 0,
                     fittedParts[index].length());
             float textX = startX + iconSize + gap;
             if (alignment == Alignment.CENTER) textX += (textWidth - partWidth) / 2f;
             else if (alignment == Alignment.RIGHT) textX += textWidth - partWidth;
-            canvas.drawText(fittedParts[index].toString(), textX,
-                    firstBaseline + index * lineHeight * 1.04f, textPaint);
+            canvas.drawText(fittedParts[index].toString(), textX, baselines[index], textPaint);
         }
+        textPaint.setTextSize(mainSize);
         // A font's line box stands well clear of the glyphs inside it - the
         // clock's is half again the height of its digits - and this rectangle
         // is three things at once: what a finger has to hit, what the
@@ -2860,15 +2897,17 @@ public final class RearDashboardView extends View {
             if (length == 0) {
                 continue;
             }
+            textPaint.setTextSize(small[index] ? mainSize * SMALL_LINE : mainSize);
             textPaint.getTextBounds(fittedParts[index], 0, length, inkBounds);
             if (inkBounds.isEmpty()) {
                 continue;
             }
             anyInk = true;
-            float partBaseline = firstBaseline + index * lineHeight * 1.04f;
+            float partBaseline = baselines[index];
             inkTop = Math.min(inkTop, partBaseline + inkBounds.top);
             inkBottom = Math.max(inkBottom, partBaseline + inkBounds.bottom);
         }
+        textPaint.setTextSize(mainSize);
         if (line.icon != WidgetIcon.NONE) {
             float iconCentreY = figureMiddle;
             inkTop = Math.min(inkTop, iconCentreY - iconSize / 2f);
@@ -2893,13 +2932,29 @@ public final class RearDashboardView extends View {
         canvas.restoreToCount(canvasState);
     }
 
+    /** How big a small line is beside the main one above it. */
+    private static final float SMALL_LINE = 0.5f;
+
+    /** One line's width with its widest figures, small lines measured at their own size. */
+    private float measurePart(String part) {
+        if (!part.startsWith(WidgetText.SMALL)) {
+            return textPaint.measureText(widestFigures(part));
+        }
+        float size = textPaint.getTextSize();
+        textPaint.setTextSize(size * SMALL_LINE);
+        float width = textPaint.measureText(
+                widestFigures(part.substring(WidgetText.SMALL.length())));
+        textPaint.setTextSize(size);
+        return width;
+    }
+
     /** Shrinks the text alone into the room left beside the icon. */
     private void fitTextToWidth(Line line, float width) {
         float originalSize = textPaint.getTextSize();
         width = Math.max(1f, width);
         float desired = 0f;
         for (String part : line.text.split("\\n", -1)) {
-            desired = Math.max(desired, textPaint.measureText(widestFigures(part)));
+            desired = Math.max(desired, measurePart(part));
         }
         if (desired <= width || desired <= 0f) return;
         // The rear panel is only 126 px wide on the target device. A hard 40% floor
@@ -3559,13 +3614,32 @@ public final class RearDashboardView extends View {
 
     private void drawCompass(Canvas canvas, RectF body) {
         canvas.drawCircle(body.centerX(), body.centerY(), body.width() * 0.42f, iconPaint);
-        Path needle = new Path();
-        needle.moveTo(body.centerX(), body.top + body.height() * 0.10f);
-        needle.lineTo(body.centerX() + body.width() * 0.13f, body.centerY());
-        needle.lineTo(body.centerX(), body.bottom - body.height() * 0.10f);
-        needle.lineTo(body.centerX() - body.width() * 0.13f, body.centerY());
-        needle.close();
-        canvas.drawPath(needle, iconPaint);
+        Float heading = snapshot.headingDegrees;
+        int state = canvas.save();
+        if (heading != null) {
+            // North lies the other way from where the phone points, and what
+            // the canvas is already turned by comes off, as for the level.
+            canvas.rotate(-heading - getRotation() - drawingLineRotation,
+                    body.centerX(), body.centerY());
+        }
+        Path north = new Path();
+        north.moveTo(body.centerX(), body.top + body.height() * 0.10f);
+        north.lineTo(body.centerX() + body.width() * 0.13f, body.centerY());
+        north.lineTo(body.centerX() - body.width() * 0.13f, body.centerY());
+        north.close();
+        Path south = new Path();
+        south.moveTo(body.centerX() + body.width() * 0.13f, body.centerY());
+        south.lineTo(body.centerX(), body.bottom - body.height() * 0.10f);
+        south.lineTo(body.centerX() - body.width() * 0.13f, body.centerY());
+        south.close();
+        // The north half is solid and the south half an outline, so the
+        // needle says which end is which once it has turned.
+        Paint.Style previous = iconPaint.getStyle();
+        iconPaint.setStyle(Paint.Style.FILL);
+        canvas.drawPath(north, iconPaint);
+        iconPaint.setStyle(previous);
+        canvas.drawPath(south, iconPaint);
+        canvas.restoreToCount(state);
     }
 
     private void drawSpeed(Canvas canvas, RectF body) {
@@ -3653,6 +3727,7 @@ public final class RearDashboardView extends View {
         final String text;
         final boolean primary;
         final WidgetIcon icon;
+        final Severity severity;
         final float scale;
         final DashboardWidgetLayout.Position position;
         final DashboardWidgetLayout.Style style;
@@ -3670,6 +3745,12 @@ public final class RearDashboardView extends View {
         final RectF bounds = new RectF();
 
         Line(DashboardWidgetLayout.Widget widget, String text, boolean primary, WidgetIcon icon) {
+            this(widget, text, primary, icon, Severity.NORMAL);
+        }
+
+        Line(DashboardWidgetLayout.Widget widget, String text, boolean primary, WidgetIcon icon,
+                Severity severity) {
+            this.severity = severity;
             this.widget = widget;
             this.text = text;
             this.primary = primary;

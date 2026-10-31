@@ -26,6 +26,8 @@ final class WidgetSpecs {
      * charger is minutes apart.
      */
     static final long CHARGE_TICK_MILLIS = 3_000L;
+    /** A fix that has gone quiet is noticed within this long. */
+    static final long LOCATION_TICK_MILLIS = 5_000L;
 
     private interface Reader {
         @Nullable
@@ -128,14 +130,17 @@ final class WidgetSpecs {
 
         add(s, Widget.CLOCK, NONE,
                 // Seconds on the face want a frame a second.
-                (context, charging) -> DashboardWidgetLayout.loadVariant(context, Widget.CLOCK)
-                        == Variant.DETAILED ? SECOND : 0L,
+                (context, charging) -> {
+                    Variant variant = DashboardWidgetLayout.loadVariant(context, Widget.CLOCK);
+                    return variant == Variant.DETAILED || variant == Variant.FIFTH ? SECOND : 0L;
+                },
                 env -> WidgetReading.primary(WidgetText.clock(env.variant(Widget.CLOCK), env.h24,
-                        new java.util.Date(env.now()), env.locale), WidgetIcon.NONE));
+                        new java.util.Date(env.now()), env.locale, env.dayMonth),
+                        WidgetIcon.NONE));
 
         add(s, Widget.DATE, NONE, null, env -> WidgetReading.plain(
                 WidgetText.date(env.variant(Widget.DATE), new java.util.Date(env.now()),
-                        env.locale), WidgetIcon.NONE));
+                        env.locale, env.dayMonth), WidgetIcon.NONE));
 
         add(s, Widget.BATTERY, NONE, null, env -> env.snapshot.batteryPercent < 0 ? null
                 : WidgetReading.plain(WidgetText.battery(env.variant(Widget.BATTERY),
@@ -146,7 +151,9 @@ final class WidgetSpecs {
                 env.snapshot.temperatureTenthsCelsius < 0 ? null
                         : WidgetReading.plain(WidgetText.temperature(env.variant(Widget.TEMPERATURE),
                         env.degrees(env.snapshot.temperatureTenthsCelsius / 10f),
-                        env.degreeName(), env.locale, env.words), WidgetIcon.TEMPERATURE));
+                        env.degreeName(), env.locale, env.words), WidgetIcon.TEMPERATURE)
+                        .withSeverity(Severity.forPhoneCelsius(
+                                env.snapshot.temperatureTenthsCelsius / 10f)));
 
         add(s, Widget.WEATHER, of(Source.WEATHER), null, env -> {
             String weather = env.weather(Widget.WEATHER);
@@ -171,15 +178,25 @@ final class WidgetSpecs {
                     WidgetEnv.cardinal(heading)), WidgetIcon.COMPASS);
         });
 
-        add(s, Widget.SPEED, of(Source.LOCATION), null, env -> {
+        add(s, Widget.SPEED, of(Source.LOCATION), (context, charging) -> LOCATION_TICK_MILLIS,
+                env -> {
             Float speed = env.snapshot.speedMetersPerSecond;
+            if (env.snapshot.extra.locationLost) {
+                return WidgetReading.gated(true, env.words.get(R.string.dashboard_no_signal),
+                        WidgetIcon.SPEED).withSeverity(Severity.NOTICE);
+            }
             return WidgetReading.gated(speed != null, speed == null ? ""
                     : WidgetText.speed(env.variant(Widget.SPEED), speed, env.imperial,
                     env.words), WidgetIcon.SPEED);
         });
 
-        add(s, Widget.ALTITUDE, of(Source.LOCATION), null, env -> {
+        add(s, Widget.ALTITUDE, of(Source.LOCATION), (context, charging) -> LOCATION_TICK_MILLIS,
+                env -> {
             Double altitude = env.snapshot.altitudeMeters;
+            if (env.snapshot.extra.locationLost) {
+                return WidgetReading.gated(true, env.words.get(R.string.dashboard_no_signal),
+                        WidgetIcon.ALTITUDE).withSeverity(Severity.NOTICE);
+            }
             return WidgetReading.gated(altitude != null, altitude == null ? ""
                     : WidgetText.altitude(env.variant(Widget.ALTITUDE), altitude, env.imperial,
                     env.words), WidgetIcon.ALTITUDE);
@@ -206,13 +223,15 @@ final class WidgetSpecs {
         add(s, Widget.MEMORY, NONE, null, env -> WidgetReading.gated(
                 env.snapshot.memoryPercent >= 0,
                 WidgetText.percent(env.snapshot.memoryPercent, env.variant(Widget.MEMORY),
-                        env.words.get(R.string.dashboard_variant_memory)), WidgetIcon.MEMORY));
+                        env.words.get(R.string.dashboard_variant_memory)), WidgetIcon.MEMORY)
+                .withSeverity(Severity.forUsedPercent(env.snapshot.memoryPercent)));
 
         add(s, Widget.STORAGE, NONE, null, env -> WidgetReading.gated(
                 env.snapshot.storagePercentFree >= 0,
                 WidgetText.percent(env.snapshot.storagePercentFree, env.variant(Widget.STORAGE),
                         env.words.get(R.string.dashboard_variant_storage_free)),
-                WidgetIcon.STORAGE));
+                WidgetIcon.STORAGE).withSeverity(
+                        Severity.forFreePercent(env.snapshot.storagePercentFree)));
 
         add(s, Widget.NOTIFICATIONS, NONE, null, env -> {
             // Nothing unread is the empty case here, not a missing reading.
@@ -226,7 +245,8 @@ final class WidgetSpecs {
             Long start = env.snapshot.calendarStartMillis;
             return WidgetReading.gated(start != null, start == null ? ""
                     : WidgetText.calendar(env.variant(Widget.CALENDAR), env.h24, start,
-                    env.snapshot.calendarTitle, env.locale), WidgetIcon.CALENDAR);
+                    env.snapshot.extra.calendarEndMillis, env.now(), env.snapshot.calendarTitle,
+                    env.snapshot.extra.calendarMore, env.locale, env.words), WidgetIcon.CALENDAR);
         });
 
         add(s, Widget.STEPS, of(Source.STEPS), null, env -> WidgetReading.gated(
@@ -246,7 +266,8 @@ final class WidgetSpecs {
         add(s, Widget.LAST_NOTIFICATION, NONE, null, env -> {
             String value = WidgetText.lastNotification(env.variant(Widget.LAST_NOTIFICATION),
                     env.snapshot.notificationApp, env.snapshot.notificationTitle,
-                    env.snapshot.notificationText);
+                    env.snapshot.notificationText,
+                    DashboardWidgetLayout.isNotificationTextShown(env.context));
             return WidgetReading.gated(!value.isEmpty(), value, WidgetIcon.MESSAGE);
         });
 
@@ -302,10 +323,14 @@ final class WidgetSpecs {
         });
 
         add(s, Widget.WORLD_CLOCK, NONE, null, env -> {
-            String zoneId = DashboardWidgetLayout.worldClockZone(env.context);
-            return WidgetReading.plain(WidgetText.worldClock(env.variant(Widget.WORLD_CLOCK),
-                    TimeZone.getTimeZone(zoneId), env.cityName(zoneId), env.now(), env.h24,
-                    env.locale, env.words), WidgetIcon.GLOBE);
+            List<TimeZone> zones = new ArrayList<>();
+            List<String> cities = new ArrayList<>();
+            for (String zoneId : DashboardWidgetLayout.worldClockZones(env.context)) {
+                zones.add(TimeZone.getTimeZone(zoneId));
+                cities.add(env.cityName(zoneId));
+            }
+            return WidgetReading.plain(WidgetText.worldClocks(env.variant(Widget.WORLD_CLOCK),
+                    zones, cities, env.now(), env.h24, env.locale, env.words), WidgetIcon.GLOBE);
         });
 
         // Drawn as a picture by the view; the text is only what a page too
@@ -315,14 +340,17 @@ final class WidgetSpecs {
         add(s, Widget.UV_INDEX, of(Source.WEATHER), null, env -> {
             Float uv = env.snapshot.extra.uvIndex;
             return WidgetReading.gated(uv != null, uv == null ? ""
-                    : WidgetText.uv(env.variant(Widget.UV_INDEX), uv, env.words), WidgetIcon.UV);
+                    : WidgetText.uv(env.variant(Widget.UV_INDEX), uv, env.words), WidgetIcon.UV)
+                    .withSeverity(uv == null ? Severity.NORMAL
+                            : Severity.forUvBand(WidgetMath.uvBand(uv)));
         });
 
         add(s, Widget.AIR_QUALITY, of(Source.WEATHER), null, env -> {
             Integer air = env.snapshot.extra.airQuality;
             return WidgetReading.gated(air != null, air == null ? ""
                     : WidgetText.air(env.variant(Widget.AIR_QUALITY), air, env.words),
-                    WidgetIcon.AIR);
+                    WidgetIcon.AIR).withSeverity(air == null ? Severity.NORMAL
+                    : Severity.forAirBand(WidgetMath.airBand(air)));
         });
 
         add(s, Widget.NETWORK_SPEED, NONE, (context, charging) -> TRAFFIC_TICK_MILLIS, env -> {

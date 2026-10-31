@@ -1398,29 +1398,64 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             android.icu.text.TimeZoneNames names =
                     android.icu.text.TimeZoneNames.getInstance(Locale.getDefault());
             String[] zoneLabels = new String[zones.size()];
-            String chosen = DashboardWidgetLayout.worldClockZone(this);
-            int current = 0;
             for (int index = 0; index < zones.size(); index++) {
                 String id = zones.get(index);
                 String city = names.getExemplarLocationName(id);
                 if (city == null || city.isEmpty()) city = WorldClock.fallbackName(id);
                 int offset = java.util.TimeZone.getTimeZone(id).getOffset(now) / 60_000;
-                zoneLabels[index] = city + " · " + WorldClock.utcLabel(offset);
-                if (id.equals(chosen)) current = index;
+                zoneLabels[index] = city + " \u00b7 " + WorldClock.utcLabel(offset);
             }
-            HyperValueRow zoneRow = (HyperValueRow) getLayoutInflater()
-                    .inflate(R.layout.widget_value_row_single, column, false);
-            zoneRow.setTitle(getString(R.string.dashboard_world_clock_zone));
-            zoneRow.setEntries(zoneLabels);
-            zoneRow.setValue(zoneLabels[current]);
-            zoneRow.setBackgroundResource(R.drawable.hyper_segment_track);
-            zoneRow.setOnItemSelectedListener(position -> {
-                if (position >= 0 && position < zones.size()) {
-                    DashboardWidgetLayout.setWorldClockZone(this, zones.get(position));
-                    notifyDashboardChanged();
+            // The first city always shows; the second and third may be left out.
+            for (int slot = 1; slot <= 3; slot++) {
+                final int which = slot;
+                boolean optional = slot > 1;
+                String chosen = slot == 1 ? DashboardWidgetLayout.worldClockZone(this)
+                        : DashboardWidgetLayout.worldClockExtraZone(this, slot);
+                String[] labels = new String[zoneLabels.length + (optional ? 1 : 0)];
+                if (optional) {
+                    labels[0] = getString(R.string.dashboard_world_clock_zone_none);
                 }
+                System.arraycopy(zoneLabels, 0, labels, optional ? 1 : 0, zoneLabels.length);
+                int current = optional ? 0 : -1;
+                for (int index = 0; index < zones.size(); index++) {
+                    if (zones.get(index).equals(chosen)) current = index + (optional ? 1 : 0);
+                }
+                HyperValueRow zoneRow = (HyperValueRow) getLayoutInflater()
+                        .inflate(R.layout.widget_value_row_single, column, false);
+                zoneRow.setTitle(slot == 1 ? getString(R.string.dashboard_world_clock_zone)
+                        : getString(R.string.dashboard_world_clock_zone_n, slot));
+                zoneRow.setEntries(labels);
+                zoneRow.setValue(labels[Math.max(0, current)]);
+                zoneRow.setBackgroundResource(R.drawable.hyper_segment_track);
+                zoneRow.setOnItemSelectedListener(position -> {
+                    int offsetIndex = position - (optional ? 1 : 0);
+                    if (which == 1 && offsetIndex >= 0 && offsetIndex < zones.size()) {
+                        DashboardWidgetLayout.setWorldClockZone(this, zones.get(offsetIndex));
+                    } else if (which > 1) {
+                        DashboardWidgetLayout.setWorldClockExtraZone(this, which,
+                                offsetIndex >= 0 && offsetIndex < zones.size()
+                                        ? zones.get(offsetIndex) : "");
+                    } else {
+                        return;
+                    }
+                    notifyDashboardChanged();
+                });
+                special.addView(zoneRow, spaced());
+            }
+        }
+
+        // The last message's own words, which the panel keeps to itself unless asked.
+        if (widget == DashboardWidgetLayout.Widget.LAST_NOTIFICATION) {
+            MaterialSwitch textSwitch = (MaterialSwitch) getLayoutInflater()
+                    .inflate(R.layout.widget_switch_row_bottom, special, false);
+            textSwitch.setText(R.string.dashboard_notification_text_shown);
+            textSwitch.setChecked(DashboardWidgetLayout.isNotificationTextShown(this));
+            textSwitch.setBackground(null);
+            textSwitch.setOnCheckedChangeListener((button, checked) -> {
+                DashboardWidgetLayout.setNotificationTextShown(this, checked);
+                notifyDashboardChanged();
             });
-            special.addView(zoneRow, spaced());
+            special.addView(textSwitch, spaced());
         }
 
         // Rarely changed, so after the four that shape the widget.
@@ -1647,13 +1682,22 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             return new String[]{
                     new java.text.SimpleDateFormat("HH:mm", Locale.getDefault()).format(now),
                     new java.text.SimpleDateFormat("HH\nmm", Locale.getDefault()).format(now),
-                    new java.text.SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(now)};
+                    new java.text.SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(now),
+                    new java.text.SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
+                            + "\n" + new java.text.SimpleDateFormat("d MMM",
+                                    Locale.getDefault()).format(now),
+                    new java.text.SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
+                            + "\n" + new java.text.SimpleDateFormat("ss",
+                                    Locale.getDefault()).format(now)};
         }
         if (widget == DashboardWidgetLayout.Widget.DATE) {
             return new String[]{
                     new java.text.SimpleDateFormat("d MMM", Locale.getDefault()).format(now),
                     new java.text.SimpleDateFormat("dd.MM", Locale.getDefault()).format(now),
-                    new java.text.SimpleDateFormat("dd.MM.yy", Locale.getDefault()).format(now)};
+                    new java.text.SimpleDateFormat("dd.MM.yy", Locale.getDefault()).format(now),
+                    new java.text.SimpleDateFormat("EEE", Locale.getDefault()).format(now)
+                            + "\n" + new java.text.SimpleDateFormat("d MMM",
+                                    Locale.getDefault()).format(now)};
         }
         return null;
     }
@@ -1701,13 +1745,16 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             return new String[]{
                     getString(R.string.dashboard_variant_clock_inline_caption),
                     getString(R.string.dashboard_variant_clock_stacked_caption),
-                    getString(R.string.dashboard_variant_clock_seconds_caption)};
+                    getString(R.string.dashboard_variant_clock_seconds_caption),
+                    getString(R.string.dashboard_variant_clock_date_caption),
+                    getString(R.string.dashboard_variant_clock_small_seconds_caption)};
         }
         if (widget == DashboardWidgetLayout.Widget.DATE) {
             return new String[]{
                     getString(R.string.dashboard_variant_date_text_caption),
                     getString(R.string.dashboard_variant_date_numeric_caption),
-                    getString(R.string.dashboard_variant_date_year_caption)};
+                    getString(R.string.dashboard_variant_date_year_caption),
+                    getString(R.string.dashboard_variant_date_weekday_caption)};
         }
         return variantLabels(widget);
     }
@@ -1717,13 +1764,16 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             return new String[]{
                     getString(R.string.dashboard_variant_clock_inline),
                     getString(R.string.dashboard_variant_clock_stacked),
-                    getString(R.string.dashboard_variant_clock_seconds)};
+                    getString(R.string.dashboard_variant_clock_seconds),
+                    getString(R.string.dashboard_variant_clock_date),
+                    getString(R.string.dashboard_variant_clock_small_seconds)};
         }
         if (widget == DashboardWidgetLayout.Widget.DATE) {
             return new String[]{
                     getString(R.string.dashboard_variant_date_text),
                     getString(R.string.dashboard_variant_date_numeric),
-                    getString(R.string.dashboard_variant_date_year)};
+                    getString(R.string.dashboard_variant_date_year),
+                    getString(R.string.dashboard_variant_date_weekday)};
         }
         return new String[]{
                 getString(R.string.dashboard_variant_default),

@@ -22,6 +22,11 @@ final class ExtraReadings {
     final int pressureTrend;
     /** The weather has not been fetched for a long while, so its figures are old. */
     final boolean weatherStale;
+    /** When the event shown ends, and how many follow it; -1 and 0 without one. */
+    final long calendarEndMillis;
+    final int calendarMore;
+    /** A satellite fix was had and has gone quiet: not the same as standing still. */
+    final boolean locationLost;
 
     ExtraReadings(@Nullable Float uvIndex, @Nullable Integer airQuality,
             long downBytesPerSecond, long upBytesPerSecond,
@@ -33,6 +38,17 @@ final class ExtraReadings {
     ExtraReadings(@Nullable Float uvIndex, @Nullable Integer airQuality,
             long downBytesPerSecond, long upBytesPerSecond,
             @Nullable Float pressureHpa, int pressureTrend, boolean weatherStale) {
+        this(uvIndex, airQuality, downBytesPerSecond, upBytesPerSecond, pressureHpa,
+                pressureTrend, weatherStale, -1L, 0, false);
+    }
+
+    ExtraReadings(@Nullable Float uvIndex, @Nullable Integer airQuality,
+            long downBytesPerSecond, long upBytesPerSecond,
+            @Nullable Float pressureHpa, int pressureTrend, boolean weatherStale,
+            long calendarEndMillis, int calendarMore, boolean locationLost) {
+        this.calendarEndMillis = calendarEndMillis;
+        this.calendarMore = calendarMore;
+        this.locationLost = locationLost;
         this.weatherStale = weatherStale;
         this.uvIndex = uvIndex;
         this.airQuality = airQuality;
