@@ -2861,9 +2861,10 @@ public final class RearDashboardView extends View {
         if (hasSmall) {
             baselines[0] = baseline - (parts.length > 1 ? 0.28f * lineHeight : 0f);
             for (int index = 1; index < parts.length; index++) {
-                float above = small[index - 1] ? lineHeight * SMALL_LINE : lineHeight;
-                float here = small[index] ? lineHeight * SMALL_LINE : lineHeight;
-                baselines[index] = baselines[index - 1] + above * 0.46f + here * 0.62f;
+                // A small line sits just under the digits above it: its own cap
+                // height and a little air, not a full line of the main size.
+                baselines[index] = baselines[index - 1]
+                        + (small[index] ? lineHeight * 0.44f : lineHeight * 1.04f);
             }
             firstBaseline = baselines[0];
         } else {
@@ -3617,9 +3618,10 @@ public final class RearDashboardView extends View {
         Float heading = snapshot.headingDegrees;
         int state = canvas.save();
         if (heading != null) {
-            // North lies the other way from where the phone points, and what
-            // the canvas is already turned by comes off, as for the level.
-            canvas.rotate(-heading - getRotation() - drawingLineRotation,
+            // North lies the other way from where the phone points. The view's
+            // turn stays: it moves the phone's own top with it, which is what
+            // the heading is measured from. Only the widget's own turn comes off.
+            canvas.rotate(-heading - drawingLineRotation,
                     body.centerX(), body.centerY());
         }
         Path north = new Path();

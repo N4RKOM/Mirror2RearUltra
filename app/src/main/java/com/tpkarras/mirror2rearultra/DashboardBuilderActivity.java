@@ -1641,7 +1641,9 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             tile.setContentDescription(names[index]);
             tile.setClickable(true);
             tile.setFocusable(true);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, -2, 1f);
+            // Match the row's height, so tiles with a stacked sample or a two-line
+            // caption do not make their neighbours shorter than themselves.
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, -1, 1f);
             if (index > 0) {
                 params.setMarginStart(dp(8));
             }
