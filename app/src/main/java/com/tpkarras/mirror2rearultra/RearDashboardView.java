@@ -3618,10 +3618,11 @@ public final class RearDashboardView extends View {
         Float heading = snapshot.headingDegrees;
         int state = canvas.save();
         if (heading != null) {
-            // North lies the other way from where the phone points. The view's
-            // turn stays: it moves the phone's own top with it, which is what
-            // the heading is measured from. Only the widget's own turn comes off.
-            canvas.rotate(-heading - drawingLineRotation,
+            // North lies the other way from where the phone's top points. The
+            // view is turned so that the page reads upright, which leaves the
+            // phone's top at the opposite turn on the canvas: it comes off,
+            // with the widget's own, as for the level.
+            canvas.rotate(-heading - getRotation() - drawingLineRotation,
                     body.centerX(), body.centerY());
         }
         Path north = new Path();
@@ -3637,8 +3638,11 @@ public final class RearDashboardView extends View {
         // The north half is solid and the south half an outline, so the
         // needle says which end is which once it has turned.
         Paint.Style previous = iconPaint.getStyle();
+        int colour = iconPaint.getColor();
         iconPaint.setStyle(Paint.Style.FILL);
+        iconPaint.setColor(0xFFE53935);
         canvas.drawPath(north, iconPaint);
+        iconPaint.setColor(colour);
         iconPaint.setStyle(previous);
         canvas.drawPath(south, iconPaint);
         canvas.restoreToCount(state);

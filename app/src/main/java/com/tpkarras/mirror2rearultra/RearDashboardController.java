@@ -524,6 +524,13 @@ final class RearDashboardController implements
         SensorManager.getRotationMatrixFromVector(rotation, event.values);
         SensorManager.getOrientation(rotation, orientation);
         float degrees = (float) Math.toDegrees(orientation[0]);
+        // Lying screen down, the panel is the face in view and the system compass
+        // reads from there: its figure is ours turned half way round (measured
+        // on the device, 311 against 124 and 50 against 230 after a quarter turn).
+        // rotation[8] is how far the screen faces up; vertical is left as it is.
+        if (rotation[8] < -0.5f) {
+            degrees += 180f;
+        }
         headingDegrees = (degrees + 360f) % 360f;
         publish();
     }
