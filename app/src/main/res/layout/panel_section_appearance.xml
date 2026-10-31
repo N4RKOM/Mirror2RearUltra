@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/dashboard_section_appearance"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout style="@style/HyperOS.Group">
+
+        <com.tpkarras.mirror2rearultra.HyperValueRow
+            android:id="@+id/dashboard_theme_input"
+            style="@style/HyperOS.ValueRow.Top"
+            app:rowTitle="@string/dashboard_theme_title" />
+
+        <com.tpkarras.mirror2rearultra.HyperValueRow
+            android:id="@+id/dashboard_font_input"
+            style="@style/HyperOS.ValueRow"
+            app:rowTitle="@string/dashboard_font_title" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/dashboard_font_add_button"
+            style="@style/HyperOS.ActionRow"
+            android:text="@string/dashboard_font_add" />
+
+        <com.tpkarras.mirror2rearultra.HyperValueRow
+            android:id="@+id/dashboard_font_remove_input"
+            style="@style/HyperOS.ValueRow"
+            android:visibility="gone"
+            app:rowTitle="@string/dashboard_font_remove" />
+
+        <TextView
+            android:id="@+id/dashboard_text_scale_value"
+            style="@style/HyperOS.SliderLabel"
+            android:labelFor="@id/dashboard_text_scale_slider"
+            android:text="@string/dashboard_text_scale_default" />
+
+        <com.tpkarras.mirror2rearultra.HyperSlider
+            android:id="@+id/dashboard_text_scale_slider"
+            style="@style/HyperOS.Slider.Row"
+            android:contentDescription="@string/dashboard_text_scale_default"
+            app:hyperStepSize="5"
+            app:hyperValueFrom="70"
+            app:hyperValueTo="160" />
+
+        <TextView
+            android:id="@+id/dashboard_background_opacity_value"
+            style="@style/HyperOS.SliderLabel"
+            android:labelFor="@id/dashboard_background_opacity_slider"
+            android:text="@string/dashboard_background_opacity_default" />
+
+        <com.tpkarras.mirror2rearultra.HyperSlider
+            android:id="@+id/dashboard_background_opacity_slider"
+            style="@style/HyperOS.Slider.Row"
+            android:contentDescription="@string/dashboard_background_opacity_default"
+            app:hyperStepSize="5"
+            app:hyperValueFrom="0"
+            app:hyperValueTo="100" />
+    </LinearLayout>
+</LinearLayout>

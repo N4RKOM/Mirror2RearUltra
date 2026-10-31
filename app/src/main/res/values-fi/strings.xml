@@ -557,4 +557,11 @@
     <string name="dashboard_pressure_rising">nousee</string>
     <string name="dashboard_pressure_falling">laskee</string>
     <string name="dashboard_pressure_steady">vakaa</string>
+    <string name="app_look_title">Käyttöliittymä</string>
+    <string name="app_theme_title">Teema</string>
+    <string name="app_theme_system">Järjestelmän</string>
+    <string name="app_theme_light">Vaalea</string>
+    <string name="app_theme_dark">Tumma</string>
+    <string name="app_language_title">Kieli</string>
+    <string name="app_language_system">Järjestelmän oletus</string>
 </resources>

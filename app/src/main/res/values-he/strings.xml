@@ -561,4 +561,11 @@
     <string name="dashboard_pressure_rising">עולה</string>
     <string name="dashboard_pressure_falling">יורד</string>
     <string name="dashboard_pressure_steady">יציב</string>
+    <string name="app_look_title">ממשק</string>
+    <string name="app_theme_title">ערכת נושא</string>
+    <string name="app_theme_system">מערכת</string>
+    <string name="app_theme_light">בהיר</string>
+    <string name="app_theme_dark">כהה</string>
+    <string name="app_language_title">שפה</string>
+    <string name="app_language_system">ברירת מחדל של המערכת</string>
 </resources>

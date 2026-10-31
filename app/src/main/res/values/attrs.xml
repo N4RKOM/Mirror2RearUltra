@@ -11,4 +11,12 @@
         <attr name="hyperValueTo" format="float" />
         <attr name="hyperStepSize" format="float" />
     </declare-styleable>
+    <!-- The accent family; the Monet overlay swaps these for the wallpaper colours. -->
+    <attr name="hyperAccent" format="color" />
+    <attr name="hyperAccentPressed" format="color" />
+    <attr name="hyperAccentDisabled" format="color" />
+    <attr name="hyperOnAccent" format="color" />
+    <attr name="hyperAccentContainer" format="color" />
+    <attr name="hyperOnAccentContainer" format="color" />
+    <attr name="hyperSelection" format="color" />
 </resources>

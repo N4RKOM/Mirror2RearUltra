@@ -7,8 +7,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.content.res.ColorStateList;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -18,23 +24,34 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
- * Chooses which widgets the rear panel shows.
+ * The add-widget gallery: chooses which widgets the rear panel shows.
  *
- * <p>The single place a widget is switched on or off. It used to be two: a
- * switch per widget on the dashboard settings page and another inside every
- * builder card, which forced the builder to list all nineteen widgets whether
- * or not they were in use. The builder now lists only what is on, and what is
- * off waits here.
+ * <p>The single place a widget is switched on or off. A widget is a card;
+ * tapping it puts the widget on the page the gallery was opened for, tapping
+ * it again takes it off. A search field and group chips narrow what is shown.
  *
- * <p>Reached from both the dashboard settings page and the builder.
+ * <p>The on/off state still lives in one {@link MaterialSwitch} per widget,
+ * kept in code and never shown: the listeners that save a widget, ask for its
+ * permission and tell the panel were written against them, and a card is a
+ * view of the same switch. What a widget needs - a city, a text, a code, a
+ * permission - sits under "Widget settings", and a block appears only while a
+ * widget that uses it is on.
+ *
+ * <p>Reached from the widgets tab and the builder.
  */
 public class WidgetPickerActivity extends AppCompatActivity implements MediaWidgetState.Listener {
     /**
@@ -45,78 +62,62 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
      */
     static final String EXTRA_TARGET_PAGE = "target_page";
 
-    /**
-     * Pairs each switch with the widget it controls, in the order the screen
-     * lists them. A widget needs one row here and one row in the layout.
-     */
-    private static final class WidgetRow {
-        final int viewId;
-        final DashboardWidgetLayout.Widget widget;
-
-        WidgetRow(int viewId, DashboardWidgetLayout.Widget widget) {
-            this.viewId = viewId;
-            this.widget = widget;
-        }
-    }
-
-    private static final WidgetRow[] WIDGET_ROWS = {
+    /** Every widget, in the order the gallery lists them within its group. */
+    private static final DashboardWidgetLayout.Widget[] WIDGETS = {
             // Time
-            new WidgetRow(R.id.dashboard_clock_switch, DashboardWidgetLayout.Widget.CLOCK),
-            new WidgetRow(R.id.dashboard_date_switch, DashboardWidgetLayout.Widget.DATE),
-            new WidgetRow(R.id.dashboard_world_clock_switch,
-                    DashboardWidgetLayout.Widget.WORLD_CLOCK),
-            new WidgetRow(R.id.dashboard_countdown_switch, DashboardWidgetLayout.Widget.COUNTDOWN),
-            new WidgetRow(R.id.dashboard_progress_switch, DashboardWidgetLayout.Widget.PROGRESS),
-            new WidgetRow(R.id.dashboard_next_alarm_switch, DashboardWidgetLayout.Widget.NEXT_ALARM),
-            new WidgetRow(R.id.dashboard_session_timer_switch,
-                    DashboardWidgetLayout.Widget.SESSION_TIMER),
-            new WidgetRow(R.id.dashboard_timer_switch, DashboardWidgetLayout.Widget.TIMER),
-            new WidgetRow(R.id.dashboard_calendar_switch, DashboardWidgetLayout.Widget.CALENDAR),
+            DashboardWidgetLayout.Widget.CLOCK,
+            DashboardWidgetLayout.Widget.DATE,
+            DashboardWidgetLayout.Widget.WORLD_CLOCK,
+            DashboardWidgetLayout.Widget.COUNTDOWN,
+            DashboardWidgetLayout.Widget.PROGRESS,
+            DashboardWidgetLayout.Widget.NEXT_ALARM,
+            DashboardWidgetLayout.Widget.SESSION_TIMER,
+            DashboardWidgetLayout.Widget.TIMER,
+            DashboardWidgetLayout.Widget.CALENDAR,
             // Device
-            new WidgetRow(R.id.dashboard_battery_switch, DashboardWidgetLayout.Widget.BATTERY),
-            new WidgetRow(R.id.dashboard_charging_switch, DashboardWidgetLayout.Widget.CHARGING),
-            new WidgetRow(R.id.dashboard_sound_mode_switch,
-                    DashboardWidgetLayout.Widget.SOUND_MODE),
-            new WidgetRow(R.id.dashboard_temperature_switch,
-                    DashboardWidgetLayout.Widget.TEMPERATURE),
-            new WidgetRow(R.id.dashboard_memory_switch, DashboardWidgetLayout.Widget.MEMORY),
-            new WidgetRow(R.id.dashboard_storage_switch, DashboardWidgetLayout.Widget.STORAGE),
-            new WidgetRow(R.id.dashboard_network_switch, DashboardWidgetLayout.Widget.NETWORK),
-            new WidgetRow(R.id.dashboard_network_speed_switch,
-                    DashboardWidgetLayout.Widget.NETWORK_SPEED),
+            DashboardWidgetLayout.Widget.BATTERY,
+            DashboardWidgetLayout.Widget.CHARGING,
+            DashboardWidgetLayout.Widget.SOUND_MODE,
+            DashboardWidgetLayout.Widget.TEMPERATURE,
+            DashboardWidgetLayout.Widget.MEMORY,
+            DashboardWidgetLayout.Widget.STORAGE,
+            DashboardWidgetLayout.Widget.NETWORK,
+            DashboardWidgetLayout.Widget.NETWORK_SPEED,
             // Weather and sensors
-            new WidgetRow(R.id.dashboard_weather_switch, DashboardWidgetLayout.Widget.WEATHER),
-            new WidgetRow(R.id.dashboard_fullscreen_weather_switch,
-                    DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER),
-            new WidgetRow(R.id.dashboard_sun_switch, DashboardWidgetLayout.Widget.SUN),
-            new WidgetRow(R.id.dashboard_uv_index_switch, DashboardWidgetLayout.Widget.UV_INDEX),
-            new WidgetRow(R.id.dashboard_air_quality_switch,
-                    DashboardWidgetLayout.Widget.AIR_QUALITY),
-            new WidgetRow(R.id.dashboard_moon_switch, DashboardWidgetLayout.Widget.MOON),
-            new WidgetRow(R.id.dashboard_compass_switch, DashboardWidgetLayout.Widget.COMPASS),
-            new WidgetRow(R.id.dashboard_level_switch, DashboardWidgetLayout.Widget.LEVEL),
-            new WidgetRow(R.id.dashboard_speed_switch, DashboardWidgetLayout.Widget.SPEED),
-            new WidgetRow(R.id.dashboard_altitude_switch, DashboardWidgetLayout.Widget.ALTITUDE),
-            new WidgetRow(R.id.dashboard_pressure_switch, DashboardWidgetLayout.Widget.PRESSURE),
-            new WidgetRow(R.id.dashboard_steps_switch, DashboardWidgetLayout.Widget.STEPS),
+            DashboardWidgetLayout.Widget.WEATHER,
+            DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER,
+            DashboardWidgetLayout.Widget.SUN,
+            DashboardWidgetLayout.Widget.UV_INDEX,
+            DashboardWidgetLayout.Widget.AIR_QUALITY,
+            DashboardWidgetLayout.Widget.MOON,
+            DashboardWidgetLayout.Widget.COMPASS,
+            DashboardWidgetLayout.Widget.LEVEL,
+            DashboardWidgetLayout.Widget.SPEED,
+            DashboardWidgetLayout.Widget.ALTITUDE,
+            DashboardWidgetLayout.Widget.PRESSURE,
+            DashboardWidgetLayout.Widget.STEPS,
             // Media and notifications
-            new WidgetRow(R.id.dashboard_media_switch, DashboardWidgetLayout.Widget.MEDIA),
-            new WidgetRow(R.id.dashboard_fullscreen_media_switch,
-                    DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA),
-            new WidgetRow(R.id.dashboard_notifications_switch,
-                    DashboardWidgetLayout.Widget.NOTIFICATIONS),
-            new WidgetRow(R.id.dashboard_last_notification_switch,
-                    DashboardWidgetLayout.Widget.LAST_NOTIFICATION),
+            DashboardWidgetLayout.Widget.MEDIA,
+            DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA,
+            DashboardWidgetLayout.Widget.NOTIFICATIONS,
+            DashboardWidgetLayout.Widget.LAST_NOTIFICATION,
             // Other
-            new WidgetRow(R.id.dashboard_active_profile_switch,
-                    DashboardWidgetLayout.Widget.ACTIVE_PROFILE),
-            new WidgetRow(R.id.dashboard_custom_text_switch,
-                    DashboardWidgetLayout.Widget.CUSTOM_TEXT),
-            new WidgetRow(R.id.dashboard_qr_code_switch, DashboardWidgetLayout.Widget.QR_CODE),
+            DashboardWidgetLayout.Widget.ACTIVE_PROFILE,
+            DashboardWidgetLayout.Widget.CUSTOM_TEXT,
+            DashboardWidgetLayout.Widget.QR_CODE,
     };
 
+    /** One state holder per widget; see the class comment. Never attached. */
     private final Map<DashboardWidgetLayout.Widget, MaterialSwitch> widgetSwitches =
             new EnumMap<>(DashboardWidgetLayout.Widget.class);
+
+    private LinearLayout gallery;
+    private TextView noResults;
+    private TextInputEditText searchInput;
+    /** The group chosen in the chips, or null for all of them. */
+    @Nullable private WidgetCatalog.Group groupFilter;
+    /** The page chosen in the page chips, or 0 for every widget whatever its page. */
+    private int pageFilter;
 
     private TextInputLayout weatherCityContainer;
     private TextInputEditText weatherCityInput;
@@ -154,7 +155,7 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
                 granted -> updatePermissionUi()
         );
         widgetPermissionLauncher = registerForActivityResult(
-                new ActivityResultContracts.RequestPermission(), granted -> { });
+                new ActivityResultContracts.RequestPermission(), granted -> renderGallery());
         setContentView(R.layout.activity_widget_picker);
         SettingsLayout.bindCollapsingTitle(this, R.id.widget_picker_toolbar,
                 R.id.widget_picker_scroll, R.id.widget_picker_page_title);
@@ -162,9 +163,12 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
         MaterialToolbar toolbar = findViewById(R.id.widget_picker_toolbar);
         toolbar.setNavigationOnClickListener(view -> finish());
 
-        for (WidgetRow row : WIDGET_ROWS) {
-            widgetSwitches.put(row.widget, findViewById(row.viewId));
+        for (DashboardWidgetLayout.Widget widget : WIDGETS) {
+            widgetSwitches.put(widget, new MaterialSwitch(this));
         }
+        gallery = findViewById(R.id.widget_picker_gallery);
+        noResults = findViewById(R.id.widget_picker_no_results);
+        searchInput = findViewById(R.id.widget_picker_search);
         weatherCityContainer = findViewById(R.id.dashboard_weather_city_container);
         weatherCityInput = findViewById(R.id.dashboard_weather_city_input);
         imperialUnitsSwitch = findViewById(R.id.dashboard_imperial_units_switch);
@@ -190,44 +194,9 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
         SettingsLayout.constrainContentOnWideScreens(this, content);
         bindInteractions();
         MiuixRows.installSwitches(this,
-                R.id.dashboard_clock_switch,
-                R.id.dashboard_date_switch,
-                R.id.dashboard_world_clock_switch,
-                R.id.dashboard_countdown_switch,
-                R.id.dashboard_progress_switch,
-                R.id.dashboard_next_alarm_switch,
-                R.id.dashboard_timer_switch,
-                R.id.dashboard_session_timer_switch,
-                R.id.dashboard_calendar_switch,
-                R.id.dashboard_battery_switch,
-                R.id.dashboard_charging_switch,
-                R.id.dashboard_sound_mode_switch,
-                R.id.dashboard_temperature_switch,
-                R.id.dashboard_memory_switch,
-                R.id.dashboard_storage_switch,
-                R.id.dashboard_network_switch,
-                R.id.dashboard_network_speed_switch,
-                R.id.dashboard_weather_switch,
-                R.id.dashboard_fullscreen_weather_switch,
-                R.id.dashboard_sun_switch,
-                R.id.dashboard_uv_index_switch,
-                R.id.dashboard_air_quality_switch,
-                R.id.dashboard_moon_switch,
-                R.id.dashboard_compass_switch,
-                R.id.dashboard_level_switch,
-                R.id.dashboard_speed_switch,
-                R.id.dashboard_altitude_switch,
-                R.id.dashboard_pressure_switch,
-                R.id.dashboard_steps_switch,
-                R.id.dashboard_media_switch,
-                R.id.dashboard_fullscreen_media_switch,
-                R.id.dashboard_notifications_switch,
-                R.id.dashboard_last_notification_switch,
-                R.id.dashboard_active_profile_switch,
-                R.id.dashboard_custom_text_switch,
-                R.id.dashboard_qr_code_switch,
                 R.id.dashboard_qr_wifi_switch,
                 R.id.dashboard_imperial_units_switch);
+        bindGallery();
     }
 
     @Override
@@ -287,6 +256,7 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
                 }
                 DashboardWidgetLayout.setWidgetEnabled(this, widget, checked);
                 onWidgetToggled(widget, checked);
+                renderGallery();
             });
         }
 
@@ -402,6 +372,7 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
         qrPasswordInput.setText(DashboardWidgetLayout.qrWifiPassword(this));
         updateQrFields();
         bindingUi = false;
+        renderGallery();
     }
 
     /** The text field or the network's two, whichever the code is made of. */
@@ -506,6 +477,243 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
                 : R.string.dashboard_media_access_optional);
         mediaAccessButton.setVisibility(
                 needsShade && !mediaGranted ? View.VISIBLE : View.GONE);
+        renderGallery();
+    }
+
+    // ------------------------------------------------------------------
+    // Gallery
+    // ------------------------------------------------------------------
+
+    /**
+     * A chip per page, so what is on each page can be read on its own. The
+     * row is left out with a single page, where there is nothing to tell apart.
+     */
+    private void bindPageChips() {
+        int pageCount = DashboardWidgetLayout.loadPageCount(this);
+        if (pageCount <= 1) {
+            return;
+        }
+        ChipGroup chips = findViewById(R.id.widget_picker_page_chips);
+        findViewById(R.id.widget_picker_page_scroll).setVisibility(View.VISIBLE);
+        addPageChip(chips, getString(R.string.widget_gallery_all_pages), 0);
+        for (int page = 1; page <= pageCount; page++) {
+            addPageChip(chips, WidgetCatalog.pageLabel(this, page), page);
+        }
+        ((Chip) chips.getChildAt(0)).setChecked(true);
+        chips.setOnCheckedStateChangeListener((container, checkedIds) -> {
+            pageFilter = 0;
+            if (!checkedIds.isEmpty()) {
+                Object tag = container.findViewById(checkedIds.get(0)).getTag();
+                pageFilter = tag instanceof Integer ? (Integer) tag : 0;
+            }
+            renderGallery();
+        });
+    }
+
+    private void addPageChip(ChipGroup chips, String label, int page) {
+        Chip chip = new Chip(this);
+        chip.setId(View.generateViewId());
+        chip.setText(label);
+        chip.setCheckable(true);
+        chip.setTag(page);
+        chips.addView(chip);
+    }
+
+    private void bindGallery() {
+        bindPageChips();
+        ChipGroup chips = findViewById(R.id.widget_picker_chips);
+        addChip(chips, getString(R.string.widget_gallery_all), null);
+        for (WidgetCatalog.Group group : WidgetCatalog.Group.values()) {
+            addChip(chips, getString(group.title), group);
+        }
+        ((Chip) chips.getChildAt(0)).setChecked(true);
+        chips.setOnCheckedStateChangeListener((container, checkedIds) -> {
+            groupFilter = null;
+            if (!checkedIds.isEmpty()) {
+                Object tag = container.findViewById(checkedIds.get(0)).getTag();
+                groupFilter = tag instanceof WidgetCatalog.Group
+                        ? (WidgetCatalog.Group) tag : null;
+            }
+            renderGallery();
+        });
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) { }
+            @Override public void onTextChanged(CharSequence s, int a, int b, int c) { }
+            @Override public void afterTextChanged(Editable s) {
+                renderGallery();
+            }
+        });
+    }
+
+    private void addChip(ChipGroup chips, String label, @Nullable WidgetCatalog.Group group) {
+        Chip chip = new Chip(this);
+        chip.setId(View.generateViewId());
+        chip.setText(label);
+        chip.setCheckable(true);
+        chip.setTag(group);
+        chips.addView(chip);
+    }
+
+    /**
+     * Draws the cards for what the search and the chips leave, and shows the
+     * settings blocks the widgets that are on need. Called after anything that
+     * can change either: a toggle, a permission, a search, a chip.
+     */
+    private void renderGallery() {
+        if (gallery == null) {
+            return;
+        }
+        String query = searchInput.getText() == null ? ""
+                : searchInput.getText().toString().trim().toLowerCase(Locale.getDefault());
+        int targetPage = getIntent().getIntExtra(EXTRA_TARGET_PAGE, 0);
+        gallery.removeAllViews();
+        boolean any = false;
+        for (WidgetCatalog.Group group : WidgetCatalog.Group.values()) {
+            if (groupFilter != null && groupFilter != group) {
+                continue;
+            }
+            List<DashboardWidgetLayout.Widget> shown = new ArrayList<>();
+            for (DashboardWidgetLayout.Widget widget : WIDGETS) {
+                if (WidgetCatalog.groupOf(widget) == group
+                        && (pageFilter == 0 || (isWidgetOn(widget)
+                        && DashboardWidgetLayout.loadPage(this, widget) == pageFilter))
+                        && (query.isEmpty() || WidgetCatalog.label(this, widget)
+                        .toLowerCase(Locale.getDefault()).contains(query))) {
+                    shown.add(widget);
+                }
+            }
+            if (shown.isEmpty()) {
+                continue;
+            }
+            any = true;
+            TextView header = (TextView) getLayoutInflater()
+                    .inflate(R.layout.widget_gallery_header, gallery, false);
+            header.setText(group.title);
+            gallery.addView(header);
+            for (int start = 0; start < shown.size(); start += 3) {
+                LinearLayout row = new LinearLayout(this);
+                row.setOrientation(LinearLayout.HORIZONTAL);
+                row.setBaselineAligned(false);
+                // Three to a row whatever the row holds, so a short last row
+                // keeps its cards the width of the rest without filler views.
+                row.setWeightSum(3f);
+                for (int index = start; index < Math.min(start + 3, shown.size()); index++) {
+                    // A cell without margins, so a third of the row is a third
+                    // however many cards the row holds; the card's own margin
+                    // is set inside it.
+                    FrameLayout cell = new FrameLayout(this);
+                    FrameLayout.LayoutParams inner = new FrameLayout.LayoutParams(-1, -2);
+                    inner.setMargins(dp(4), 0, dp(4), 0);
+                    cell.addView(widgetCard(row, shown.get(index), group, targetPage), inner);
+                    row.addView(cell, new LinearLayout.LayoutParams(0, -2, 1f));
+                }
+                LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(-1, -2);
+                // Pulls the cards' own side margins back out at the edges.
+                rowParams.setMargins(-dp(4), dp(8), -dp(4), 0);
+                gallery.addView(row, rowParams);
+            }
+        }
+        noResults.setText(pageFilter > 0 && query.isEmpty()
+                ? R.string.widget_gallery_page_empty : R.string.widget_gallery_no_results);
+        noResults.setVisibility(any ? View.GONE : View.VISIBLE);
+        updateSettingsBlocks();
+    }
+
+    private View widgetCard(ViewGroup parent, DashboardWidgetLayout.Widget widget,
+            WidgetCatalog.Group group, int targetPage) {
+        MaterialCardView card = (MaterialCardView) getLayoutInflater()
+                .inflate(R.layout.widget_gallery_card, parent, false);
+        boolean on = isWidgetOn(widget);
+        ImageView icon = card.findViewById(R.id.widget_gallery_icon);
+        icon.setImageResource(WidgetCatalog.icon(widget));
+        icon.setImageTintList(ColorStateList.valueOf(
+                com.google.android.material.color.MaterialColors.getColor(this, R.attr.hyperOnAccentContainer, 0)));
+        String name = WidgetCatalog.label(this, widget);
+        ((TextView) card.findViewById(R.id.widget_gallery_name)).setText(name);
+        TextView state = card.findViewById(R.id.widget_gallery_state);
+        if (permissionMissing(widget)) {
+            state.setText(R.string.widget_gallery_needs_access);
+            state.setTextColor(ContextCompat.getColor(this, R.color.hyper_warning));
+        } else if (on) {
+            // With several pages the line names the page a widget is on, in
+            // the accent colour for the page being added to and muted for the
+            // others; "Added" alone cannot say which page it means.
+            int page = DashboardWidgetLayout.loadPage(this, widget);
+            boolean several = DashboardWidgetLayout.loadPageCount(this) > 1;
+            boolean here = targetPage <= 0 || page == targetPage;
+            state.setText(several ? getString(R.string.widget_gallery_on_page, page)
+                    : getString(R.string.widget_gallery_added));
+            state.setTextColor(here
+                    ? com.google.android.material.color.MaterialColors.getColor(
+                            this, R.attr.hyperAccent, 0)
+                    : ContextCompat.getColor(this, R.color.hyper_text_secondary));
+        } else {
+            state.setText("");
+        }
+        card.setStrokeWidth(on ? dp(2) : 0);
+        card.setChecked(on);
+        card.setContentDescription(on
+                ? getString(R.string.widget_gallery_added) + ", " + name + ", "
+                + getString(R.string.widget_gallery_on_page,
+                DashboardWidgetLayout.loadPage(this, widget)) : name);
+        card.setOnClickListener(view ->
+                widgetSwitches.get(widget).setChecked(!isWidgetOn(widget)));
+        return card;
+    }
+
+    /** Whether a widget that is on still lacks what it reads from the phone. */
+    private boolean permissionMissing(DashboardWidgetLayout.Widget widget) {
+        if (!isWidgetOn(widget)) {
+            return false;
+        }
+        switch (widget) {
+            case SPEED:
+            case ALTITUDE:
+                return !hasLocationAccess();
+            case MEDIA:
+            case FULLSCREEN_MEDIA:
+            case NOTIFICATIONS:
+            case LAST_NOTIFICATION:
+                return !MediaWidgetState.hasNotificationAccess(this);
+            case CALENDAR:
+                return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR)
+                        != PackageManager.PERMISSION_GRANTED;
+            case STEPS:
+                return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+                        && ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.ACTIVITY_RECOGNITION)
+                        != PackageManager.PERMISSION_GRANTED;
+            default:
+                return false;
+        }
+    }
+
+    /** Shows the value and permission blocks only for widgets that are on. */
+    private void updateSettingsBlocks() {
+        boolean weather = needsWeatherCity();
+        boolean location = isWidgetOn(DashboardWidgetLayout.Widget.SPEED)
+                || isWidgetOn(DashboardWidgetLayout.Widget.ALTITUDE);
+        boolean media = isWidgetOn(DashboardWidgetLayout.Widget.MEDIA)
+                || isWidgetOn(DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA)
+                || isWidgetOn(DashboardWidgetLayout.Widget.NOTIFICATIONS)
+                || isWidgetOn(DashboardWidgetLayout.Widget.LAST_NOTIFICATION);
+        boolean text = isWidgetOn(DashboardWidgetLayout.Widget.CUSTOM_TEXT);
+        boolean qr = isWidgetOn(DashboardWidgetLayout.Widget.QR_CODE);
+        findViewById(R.id.widget_picker_block_weather).setVisibility(vis(weather));
+        findViewById(R.id.widget_picker_block_location).setVisibility(vis(location));
+        findViewById(R.id.widget_picker_block_media).setVisibility(vis(media));
+        findViewById(R.id.widget_picker_block_custom_text).setVisibility(vis(text));
+        findViewById(R.id.widget_picker_block_qr).setVisibility(vis(qr));
+        findViewById(R.id.widget_picker_settings_header).setVisibility(
+                vis(weather || location || media || text || qr));
+    }
+
+    private static int vis(boolean visible) {
+        return visible ? View.VISIBLE : View.GONE;
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     private void updateMediaControls(MediaWidgetState.Snapshot snapshot) {

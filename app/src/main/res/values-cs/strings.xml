@@ -561,4 +561,11 @@
     <string name="dashboard_pressure_rising">stoupá</string>
     <string name="dashboard_pressure_falling">klesá</string>
     <string name="dashboard_pressure_steady">beze změny</string>
+    <string name="app_look_title">Rozhraní</string>
+    <string name="app_theme_title">Motiv</string>
+    <string name="app_theme_system">Systémový</string>
+    <string name="app_theme_light">Světlý</string>
+    <string name="app_theme_dark">Tmavý</string>
+    <string name="app_language_title">Jazyk</string>
+    <string name="app_language_system">Podle systému</string>
 </resources>

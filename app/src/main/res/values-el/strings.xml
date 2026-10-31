@@ -557,4 +557,11 @@
     <string name="dashboard_pressure_rising">ανεβαίνει</string>
     <string name="dashboard_pressure_falling">πέφτει</string>
     <string name="dashboard_pressure_steady">σταθερή</string>
+    <string name="app_look_title">Διεπαφή</string>
+    <string name="app_theme_title">Θέμα</string>
+    <string name="app_theme_system">Συστήματος</string>
+    <string name="app_theme_light">Φωτεινό</string>
+    <string name="app_theme_dark">Σκούρο</string>
+    <string name="app_language_title">Γλώσσα</string>
+    <string name="app_language_system">Προεπιλογή συστήματος</string>
 </resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Monet colours (dark): the accent family from the wallpaper. Applied by MirrorApp when chosen. -->
+<resources>
+    <style name="ThemeOverlay.M2R.Monet" parent="">
+        <item name="hyperAccent">@android:color/system_accent1_200</item>
+        <item name="hyperAccentPressed">@android:color/system_accent1_300</item>
+        <item name="hyperAccentDisabled">@android:color/system_accent1_700</item>
+        <item name="hyperOnAccent">@android:color/system_accent1_800</item>
+        <item name="hyperAccentContainer">@android:color/system_accent1_900</item>
+        <item name="hyperOnAccentContainer">@android:color/system_accent1_100</item>
+        <item name="hyperSelection">@android:color/system_accent1_900</item>
+    </style>
+</resources>

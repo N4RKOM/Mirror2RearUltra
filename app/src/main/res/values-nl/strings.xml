@@ -557,4 +557,11 @@
     <string name="dashboard_pressure_rising">stijgend</string>
     <string name="dashboard_pressure_falling">dalend</string>
     <string name="dashboard_pressure_steady">stabiel</string>
+    <string name="app_look_title">Interface</string>
+    <string name="app_theme_title">Thema</string>
+    <string name="app_theme_system">Systeem</string>
+    <string name="app_theme_light">Licht</string>
+    <string name="app_theme_dark">Donker</string>
+    <string name="app_language_title">Taal</string>
+    <string name="app_language_system">Systeemstandaard</string>
 </resources>

@@ -557,4 +557,11 @@
     <string name="dashboard_pressure_rising">linapanda</string>
     <string name="dashboard_pressure_falling">linashuka</string>
     <string name="dashboard_pressure_steady">thabiti</string>
+    <string name="app_look_title">Kiolesura</string>
+    <string name="app_theme_title">Mandhari</string>
+    <string name="app_theme_system">Mfumo</string>
+    <string name="app_theme_light">Nyepesi</string>
+    <string name="app_theme_dark">Nyeusi</string>
+    <string name="app_language_title">Lugha</string>
+    <string name="app_language_system">Chaguo-msingi la mfumo</string>
 </resources>

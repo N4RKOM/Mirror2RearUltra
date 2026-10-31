@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/dashboard_section_screen"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout style="@style/HyperOS.Group">
+
+        <com.tpkarras.mirror2rearultra.HyperValueRow
+            android:id="@+id/dashboard_idle_mode_input"
+            style="@style/HyperOS.ValueRow.Top"
+            app:rowTitle="@string/dashboard_idle_mode_title" />
+
+        <!-- When AOD goes out instead of dimming: from sunset to
+             sunrise or between two times. Shown only for AOD, and
+             only the rows for the chosen way. -->
+        <com.tpkarras.mirror2rearultra.HyperValueRow
+            android:id="@+id/dashboard_quiet_mode_input"
+            style="@style/HyperOS.ValueRow"
+            app:rowTitle="@string/dashboard_quiet_title" />
+
+        <com.tpkarras.mirror2rearultra.HyperValueRow
+            android:id="@+id/dashboard_quiet_sun_input"
+            style="@style/HyperOS.ValueRow"
+            app:rowTitle="@string/dashboard_quiet_sun" />
+
+        <com.tpkarras.mirror2rearultra.HyperValueRow
+            android:id="@+id/dashboard_quiet_from_input"
+            style="@style/HyperOS.ValueRow"
+            app:rowTitle="@string/panel_trigger_from" />
+
+        <com.tpkarras.mirror2rearultra.HyperValueRow
+            android:id="@+id/dashboard_quiet_to_input"
+            style="@style/HyperOS.ValueRow"
+            app:rowTitle="@string/panel_trigger_to" />
+
+        <TextView
+            android:id="@+id/dashboard_aod_min_brightness_value"
+            style="@style/HyperOS.SliderLabel"
+            android:labelFor="@id/dashboard_aod_min_brightness_slider"
+            android:text="@string/dashboard_aod_min_brightness_default" />
+
+        <com.tpkarras.mirror2rearultra.HyperSlider
+            android:id="@+id/dashboard_aod_min_brightness_slider"
+            style="@style/HyperOS.Slider.Row"
+            android:contentDescription="@string/dashboard_aod_min_brightness_default"
+            app:hyperStepSize="1"
+            app:hyperValueFrom="1"
+            app:hyperValueTo="30" />
+
+        <!-- The drift already existed at a fixed 3dp; this makes it a
+             choice, including off. -->
+        <com.tpkarras.mirror2rearultra.HyperValueRow
+            android:id="@+id/dashboard_burn_in_input"
+            style="@style/HyperOS.ValueRow.Bottom"
+            app:rowTitle="@string/dashboard_burn_in_title" />
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/HyperOS.Group"
+        android:layout_marginTop="@dimen/section_spacing">
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/dashboard_notification_light_switch"
+            style="@style/HyperOS.Switch.Single"
+            android:text="@string/notification_light" />
+    </LinearLayout>
+</LinearLayout>

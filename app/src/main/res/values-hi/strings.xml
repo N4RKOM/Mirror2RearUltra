@@ -557,4 +557,11 @@
     <string name="dashboard_pressure_rising">बढ़ रहा</string>
     <string name="dashboard_pressure_falling">गिर रहा</string>
     <string name="dashboard_pressure_steady">स्थिर</string>
+    <string name="app_look_title">इंटरफ़ेस</string>
+    <string name="app_theme_title">थीम</string>
+    <string name="app_theme_system">सिस्टम</string>
+    <string name="app_theme_light">हल्का</string>
+    <string name="app_theme_dark">गहरा</string>
+    <string name="app_language_title">भाषा</string>
+    <string name="app_language_system">सिस्टम डिफ़ॉल्ट</string>
 </resources>

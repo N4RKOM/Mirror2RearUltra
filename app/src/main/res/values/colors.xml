@@ -56,4 +56,7 @@
 
     <!-- Retained: the mirror output window must stay true black on the rear OLED. -->
     <color name="black">#FF000000</color>
+
+    <color name="hyper_success_container">#DDF3E6</color>
+    <color name="hyper_on_success_container">#0C5A31</color>
 </resources>

@@ -557,4 +557,11 @@
     <string name="dashboard_pressure_rising">en hausse</string>
     <string name="dashboard_pressure_falling">en baisse</string>
     <string name="dashboard_pressure_steady">stable</string>
+    <string name="app_look_title">Interface</string>
+    <string name="app_theme_title">Thème</string>
+    <string name="app_theme_system">Système</string>
+    <string name="app_theme_light">Clair</string>
+    <string name="app_theme_dark">Sombre</string>
+    <string name="app_language_title">Langue</string>
+    <string name="app_language_system">Par défaut du système</string>
 </resources>

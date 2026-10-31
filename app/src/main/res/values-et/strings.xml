@@ -557,4 +557,11 @@
     <string name="dashboard_pressure_rising">tõuseb</string>
     <string name="dashboard_pressure_falling">langeb</string>
     <string name="dashboard_pressure_steady">püsiv</string>
+    <string name="app_look_title">Liides</string>
+    <string name="app_theme_title">Teema</string>
+    <string name="app_theme_system">Süsteemi oma</string>
+    <string name="app_theme_light">Hele</string>
+    <string name="app_theme_dark">Tume</string>
+    <string name="app_language_title">Keel</string>
+    <string name="app_language_system">Süsteemi vaikimisi</string>
 </resources>

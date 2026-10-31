@@ -59,4 +59,7 @@
     <color name="hyper_field_pressed">#333333</color>
 
     <color name="black">#FF000000</color>
+
+    <color name="hyper_success_container">#12301F</color>
+    <color name="hyper_on_success_container">#BDEBD0</color>
 </resources>

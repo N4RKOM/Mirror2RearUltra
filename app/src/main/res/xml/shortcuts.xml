@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="widgets"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_widgets"
+        android:shortcutShortLabel="@string/dashboard_widgets_title"
+        android:shortcutLongLabel="@string/dashboard_widgets_title">
+        <intent
+            android:action="com.tpkarras.mirror2rearultra.action.TAB_WIDGETS"
+            android:targetClass="com.tpkarras.mirror2rearultra.SettingsActivity"
+            android:targetPackage="com.tpkarras.mirror2rearultra" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="builder"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_builder"
+        android:shortcutShortLabel="@string/shortcut_builder_short"
+        android:shortcutLongLabel="@string/dashboard_builder_title">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.tpkarras.mirror2rearultra.DashboardBuilderActivity"
+            android:targetPackage="com.tpkarras.mirror2rearultra" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="mirror"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_mirror"
+        android:shortcutShortLabel="@string/nav_mirror"
+        android:shortcutLongLabel="@string/nav_mirror">
+        <intent
+            android:action="com.tpkarras.mirror2rearultra.action.TAB_MIRROR"
+            android:targetClass="com.tpkarras.mirror2rearultra.SettingsActivity"
+            android:targetPackage="com.tpkarras.mirror2rearultra" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="settings"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_settings"
+        android:shortcutShortLabel="@string/nav_settings"
+        android:shortcutLongLabel="@string/nav_settings">
+        <intent
+            android:action="com.tpkarras.mirror2rearultra.action.TAB_SETTINGS"
+            android:targetClass="com.tpkarras.mirror2rearultra.SettingsActivity"
+            android:targetPackage="com.tpkarras.mirror2rearultra" />
+    </shortcut>
+</shortcuts>

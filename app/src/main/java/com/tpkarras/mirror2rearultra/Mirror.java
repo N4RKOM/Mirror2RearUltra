@@ -539,6 +539,7 @@ public class Mirror extends Activity implements
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
+        uprightPanelTouch(event);
         // Swallowed rather than passed on: in a pocket every one of these is
         // the lining, and letting them through would wake the panel, turn its
         // pages and restyle its widgets all the way to the shops.
@@ -555,6 +556,32 @@ public class Mirror extends Activity implements
             return true;
         }
         return super.dispatchTouchEvent(event);
+    }
+
+    /**
+     * Puts the panel's touches in the frame it draws in.
+     *
+     * <p>The panel's touch layer reports along the phone's long edge, while
+     * the panel is drawn the other way across, and the system stretches the
+     * one onto the other without turning it. A swipe along the strip came out
+     * as a swipe across it, and a tap landed beside the finger. Undoing the
+     * stretch and the quarter turn leaves the finger where it is on the glass.
+     */
+    private void uprightPanelTouch(MotionEvent event) {
+        Display display = getDisplay();
+        View decor = getWindow().getDecorView();
+        float width = decor.getWidth();
+        float height = decor.getHeight();
+        if (display == null || display.getDisplayId() == Display.DEFAULT_DISPLAY
+                || width <= height || height <= 0f) {
+            return;
+        }
+        Matrix turn = new Matrix();
+        turn.setValues(new float[] {
+                0f, width / height, 0f,
+                -height / width, 0f, height,
+                0f, 0f, 1f});
+        event.transform(turn);
     }
 
     /**

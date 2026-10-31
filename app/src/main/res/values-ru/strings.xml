@@ -591,4 +591,54 @@
     <string name="widgets_home_arrangement_help">Настройте виджеты, страницы и их внешний вид.</string>
     <string name="widgets_home_display">Экран</string>
     <string name="widgets_home_display_help">Настройте, как и когда виджеты отображаются на заднем экране.</string>
+
+    <!-- Widgets tab redesign -->
+    <string name="panel_mirror_tools_title">Затвор, сетка и уровень</string>
+    <string name="widgets_home_widgets_header">Виджеты на странице</string>
+    <string name="widgets_home_add">Добавить виджет</string>
+    <string name="widgets_home_empty">На этой странице пока пусто. Добавьте виджет.</string>
+    <string name="widgets_home_preview_hint">Нажмите на превью или на виджет в списке, чтобы изменить.</string>
+    <string name="widgets_home_panel">Панель</string>
+    <string name="widgets_home_all_pages">Общее для всех страниц</string>
+    <string name="widgets_home_builder">Расположение, страницы и фон</string>
+    <string name="widgets_home_appearance_summary">%1$s · текст %2$d%%</string>
+    <string name="widgets_home_touch_summary">Включено: %1$d из %2$d</string>
+
+    <!-- Add-widget gallery -->
+    <string name="widget_gallery_help">Нажмите на виджет, чтобы поставить его на эту страницу, и ещё раз, чтобы убрать.</string>
+    <string name="widget_gallery_search">Найти виджет</string>
+    <string name="widget_gallery_all">Все</string>
+    <string name="widget_gallery_all_pages">Все страницы</string>
+    <string name="widget_gallery_page_empty">На этой странице пока ничего нет.</string>
+    <string name="widget_gallery_added">Добавлен</string>
+    <string name="widget_gallery_on_page">Страница %1$d</string>
+    <string name="widget_gallery_needs_access">Нужен доступ</string>
+    <string name="widget_gallery_no_results">Подходящих виджетов нет.</string>
+    <string name="widget_gallery_settings">Настройки виджетов</string>
+    <string name="app_look_title">Интерфейс</string>
+    <string name="app_theme_title">Тема</string>
+    <string name="app_theme_system">Системная</string>
+    <string name="app_theme_light">Светлая</string>
+    <string name="app_theme_dark">Тёмная</string>
+    <string name="app_language_title">Язык</string>
+    <string name="app_language_system">Как в системе</string>
+    <string name="shortcut_builder_short">Расположение</string>
+    <string name="app_group_title">Приложение</string>
+    <string name="app_about_title">О приложении</string>
+    <string name="app_source_title">Исходный проект на GitHub</string>
+    <string name="app_about_version">Версия %1$s (%2$s)</string>
+    <string name="app_about_name">Mirror2RearUltra</string>
+    <string name="app_about_text">Лицензия GPL-3.0. Основано на исходном проекте tpkarras.</string>
+    <string name="app_about_open">Открыть на GitHub</string>
+    <string name="app_about_close">Закрыть</string>
+    <string name="app_monet_title">Цвета обоев</string>
+    <string name="app_blur_title">Матовая нижняя панель</string>
+    <string name="dashboard_builder_section_widgets">Виджеты</string>
+    <string name="dashboard_builder_section_page">Страница</string>
+    <string name="dashboard_builder_section_more">Ещё</string>
+    <string name="dashboard_builder_drag">Перетащить: %1$s</string>
+    <string name="dashboard_builder_list_hint_free">Нажмите на виджет, чтобы открыть его настройки.</string>
+    <string name="dashboard_builder_list_hint_free_pages">Нажмите на виджет, чтобы открыть его настройки. Удерживайте и отпустите на вкладке страницы, чтобы перенести его туда.</string>
+    <string name="dashboard_builder_editor_prev">Предыдущий виджет</string>
+    <string name="dashboard_builder_editor_next">Следующий виджет</string>
 </resources>

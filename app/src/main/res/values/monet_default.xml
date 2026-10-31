@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Monet needs Android 12; before that the overlay changes nothing. -->
+<resources>
+    <style name="ThemeOverlay.M2R.Monet" parent="" />
+</resources>

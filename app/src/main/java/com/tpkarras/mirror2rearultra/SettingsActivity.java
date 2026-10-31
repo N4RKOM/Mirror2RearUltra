@@ -1,18 +1,29 @@
 package com.tpkarras.mirror2rearultra;
 
 import android.content.Intent;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.content.res.ColorStateList;
 import android.view.View;
+import android.widget.ImageView;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.compose.ui.platform.ComposeView;
 
@@ -21,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -50,8 +62,25 @@ public class SettingsActivity extends AppCompatActivity implements
     private View capabilityRefreshButton;
     private TextView backupStatus;
     private ViewGroup settingsContent;
+    /** The looks, screen and touch sections folded open on the widgets tab. */
+    private PanelSettingsController panelSettings;
     private int selectedSection = 1;
+
+    /** Which tab a launcher shortcut asks for; the Mirror tab otherwise. */
+    private static int sectionFor(@Nullable String action) {
+        if ("com.tpkarras.mirror2rearultra.action.TAB_WIDGETS".equals(action)) return 0;
+        if ("com.tpkarras.mirror2rearultra.action.TAB_SETTINGS".equals(action)) return 2;
+        return 1;
+    }
     private MiuixNavigation navigation;
+
+    private RearDashboardView homePreview;
+    private MaterialCardView homePreviewContainer;
+    private FrameLayout homePageTabs;
+    private LinearLayout homeRows;
+    private TextView homeHint;
+    /** The page the widgets tab shows: its preview, its tab and its list. */
+    private int homePage = 1;
 
     private MirrorProfile activeProfile;
     /** Guards the listeners while the UI is being written from stored state. */
@@ -83,9 +112,12 @@ public class SettingsActivity extends AppCompatActivity implements
                 }
         );
         setContentView(R.layout.activity_settings);
+        selectedSection = sectionFor(getIntent().getAction());
         if (savedInstanceState != null) selectedSection = savedInstanceState.getInt("section", 1);
         navigation = new MiuixNavigation((ComposeView) findViewById(R.id.floating_navigation),
-                selectedSection, this::selectSection);
+                selectedSection, this::selectSection, findViewById(R.id.frosted_backdrop),
+                findViewById(R.id.settings_scroll), AppLook.blur(this));
+        navigation.followScroll(findViewById(R.id.settings_scroll));
 
         profileInput = findViewById(R.id.profile_input);
         profileSummary = findViewById(R.id.profile_summary);
@@ -99,9 +131,31 @@ public class SettingsActivity extends AppCompatActivity implements
         scaleLabels = getResources().getStringArray(R.array.scale_mode_entries);
 
         bindInteractions();
-        MiuixRows.install(this, R.id.dashboard_settings_button, R.id.widget_picker_button,
-                R.id.widget_builder_button, R.id.image_settings_button,
-                R.id.manage_profiles_button, R.id.automation_button, R.id.device_protection_button);
+        bindAppearance();
+        panelSettings = new PanelSettingsController(this, settingsContent,
+                this::onPanelSettingsChanged);
+        MiuixRows.installWithIcon(this, R.id.image_settings_button, R.drawable.ic_row_image);
+        MiuixRows.installWithIcon(this, R.id.manage_profiles_button, R.drawable.ic_row_profiles);
+        MiuixRows.installWithIcon(this, R.id.automation_button, R.drawable.ic_row_automation);
+        MiuixRows.installWithIcon(this, R.id.mirror_tools_button, R.drawable.ic_row_shutter);
+        MiuixRows.installWithIcon(this, R.id.device_protection_button,
+                R.drawable.ic_row_protection);
+        MiuixRows.installWithIcon(this, R.id.app_about_button, R.drawable.ic_row_about);
+        MiuixRows.installWithIcon(this, R.id.app_source_button, R.drawable.ic_row_link);
+        findViewById(R.id.app_about_button).setOnClickListener(view -> showAbout());
+        findViewById(R.id.app_source_button).setOnClickListener(view -> openSource());
+        MiuixRows.installWithIcon(this, R.id.widgets_home_add_button, R.drawable.ic_row_add);
+        MiuixRows.installWithIcon(this, R.id.general_content_button, R.drawable.ic_row_content);
+        MiuixRows.installExpandableRow(this, R.id.widgets_home_appearance_button,
+                R.drawable.ic_row_appearance, R.id.widgets_home_appearance_panel);
+        MiuixRows.installExpandableRow(this, R.id.widgets_home_screen_button,
+                R.drawable.ic_row_screen, R.id.widgets_home_screen_panel);
+        MiuixRows.installExpandableRow(this, R.id.widgets_home_touch_button,
+                R.drawable.ic_row_touch, R.id.widgets_home_touch_panel);
+        MiuixRows.installWithIcon(this, R.id.widgets_home_builder_button,
+                R.drawable.ic_row_builder);
+        MiuixRows.installWithIcon(this, R.id.widgets_home_templates_button,
+                R.drawable.ic_row_templates);
         selectSection(selectedSection);
         SettingsLayout.constrainContentOnWideScreens(this, settingsContent);
         renderStoredSettings();
@@ -125,6 +179,7 @@ public class SettingsActivity extends AppCompatActivity implements
             findViewById(sections[i]).setVisibility(selected ? View.VISIBLE : View.GONE);
         }
         navigation.select(section);
+        navigation.setHidden(false);
         ((androidx.core.widget.NestedScrollView) settingsContent.getParent()).scrollTo(0, 0);
     }
 
@@ -156,12 +211,20 @@ public class SettingsActivity extends AppCompatActivity implements
         // A sub-page may have changed the profile or its settings, so the
         // summary and picker are rebuilt every time this screen comes back.
         renderStoredSettings();
-        int enabledWidgets = 0;
-        for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values()) {
-            if (DashboardWidgetLayout.isWidgetEnabled(this, widget)) enabledWidgets++;
-        }
-        ((TextView) findViewById(R.id.widgets_home_count)).setText(
-                getString(R.string.widgets_home_count, enabledWidgets));
+        renderWidgetsHome();
+        panelSettings.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        panelSettings.onPause();
+        super.onPause();
+    }
+
+    /** A setting in a folded-open section changed: the preview and summaries follow. */
+    private void onPanelSettingsChanged() {
+        renderHomeSummaries();
+        refreshHomePreview(DashboardWidgetLayout.loadPageCount(this));
     }
 
     @Override
@@ -175,10 +238,7 @@ public class SettingsActivity extends AppCompatActivity implements
     }
 
     private void bindInteractions() {
-        findViewById(R.id.widget_picker_button).setOnClickListener(v ->
-                startActivity(new Intent(this, WidgetPickerActivity.class)));
-        findViewById(R.id.widget_builder_button).setOnClickListener(v ->
-                startActivity(new Intent(this, DashboardBuilderActivity.class)));
+        bindWidgetsHome();
         profileInput.setOnItemSelectedListener(position -> {
             if (bindingUi || position < 0 || position >= profiles.size()) {
                 return;
@@ -199,8 +259,9 @@ public class SettingsActivity extends AppCompatActivity implements
                 startActivity(new Intent(this, ProfileManagerActivity.class))
         );
 
-        findViewById(R.id.dashboard_settings_button).setOnClickListener(view ->
-                startActivity(new Intent(this, DashboardSettingsActivity.class))
+        findViewById(R.id.mirror_tools_button).setOnClickListener(view ->
+                startActivity(DashboardSettingsActivity.intentFor(this,
+                        DashboardSettingsActivity.SECTION_MIRROR_TOOLS))
         );
 
         findViewById(R.id.automation_button).setOnClickListener(view ->
@@ -224,6 +285,246 @@ public class SettingsActivity extends AppCompatActivity implements
                         "application/octet-stream"
                 })
         );
+    }
+
+    // ------------------------------------------------------------------
+    // Interface: theme and language
+    // ------------------------------------------------------------------
+
+    private void bindAppearance() {
+        HyperValueRow themeRow = findViewById(R.id.app_theme_input);
+        String[] themes = {getString(R.string.app_theme_system), getString(R.string.app_theme_light),
+                getString(R.string.app_theme_dark)};
+        themeRow.setEntries(themes);
+        themeRow.setValue(themes[AppLook.theme(this)]);
+        themeRow.setOnItemSelectedListener(position -> AppLook.setTheme(this, position));
+
+        HyperValueRow languageRow = findViewById(R.id.app_language_input);
+        List<String> tags = AppLook.languageTags();
+        String[] names = new String[tags.size() + 1];
+        names[0] = getString(R.string.app_language_system);
+        for (int index = 0; index < tags.size(); index++) {
+            names[index + 1] = AppLook.nativeName(tags.get(index));
+        }
+        languageRow.setEntries(names);
+        int current = tags.indexOf(AppLook.language()) + 1;
+        languageRow.setValue(names[current]);
+        languageRow.setOnItemSelectedListener(position ->
+                AppLook.setLanguage(position == 0 ? "" : tags.get(position - 1)));
+
+        com.google.android.material.materialswitch.MaterialSwitch monet = findViewById(R.id.app_monet_switch);
+        monet.setChecked(AppLook.monet(this));
+        monet.setOnCheckedChangeListener((button, checked) -> {
+            AppLook.setMonet(this, checked);
+            recreate();
+        });
+        com.google.android.material.materialswitch.MaterialSwitch blur = findViewById(R.id.app_blur_switch);
+        blur.setChecked(AppLook.blur(this));
+        blur.setOnCheckedChangeListener((button, checked) -> {
+            AppLook.setBlur(this, checked);
+            navigation.setFrosted(AppLook.blur(this));
+        });
+        MiuixRows.installSwitches(this, R.id.app_monet_switch, R.id.app_blur_switch);
+    }
+
+    // ------------------------------------------------------------------
+    // Widgets tab
+    // ------------------------------------------------------------------
+
+    private void bindWidgetsHome() {
+        homePreview = findViewById(R.id.widgets_home_preview_view);
+        homePreviewContainer = findViewById(R.id.widgets_home_preview_container);
+        homePageTabs = findViewById(R.id.widgets_home_page_tabs);
+        homeRows = findViewById(R.id.widgets_home_rows);
+        homeHint = findViewById(R.id.widgets_home_hint);
+        // The preview is a picture here. Left to take touches it would move
+        // widgets in the free layout, and a long press would switch the phone
+        // into always-on, so a tap on it opens the builder instead.
+        findViewById(R.id.widgets_home_preview_tap).setOnClickListener(view -> openBuilder(null));
+        findViewById(R.id.widgets_home_add_button).setOnClickListener(view ->
+                startActivity(new Intent(this, WidgetPickerActivity.class)
+                        .putExtra(WidgetPickerActivity.EXTRA_TARGET_PAGE, homePage)));
+        findViewById(R.id.widgets_home_builder_button).setOnClickListener(view ->
+                openBuilder(null));
+        findViewById(R.id.widgets_home_templates_button).setOnClickListener(view ->
+                startActivity(new Intent(this, DashboardTemplatesActivity.class)));
+        bindSectionRow(R.id.general_content_button,
+                DashboardSettingsActivity.SECTION_MODE);
+    }
+
+    private void bindSectionRow(int buttonId, int section) {
+        findViewById(buttonId).setOnClickListener(view ->
+                startActivity(DashboardSettingsActivity.intentFor(this, section)));
+    }
+
+    private void openBuilder(@Nullable DashboardWidgetLayout.Widget widget) {
+        Intent intent = new Intent(this, DashboardBuilderActivity.class)
+                .putExtra(DashboardBuilderActivity.EXTRA_PAGE, homePage);
+        if (widget != null) {
+            intent.putExtra(DashboardBuilderActivity.EXTRA_WIDGET, widget.name());
+        }
+        startActivity(intent);
+    }
+
+    /** Rebuilds the tab from stored state; the picker and builder change it. */
+    private void renderWidgetsHome() {
+        int pageCount = DashboardWidgetLayout.loadPageCount(this);
+        homePage = Math.max(1, Math.min(pageCount, homePage));
+        renderHomePageTabs(pageCount);
+        renderHomeRows(pageCount);
+        refreshHomePreview(pageCount);
+        renderHomeSummaries();
+    }
+
+    private void renderHomePageTabs(int pageCount) {
+        homePageTabs.removeAllViews();
+        homePageTabs.setVisibility(pageCount > 1 ? View.VISIBLE : View.GONE);
+        if (pageCount <= 1) {
+            return;
+        }
+        MaterialButtonToggleGroup group = (MaterialButtonToggleGroup) getLayoutInflater()
+                .inflate(R.layout.widget_segment_group, homePageTabs, false);
+        int[] ids = new int[pageCount];
+        int home = DashboardWidgetLayout.loadHomePage(this);
+        for (int page = 1; page <= pageCount; page++) {
+            MaterialButton tab = (MaterialButton) getLayoutInflater()
+                    .inflate(R.layout.widget_segment_button, group, false);
+            tab.setId(View.generateViewId());
+            ids[page - 1] = tab.getId();
+            tab.setText(page == home ? page + " ★" : String.valueOf(page));
+            tab.setContentDescription(WidgetCatalog.pageLabel(this, page));
+            group.addView(tab, new LinearLayout.LayoutParams(0, dp(42), 1f));
+        }
+        group.check(ids[homePage - 1]);
+        group.addOnButtonCheckedListener((toggleGroup, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            for (int index = 0; index < ids.length; index++) {
+                if (ids[index] == checkedId && index + 1 != homePage) {
+                    homePage = index + 1;
+                    renderHomeRows(ids.length);
+                    refreshHomePreview(ids.length);
+                    return;
+                }
+            }
+        });
+        homePageTabs.addView(group);
+    }
+
+    /** The widgets on the shown page, as the builder lists them. */
+    private void renderHomeRows(int pageCount) {
+        homeRows.removeAllViews();
+        List<DashboardWidgetLayout.Widget> onPage = new ArrayList<>();
+        for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.loadOrder(this)) {
+            if (DashboardWidgetLayout.isWidgetEnabled(this, widget)
+                    && Math.min(pageCount, DashboardWidgetLayout.loadPage(this, widget))
+                    == homePage) {
+                onPage.add(widget);
+            }
+        }
+        homeRows.setVisibility(onPage.isEmpty() ? View.GONE : View.VISIBLE);
+        homeHint.setText(onPage.isEmpty()
+                ? R.string.widgets_home_empty : R.string.widgets_home_preview_hint);
+        for (int index = 0; index < onPage.size(); index++) {
+            DashboardWidgetLayout.Widget widget = onPage.get(index);
+            MaterialButton row = (MaterialButton) getLayoutInflater()
+                    .inflate(R.layout.widget_builder_row, homeRows, false);
+            row.setText(WidgetCatalog.label(this, widget));
+            row.setShapeAppearanceModel(ShapeAppearanceModel.builder(this, 0,
+                    onPage.size() == 1 ? R.style.HyperOS_Shape_Group
+                            : index == 0 ? R.style.HyperOS_Shape_RowTop
+                            : index == onPage.size() - 1 ? R.style.HyperOS_Shape_RowBottom
+                            : R.style.HyperOS_Shape_RowMiddle).build());
+            row.setOnClickListener(view -> openBuilder(widget));
+            homeRows.addView(row, new LinearLayout.LayoutParams(-1, -2));
+        }
+    }
+
+    private void refreshHomePreview(int pageCount) {
+        DashboardSettings settings = MirrorSettings.loadDashboardSettings(this)
+                .withContentMode(RearContentMode.DASHBOARD);
+        Point panel = PreviewSupport.panelSize(this);
+        homePreview.setDashboardSettings(settings, RearContentMode.DASHBOARD);
+        homePreview.setPanelMetrics(panel == null ? 0 : Math.min(panel.x, panel.y),
+                panel == null ? 0f : PreviewSupport.panelDensity(this));
+        homePreview.setSnapshot(PreviewSupport.snapshot(this));
+        // Pinned to the shown page, as the builder pins it: waiting for the
+        // preview to cycle round to the page being looked at is no preview.
+        homePreview.setSelectedPage(pageCount > 1 ? homePage : 0);
+        homePreview.setContentDescription(WidgetCatalog.pageLabel(this, homePage));
+        sizeHomePreview(DashboardWidgetLayout.loadPageOrientation(this, homePage), panel);
+    }
+
+    /** The panel's own proportions, kept short enough to leave the list in view. */
+    private void sizeHomePreview(DashboardWidgetLayout.Orientation orientation,
+            @Nullable Point panel) {
+        LinearLayout.LayoutParams params =
+                (LinearLayout.LayoutParams) homePreviewContainer.getLayoutParams();
+        int maxHeight = Math.min(dp(220),
+                Math.round(getResources().getDisplayMetrics().heightPixels * 0.32f));
+        int availableWidth = Math.max(dp(120), getResources().getDisplayMetrics().widthPixels
+                - 2 * getResources().getDimensionPixelSize(R.dimen.page_margin_horizontal));
+        if (panel == null) {
+            boolean portrait = orientation == DashboardWidgetLayout.Orientation.PORTRAIT;
+            params.width = portrait ? dp(130) : -1;
+            params.height = portrait ? maxHeight : dp(150);
+        } else {
+            boolean landscape = orientation != DashboardWidgetLayout.Orientation.PORTRAIT;
+            float longSide = Math.max(panel.x, panel.y);
+            float shortSide = Math.min(panel.x, panel.y);
+            float aspect = landscape ? longSide / shortSide : shortSide / longSide;
+            int width = availableWidth;
+            int height = Math.round(width / aspect);
+            if (height > maxHeight) {
+                height = maxHeight;
+                width = Math.round(height * aspect);
+            }
+            params.width = width;
+            params.height = height;
+        }
+        params.gravity = Gravity.CENTER_HORIZONTAL;
+        homePreviewContainer.setLayoutParams(params);
+    }
+
+    /** One line under each settings row saying what it is set to. */
+    private void renderHomeSummaries() {
+        DashboardSettings settings = MirrorSettings.loadDashboardSettings(this);
+        String[] modes = getResources().getStringArray(R.array.dashboard_mode_entries);
+        String[] themes = getResources().getStringArray(R.array.dashboard_theme_entries);
+        String[] idle = {
+                getString(R.string.dashboard_idle_15_seconds),
+                getString(R.string.dashboard_idle_30_seconds),
+                getString(R.string.dashboard_idle_always_on),
+        };
+        ((TextView) findViewById(R.id.general_content_summary)).setText(
+                labelAt(modes, settings.contentMode.ordinal()));
+        ((TextView) findViewById(R.id.widgets_home_appearance_summary)).setText(getString(
+                R.string.widgets_home_appearance_summary,
+                labelAt(themes, settings.theme.ordinal()), settings.textScalePercent));
+        ((TextView) findViewById(R.id.widgets_home_screen_summary)).setText(
+                labelAt(idle, DashboardWidgetLayout.loadIdleMode(this).ordinal()));
+        boolean[] touch = {
+                DashboardWidgetLayout.isTapCyclesVariantEnabled(this),
+                DashboardWidgetLayout.isPocketLockEnabled(this),
+                DashboardWidgetLayout.isFaceDownOffEnabled(this),
+        };
+        int on = 0;
+        for (boolean enabled : touch) {
+            if (enabled) {
+                on++;
+            }
+        }
+        ((TextView) findViewById(R.id.widgets_home_touch_summary)).setText(
+                getString(R.string.widgets_home_touch_summary, on, touch.length));
+    }
+
+    private static String labelAt(String[] labels, int index) {
+        return index >= 0 && index < labels.length ? labels[index] : "";
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     private void renderStoredSettings() {
@@ -331,6 +632,21 @@ public class SettingsActivity extends AppCompatActivity implements
         statusValue.setContentDescription(getString(
                 active ? R.string.status_active_accessibility : R.string.status_inactive_accessibility
         ));
+        // Running reads green at a glance; off stays on the plain surface.
+        View card = findViewById(R.id.status_card);
+        ImageView icon = findViewById(R.id.status_icon);
+        TextView title = findViewById(R.id.status_title);
+        int onColor = ContextCompat.getColor(this, active
+                ? R.color.hyper_on_success_container : R.color.hyper_text_primary);
+        int quietColor = ContextCompat.getColor(this, active
+                ? R.color.hyper_on_success_container : R.color.hyper_text_secondary);
+        card.setBackgroundTintList(active ? ColorStateList.valueOf(
+                ContextCompat.getColor(this, R.color.hyper_success_container)) : null);
+        icon.setImageResource(active ? R.drawable.ic_status_on : R.drawable.ic_status_off);
+        icon.setImageTintList(ColorStateList.valueOf(active
+                ? ContextCompat.getColor(this, R.color.hyper_success) : quietColor));
+        title.setTextColor(quietColor);
+        statusValue.setTextColor(onColor);
     }
 
     private void updateCapabilityUi(DeviceCapabilityState.Snapshot snapshot) {
@@ -381,5 +697,33 @@ public class SettingsActivity extends AppCompatActivity implements
         profileInput.setEntries(profileLabels);
         profileInput.setValue(profileLabels[selectedIndex]);
         bindingUi = false;
+    }
+
+    private static final String SOURCE_URL = "https://github.com/tpkarras/Mirror2RearUltra";
+
+    private void openSource() {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(SOURCE_URL)));
+        } catch (android.content.ActivityNotFoundException ignored) {
+            // No browser installed: nothing to open.
+        }
+    }
+
+    /** Version, licence and where the project comes from. */
+    private void showAbout() {
+        String version = "";
+        try {
+            android.content.pm.PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
+            version = getString(R.string.app_about_version, info.versionName,
+                    String.valueOf(info.getLongVersionCode()));
+        } catch (android.content.pm.PackageManager.NameNotFoundException ignored) {
+            // Our own package is always installed.
+        }
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.app_about_name)
+                .setMessage(version + "\n\n" + getString(R.string.app_about_text))
+                .setPositiveButton(R.string.app_about_open, (dialog, which) -> openSource())
+                .setNegativeButton(R.string.app_about_close, null)
+                .show();
     }
 }

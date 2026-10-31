@@ -557,4 +557,11 @@
     <string name="dashboard_pressure_rising">stigende</string>
     <string name="dashboard_pressure_falling">fallende</string>
     <string name="dashboard_pressure_steady">stabilt</string>
+    <string name="app_look_title">Grensesnitt</string>
+    <string name="app_theme_title">Tema</string>
+    <string name="app_theme_system">System</string>
+    <string name="app_theme_light">Lyst</string>
+    <string name="app_theme_dark">Mørkt</string>
+    <string name="app_language_title">Språk</string>
+    <string name="app_language_system">Systemstandard</string>
 </resources>

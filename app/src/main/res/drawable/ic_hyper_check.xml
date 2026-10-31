@@ -5,7 +5,7 @@
     android:height="22dp"
     android:viewportWidth="22"
     android:viewportHeight="22"
-    android:tint="@color/hyper_accent">
+    android:tint="?attr/hyperAccent">
     <path
         android:strokeColor="#FFFFFFFF"
         android:strokeWidth="2"

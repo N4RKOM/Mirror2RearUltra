@@ -563,4 +563,11 @@
     <string name="dashboard_pressure_rising">ag ardú</string>
     <string name="dashboard_pressure_falling">ag titim</string>
     <string name="dashboard_pressure_steady">seasmhach</string>
+    <string name="app_look_title">Comhéadan</string>
+    <string name="app_theme_title">Téama</string>
+    <string name="app_theme_system">Córas</string>
+    <string name="app_theme_light">Éadrom</string>
+    <string name="app_theme_dark">Dorcha</string>
+    <string name="app_language_title">Teanga</string>
+    <string name="app_language_system">Réamhshocrú an chórais</string>
 </resources>

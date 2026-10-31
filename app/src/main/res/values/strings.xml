@@ -587,4 +587,54 @@
     <string name="widgets_home_arrangement_help">Arrange widgets, pages and their appearance.</string>
     <string name="widgets_home_display">Display</string>
     <string name="widgets_home_display_help">Set how and when the rear display shows widgets.</string>
+
+    <!-- Widgets tab redesign -->
+    <string name="panel_mirror_tools_title">Shutter, grid and level</string>
+    <string name="widgets_home_widgets_header">Widgets on this page</string>
+    <string name="widgets_home_add">Add widget</string>
+    <string name="widgets_home_empty">Nothing on this page yet. Add a widget to start.</string>
+    <string name="widgets_home_preview_hint">Tap the preview or a widget in the list to change it.</string>
+    <string name="widgets_home_panel">Panel</string>
+    <string name="widgets_home_all_pages">For all pages</string>
+    <string name="widgets_home_builder">Layout, pages and background</string>
+    <string name="widgets_home_appearance_summary">%1$s · text %2$d%%</string>
+    <string name="widgets_home_touch_summary">On: %1$d of %2$d</string>
+
+    <!-- Add-widget gallery -->
+    <string name="widget_gallery_help">Tap a widget to put it on this page, and tap it again to take it off.</string>
+    <string name="widget_gallery_search">Search widgets</string>
+    <string name="widget_gallery_all">All</string>
+    <string name="widget_gallery_all_pages">All pages</string>
+    <string name="widget_gallery_page_empty">Nothing is on this page yet.</string>
+    <string name="widget_gallery_added">Added</string>
+    <string name="widget_gallery_on_page">Page %1$d</string>
+    <string name="widget_gallery_needs_access">Needs access</string>
+    <string name="widget_gallery_no_results">No widgets match your search.</string>
+    <string name="widget_gallery_settings">Widget settings</string>
+    <string name="app_look_title">Interface</string>
+    <string name="app_theme_title">Theme</string>
+    <string name="app_theme_system">System</string>
+    <string name="app_theme_light">Light</string>
+    <string name="app_theme_dark">Dark</string>
+    <string name="app_language_title">Language</string>
+    <string name="app_language_system">System default</string>
+    <string name="shortcut_builder_short">Layout</string>
+    <string name="app_group_title">App</string>
+    <string name="app_about_title">About</string>
+    <string name="app_source_title">Original project on GitHub</string>
+    <string name="app_about_version">Version %1$s (%2$s)</string>
+    <string name="app_about_name">Mirror2RearUltra</string>
+    <string name="app_about_text">Licensed under GPL-3.0. Based on the original project by tpkarras.</string>
+    <string name="app_about_open">Open on GitHub</string>
+    <string name="app_about_close">Close</string>
+    <string name="app_monet_title">Wallpaper colours</string>
+    <string name="app_blur_title">Frosted bottom bar</string>
+    <string name="dashboard_builder_section_widgets">Widgets</string>
+    <string name="dashboard_builder_section_page">Page</string>
+    <string name="dashboard_builder_section_more">More</string>
+    <string name="dashboard_builder_drag">Drag %1$s</string>
+    <string name="dashboard_builder_list_hint_free">Tap a widget for its settings.</string>
+    <string name="dashboard_builder_list_hint_free_pages">Tap a widget for its settings. Hold it and drop it on a page tab to move it there.</string>
+    <string name="dashboard_builder_editor_prev">Previous widget</string>
+    <string name="dashboard_builder_editor_next">Next widget</string>
 </resources>

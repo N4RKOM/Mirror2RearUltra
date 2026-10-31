@@ -561,4 +561,11 @@
     <string name="dashboard_pressure_rising">зростає</string>
     <string name="dashboard_pressure_falling">падає</string>
     <string name="dashboard_pressure_steady">без змін</string>
+    <string name="app_look_title">Інтерфейс</string>
+    <string name="app_theme_title">Тема</string>
+    <string name="app_theme_system">Системна</string>
+    <string name="app_theme_light">Світла</string>
+    <string name="app_theme_dark">Темна</string>
+    <string name="app_language_title">Мова</string>
+    <string name="app_language_system">Як у системі</string>
 </resources>

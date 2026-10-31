@@ -555,4 +555,11 @@
     <string name="dashboard_pressure_rising">上升</string>
     <string name="dashboard_pressure_falling">下降</string>
     <string name="dashboard_pressure_steady">平稳</string>
+    <string name="app_look_title">界面</string>
+    <string name="app_theme_title">主题</string>
+    <string name="app_theme_system">跟随系统</string>
+    <string name="app_theme_light">浅色</string>
+    <string name="app_theme_dark">深色</string>
+    <string name="app_language_title">语言</string>
+    <string name="app_language_system">系统默认</string>
 </resources>

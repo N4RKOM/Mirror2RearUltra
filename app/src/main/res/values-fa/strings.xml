@@ -557,4 +557,11 @@
     <string name="dashboard_pressure_rising">در حال افزایش</string>
     <string name="dashboard_pressure_falling">در حال کاهش</string>
     <string name="dashboard_pressure_steady">ثابت</string>
+    <string name="app_look_title">رابط کاربری</string>
+    <string name="app_theme_title">پوسته</string>
+    <string name="app_theme_system">سیستم</string>
+    <string name="app_theme_light">روشن</string>
+    <string name="app_theme_dark">تیره</string>
+    <string name="app_language_title">زبان</string>
+    <string name="app_language_system">پیش‌فرض سیستم</string>
 </resources>

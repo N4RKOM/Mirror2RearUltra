@@ -53,7 +53,14 @@ import java.util.Locale;
  * the arrangement-wide tools moved to {@link DashboardTemplatesActivity}.
  */
 public class DashboardBuilderActivity extends AppCompatActivity {
+    /** The page to open on, as the widgets tab last showed it. */
+    static final String EXTRA_PAGE = "page";
+    /** A widget (by enum name) whose settings should open straight away. */
+    static final String EXTRA_WIDGET = "widget";
+
     private final List<DashboardWidgetLayout.Widget> widgets = new ArrayList<>();
+    /** Set from {@link #EXTRA_WIDGET} and consumed once the screen is built. */
+    @Nullable private DashboardWidgetLayout.Widget pendingEditor;
     private NestedScrollView scroll;
     private FrameLayout pageTabs;
     private MaterialButton addPageButton;
@@ -92,19 +99,23 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     @Nullable private DashboardWidgetLayout.Widget selectedWidget;
     private MaterialToolbar toolbar;
     private View editor;
-    /** Where the preview is shown while a widget is being edited. */
-    private FrameLayout editorWindow;
     private TextView editorTitle;
+    private android.widget.ImageView editorIcon;
+    private View editorPrev;
+    private View editorNext;
     private NestedScrollView editorScroll;
     private LinearLayout editorRows;
     /** The widget the editor is open for, or null while it is closed. */
     @Nullable private DashboardWidgetLayout.Widget editingWidget;
-    /** Where the preview came from, to put it back when the editor closes. */
-    @Nullable private ViewGroup previewHome;
-    private int previewHomeIndex;
-    private int builderScrollY;
-    /** Set when the preview should be moved to the edited widget once drawn. */
-    private boolean focusPending;
+    /** The three sections under the preview: widgets, this page, and what all pages share. */
+    private static final int SECTION_WIDGETS = 0;
+    private static final int SECTION_PAGE = 1;
+    private static final int SECTION_MORE = 2;
+    private static final String STATE_SECTION = "section";
+    private int section = SECTION_WIDGETS;
+    private MaterialButtonToggleGroup sectionGroup;
+    private View[] sectionPanels;
+    private FrameLayout previewSlot;
     /** Brings an editor control back in line after a pinch in the preview. */
     @Nullable private Runnable editorSync;
     private final OnBackPressedCallback closeEditorOnBack = new OnBackPressedCallback(false) {
@@ -124,8 +135,6 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 new ActivityResultContracts.GetContent(), this::importImage);
         setContentView(R.layout.activity_dashboard_builder);
         MiuixRows.install(this, R.id.dashboard_builder_choose, R.id.dashboard_builder_templates);
-        SettingsLayout.bindCollapsingTitle(this, R.id.dashboard_builder_toolbar,
-                R.id.dashboard_builder_scroll, R.id.dashboard_builder_page_title);
         toolbar = findViewById(R.id.dashboard_builder_toolbar);
         toolbar.setNavigationOnClickListener(view -> {
             if (editingWidget != null) {
@@ -149,12 +158,21 @@ public class DashboardBuilderActivity extends AppCompatActivity {
 
         scroll = findViewById(R.id.dashboard_builder_scroll);
         editor = findViewById(R.id.dashboard_builder_editor);
-        editorWindow = findViewById(R.id.dashboard_builder_editor_window);
         editorTitle = findViewById(R.id.dashboard_builder_editor_title);
+        editorIcon = findViewById(R.id.dashboard_builder_editor_icon);
+        editorPrev = findViewById(R.id.dashboard_builder_editor_prev);
+        editorNext = findViewById(R.id.dashboard_builder_editor_next);
         editorScroll = findViewById(R.id.dashboard_builder_editor_scroll);
         editorRows = findViewById(R.id.dashboard_builder_editor_rows);
         findViewById(R.id.dashboard_builder_editor_done).setOnClickListener(view ->
                 closeWidgetEditor());
+        editorPrev.setOnClickListener(view -> stepEditor(-1));
+        editorNext.setOnClickListener(view -> stepEditor(1));
+        previewSlot = findViewById(R.id.dashboard_builder_preview_slot);
+        if (state != null) {
+            section = state.getInt(STATE_SECTION, SECTION_WIDGETS);
+        }
+        bindSections();
         getOnBackPressedDispatcher().addCallback(this, closeEditorOnBack);
         pageTabs = findViewById(R.id.dashboard_builder_page_tabs);
         addPageButton = findViewById(R.id.dashboard_builder_page_add);
@@ -243,6 +261,55 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         bindCustomImage();
         findViewById(R.id.dashboard_builder_templates).setOnClickListener(view ->
                 startActivity(new Intent(this, DashboardTemplatesActivity.class)));
+
+        if (state == null) {
+            editedPage = Math.max(1, getIntent().getIntExtra(EXTRA_PAGE, 1));
+            String widgetName = getIntent().getStringExtra(EXTRA_WIDGET);
+            if (widgetName != null) {
+                try {
+                    pendingEditor = DashboardWidgetLayout.Widget.valueOf(widgetName);
+                } catch (IllegalArgumentException unknown) {
+                    pendingEditor = null;
+                }
+            }
+        }
+    }
+
+    @Override protected void onSaveInstanceState(Bundle out) {
+        super.onSaveInstanceState(out);
+        out.putInt(STATE_SECTION, section);
+    }
+
+    /** The switch under the preview that picks which section is shown. */
+    private void bindSections() {
+        sectionGroup = findViewById(R.id.dashboard_builder_sections);
+        sectionPanels = new View[]{
+                findViewById(R.id.dashboard_builder_panel_widgets),
+                findViewById(R.id.dashboard_builder_panel_page),
+                findViewById(R.id.dashboard_builder_panel_more)};
+        int[] buttons = {R.id.dashboard_builder_section_widgets,
+                R.id.dashboard_builder_section_page, R.id.dashboard_builder_section_more};
+        sectionGroup.check(buttons[section]);
+        showSection(section);
+        sectionGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            for (int index = 0; index < buttons.length; index++) {
+                if (buttons[index] == checkedId) {
+                    showSection(index);
+                    return;
+                }
+            }
+        });
+    }
+
+    private void showSection(int next) {
+        section = next;
+        for (int index = 0; index < sectionPanels.length; index++) {
+            sectionPanels[index].setVisibility(index == next ? View.VISIBLE : View.GONE);
+        }
+        scroll.scrollTo(0, 0);
     }
 
     @Override
@@ -251,12 +318,23 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         // The picker and the templates screen both change the arrangement
         // while this one is stopped.
         reload();
+        if (pendingEditor != null) {
+            DashboardWidgetLayout.Widget widget = pendingEditor;
+            pendingEditor = null;
+            if (DashboardWidgetLayout.isWidgetEnabled(this, widget)) {
+                // After layout: the editor moves the preview and needs sizes.
+                scroll.post(() -> {
+                    if (!isFinishing() && !isDestroyed()) {
+                        openWidgetEditor(widget);
+                    }
+                });
+            }
+        }
     }
 
     @Override
     protected void onDestroy() {
         MediaWidgetState.removeListener(mediaListener);
-        preview.setOnDrawnListener(null);
         imageExecutor.shutdownNow();
         super.onDestroy();
     }
@@ -418,8 +496,20 @@ public class DashboardBuilderActivity extends AppCompatActivity {
      * to the page being left.
      */
     private void selectPage(int page) {
+        selectPage(page, false);
+    }
+
+    /**
+     * @param keepEditor true when the open editor's widget moved to this page
+     *     and the editor should follow it; otherwise it is closed, since its
+     *     widget belongs to the page being left
+     */
+    private void selectPage(int page, boolean keepEditor) {
         if (page == editedPage) {
             return;
+        }
+        if (!keepEditor && editingWidget != null) {
+            closeWidgetEditor();
         }
         editedPage = page;
         selectedWidget = null;
@@ -430,6 +520,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     }
 
     private void addPage() {
+        closeWidgetEditor();
         int page = DashboardWidgetLayout.addPage(this);
         if (page == 0) {
             return;
@@ -443,6 +534,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     }
 
     private void showPageActions(View anchor) {
+        closeWidgetEditor();
         int pageCount = DashboardWidgetLayout.loadPageCount(this);
         boolean home = DashboardWidgetLayout.loadHomePage(this) == editedPage;
         PopupMenu menu = new PopupMenu(this, anchor, Gravity.END);
@@ -722,34 +814,113 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         for (List<DashboardWidgetLayout.Widget> each : pages) {
             total += each.size();
         }
+        boolean free = DashboardWidgetLayout.loadPageLayout(this, editedPage,
+                MirrorSettings.loadDashboardSettings(this).layout) == DashboardSettings.Layout.FREE;
         listHint.setText(total == 0 ? R.string.dashboard_builder_empty
                 : page.isEmpty() ? R.string.dashboard_builder_page_empty_hint
-                : R.string.dashboard_builder_list_hint);
+                : !free ? R.string.dashboard_builder_list_hint
+                : pages.size() > 1 ? R.string.dashboard_builder_list_hint_free_pages
+                : R.string.dashboard_builder_list_hint_free);
         for (int index = 0; index < page.size(); index++) {
             DashboardWidgetLayout.Widget widget = page.get(index);
-            MaterialButton row = (MaterialButton) getLayoutInflater()
-                    .inflate(R.layout.widget_builder_row, rows, false);
+            View row = getLayoutInflater().inflate(R.layout.widget_builder_item, rows, false);
             row.setTag(widget);
-            row.setText(label(widget));
-            row.setShapeAppearanceModel(ShapeAppearanceModel.builder(this, 0,
-                    page.size() == 1 ? R.style.HyperOS_Shape_Group
-                            : index == 0 ? R.style.HyperOS_Shape_RowTop
-                            : index == page.size() - 1 ? R.style.HyperOS_Shape_RowBottom
-                            : R.style.HyperOS_Shape_RowMiddle).build());
+            ((TextView) row.findViewById(R.id.builder_item_title)).setText(label(widget));
+            ((TextView) row.findViewById(R.id.builder_item_summary))
+                    .setText(widgetSummary(widget, free));
+            ((android.widget.ImageView) row.findViewById(R.id.builder_item_icon))
+                    .setImageResource(WidgetCatalog.icon(widget));
+            row.setBackgroundResource(page.size() == 1 ? R.drawable.hyper_row_bg_single
+                    : index == 0 ? R.drawable.hyper_row_bg_top
+                    : index == page.size() - 1 ? R.drawable.hyper_row_bg_bottom
+                    : R.drawable.hyper_row_bg_middle);
             markSelected(row, widget == selectedWidget);
             row.setOnClickListener(view -> openWidgetEditor(widget));
-            row.setOnLongClickListener(view -> {
-                ClipData data = ClipData.newPlainText("widget", widget.name());
-                return view.startDragAndDrop(data, new View.DragShadowBuilder(view), widget, 0);
-            });
-            addMoveActions(row, widget, index, page.size(), pages.size());
+            View handle = row.findViewById(R.id.builder_item_handle);
+            if (free) {
+                // A free page puts each widget where it was dropped in the
+                // preview, so the list has no order to change: no grip, and
+                // a long press only carries the row to another page's tab.
+                handle.setVisibility(View.GONE);
+                row.setPaddingRelative(dp(16), 0, row.getPaddingEnd(), 0);
+                if (pages.size() > 1) {
+                    row.setOnLongClickListener(view -> startRowDrag(view, widget));
+                }
+            } else {
+                row.setOnLongClickListener(view -> startRowDrag(view, widget));
+                // The grip drags at once; a long press anywhere on the row does too.
+                handle.setOnTouchListener((view, event) ->
+                        event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN
+                                && startRowDrag(row, widget));
+            }
+            addMoveActions(row, widget, index, page.size(), pages.size(), free);
             rows.addView(row, new LinearLayout.LayoutParams(-1, -2));
+        }
+        updateEditorNav();
+    }
+
+    private boolean startRowDrag(View row, DashboardWidgetLayout.Widget widget) {
+        ClipData data = ClipData.newPlainText("widget", widget.name());
+        boolean started = row.startDragAndDrop(data, new View.DragShadowBuilder(row), widget, 0);
+        if (started) {
+            row.setAlpha(0.35f);
+        }
+        return started;
+    }
+
+    /** "Normal · Center · Accent": what the widget is set to, without opening it. */
+    private String widgetSummary(DashboardWidgetLayout.Widget widget, boolean free) {
+        String[] sizes = {getString(R.string.dashboard_builder_small),
+                getString(R.string.dashboard_builder_normal),
+                getString(R.string.dashboard_builder_large)};
+        String[] positions = {getString(R.string.dashboard_builder_left),
+                getString(R.string.dashboard_builder_center),
+                getString(R.string.dashboard_builder_right)};
+        String[] styles = {getString(R.string.dashboard_builder_style_default),
+                getString(R.string.dashboard_builder_style_accent),
+                getString(R.string.dashboard_builder_style_muted)};
+        List<String> parts = new ArrayList<>();
+        if (free) {
+            parts.add(getString(R.string.dashboard_builder_size_percent,
+                    Math.round(DashboardWidgetLayout.scale(this, widget) * 100f)));
+        } else {
+            parts.add(sizes[DashboardWidgetLayout.loadSize(this, widget).ordinal()]);
+            parts.add(positions[DashboardWidgetLayout.loadPosition(this, widget).ordinal()]);
+        }
+        int style = DashboardWidgetLayout.loadStyle(this, widget).ordinal();
+        if (style != 0) {
+            parts.add(styles[style]);
+        }
+        return android.text.TextUtils.join(" · ", parts);
+    }
+
+    /** Moves the open editor to the widget before or after it on the page. */
+    private void stepEditor(int direction) {
+        if (editingWidget == null) {
+            return;
+        }
+        List<DashboardWidgetLayout.Widget> page = currentPages().get(editedPage - 1);
+        int target = page.indexOf(editingWidget) + direction;
+        if (target >= 0 && target < page.size()) {
+            openWidgetEditor(page.get(target));
         }
     }
 
+    private void updateEditorNav() {
+        if (editingWidget == null) {
+            return;
+        }
+        List<DashboardWidgetLayout.Widget> page = currentPages().get(editedPage - 1);
+        int index = page.indexOf(editingWidget);
+        editorPrev.setEnabled(index > 0);
+        editorPrev.setAlpha(index > 0 ? 1f : 0.3f);
+        editorNext.setEnabled(index >= 0 && index < page.size() - 1);
+        editorNext.setAlpha(editorNext.isEnabled() ? 1f : 0.3f);
+    }
+
     private void addMoveActions(View row, DashboardWidgetLayout.Widget widget,
-            int index, int pageSize, int pageCount) {
-        if (index > 0) {
+            int index, int pageSize, int pageCount, boolean free) {
+        if (!free && index > 0) {
             ViewCompat.addAccessibilityAction(row,
                     getString(R.string.dashboard_builder_move_up, label(widget)),
                     (view, arguments) -> {
@@ -757,7 +928,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                         return true;
                     });
         }
-        if (index < pageSize - 1) {
+        if (!free && index < pageSize - 1) {
             ViewCompat.addAccessibilityAction(row,
                     getString(R.string.dashboard_builder_move_down, label(widget)),
                     (view, arguments) -> {
@@ -785,25 +956,41 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         preview.setSelectedWidget(widget);
         for (int index = 0; index < rows.getChildCount(); index++) {
             View child = rows.getChildAt(index);
-            if (child instanceof MaterialButton) {
-                markSelected((MaterialButton) child, widget != null && child.getTag() == widget);
+            if (child.getTag() instanceof DashboardWidgetLayout.Widget) {
+                markSelected(child, widget != null && child.getTag() == widget);
             }
         }
     }
 
-    private void markSelected(MaterialButton row, boolean picked) {
-        row.setTextColor(ContextCompat.getColorStateList(this,
-                picked ? R.color.hyper_text_button_text : R.color.hyper_row_title_text));
+    private void markSelected(View row, boolean picked) {
+        android.content.res.ColorStateList color = ContextCompat.getColorStateList(this,
+                picked ? R.color.hyper_text_button_text : R.color.hyper_row_title_text);
+        ((TextView) row.findViewById(R.id.builder_item_title)).setTextColor(color);
+        ((android.widget.ImageView) row.findViewById(R.id.builder_item_icon))
+                .setImageTintList(ContextCompat.getColorStateList(this, picked
+                        ? R.color.hyper_text_button_text : R.color.hyper_text_secondary));
     }
 
     /** Reorders within the edited page, by where the finger lets go. */
     private boolean handleRowDrop(View view, DragEvent event) {
+        if (event.getAction() == DragEvent.ACTION_DRAG_ENDED) {
+            // A drag that went nowhere leaves the lifted row dimmed.
+            for (int child = 0; child < rows.getChildCount(); child++) {
+                rows.getChildAt(child).setAlpha(1f);
+            }
+            return true;
+        }
         if (event.getAction() != DragEvent.ACTION_DROP) {
             return true;
         }
         Object state = event.getLocalState();
         if (!(state instanceof DashboardWidgetLayout.Widget)) {
             return false;
+        }
+        // A free page has no order to rearrange; only the tabs take a drop.
+        if (DashboardWidgetLayout.loadPageLayout(this, editedPage,
+                MirrorSettings.loadDashboardSettings(this).layout) == DashboardSettings.Layout.FREE) {
+            return true;
         }
         int index = rows.getChildCount();
         for (int child = 0; child < rows.getChildCount(); child++) {
@@ -846,21 +1033,16 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     // ------------------------------------------------------------------
 
     /**
-     * Opens a widget's settings, with the preview held above them.
+     * Opens a widget's settings under the pinned preview.
      *
-     * <p>They were nine rows inside every card, then a sheet over the lower
-     * half of the screen - which covered the preview whenever the page was
-     * upright, and slid the page about to uncover it. The preview itself now
-     * moves into the editor's window, so it stays in sight however far the
-     * settings are scrolled. A sideways page fits the window whole. An
-     * upright one is shown the full width, far taller than the window, which
-     * moves to whichever widget is being edited.
-     *
-     * <p>The preview is moved, not copied: more than one of this view on
-     * screen at once shared each other's drawings on HyperOS.
+     * <p>The settings replace the sections in place and the preview stays
+     * where it is, so the widget being changed is in sight however far the
+     * settings are scrolled. It used to be moved into the editor and back,
+     * which more than one copy of the view on screen could not share on
+     * HyperOS.
      *
      * <p>Tapping another widget in the preview while the editor is open
-     * switches the editor to it.
+     * switches the editor to it, and so do the arrows beside its title.
      */
     private void openWidgetEditor(DashboardWidgetLayout.Widget widget) {
         if (widget == editingWidget) {
@@ -869,34 +1051,23 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         boolean opening = editingWidget == null;
         editingWidget = widget;
         editorTitle.setText(label(widget));
+        editorIcon.setImageResource(WidgetCatalog.icon(widget));
+        editorIcon.setImageTintList(ContextCompat.getColorStateList(this,
+                R.color.hyper_text_button_text));
         editorRows.removeAllViews();
         editorSync = null;
         fillWidgetSheet(editorRows, widget);
         editorScroll.scrollTo(0, 0);
         if (opening) {
-            builderScrollY = scroll.getScrollY();
-            previewHome = (ViewGroup) previewContainer.getParent();
-            previewHomeIndex = previewHome.indexOfChild(previewContainer);
-            previewHome.removeView(previewContainer);
-            editorWindow.addView(previewContainer);
-            preview.setOnDrawnListener(this::focusEditedWidget);
             editor.setAlpha(0f);
             editor.setVisibility(View.VISIBLE);
             editor.animate().alpha(1f).setDuration(160L).start();
             closeEditorOnBack.setEnabled(true);
             toolbar.getMenu().setGroupVisible(0, false);
-            // Sized again once the editor has been laid out: until then its
-            // window has no width and its height is a guess.
-            editor.post(() -> {
-                if (editingWidget != null) {
-                    focusPending = true;
-                    refreshPreview();
-                }
-            });
+            sectionGroup.setVisibility(View.GONE);
         }
         selectWidget(widget);
-        focusPending = true;
-        refreshPreview();
+        updateEditorNav();
     }
 
     private void closeWidgetEditor() {
@@ -905,71 +1076,15 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         }
         editingWidget = null;
         editorSync = null;
-        focusPending = false;
         closeEditorOnBack.setEnabled(false);
         toolbar.getMenu().setGroupVisible(0, true);
-        preview.setOnDrawnListener(null);
-        previewContainer.animate().cancel();
-        previewContainer.setTranslationY(0f);
-        editorWindow.removeView(previewContainer);
-        if (previewHome != null) {
-            previewHome.addView(previewContainer, previewHomeIndex,
-                    new LinearLayout.LayoutParams(-1, dp(150)));
-        }
+        sectionGroup.setVisibility(View.VISIBLE);
+        editor.animate().cancel();
         editor.setVisibility(View.GONE);
         editorRows.removeAllViews();
+        // The rows show what each widget is set to, which may have changed.
+        renderRows();
         refreshPreview();
-        scroll.post(() -> scroll.scrollTo(0, builderScrollY));
-    }
-
-    /**
-     * Sizes the preview for the editor's window: the full width, and the
-     * window as tall as the page is sideways, or a part of the screen when it
-     * is upright and would never fit.
-     */
-    private void layoutEditorPreview(DashboardWidgetLayout.Orientation orientation) {
-        boolean landscape = orientation == DashboardWidgetLayout.Orientation.LANDSCAPE;
-        int width = editorWindow.getWidth() > 0 ? editorWindow.getWidth() : previewMaxWidth();
-        int height = Math.round(width / panelAspect(orientation));
-        FrameLayout.LayoutParams card = new FrameLayout.LayoutParams(width, height);
-        previewContainer.setLayoutParams(card);
-        ViewGroup.LayoutParams window = editorWindow.getLayoutParams();
-        int available = editor.getHeight() > 0
-                ? editor.getHeight() : getResources().getDisplayMetrics().heightPixels;
-        window.height = landscape ? ViewGroup.LayoutParams.WRAP_CONTENT
-                : Math.min(height, Math.round(available * 0.42f));
-        editorWindow.setLayoutParams(window);
-        if (landscape) {
-            previewContainer.animate().cancel();
-            previewContainer.setTranslationY(0f);
-        }
-    }
-
-    /**
-     * Moves an upright preview so the edited widget sits in the middle of the
-     * window, as far as the preview's ends allow.
-     *
-     * <p>Only when asked - on opening, and on changing widget or page - and
-     * never after a frame the finger caused: moving the preview under a
-     * widget being dragged would drag it somewhere else.
-     */
-    private void focusEditedWidget() {
-        if (!focusPending || editingWidget == null) {
-            return;
-        }
-        RectF bounds = preview.widgetBounds(editingWidget);
-        int window = editorWindow.getHeight();
-        int card = previewContainer.getHeight();
-        if (bounds == null || window <= 0 || card <= 0) {
-            return;
-        }
-        focusPending = false;
-        float target = 0f;
-        if (card > window) {
-            float middle = preview.getTop() + bounds.centerY();
-            target = Math.max(window - card, Math.min(0f, window / 2f - middle));
-        }
-        previewContainer.animate().translationY(target).setDuration(220L).start();
     }
 
     private void fillWidgetSheet(LinearLayout column, DashboardWidgetLayout.Widget widget) {
@@ -990,9 +1105,8 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                         if (moveWidget(widget, target, -1)) {
                             // Follow it, so the move is seen rather than the
                             // widget simply vanishing from the list.
-                            selectPage(target);
+                            selectPage(target, true);
                             selectWidget(widget);
-                            focusPending = true;
                             refreshPreview();
                         }
                     });
@@ -1521,11 +1635,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         bindingSnap = true;
         snapSwitch.setChecked(DashboardWidgetLayout.isGridSnapEnabled(this));
         bindingSnap = false;
-        if (editingWidget != null) {
-            layoutEditorPreview(orientation);
-        } else {
-            sizePreviewToPanel(orientation);
-        }
+        sizePreviewToPanel(orientation);
     }
 
     /** Redraws the preview when the session starts, stops or changes track. */
@@ -1572,76 +1682,9 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Fills the preview from live state where the app already has it.
-     *
-     * <p>Battery, temperature, charging, the current track, the clock, the
-     * profile name, the network, memory and storage are real. Weather,
-     * heading, speed, altitude, the next event, today's steps, the charger,
-     * the sun and the level stand in: those come from sensors, a network
-     * fetch and a content query the builder does not start. The charger stands
-     * in even when unplugged, for the same reason as the counters below.
-     *
-     * <p>The system counters are stood in for rather than left at "no
-     * reading": a widget with no reading is dropped, so a page made of them
-     * would look empty here while the panel showed it.
-     */
+    /** Live readings where the app has them, stand-ins elsewhere. */
     private RearDashboardSnapshot previewSnapshot() {
-        MediaWidgetState.Snapshot media = MediaWidgetState.get();
-        boolean playing = media != null && media.hasMedia();
-        // Read the battery straight from the sticky broadcast rather than from
-        // DeviceHealthState: that is filled by DeviceHealthMonitor, which only
-        // runs while the protection screen or the mirroring service is up, so
-        // in the builder it is almost always unknown.
-        Intent battery = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        int level = battery == null ? -1 : battery.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = battery == null ? -1 : battery.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-        int batteryPercent = level >= 0 && scale > 0 ? Math.round(level * 100f / scale) : 72;
-        int temperature = battery == null
-                ? 365 : battery.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 365);
-        int status = battery == null
-                ? -1 : battery.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-        boolean charging = status == BatteryManager.BATTERY_STATUS_CHARGING
-                || status == BatteryManager.BATTERY_STATUS_FULL;
-        SystemStats stats = SystemStats.read(this);
-        NotificationWidgetState.Snapshot notification = NotificationWidgetState.get();
-        return new RearDashboardSnapshot(
-                System.currentTimeMillis(),
-                batteryPercent,
-                temperature,
-                charging,
-                "",
-                18,
-                1,
-                false,
-                System.currentTimeMillis() + 3_600_000L,
-                playing ? media.title : getString(R.string.dashboard_builder_sample_track),
-                playing ? media.artist : "",
-                media != null && media.playing,
-                45f,
-                8.3f,
-                120.0,
-                754_000L,
-                MirrorSettings.profileDisplayName(this, MirrorSettings.loadActiveProfile(this)),
-                stats.networkSummary,
-                stats.memoryPercent,
-                stats.storagePercentFree,
-                getString(R.string.dashboard_builder_sample_event),
-                System.currentTimeMillis() + 5_400_000L,
-                4_820,
-                notification.hasContent() ? notification.app
-                        : getString(R.string.dashboard_builder_sample_notification_app),
-                notification.hasContent() ? notification.title
-                        : getString(R.string.dashboard_builder_sample_notification),
-                notification.hasContent() ? notification.text : "",
-                new ChargeReading(2_100, 8_200, 52 * 60_000L, false),
-                new SunTimes.Next(System.currentTimeMillis() - 4 * 3_600_000L,
-                        System.currentTimeMillis() + 135 * 60_000L, false),
-                new LevelReading(2.4f, 2.4f, 6f),
-                // Vibrate rather than ringing: a ringing phone drops the row
-                // unless it is set to stay, and the preview would be empty.
-                new SoundModeReading(SoundModeReading.Mode.VIBRATE, 60),
-                new ExtraReadings(4.6f, 34, 1_250_000L, 42_000L, 1013.2f, 1));
+        return PreviewSupport.snapshot(this);
     }
 
     /**
@@ -1651,28 +1694,33 @@ public class DashboardBuilderActivity extends AppCompatActivity {
      * only when the rear display cannot be read.
      */
     private void sizePreviewToPanel(DashboardWidgetLayout.Orientation orientation) {
-        LinearLayout.LayoutParams params =
-                (LinearLayout.LayoutParams) previewContainer.getLayoutParams();
+        FrameLayout.LayoutParams params =
+                new FrameLayout.LayoutParams(previewContainer.getLayoutParams());
+        params.gravity = Gravity.CENTER_HORIZONTAL;
         Point panel = rearPanelSize();
         if (panel == null) {
             if (orientation == DashboardWidgetLayout.Orientation.PORTRAIT) {
-                params.width = dp(180);
-                params.height = dp(300);
-                params.gravity = Gravity.CENTER_HORIZONTAL;
+                params.width = dp(120);
+                params.height = dp(220);
             } else {
                 params.width = -1;
                 params.height = dp(150);
-                params.gravity = Gravity.NO_GRAVITY;
             }
             previewContainer.setLayoutParams(params);
             return;
         }
-        boolean landscape = orientation == DashboardWidgetLayout.Orientation.LANDSCAPE;
-        float aspect = landscape
-                ? panel.y / (float) panel.x
-                : panel.x / (float) panel.y;
+        boolean landscape = orientation != DashboardWidgetLayout.Orientation.PORTRAIT;
+        // The panel reports its size in its own frame, which is the wide one,
+        // so a landscape page takes the long side across whichever way round
+        // the two numbers arrive.
+        float longSide = Math.max(panel.x, panel.y);
+        float shortSide = Math.min(panel.x, panel.y);
+        float aspect = landscape ? longSide / shortSide : shortSide / longSide;
         int availableWidth = Math.max(dp(120), previewMaxWidth());
-        int maxHeight = dp(320);
+        // The preview is pinned above everything else, so an upright page is
+        // kept short enough to leave the sections room below it.
+        int maxHeight = Math.min(dp(250),
+                Math.round(getResources().getDisplayMetrics().heightPixels * 0.3f));
         int width = availableWidth;
         int height = Math.round(width / aspect);
         if (height > maxHeight) {
@@ -1685,85 +1733,24 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         previewContainer.setLayoutParams(params);
     }
 
-    /** Width over height of the panel as a page turned this way shows it. */
-    private float panelAspect(DashboardWidgetLayout.Orientation orientation) {
-        Point panel = rearPanelSize();
-        float wide = panel == null ? 294f / 126f
-                : Math.max(panel.x, panel.y) / (float) Math.min(panel.x, panel.y);
-        return orientation == DashboardWidgetLayout.Orientation.LANDSCAPE ? wide : 1f / wide;
-    }
-
     private int previewMaxWidth() {
         int screen = getResources().getDisplayMetrics().widthPixels;
         int margins = 2 * getResources().getDimensionPixelSize(R.dimen.page_margin_horizontal);
         return screen - margins;
     }
 
-    /**
-     * Density of the rear panel, or zero when it cannot be read.
-     *
-     * <p>Its own, not this screen's: the preview sizes its text against the
-     * panel's dp, which is a different size from the phone's.
-     */
+    /** Density of the rear panel, or zero when it cannot be read. */
     private float rearPanelDensity() {
-        DisplayManager manager = getSystemService(DisplayManager.class);
-        int rearDisplayId = DisplayActivity.findRearDisplayId(manager);
-        if (manager == null || rearDisplayId == Display.INVALID_DISPLAY) {
-            return 0f;
-        }
-        Display display = manager.getDisplay(rearDisplayId);
-        if (display == null) {
-            return 0f;
-        }
-        // The display's own metrics rather than a context's: a display context
-        // reports the density this screen was configured with, which is the
-        // phone's, and sizing the preview against that made it a drawing of
-        // the wrong panel.
-        android.util.DisplayMetrics metrics = new android.util.DisplayMetrics();
-        display.getRealMetrics(metrics);
-        return metrics.density;
+        return PreviewSupport.panelDensity(this);
     }
 
     /** Physical size of the rear panel, or null when it cannot be read. */
     private Point rearPanelSize() {
-        DisplayManager manager = getSystemService(DisplayManager.class);
-        int rearDisplayId = DisplayActivity.findRearDisplayId(manager);
-        if (manager == null || rearDisplayId == Display.INVALID_DISPLAY) {
-            return null;
-        }
-        Display display = manager.getDisplay(rearDisplayId);
-        if (display == null || display.getMode() == null) {
-            return null;
-        }
-        int width = display.getMode().getPhysicalWidth();
-        int height = display.getMode().getPhysicalHeight();
-        return width > 0 && height > 0 ? new Point(width, height) : null;
+        return PreviewSupport.panelSize(this);
     }
 
     private String label(DashboardWidgetLayout.Widget widget) {
-        int[] labels = {R.string.dashboard_widget_clock, R.string.dashboard_widget_date,
-                R.string.dashboard_widget_battery, R.string.dashboard_widget_temperature,
-                R.string.dashboard_widget_weather, R.string.dashboard_widget_next_alarm,
-                R.string.dashboard_widget_media, R.string.dashboard_widget_compass,
-                R.string.dashboard_widget_speed, R.string.dashboard_widget_altitude,
-                R.string.dashboard_widget_session_timer, R.string.dashboard_widget_active_profile,
-                R.string.dashboard_widget_custom_text, R.string.dashboard_widget_network,
-                R.string.dashboard_widget_memory, R.string.dashboard_widget_storage,
-                R.string.dashboard_widget_notifications, R.string.dashboard_widget_calendar,
-                R.string.dashboard_widget_steps, R.string.dashboard_widget_fullscreen_weather,
-                R.string.dashboard_widget_fullscreen_media,
-                R.string.dashboard_widget_last_notification,
-                R.string.dashboard_widget_timer, R.string.dashboard_widget_charging,
-                R.string.dashboard_widget_sun, R.string.dashboard_widget_level,
-                R.string.dashboard_widget_sound_mode, R.string.dashboard_widget_world_clock,
-                R.string.dashboard_widget_qr_code, R.string.dashboard_widget_uv,
-                R.string.dashboard_widget_air, R.string.dashboard_widget_net_speed,
-                R.string.dashboard_widget_moon, R.string.dashboard_widget_countdown,
-                R.string.dashboard_widget_progress, R.string.dashboard_widget_pressure};
-        // Indexed by ordinal, so a widget added without a label here would
-        // take the whole screen down rather than show a blank row.
-        int index = widget.ordinal();
-        return getString(index < labels.length ? labels[index] : R.string.dashboard_widgets_title);
+        return WidgetCatalog.label(this, widget);
     }
 
     private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }

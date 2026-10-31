@@ -559,4 +559,11 @@
     <string name="dashboard_pressure_rising">în creștere</string>
     <string name="dashboard_pressure_falling">în scădere</string>
     <string name="dashboard_pressure_steady">stabilă</string>
+    <string name="app_look_title">Interfață</string>
+    <string name="app_theme_title">Temă</string>
+    <string name="app_theme_system">Sistem</string>
+    <string name="app_theme_light">Luminos</string>
+    <string name="app_theme_dark">Întunecat</string>
+    <string name="app_language_title">Limbă</string>
+    <string name="app_language_system">Implicit sistem</string>
 </resources>

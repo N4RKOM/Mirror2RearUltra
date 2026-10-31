@@ -15,10 +15,17 @@
     <style name="Theme.Mirror2RearUltra" parent="Theme.Material3.DayNight.NoActionBar">
 
         <!-- Accent: the product's own blue, not Xiaomi brand orange. -->
-        <item name="colorPrimary">@color/hyper_accent</item>
-        <item name="colorOnPrimary">@color/hyper_on_accent</item>
-        <item name="colorPrimaryContainer">@color/hyper_accent_container</item>
-        <item name="colorOnPrimaryContainer">@color/hyper_on_accent_container</item>
+        <item name="hyperAccent">@color/hyper_accent</item>
+        <item name="hyperAccentPressed">@color/hyper_accent_pressed</item>
+        <item name="hyperAccentDisabled">@color/hyper_accent_disabled</item>
+        <item name="hyperOnAccent">@color/hyper_on_accent</item>
+        <item name="hyperAccentContainer">@color/hyper_accent_container</item>
+        <item name="hyperOnAccentContainer">@color/hyper_on_accent_container</item>
+        <item name="hyperSelection">@color/hyper_selection</item>
+        <item name="colorPrimary">?attr/hyperAccent</item>
+        <item name="colorOnPrimary">?attr/hyperOnAccent</item>
+        <item name="colorPrimaryContainer">?attr/hyperAccentContainer</item>
+        <item name="colorOnPrimaryContainer">?attr/hyperOnAccentContainer</item>
         <item name="colorSecondary">@color/hyper_accent</item>
         <item name="colorOnSecondary">@color/hyper_on_accent</item>
         <item name="colorSecondaryContainer">@color/hyper_field</item>
