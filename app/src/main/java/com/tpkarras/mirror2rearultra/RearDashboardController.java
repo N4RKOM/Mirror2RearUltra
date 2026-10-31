@@ -162,6 +162,11 @@ final class RearDashboardController implements
     private String networkSummary = "";
     private int memoryPercent = -1;
     private int storagePercentFree = -1;
+    private static final long ALARM_CACHE_MILLIS = 30_000L;
+    private long alarmReadAt;
+    private Long nextAlarmMillis;
+    /** The barometer's history, read from the preferences once and kept. */
+    private java.util.List<long[]> pressureSamples;
     private String calendarTitle = "";
     private Long calendarStartMillis;
     private long calendarUpdatedAt;
@@ -551,10 +556,16 @@ final class RearDashboardController implements
         long now = System.currentTimeMillis();
         android.content.SharedPreferences prefs = context.getSharedPreferences(
                 "dashboard_pressure", Context.MODE_PRIVATE);
-        java.util.List<long[]> samples = PressureHistory.parse(prefs.getString("samples", ""));
+        // The sensor reports many times a second; the preferences were being
+        // parsed on every report to look at a list that changes every 15 min.
+        if (pressureSamples == null) {
+            pressureSamples = PressureHistory.parse(prefs.getString("samples", ""));
+        }
+        java.util.List<long[]> samples = pressureSamples;
         if (samples.isEmpty() || now - samples.get(samples.size() - 1)[0] >= 15 * 60_000L) {
             samples.add(new long[]{now, Math.round(smoothed * 10f)});
             samples = PressureHistory.trimmed(samples, now);
+            pressureSamples = samples;
             prefs.edit().putString("samples", PressureHistory.format(samples)).apply();
         }
         Float earlier = PressureHistory.threeHoursBefore(samples, now);
@@ -893,9 +904,7 @@ final class RearDashboardController implements
                 ? SunTimes.next(now, WeatherForecastState.sunrises(),
                         WeatherForecastState.sunsets())
                 : null;
-        AlarmManager.AlarmClockInfo nextAlarm = settings.showNextAlarm && alarmManager != null
-                ? alarmManager.getNextAlarmClock()
-                : null;
+        Long nextAlarm = nextAlarmTime();
         MediaWidgetState.Snapshot media = MediaWidgetState.get();
         NotificationWidgetState.Snapshot notifications = NotificationWidgetState.get();
         listener.onDashboardDataChanged(new RearDashboardSnapshot(
@@ -907,7 +916,7 @@ final class RearDashboardController implements
                 weatherTemperatureCelsius,
                 weatherCode,
                 weatherLoading,
-                nextAlarm == null ? null : nextAlarm.getTriggerTime(),
+                nextAlarm,
                 media.title,
                 media.artist,
                 media.playing,
@@ -934,6 +943,24 @@ final class RearDashboardController implements
                         weatherSucceededAt > 0L
                                 && now - weatherSucceededAt > WEATHER_STALE_MILLIS)
         ));
+    }
+
+    /**
+     * When the next alarm rings, asked of the system at most twice a minute:
+     * the clock may tick every second, and the alarm does not move that fast.
+     */
+    @Nullable
+    private Long nextAlarmTime() {
+        if (!settings.showNextAlarm || alarmManager == null) {
+            return null;
+        }
+        long elapsed = SystemClock.elapsedRealtime();
+        if (elapsed - alarmReadAt >= ALARM_CACHE_MILLIS || alarmReadAt == 0L) {
+            alarmReadAt = elapsed;
+            AlarmManager.AlarmClockInfo info = alarmManager.getNextAlarmClock();
+            nextAlarmMillis = info == null ? null : info.getTriggerTime();
+        }
+        return nextAlarmMillis;
     }
 
     private void refreshCalendar() {
