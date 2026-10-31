@@ -95,6 +95,11 @@ public class SettingsActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!MirrorState.isActive()) {
+            // A session that ended with the process, not with itself, still
+            // holds the rear-screen mod's switch.
+            RearModGuard.resume(this);
+        }
         exportDocumentLauncher = registerForActivityResult(
                 new ActivityResultContracts.CreateDocument("application/xml"),
                 uri -> {

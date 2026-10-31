@@ -115,6 +115,15 @@ final class MirrorState {
             GENERATION.incrementAndGet();
         }
         if (changed) {
+            // A system mod that drives the panel's backlight argues with the
+            // session; it sits out for as long as the session lasts.
+            if (active) {
+                RearModGuard.pause(context);
+            } else {
+                RearModGuard.resume(context);
+            }
+        }
+        if (changed) {
             for (Listener listener : LISTENERS) {
                 listener.onMirrorStateChanged(active);
             }
