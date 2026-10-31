@@ -577,4 +577,14 @@
     <string name="dashboard_pressure_rising">растёт</string>
     <string name="dashboard_pressure_falling">падает</string>
     <string name="dashboard_pressure_steady">без изменений</string>
+    <string name="nav_mirror">Зеркало</string>
+    <string name="nav_settings">Настройки</string>
+    <string name="widgets_home_intro">Настройте, что показывать на заднем экране.</string>
+    <string name="widgets_home_count">Включено виджетов: %1$d</string>
+    <string name="widgets_home_count_help">Выберите информацию, которую хотите видеть.</string>
+    <string name="widgets_home_choose">Выбрать виджеты</string>
+    <string name="widgets_home_arrangement">Расположение</string>
+    <string name="widgets_home_arrangement_help">Настройте виджеты, страницы и их внешний вид.</string>
+    <string name="widgets_home_display">Экран</string>
+    <string name="widgets_home_display_help">Настройте, как и когда виджеты отображаются на заднем экране.</string>
 </resources>

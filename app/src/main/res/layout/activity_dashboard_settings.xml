@@ -35,6 +35,7 @@
         app:navigationIcon="@drawable/ic_hyper_back" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/dashboard_settings_scroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -47,6 +48,7 @@
             style="@style/HyperOS.Page">
 
             <TextView
+                android:id="@+id/dashboard_settings_page_title"
                 style="@style/HyperOS.PageTitle"
                 android:text="@string/dashboard_settings_heading" />
 

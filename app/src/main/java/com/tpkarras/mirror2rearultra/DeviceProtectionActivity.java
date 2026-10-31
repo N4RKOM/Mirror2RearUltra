@@ -37,6 +37,8 @@ public class DeviceProtectionActivity extends AppCompatActivity
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_protection);
+        SettingsLayout.bindCollapsingTitle(this, R.id.device_protection_toolbar,
+                R.id.device_protection_scroll, R.id.device_protection_page_title);
 
         MaterialToolbar toolbar = findViewById(R.id.device_protection_toolbar);
         toolbar.setNavigationOnClickListener(view -> finish());
@@ -52,6 +54,7 @@ public class DeviceProtectionActivity extends AppCompatActivity
 
         SettingsLayout.constrainContentOnWideScreens(this, content);
         bindInteractions();
+        MiuixRows.installSwitches(this, R.id.temperature_protection_switch, R.id.battery_protection_switch);
         healthMonitor = new DeviceHealthMonitor(this, snapshot ->
                 runOnUiThread(() -> updateDeviceHealthUi(snapshot))
         );

@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
+import androidx.core.widget.NestedScrollView;
+import com.google.android.material.appbar.MaterialToolbar;
 
 /**
  * Layout helpers shared by the settings screens.
@@ -20,6 +23,24 @@ final class SettingsLayout {
     private static final int WIDE_SCREEN_THRESHOLD_DP = 640;
 
     private SettingsLayout() {
+    }
+
+    /** Keeps the page name visible in the app bar once its large title scrolls away. */
+    static void bindCollapsingTitle(Activity activity, int toolbarId, int scrollId, int titleId) {
+        MaterialToolbar toolbar = activity.findViewById(toolbarId);
+        NestedScrollView scroll = activity.findViewById(scrollId);
+        TextView title = activity.findViewById(titleId);
+        Runnable update = () -> {
+            int[] titleLocation = new int[2];
+            int[] scrollLocation = new int[2];
+            title.getLocationOnScreen(titleLocation);
+            scroll.getLocationOnScreen(scrollLocation);
+            boolean collapsed = titleLocation[1] + title.getHeight() <= scrollLocation[1];
+            toolbar.setTitle(collapsed ? title.getText() : null);
+        };
+        scroll.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener)
+                (view, x, y, oldX, oldY) -> update.run());
+        scroll.post(update);
     }
 
     /**

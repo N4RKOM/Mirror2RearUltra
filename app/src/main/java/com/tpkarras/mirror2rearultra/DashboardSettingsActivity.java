@@ -87,6 +87,9 @@ public class DashboardSettingsActivity extends AppCompatActivity {
         fontPickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(), this::importFont);
         setContentView(R.layout.activity_dashboard_settings);
+        MiuixRows.install(this, R.id.dashboard_builder_button);
+        SettingsLayout.bindCollapsingTitle(this, R.id.dashboard_settings_toolbar,
+                R.id.dashboard_settings_scroll, R.id.dashboard_settings_page_title);
 
         MaterialToolbar toolbar = findViewById(R.id.dashboard_settings_toolbar);
         toolbar.setNavigationOnClickListener(view -> finish());
@@ -147,6 +150,14 @@ public class DashboardSettingsActivity extends AppCompatActivity {
 
         render(MirrorSettings.loadDashboardSettings(this));
         bindInteractions();
+        MiuixRows.installSwitches(this,
+                R.id.dashboard_notification_light_switch,
+                R.id.dashboard_tap_variant_switch,
+                R.id.dashboard_pocket_lock_switch,
+                R.id.dashboard_face_down_switch,
+                R.id.dashboard_shutter_switch,
+                R.id.dashboard_mirror_grid_switch,
+                R.id.dashboard_mirror_level_switch);
         SettingsLayout.constrainContentOnWideScreens(this, content);
     }
 

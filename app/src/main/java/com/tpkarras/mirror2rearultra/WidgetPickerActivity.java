@@ -156,6 +156,8 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
         widgetPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(), granted -> { });
         setContentView(R.layout.activity_widget_picker);
+        SettingsLayout.bindCollapsingTitle(this, R.id.widget_picker_toolbar,
+                R.id.widget_picker_scroll, R.id.widget_picker_page_title);
 
         MaterialToolbar toolbar = findViewById(R.id.widget_picker_toolbar);
         toolbar.setNavigationOnClickListener(view -> finish());
@@ -187,6 +189,45 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
 
         SettingsLayout.constrainContentOnWideScreens(this, content);
         bindInteractions();
+        MiuixRows.installSwitches(this,
+                R.id.dashboard_clock_switch,
+                R.id.dashboard_date_switch,
+                R.id.dashboard_world_clock_switch,
+                R.id.dashboard_countdown_switch,
+                R.id.dashboard_progress_switch,
+                R.id.dashboard_next_alarm_switch,
+                R.id.dashboard_timer_switch,
+                R.id.dashboard_session_timer_switch,
+                R.id.dashboard_calendar_switch,
+                R.id.dashboard_battery_switch,
+                R.id.dashboard_charging_switch,
+                R.id.dashboard_sound_mode_switch,
+                R.id.dashboard_temperature_switch,
+                R.id.dashboard_memory_switch,
+                R.id.dashboard_storage_switch,
+                R.id.dashboard_network_switch,
+                R.id.dashboard_network_speed_switch,
+                R.id.dashboard_weather_switch,
+                R.id.dashboard_fullscreen_weather_switch,
+                R.id.dashboard_sun_switch,
+                R.id.dashboard_uv_index_switch,
+                R.id.dashboard_air_quality_switch,
+                R.id.dashboard_moon_switch,
+                R.id.dashboard_compass_switch,
+                R.id.dashboard_level_switch,
+                R.id.dashboard_speed_switch,
+                R.id.dashboard_altitude_switch,
+                R.id.dashboard_pressure_switch,
+                R.id.dashboard_steps_switch,
+                R.id.dashboard_media_switch,
+                R.id.dashboard_fullscreen_media_switch,
+                R.id.dashboard_notifications_switch,
+                R.id.dashboard_last_notification_switch,
+                R.id.dashboard_active_profile_switch,
+                R.id.dashboard_custom_text_switch,
+                R.id.dashboard_qr_code_switch,
+                R.id.dashboard_qr_wifi_switch,
+                R.id.dashboard_imperial_units_switch);
     }
 
     @Override

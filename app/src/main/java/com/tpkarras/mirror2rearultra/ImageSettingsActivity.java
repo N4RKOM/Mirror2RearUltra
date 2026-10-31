@@ -62,6 +62,8 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_settings);
+        SettingsLayout.bindCollapsingTitle(this, R.id.image_settings_toolbar,
+                R.id.image_settings_scroll, R.id.image_settings_page_title);
 
         MaterialToolbar toolbar = findViewById(R.id.image_settings_toolbar);
         toolbar.setNavigationOnClickListener(view -> finish());
@@ -98,6 +100,10 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
 
         SettingsLayout.constrainContentOnWideScreens(this, content);
         bindInteractions();
+        MiuixRows.installSwitches(this, R.id.mirror_switch, R.id.calibration_grid_switch);
+        if (autoBrightnessSwitch.getVisibility() == View.VISIBLE) {
+            MiuixRows.installSwitches(this, R.id.auto_brightness_switch);
+        }
     }
 
     @Override

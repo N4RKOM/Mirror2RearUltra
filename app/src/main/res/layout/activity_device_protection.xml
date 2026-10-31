@@ -26,6 +26,7 @@
         app:navigationIcon="@drawable/ic_hyper_back" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/device_protection_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
@@ -37,6 +38,7 @@
             style="@style/HyperOS.Page">
 
             <TextView
+                android:id="@+id/device_protection_page_title"
                 style="@style/HyperOS.PageTitle"
                 android:text="@string/device_protection_title" />
 

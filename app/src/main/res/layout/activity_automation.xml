@@ -28,6 +28,7 @@
         app:navigationIcon="@drawable/ic_hyper_back" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/automation_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
@@ -39,6 +40,7 @@
             style="@style/HyperOS.Page">
 
             <TextView
+                android:id="@+id/automation_page_title"
                 style="@style/HyperOS.PageTitle"
                 android:text="@string/auto_profile_title" />
 

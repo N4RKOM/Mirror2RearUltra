@@ -572,4 +572,14 @@
     <string name="dashboard_pressure_rising">rising</string>
     <string name="dashboard_pressure_falling">falling</string>
     <string name="dashboard_pressure_steady">steady</string>
+    <string name="nav_mirror">Mirror</string>
+    <string name="nav_settings">Settings</string>
+    <string name="widgets_home_intro">Configure what appears on the rear display.</string>
+    <string name="widgets_home_count">Enabled widgets: %1$d</string>
+    <string name="widgets_home_count_help">Choose the information you want to see.</string>
+    <string name="widgets_home_choose">Choose widgets</string>
+    <string name="widgets_home_arrangement">Layout</string>
+    <string name="widgets_home_arrangement_help">Arrange widgets, pages and their appearance.</string>
+    <string name="widgets_home_display">Display</string>
+    <string name="widgets_home_display_help">Set how and when the rear display shows widgets.</string>
 </resources>

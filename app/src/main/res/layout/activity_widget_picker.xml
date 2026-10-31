@@ -34,6 +34,7 @@
         app:navigationIcon="@drawable/ic_hyper_back" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/widget_picker_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
@@ -45,6 +46,7 @@
             style="@style/HyperOS.Page">
 
             <TextView
+                android:id="@+id/widget_picker_page_title"
                 style="@style/HyperOS.PageTitle"
                 android:paddingBottom="@dimen/spacing_sm"
                 android:text="@string/dashboard_widgets_title" />

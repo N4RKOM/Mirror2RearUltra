@@ -44,7 +44,8 @@
             <LinearLayout style="@style/HyperOS.Page">
 
                 <TextView
-                    style="@style/HyperOS.PageTitle"
+                    android:id="@+id/dashboard_builder_page_title"
+                style="@style/HyperOS.PageTitle"
                     android:paddingBottom="@dimen/spacing_sm"
                     android:text="@string/dashboard_builder_title" />
 

@@ -41,6 +41,8 @@ public class AutomationActivity extends AppCompatActivity implements AutoProfile
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_automation);
+        SettingsLayout.bindCollapsingTitle(this, R.id.automation_toolbar,
+                R.id.automation_scroll, R.id.automation_page_title);
 
         MaterialToolbar toolbar = findViewById(R.id.automation_toolbar);
         toolbar.setNavigationOnClickListener(view -> finish());
@@ -55,6 +57,7 @@ public class AutomationActivity extends AppCompatActivity implements AutoProfile
 
         SettingsLayout.constrainContentOnWideScreens(this, content);
         bindInteractions();
+        MiuixRows.installSwitches(this, R.id.auto_profile_switch, R.id.auto_visibility_switch);
     }
 
     @Override

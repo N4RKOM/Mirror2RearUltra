@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import androidx.compose.ui.platform.ComposeView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -49,6 +50,8 @@ public class SettingsActivity extends AppCompatActivity implements
     private View capabilityRefreshButton;
     private TextView backupStatus;
     private ViewGroup settingsContent;
+    private int selectedSection = 1;
+    private MiuixNavigation navigation;
 
     private MirrorProfile activeProfile;
     /** Guards the listeners while the UI is being written from stored state. */
@@ -80,6 +83,9 @@ public class SettingsActivity extends AppCompatActivity implements
                 }
         );
         setContentView(R.layout.activity_settings);
+        if (savedInstanceState != null) selectedSection = savedInstanceState.getInt("section", 1);
+        navigation = new MiuixNavigation((ComposeView) findViewById(R.id.floating_navigation),
+                selectedSection, this::selectSection);
 
         profileInput = findViewById(R.id.profile_input);
         profileSummary = findViewById(R.id.profile_summary);
@@ -93,10 +99,33 @@ public class SettingsActivity extends AppCompatActivity implements
         scaleLabels = getResources().getStringArray(R.array.scale_mode_entries);
 
         bindInteractions();
+        MiuixRows.install(this, R.id.dashboard_settings_button, R.id.widget_picker_button,
+                R.id.widget_builder_button, R.id.image_settings_button,
+                R.id.manage_profiles_button, R.id.automation_button, R.id.device_protection_button);
+        selectSection(selectedSection);
         SettingsLayout.constrainContentOnWideScreens(this, settingsContent);
         renderStoredSettings();
         updateCapabilityUi(DeviceCapabilityState.get());
         updateStatus(MirrorState.isActive());
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("section", selectedSection);
+        super.onSaveInstanceState(outState);
+    }
+
+    private void selectSection(int section) {
+        selectedSection = section;
+        int[] sections = {R.id.section_widgets, R.id.section_mirror, R.id.section_general};
+        int[] titles = {R.string.dashboard_widgets_title, R.string.nav_mirror, R.string.nav_settings};
+        ((TextView) findViewById(R.id.section_title)).setText(titles[section]);
+        for (int i = 0; i < sections.length; i++) {
+            boolean selected = i == section;
+            findViewById(sections[i]).setVisibility(selected ? View.VISIBLE : View.GONE);
+        }
+        navigation.select(section);
+        ((androidx.core.widget.NestedScrollView) settingsContent.getParent()).scrollTo(0, 0);
     }
 
     @Override
@@ -127,6 +156,12 @@ public class SettingsActivity extends AppCompatActivity implements
         // A sub-page may have changed the profile or its settings, so the
         // summary and picker are rebuilt every time this screen comes back.
         renderStoredSettings();
+        int enabledWidgets = 0;
+        for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values()) {
+            if (DashboardWidgetLayout.isWidgetEnabled(this, widget)) enabledWidgets++;
+        }
+        ((TextView) findViewById(R.id.widgets_home_count)).setText(
+                getString(R.string.widgets_home_count, enabledWidgets));
     }
 
     @Override
@@ -140,6 +175,10 @@ public class SettingsActivity extends AppCompatActivity implements
     }
 
     private void bindInteractions() {
+        findViewById(R.id.widget_picker_button).setOnClickListener(v ->
+                startActivity(new Intent(this, WidgetPickerActivity.class)));
+        findViewById(R.id.widget_builder_button).setOnClickListener(v ->
+                startActivity(new Intent(this, DashboardBuilderActivity.class)));
         profileInput.setOnItemSelectedListener(position -> {
             if (bindingUi || position < 0 || position >= profiles.size()) {
                 return;

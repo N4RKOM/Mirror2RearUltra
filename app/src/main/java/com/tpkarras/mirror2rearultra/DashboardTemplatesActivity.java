@@ -51,6 +51,8 @@ public class DashboardTemplatesActivity extends AppCompatActivity {
     @Override protected void onCreate(@Nullable Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_dashboard_templates);
+        SettingsLayout.bindCollapsingTitle(this, R.id.dashboard_templates_toolbar,
+                R.id.dashboard_templates_scroll, R.id.dashboard_templates_page_title);
         MaterialToolbar toolbar = findViewById(R.id.dashboard_templates_toolbar);
         toolbar.setNavigationOnClickListener(view -> finish());
 

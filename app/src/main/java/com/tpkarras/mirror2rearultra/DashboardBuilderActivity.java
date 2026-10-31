@@ -123,6 +123,9 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         imagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(), this::importImage);
         setContentView(R.layout.activity_dashboard_builder);
+        MiuixRows.install(this, R.id.dashboard_builder_choose, R.id.dashboard_builder_templates);
+        SettingsLayout.bindCollapsingTitle(this, R.id.dashboard_builder_toolbar,
+                R.id.dashboard_builder_scroll, R.id.dashboard_builder_page_title);
         toolbar = findViewById(R.id.dashboard_builder_toolbar);
         toolbar.setNavigationOnClickListener(view -> {
             if (editingWidget != null) {

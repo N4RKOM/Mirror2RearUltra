@@ -57,6 +57,8 @@ public class ProfileManagerActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_manager);
+        SettingsLayout.bindCollapsingTitle(this, R.id.profile_manager_toolbar,
+                R.id.profile_manager_scroll, R.id.profile_manager_page_title);
 
         MaterialToolbar toolbar = findViewById(R.id.profile_manager_toolbar);
         toolbar.setNavigationOnClickListener(view -> finish());
