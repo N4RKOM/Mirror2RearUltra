@@ -348,7 +348,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">नमूना इवेंट</string>
     <string name="dashboard_font_title">फ़ॉन्ट</string>
-    <string name="dashboard_font_help">पैनल अपना टेक्स्ट खुद बनाता है, इसलिए वह सिस्टम फ़ॉन्ट का पालन करता है: थीम से लगाया गया फ़ॉन्ट अपने आप आ जाता है, जबकि फ़ॉन्ट ओवरले के लिए थीम वाला विकल्प चाहिए। ‘सादा’ दोनों को छोड़कर वही फ़ॉन्ट इस्तेमाल करता है जिसके साथ डिवाइस आया था — उन मौकों के लिए जब सजावटी फ़ॉन्ट 126 गुना 294 में टिक नहीं पाता।</string>
     <string name="dashboard_font_widget_label">फ़ॉन्ट</string>
     <string name="dashboard_font_widget_panel">पैनल जैसा</string>
     <string name="dashboard_font_system">सिस्टम</string>
@@ -406,7 +405,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">कम से कम AOD ब्राइटनेस: 8%</string>
     <string name="dashboard_aod_min_brightness_value">कम से कम AOD ब्राइटनेस: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">15 या 30 सेकंड बाद ब्राइटनेस घटती जाती है और पिछली स्क्रीन का सेशन खत्म हो जाता है। Always on Display चुनी हुई ब्राइटनेस पर 30 सेकंड रहता है, फिर धीरे-धीरे कम से कम स्तर तक मंद हो जाता है। पिछली स्क्रीन छूते ही ब्राइटनेस लौट आती है और टाइमर फिर से शुरू हो जाता है। AOD में भी बर्न-इन से बचाव का खिसकाव चलता रहता है।</string>
+    <string name="dashboard_quiet_title">AOD बंद करें</string>
+    <string name="dashboard_quiet_never">कभी नहीं</string>
+    <string name="dashboard_quiet_night">सूर्यास्त से सूर्योदय तक</string>
+    <string name="dashboard_quiet_schedule">समय-सारणी के अनुसार</string>
+    <string name="dashboard_quiet_sun">सूर्यास्त और सूर्योदय</string>
+    <string name="dashboard_quiet_sun_unknown">स्थान आवश्यक है</string>
+    <string name="dashboard_quiet_polar_night">ध्रुवीय रात</string>
+    <string name="dashboard_quiet_polar_day">आधी रात का सूरज</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d मिनट</item>
         <item quantity="other">%1$d मिनट</item>
@@ -497,9 +503,7 @@
     <string name="shutter_countdown_seconds">%1$d से</string>
     <string name="mirror_grid">कैमरे पर तिहाई ग्रिड</string>
     <string name="mirror_level">कैमरे पर क्षितिज स्तर</string>
-    <string name="mirror_guides_help">ग्रिड और स्तर केवल मिरर किए गए कैमरे पर दिखते हैं और केवल पैनल पर बनते हैं — फ़ोटो में नहीं आते। फ़ोन सीधा होने पर स्तर पीला हो जाता है।</string>
     <string name="notification_light">सूचना लाइट</string>
-    <string name="notification_light_help">मुख्य स्क्रीन बंद होने पर नई सूचना कुछ सेकंड के लिए पैनल को उसके ऐप के आइकन से जलाती है — उस LED की जगह जो इस फ़ोन में नहीं है। रिंग ऐप के रंग में होती हैं, स्क्रीन पिछली बार चालू होने के बाद हर सूचना के लिए एक, अधिकतम पाँच। यह तब तक काम करती है जब तक पैनल चालू है, जैसे Always on Display में, और सूचना विजेट जैसी ही सूचना पहुँच का उपयोग करती है। जेब में, स्क्रीन नीचे होने पर या परेशान न करें में नहीं। स्पर्श करने पर बंद हो जाती है।</string>
     <string name="panel_trigger_bluetooth">Bluetooth डिवाइस जुड़ा है</string>
     <string name="panel_trigger_bluetooth_device">डिवाइस</string>
     <string name="panel_trigger_wifi">Wi‑Fi पर</string>

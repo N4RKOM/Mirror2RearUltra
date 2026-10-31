@@ -348,7 +348,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Voorbeeldafspraak</string>
     <string name="dashboard_font_title">Lettertype</string>
-    <string name="dashboard_font_help">Het paneel tekent zijn eigen tekst en volgt dus het systeemlettertype: een lettertype dat via Thema\'s is geïnstalleerd komt vanzelf mee, terwijl een lettertype-overlay de thema-optie nodig heeft. Eenvoudig negeert beide en gebruikt het lettertype waarmee het apparaat is geleverd, voor als een sierlijk lettertype 126 bij 294 niet overleeft.</string>
     <string name="dashboard_font_widget_label">Lettertype</string>
     <string name="dashboard_font_widget_panel">Zoals het paneel</string>
     <string name="dashboard_font_system">Systeem</string>
@@ -406,7 +405,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">Minimale AOD-helderheid: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Minimale AOD-helderheid: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">Na 15 of 30 seconden zakt de helderheid en eindigt de sessie van het achterscherm. Always on Display blijft 30 seconden op de gekozen helderheid en dimt daarna rustig naar het minimum. Het achterscherm aanraken herstelt de helderheid en start de timer opnieuw. De inbrandverschuiving blijft in AOD werken.</string>
+    <string name="dashboard_quiet_title">AOD uitschakelen</string>
+    <string name="dashboard_quiet_never">Nooit</string>
+    <string name="dashboard_quiet_night">Van zonsondergang tot zonsopgang</string>
+    <string name="dashboard_quiet_schedule">Volgens schema</string>
+    <string name="dashboard_quiet_sun">Zonsondergang en zonsopgang</string>
+    <string name="dashboard_quiet_sun_unknown">Locatie nodig</string>
+    <string name="dashboard_quiet_polar_night">Poolnacht</string>
+    <string name="dashboard_quiet_polar_day">Middernachtzon</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d minuut</item>
         <item quantity="other">%1$d minuten</item>
@@ -497,9 +503,7 @@
     <string name="shutter_countdown_seconds">%1$d s</string>
     <string name="mirror_grid">Raster van derden over de camera</string>
     <string name="mirror_level">Waterpas over de camera</string>
-    <string name="mirror_guides_help">Het raster en de waterpas verschijnen alleen over een gespiegelde camera en worden alleen op het paneel getekend: ze komen nooit op de foto. De waterpas wordt geel als de telefoon recht is.</string>
     <string name="notification_light">Meldingslampje</string>
-    <string name="notification_light_help">Met het hoofdscherm uit laat een nieuwe melding het paneel een paar seconden oplichten met het pictogram van de app, in plaats van de led die deze telefoon niet heeft. De ringen hebben de kleur van de app, één per melding sinds het scherm voor het laatst aan was, tot vijf. Werkt zolang het paneel aan is, zoals bij Always on Display, en gebruikt dezelfde meldingstoegang als de meldingswidgets. Niet in een zak, met het scherm omlaag of bij Niet storen. Een aanraking dooft het.</string>
     <string name="panel_trigger_bluetooth">Bluetooth-apparaat verbonden</string>
     <string name="panel_trigger_bluetooth_device">Apparaat</string>
     <string name="panel_trigger_wifi">Op wifi</string>

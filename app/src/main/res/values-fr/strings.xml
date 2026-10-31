@@ -348,7 +348,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Événement d\'exemple</string>
     <string name="dashboard_font_title">Police</string>
-    <string name="dashboard_font_help">Le panneau dessine son propre texte : il suit donc la police du système. Une police installée via Thèmes arrive d\'elle-même, tandis qu\'une surcouche de police nécessite l\'option de thème. Simple ignore les deux et utilise la police d\'origine de l\'appareil, pour les cas où une police décorative ne survit pas au format 126 sur 294.</string>
     <string name="dashboard_font_widget_label">Police</string>
     <string name="dashboard_font_widget_panel">Comme le panneau</string>
     <string name="dashboard_font_system">Système</string>
@@ -406,7 +405,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">Luminosité AOD minimale : 8%</string>
     <string name="dashboard_aod_min_brightness_value">Luminosité AOD minimale : %1$d%%</string>
-    <string name="dashboard_idle_mode_help">Au bout de 15 ou 30 secondes, la luminosité baisse et la session de l\'écran arrière se termine. Always on Display reste à la luminosité choisie pendant 30 secondes, puis s\'atténue progressivement jusqu\'au minimum. Toucher l\'écran arrière rétablit la luminosité et relance le minuteur. La dérive anti-marquage continue de fonctionner en AOD.</string>
+    <string name="dashboard_quiet_title">Éteindre l’AOD</string>
+    <string name="dashboard_quiet_never">Jamais</string>
+    <string name="dashboard_quiet_night">Du coucher au lever du soleil</string>
+    <string name="dashboard_quiet_schedule">Selon un horaire</string>
+    <string name="dashboard_quiet_sun">Coucher et lever du soleil</string>
+    <string name="dashboard_quiet_sun_unknown">Localisation requise</string>
+    <string name="dashboard_quiet_polar_night">Nuit polaire</string>
+    <string name="dashboard_quiet_polar_day">Soleil de minuit</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d minute</item>
         <item quantity="other">%1$d minutes</item>
@@ -497,9 +503,7 @@
     <string name="shutter_countdown_seconds">%1$d s</string>
     <string name="mirror_grid">Grille des tiers sur l’appareil photo</string>
     <string name="mirror_level">Niveau de l’horizon sur l’appareil photo</string>
-    <string name="mirror_guides_help">La grille et le niveau n’apparaissent que sur l’appareil photo reflété et ne sont dessinés que sur l’écran arrière : ils n’arrivent jamais sur la photo. Le niveau devient jaune quand le téléphone est droit.</string>
     <string name="notification_light">Voyant de notification</string>
-    <string name="notification_light_help">Écran principal éteint, une nouvelle notification allume le panneau quelques secondes avec l’icône de son application, à la place de la LED que ce téléphone n’a pas. Les anneaux sont à la couleur de l’application, un par notification depuis le dernier allumage de l’écran, jusqu’à cinq. Fonctionne tant que le panneau est allumé, comme en mode Always on Display, avec le même accès aux notifications que les widgets de notification. Pas dans une poche, face contre la table ni en mode Ne pas déranger. Un toucher l’éteint.</string>
     <string name="panel_trigger_bluetooth">Appareil Bluetooth connecté</string>
     <string name="panel_trigger_bluetooth_device">Appareil</string>
     <string name="panel_trigger_wifi">Sur un réseau Wi‑Fi</string>

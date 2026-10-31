@@ -348,7 +348,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Evento de ejemplo</string>
     <string name="dashboard_font_title">Fuente</string>
-    <string name="dashboard_font_help">El panel dibuja su propio texto, así que sigue la fuente del sistema: una fuente instalada desde Temas llega sola, mientras que una superposición de fuente necesita la opción del tema. Sencilla ignora ambas y usa la fuente con la que salió el dispositivo, para cuando una fuente decorativa no sobrevive a 126 por 294.</string>
     <string name="dashboard_font_widget_label">Fuente</string>
     <string name="dashboard_font_widget_panel">Como el panel</string>
     <string name="dashboard_font_system">Sistema</string>
@@ -406,7 +405,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">Brillo mínimo del AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Brillo mínimo del AOD: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">Pasados 15 o 30 segundos, el brillo baja y la sesión de la pantalla trasera termina. Always on Display se mantiene en el brillo elegido durante 30 segundos y luego se atenúa suavemente hasta el mínimo. Al tocar la pantalla trasera se recupera el brillo y el temporizador vuelve a empezar. La deriva antiquemado sigue funcionando en AOD.</string>
+    <string name="dashboard_quiet_title">Apagar AOD</string>
+    <string name="dashboard_quiet_never">Nunca</string>
+    <string name="dashboard_quiet_night">Del atardecer al amanecer</string>
+    <string name="dashboard_quiet_schedule">Según horario</string>
+    <string name="dashboard_quiet_sun">Atardecer y amanecer</string>
+    <string name="dashboard_quiet_sun_unknown">Se necesita la ubicación</string>
+    <string name="dashboard_quiet_polar_night">Noche polar</string>
+    <string name="dashboard_quiet_polar_day">Sol de medianoche</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d minuto</item>
         <item quantity="other">%1$d minutos</item>
@@ -497,9 +503,7 @@
     <string name="shutter_countdown_seconds">%1$d s</string>
     <string name="mirror_grid">Cuadrícula de tercios sobre la cámara</string>
     <string name="mirror_level">Nivel del horizonte sobre la cámara</string>
-    <string name="mirror_guides_help">La cuadrícula y el nivel solo aparecen sobre la cámara reflejada y se dibujan únicamente en el panel: nunca llegan a la foto. El nivel se vuelve amarillo cuando el teléfono está recto.</string>
     <string name="notification_light">Luz de notificaciones</string>
-    <string name="notification_light_help">Con la pantalla principal apagada, una notificación nueva ilumina el panel unos segundos con el icono de su app, en lugar del LED que este teléfono no tiene. Los anillos son del color de la app, uno por cada notificación desde que se encendió la pantalla, hasta cinco. Funciona mientras el panel está encendido, como en Always on Display, y usa el mismo acceso a notificaciones que los widgets de notificaciones. No se activa en el bolsillo, boca abajo ni con No molestar. Un toque la apaga.</string>
     <string name="panel_trigger_bluetooth">Dispositivo Bluetooth conectado</string>
     <string name="panel_trigger_bluetooth_device">Dispositivo</string>
     <string name="panel_trigger_wifi">En Wi‑Fi</string>

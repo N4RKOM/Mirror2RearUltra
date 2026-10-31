@@ -100,6 +100,9 @@ final class DashboardWidgetLayout {
     private static final String PAGE_ORIENTATION_PREFIX = "orientation_page_";
     private static final String IDLE_MODE = "idle_mode";
     private static final String AOD_MIN_BRIGHTNESS = "aod_min_brightness";
+    private static final String QUIET_MODE = "aod_quiet_mode";
+    private static final String QUIET_FROM = "aod_quiet_from";
+    private static final String QUIET_TO = "aod_quiet_to";
     private static final String AUTO_PAGE_SWITCH = "auto_page_switch";
     private static final String POCKET_LOCK = "pocket_lock";
     private static final String FACE_DOWN_OFF = "face_down_off";
@@ -880,8 +883,18 @@ final class DashboardWidgetLayout {
         }
     }
 
+    /**
+     * Going into always-on from a timeout remembers the timeout, whichever
+     * screen it was chosen on. Only the panel's own toggle used to, so turning
+     * AOD off there after picking it in settings fell back to thirty seconds.
+     */
     static void saveIdleMode(Context context, IdleMode mode) {
-        prefs(context).edit().putString(IDLE_MODE, mode.name()).apply();
+        IdleMode current = loadIdleMode(context);
+        SharedPreferences.Editor editor = prefs(context).edit().putString(IDLE_MODE, mode.name());
+        if (mode == IdleMode.ALWAYS_ON && current != IdleMode.ALWAYS_ON) {
+            editor.putString(IDLE_MODE_BEFORE_AOD, current.name());
+        }
+        editor.apply();
     }
 
     /**
@@ -909,9 +922,41 @@ final class DashboardWidgetLayout {
             saveIdleMode(context, previous);
             return previous;
         }
-        prefs(context).edit().putString(IDLE_MODE_BEFORE_AOD, current.name()).apply();
         saveIdleMode(context, IdleMode.ALWAYS_ON);
         return IdleMode.ALWAYS_ON;
+    }
+
+    /** When Always on Display goes out altogether rather than dimming. */
+    static QuietHours.Mode loadQuietMode(Context context) {
+        try {
+            return QuietHours.Mode.valueOf(prefs(context).getString(
+                    QUIET_MODE, QuietHours.Mode.OFF.name()));
+        } catch (IllegalArgumentException error) {
+            return QuietHours.Mode.OFF;
+        }
+    }
+
+    static void saveQuietMode(Context context, QuietHours.Mode mode) {
+        prefs(context).edit().putString(QUIET_MODE, mode.name()).apply();
+    }
+
+    static int quietFromMinutes(Context context) {
+        return clampMinuteOfDay(prefs(context).getInt(QUIET_FROM, 23 * 60));
+    }
+
+    static int quietToMinutes(Context context) {
+        return clampMinuteOfDay(prefs(context).getInt(QUIET_TO, 7 * 60));
+    }
+
+    static void setQuietWindow(Context context, int fromMinutes, int toMinutes) {
+        prefs(context).edit()
+                .putInt(QUIET_FROM, clampMinuteOfDay(fromMinutes))
+                .putInt(QUIET_TO, clampMinuteOfDay(toMinutes))
+                .apply();
+    }
+
+    private static int clampMinuteOfDay(int value) {
+        return Math.max(0, Math.min(24 * 60 - 1, value));
     }
 
     static int loadAodMinBrightnessPercent(Context context) {

@@ -348,7 +348,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">رویداد نمونه</string>
     <string name="dashboard_font_title">قلم</string>
-    <string name="dashboard_font_help">پنل متن خودش را می‌کشد، پس از قلم سیستم پیروی می‌کند: قلمی که از راه «پوسته‌ها» نصب شده خودبه‌خود می‌آید، در حالی که پوشش قلم به گزینهٔ پوسته نیاز دارد. «ساده» هر دو را نادیده می‌گیرد و قلمی را به کار می‌برد که دستگاه با آن آمده است، برای وقتی که یک قلم تزئینی در ۱۲۶ در ۲۹۴ دوام نمی‌آورد.</string>
     <string name="dashboard_font_widget_label">قلم</string>
     <string name="dashboard_font_widget_panel">مانند پنل</string>
     <string name="dashboard_font_system">سیستم</string>
@@ -406,7 +405,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">کمترین روشنایی AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">کمترین روشنایی AOD: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">پس از ۱۵ یا ۳۰ ثانیه روشنایی کم می‌شود و نشست صفحهٔ عقب پایان می‌یابد. Always on Display به مدت ۳۰ ثانیه روی روشنایی انتخابی می‌ماند و سپس به‌نرمی تا کمترین حد کم‌نور می‌شود. لمس صفحهٔ عقب روشنایی را برمی‌گرداند و زمان‌سنج را از نو آغاز می‌کند. جابه‌جایی ضدسوختگی در AOD هم کار می‌کند.</string>
+    <string name="dashboard_quiet_title">خاموش کردن AOD</string>
+    <string name="dashboard_quiet_never">هرگز</string>
+    <string name="dashboard_quiet_night">از غروب تا طلوع</string>
+    <string name="dashboard_quiet_schedule">طبق برنامه</string>
+    <string name="dashboard_quiet_sun">غروب و طلوع</string>
+    <string name="dashboard_quiet_sun_unknown">به موقعیت مکانی نیاز است</string>
+    <string name="dashboard_quiet_polar_night">شب قطبی</string>
+    <string name="dashboard_quiet_polar_day">خورشید نیمه‌شب</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d دقیقه</item>
         <item quantity="other">%1$d دقیقه</item>
@@ -497,9 +503,7 @@
     <string name="shutter_countdown_seconds">%1$d ث</string>
     <string name="mirror_grid">شبکه یک‌سوم روی دوربین</string>
     <string name="mirror_level">تراز افق روی دوربین</string>
-    <string name="mirror_guides_help">شبکه و تراز فقط روی آینه دوربین نمایش داده می‌شوند و تنها روی پنل کشیده می‌شوند؛ در عکس نمی‌آیند. وقتی گوشی صاف باشد، تراز زرد می‌شود.</string>
     <string name="notification_light">چراغ اعلان</string>
-    <string name="notification_light_help">وقتی صفحه اصلی خاموش است، اعلان تازه چند ثانیه پنل را با نماد برنامه‌اش روشن می‌کند، به‌جای LED که این گوشی ندارد. حلقه‌ها به رنگ برنامه‌اند، یکی برای هر اعلان از آخرین روشن شدن صفحه، تا پنج. تا وقتی پنل روشن است کار می‌کند، مثل حالت Always on Display، و از همان دسترسی اعلانی استفاده می‌کند که ابزارک‌های اعلان دارند. در جیب، رو به پایین یا در حالت مزاحم نشوید فعال نمی‌شود. یک لمس خاموشش می‌کند.</string>
     <string name="panel_trigger_bluetooth">دستگاه بلوتوث وصل است</string>
     <string name="panel_trigger_bluetooth_device">دستگاه</string>
     <string name="panel_trigger_wifi">روی Wi‑Fi</string>

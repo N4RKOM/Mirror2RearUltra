@@ -347,7 +347,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">サンプルの予定</string>
     <string name="dashboard_font_title">フォント</string>
-    <string name="dashboard_font_help">パネルは文字を自分で描くため、システムのフォントに従います。テーマから入れたフォントはそのまま反映されますが、フォントのオーバーレイにはテーマの項目が必要です。「シンプル」はどちらも無視して端末に元から入っているフォントを使います。装飾的な書体が 126 × 294 に耐えられないときのための選択肢です。</string>
     <string name="dashboard_font_widget_label">フォント</string>
     <string name="dashboard_font_widget_panel">パネルと同じ</string>
     <string name="dashboard_font_system">システム</string>
@@ -405,7 +404,14 @@
     <string name="dashboard_idle_always_on">常時表示ディスプレイ</string>
     <string name="dashboard_aod_min_brightness_default">常時表示の最小輝度: 8%</string>
     <string name="dashboard_aod_min_brightness_value">常時表示の最小輝度: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">15 秒または 30 秒で明るさが落ち、背面画面のセッションが終わります。常時表示ディスプレイは選んだ明るさを 30 秒保ったあと、なめらかに最小まで暗くなります。背面画面に触れると明るさが戻り、タイマーが再び始まります。焼き付き対策のずらしは常時表示中も働き続けます。</string>
+    <string name="dashboard_quiet_title">AOD をオフにする</string>
+    <string name="dashboard_quiet_never">しない</string>
+    <string name="dashboard_quiet_night">日没から日の出まで</string>
+    <string name="dashboard_quiet_schedule">スケジュール</string>
+    <string name="dashboard_quiet_sun">日没と日の出</string>
+    <string name="dashboard_quiet_sun_unknown">位置情報が必要です</string>
+    <string name="dashboard_quiet_polar_night">極夜</string>
+    <string name="dashboard_quiet_polar_day">白夜</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="other">%1$d 分</item>
     </plurals>
@@ -495,9 +501,7 @@
     <string name="shutter_countdown_seconds">%1$d 秒</string>
     <string name="mirror_grid">カメラに三分割グリッド</string>
     <string name="mirror_level">カメラに水平器</string>
-    <string name="mirror_guides_help">グリッドと水平器はミラー表示中のカメラの上にだけ表示され、パネルにのみ描画されるため写真には写りません。端末がまっすぐになると水平器が黄色になります。</string>
     <string name="notification_light">通知ランプ</string>
-    <string name="notification_light_help">メイン画面がオフのとき、新しい通知が数秒間アプリのアイコンでパネルを光らせます。この端末にない通知 LED の代わりです。リングはアプリの色で、最後に画面をオンにしてからの通知 1 件ごとに 1 本、最大 5 本です。Always on Display などでパネルがオンの間に動作し、通知ウィジェットと同じ通知へのアクセスを使います。ポケットの中、画面を下にしたとき、おやすみモード中は光りません。タップで消えます。</string>
     <string name="panel_trigger_bluetooth">Bluetooth デバイス接続時</string>
     <string name="panel_trigger_bluetooth_device">デバイス</string>
     <string name="panel_trigger_wifi">Wi‑Fi 接続時</string>

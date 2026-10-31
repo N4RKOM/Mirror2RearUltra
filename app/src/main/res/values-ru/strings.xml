@@ -185,7 +185,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Пример события</string>
     <string name="dashboard_font_title">Шрифт</string>
-    <string name="dashboard_font_help">Панель рисует текст сама, поэтому следует системному шрифту: шрифт из «Тем» подхватывается сам, а шрифту-наложению нужен вариант «Из темы». «Обычный» игнорирует оба и берёт шрифт, с которым устройство вышло — на случай, когда декоративное начертание не выживает на 126 на 294.</string>
     <string name="dashboard_font_widget_label">Шрифт</string>
     <string name="dashboard_font_widget_panel">Как у панели</string>
     <string name="dashboard_font_system">Системный</string>
@@ -428,7 +427,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">Минимальная яркость AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Минимальная яркость AOD: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">Через 15 или 30 секунд яркость плавно уменьшится, после чего сеанс заднего экрана завершится. В режиме Always on Display установленная яркость сохраняется 30 секунд, затем плавно снижается до минимальной. Касание заднего экрана возвращает яркость и перезапускает таймер. Сдвиг от выгорания продолжает работать в AOD.</string>
+    <string name="dashboard_quiet_title">Выключать AOD</string>
+    <string name="dashboard_quiet_never">Никогда</string>
+    <string name="dashboard_quiet_night">От заката до рассвета</string>
+    <string name="dashboard_quiet_schedule">По расписанию</string>
+    <string name="dashboard_quiet_sun">Закат и рассвет</string>
+    <string name="dashboard_quiet_sun_unknown">Нужно местоположение</string>
+    <string name="dashboard_quiet_polar_night">Полярная ночь</string>
+    <string name="dashboard_quiet_polar_day">Полярный день</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d минута</item>
         <item quantity="few">%1$d минуты</item>
@@ -521,9 +527,7 @@
     <string name="shutter_countdown_seconds">%1$d с</string>
     <string name="mirror_grid">Сетка третей поверх камеры</string>
     <string name="mirror_level">Уровень горизонта поверх камеры</string>
-    <string name="mirror_guides_help">Сетка и уровень появляются только поверх зеркала камеры и рисуются на панели — в снимок они не попадают. Уровень желтеет, когда телефон стоит ровно.</string>
     <string name="notification_light">Индикатор уведомлений</string>
-    <string name="notification_light_help">При выключенном основном экране новое уведомление на несколько секунд зажигает панель иконкой приложения — вместо светодиода, которого у этого телефона нет. Кольца — цвета приложения, по одному на каждое уведомление с тех пор, как экран включали, до пяти. Работает, пока панель включена, например в режиме Always on Display, и использует тот же доступ к уведомлениям, что и виджеты уведомлений. Не срабатывает в кармане, экраном к столу и в режиме «Не беспокоить». Касание гасит индикатор.</string>
     <string name="panel_trigger_bluetooth">Подключено Bluetooth-устройство</string>
     <string name="panel_trigger_bluetooth_device">Устройство</string>
     <string name="panel_trigger_wifi">В сети Wi‑Fi</string>

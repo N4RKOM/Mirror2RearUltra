@@ -350,7 +350,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">אירוע לדוגמה</string>
     <string name="dashboard_font_title">גופן</string>
-    <string name="dashboard_font_help">הלוח מצייר את הטקסט שלו בעצמו, ולכן הוא הולך אחרי גופן המערכת: גופן שהותקן דרך הנושאים מגיע מעצמו, ואילו שכבת גופן זקוקה לאפשרות הנושא. „פשוט“ מתעלם משניהם ומשתמש בגופן שהמכשיר הגיע איתו, למקרים שבהם גופן מעוטר אינו שורד 126 על 294.</string>
     <string name="dashboard_font_widget_label">גופן</string>
     <string name="dashboard_font_widget_panel">כמו הלוח</string>
     <string name="dashboard_font_system">מערכת</string>
@@ -408,7 +407,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">בהירות AOD מזערית: 8%</string>
     <string name="dashboard_aod_min_brightness_value">בהירות AOD מזערית: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">אחרי 15 או 30 שניות הבהירות דועכת וההפעלה של המסך האחורי מסתיימת. Always on Display נשאר בבהירות שנבחרה למשך 30 שניות, ואז מתעמעם בהדרגה עד למינימום. נגיעה במסך האחורי מחזירה את הבהירות ומאפסת את הטיימר. ההיסט נגד צריבה ממשיך לפעול גם ב‑AOD.</string>
+    <string name="dashboard_quiet_title">כיבוי AOD</string>
+    <string name="dashboard_quiet_never">אף פעם</string>
+    <string name="dashboard_quiet_night">מהשקיעה עד הזריחה</string>
+    <string name="dashboard_quiet_schedule">לפי לוח זמנים</string>
+    <string name="dashboard_quiet_sun">שקיעה וזריחה</string>
+    <string name="dashboard_quiet_sun_unknown">נדרש מיקום</string>
+    <string name="dashboard_quiet_polar_night">לילה קוטבי</string>
+    <string name="dashboard_quiet_polar_day">שמש חצות</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">דקה אחת</item>
         <item quantity="two">שתי דקות</item>
@@ -501,9 +507,7 @@
     <string name="shutter_countdown_seconds">%1$d ש׳</string>
     <string name="mirror_grid">רשת שלישים מעל המצלמה</string>
     <string name="mirror_level">פלס אופק מעל המצלמה</string>
-    <string name="mirror_guides_help">הרשת והפלס מופיעים רק מעל מראת המצלמה ומצוירים על הלוח בלבד — הם לא נכנסים לתמונה. הפלס מצהיב כשהטלפון ישר.</string>
     <string name="notification_light">נורית התראות</string>
-    <string name="notification_light_help">כשהמסך הראשי כבוי, התראה חדשה מאירה את הלוח לכמה שניות עם סמל האפליקציה שלה — במקום נורית ה-LED שאין לטלפון הזה. הטבעות בצבע האפליקציה, אחת לכל התראה מאז שהמסך הודלק לאחרונה, עד חמש. פועל כל עוד הלוח דולק, למשל במצב Always on Display, ומשתמש באותה גישה להתראות כמו ווידג׳טי ההתראות. לא בכיס, לא כשהמסך כלפי מטה ולא במצב נא לא להפריע. נגיעה מכבה אותו.</string>
     <string name="panel_trigger_bluetooth">מכשיר Bluetooth מחובר</string>
     <string name="panel_trigger_bluetooth_device">מכשיר</string>
     <string name="panel_trigger_wifi">ברשת Wi‑Fi</string>

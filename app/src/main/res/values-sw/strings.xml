@@ -348,7 +348,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Tukio la mfano</string>
     <string name="dashboard_font_title">Fonti</string>
-    <string name="dashboard_font_help">Paneli huchora maandishi yake yenyewe, kwa hivyo hufuata fonti ya mfumo: fonti iliyosakinishwa kupitia Mandhari hufika yenyewe, ilhali tabaka la fonti linahitaji chaguo la mandhari. Sahili hupuuza zote mbili na hutumia fonti kifaa kilichokuja nayo, kwa wakati ambapo fonti ya mapambo haiwezi kudumu kwa 126 kwa 294.</string>
     <string name="dashboard_font_widget_label">Fonti</string>
     <string name="dashboard_font_widget_panel">Kama paneli</string>
     <string name="dashboard_font_system">Ya mfumo</string>
@@ -406,7 +405,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">Mwangaza mdogo wa AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Mwangaza mdogo wa AOD: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">Baada ya sekunde 15 au 30, mwangaza hufifia na kipindi cha skrini ya nyuma humalizika. Always on Display hubaki kwenye mwangaza uliochaguliwa kwa sekunde 30, kisha hufifia taratibu hadi kiwango cha chini. Kugusa skrini ya nyuma hurudisha mwangaza na huanzisha kipima muda upya. Msogeo dhidi ya kuungua huendelea kufanya kazi katika AOD.</string>
+    <string name="dashboard_quiet_title">Zima AOD</string>
+    <string name="dashboard_quiet_never">Kamwe</string>
+    <string name="dashboard_quiet_night">Kutoka machweo hadi macheo</string>
+    <string name="dashboard_quiet_schedule">Kwa ratiba</string>
+    <string name="dashboard_quiet_sun">Machweo na macheo</string>
+    <string name="dashboard_quiet_sun_unknown">Mahali panahitajika</string>
+    <string name="dashboard_quiet_polar_night">Usiku wa ncha</string>
+    <string name="dashboard_quiet_polar_day">Jua la usiku wa manane</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">dakika %1$d</item>
         <item quantity="other">dakika %1$d</item>
@@ -497,9 +503,7 @@
     <string name="shutter_countdown_seconds">sek %1$d</string>
     <string name="mirror_grid">Gridi ya theluthi juu ya kamera</string>
     <string name="mirror_level">Kipimo cha upeo juu ya kamera</string>
-    <string name="mirror_guides_help">Gridi na kipimo huonekana juu ya kamera inayoakisiwa tu na huchorwa kwenye paneli pekee: haviingii kwenye picha. Kipimo huwa njano simu ikiwa imenyooka.</string>
     <string name="notification_light">Taa ya arifa</string>
-    <string name="notification_light_help">Skrini kuu ikiwa imezimwa, arifa mpya huwasha paneli kwa sekunde chache kwa aikoni ya programu yake, badala ya taa ya LED ambayo simu hii haina. Pete zina rangi ya programu, moja kwa kila arifa tangu skrini iwashwe mara ya mwisho, hadi tano. Hufanya kazi paneli ikiwa imewashwa, kama katika Always on Display, na hutumia ruhusa ileile ya arifa kama wijeti za arifa. Haiwaki mfukoni, skrini ikiwa chini wala katika Usisumbue. Mguso huizima.</string>
     <string name="panel_trigger_bluetooth">Kifaa cha Bluetooth kimeunganishwa</string>
     <string name="panel_trigger_bluetooth_device">Kifaa</string>
     <string name="panel_trigger_wifi">Kwenye Wi‑Fi</string>

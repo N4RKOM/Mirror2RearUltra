@@ -21,6 +21,7 @@ public class DisplayActivity extends AppCompatActivity {
     static final String EXTRA_DASHBOARD_ONLY = "dashboard_only";
     private static final String TAG = "Mirror2RearConsent";
     private static final String XIAOMI_REAR_SCREEN_PACKAGE = "com.xiaomi.misubscreenui";
+    private static final String XIAOMI_REAR_SCREEN_CENTER_PACKAGE = "com.xiaomi.subscreencenter";
 
     private MediaProjectionManager mediaProjectionManager;
     private ActivityResultLauncher<Intent> projectionPermissionLauncher;
@@ -42,7 +43,10 @@ public class DisplayActivity extends AppCompatActivity {
             return;
         }
 
-        if (!isPackageInstalled(XIAOMI_REAR_SCREEN_PACKAGE)) {
+        // Recent Xiaomi firmware replaced MiSubScreenUI with SubscreenCenter.
+        // Keep the legacy package supported and still require a rear display below.
+        if (!isPackageInstalled(XIAOMI_REAR_SCREEN_PACKAGE)
+                && !isPackageInstalled(XIAOMI_REAR_SCREEN_CENTER_PACKAGE)) {
             showFatalError(R.string.incompatible);
             return;
         }

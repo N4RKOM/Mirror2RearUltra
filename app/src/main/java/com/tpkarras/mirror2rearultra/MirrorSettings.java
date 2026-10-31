@@ -532,6 +532,7 @@ final class MirrorSettings {
                 .putInt(KEY_TEMPERATURE_THRESHOLD, data.temperatureThreshold)
                 .putBoolean(KEY_BATTERY_PROTECTION, data.batteryProtectionEnabled)
                 .putInt(KEY_BATTERY_THRESHOLD, data.batteryThreshold)
+                .putInt(KEY_BRIGHTNESS_SCALE, BRIGHTNESS_SCALE_PERCEPTUAL)
                 .putBoolean(KEY_ASSIGNMENTS_INITIALIZED, true);
         writeDashboardSettings(editor, data.dashboardSettings);
 
@@ -548,6 +549,8 @@ final class MirrorSettings {
                     .putInt(profilePrefix + "zoom", profile.zoomPercent)
                     .putInt(profilePrefix + "offset_x", profile.horizontalOffsetPercent)
                     .putInt(profilePrefix + "offset_y", profile.verticalOffsetPercent);
+            writeCrop(editor, profilePrefix, "crop_", profile.crop);
+            writeCrop(editor, profilePrefix, "crop_landscape_", profile.landscapeCrop);
             if (profile.isCustom()) {
                 editor.putString(profilePrefix + "name", normalizeProfileName(profile.customName));
             }

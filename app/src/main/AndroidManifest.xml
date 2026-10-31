@@ -26,6 +26,7 @@
 
     <queries>
         <package android:name="com.xiaomi.misubscreenui" />
+        <package android:name="com.xiaomi.subscreencenter" />
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
@@ -38,6 +39,13 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Mirror2RearUltra" >
+        <!-- HyperOS/MIUI gate for launching on the rear display (displayId 1).
+             ActivityStarterImpl.isShouldShowOnRearDisplay reads this int meta-data;
+             1 = REAR_POLICY_ALLOWED. Without it the window manager denies the launch
+             with "disallow on rear display!" (SecurityException). -->
+        <meta-data
+            android:name="miui.rear.policy"
+            android:value="1" />
         <service
             android:name=".ForegroundService"
             android:enabled="true"

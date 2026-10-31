@@ -348,7 +348,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Esimerkkitapahtuma</string>
     <string name="dashboard_font_title">Fontti</string>
-    <string name="dashboard_font_help">Paneeli piirtää oman tekstinsä, joten se seuraa järjestelmän fonttia: Teemat-sovelluksen kautta asennettu fontti tulee mukaan itsestään, kun taas fonttipeite tarvitsee teema-asetuksen. Yksinkertainen ohittaa molemmat ja käyttää laitteen alkuperäistä fonttia niitä tilanteita varten, joissa koristeellinen kirjasin ei kestä kokoa 126 × 294.</string>
     <string name="dashboard_font_widget_label">Fontti</string>
     <string name="dashboard_font_widget_panel">Kuten paneelissa</string>
     <string name="dashboard_font_system">Järjestelmä</string>
@@ -406,7 +405,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">AOD:n vähimmäiskirkkaus: 8%</string>
     <string name="dashboard_aod_min_brightness_value">AOD:n vähimmäiskirkkaus: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">15 tai 30 sekunnin kuluttua kirkkaus himmenee ja takanäytön istunto päättyy. Always on Display pysyy valitussa kirkkaudessa 30 sekuntia ja himmenee sitten pehmeästi vähimmäistasolle. Takanäytön koskettaminen palauttaa kirkkauden ja käynnistää ajastimen uudelleen. Kiinnipalamisen siirtymä toimii myös AOD-tilassa.</string>
+    <string name="dashboard_quiet_title">Sammuta AOD</string>
+    <string name="dashboard_quiet_never">Ei koskaan</string>
+    <string name="dashboard_quiet_night">Auringonlaskusta -nousuun</string>
+    <string name="dashboard_quiet_schedule">Aikataulun mukaan</string>
+    <string name="dashboard_quiet_sun">Auringonlasku ja -nousu</string>
+    <string name="dashboard_quiet_sun_unknown">Sijainti tarvitaan</string>
+    <string name="dashboard_quiet_polar_night">Kaamos</string>
+    <string name="dashboard_quiet_polar_day">Keskiyön aurinko</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d minuutti</item>
         <item quantity="other">%1$d minuuttia</item>
@@ -497,9 +503,7 @@
     <string name="shutter_countdown_seconds">%1$d s</string>
     <string name="mirror_grid">Kolmasosaruudukko kameran päällä</string>
     <string name="mirror_level">Horisontin vesivaaka kameran päällä</string>
-    <string name="mirror_guides_help">Ruudukko ja vesivaaka näkyvät vain peilatun kameran päällä ja piirretään vain paneeliin – kuvaan ne eivät päädy. Vesivaaka muuttuu keltaiseksi, kun puhelin on suorassa.</string>
     <string name="notification_light">Ilmoitusvalo</string>
-    <string name="notification_light_help">Kun päänäyttö on pois päältä, uusi ilmoitus sytyttää paneelin muutamaksi sekunniksi sovelluksen kuvakkeella – LED-valon sijaan, jota tässä puhelimessa ei ole. Renkaat ovat sovelluksen värisiä, yksi jokaista ilmoitusta kohden siitä, kun näyttö viimeksi oli päällä, enintään viisi. Toimii, kun paneeli on päällä, esimerkiksi Always on Display -tilassa, ja käyttää samaa ilmoitusten käyttöoikeutta kuin ilmoituswidgetit. Ei toimi taskussa, näyttö alaspäin eikä Älä häiritse -tilassa. Kosketus sammuttaa sen.</string>
     <string name="panel_trigger_bluetooth">Bluetooth-laite yhdistetty</string>
     <string name="panel_trigger_bluetooth_device">Laite</string>
     <string name="panel_trigger_wifi">Wi‑Fi-verkossa</string>

@@ -351,7 +351,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Imeacht samplach</string>
     <string name="dashboard_font_title">Cló</string>
-    <string name="dashboard_font_help">Tarraingíonn an painéal a théacs féin, mar sin leanann sé cló an chórais: tagann cló a suiteáladh trí na Téamaí leis as a stuaim féin, agus teastaíonn rogha an téama ó fhorleagan cló. Déanann Simplí neamhaird den dá cheann agus úsáideann sé an cló a tháinig leis an ngléas, do na cásanna nach maireann cló maisiúil ar 126 faoi 294.</string>
     <string name="dashboard_font_widget_label">Cló</string>
     <string name="dashboard_font_widget_panel">Mar an painéal</string>
     <string name="dashboard_font_system">Córas</string>
@@ -409,7 +408,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">Gile íosta AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Gile íosta AOD: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">Tar éis 15 nó 30 soicind, maolaíonn an ghile agus críochnaíonn seisiún an scáileáin chúil. Fanann Always on Display ag an ngile roghnaithe ar feadh 30 soicind, agus maolaíonn sé go réidh ansin go dtí an t-íosmhéid. Cuireann teagmháil leis an scáileán cúil an ghile ar ais agus atosaíonn sé an t-amadóir. Leanann an sruth in aghaidh na dó isteach ag obair in AOD.</string>
+    <string name="dashboard_quiet_title">Múch AOD</string>
+    <string name="dashboard_quiet_never">Riamh</string>
+    <string name="dashboard_quiet_night">Ó luí na gréine go héirí na gréine</string>
+    <string name="dashboard_quiet_schedule">De réir sceidil</string>
+    <string name="dashboard_quiet_sun">Luí agus éirí na gréine</string>
+    <string name="dashboard_quiet_sun_unknown">Tá suíomh ag teastáil</string>
+    <string name="dashboard_quiet_polar_night">Oíche pholach</string>
+    <string name="dashboard_quiet_polar_day">Grian mheán oíche</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d nóiméad</item>
         <item quantity="two">%1$d nóiméad</item>
@@ -503,9 +509,7 @@
     <string name="shutter_countdown_seconds">%1$d s</string>
     <string name="mirror_grid">Greille trian thar an gceamara</string>
     <string name="mirror_level">Leibhéal na spéire thar an gceamara</string>
-    <string name="mirror_guides_help">Ní thaispeántar an ghreille ná an leibhéal ach thar an gceamara scáthánaithe, agus ar an bpainéal amháin a tharraingítear iad: ní shroicheann siad an grianghraf. Éiríonn an leibhéal buí nuair atá an fón díreach.</string>
     <string name="notification_light">Solas fógraí</string>
-    <string name="notification_light_help">Nuair atá an príomhscáileán múchta, lasann fógra nua an painéal ar feadh cúpla soicind le deilbhín a aipe, in áit an LED nach bhfuil ag an bhfón seo. Tá na fáinní i ndath na haipe, ceann do gach fógra ó lasadh an scáileán go deireanach, suas le cúig cinn. Oibríonn sé fad atá an painéal ar siúl, mar atá in Always on Display, agus úsáideann sé an rochtain chéanna ar fhógraí agus atá ag na giuirléidí fógraí. Ní oibríonn sé i bpóca, leis an scáileán síos ná le Ná cuir isteach orm. Múchann teagmháil é.</string>
     <string name="panel_trigger_bluetooth">Gléas Bluetooth ceangailte</string>
     <string name="panel_trigger_bluetooth_device">Gléas</string>
     <string name="panel_trigger_wifi">Ar Wi‑Fi</string>

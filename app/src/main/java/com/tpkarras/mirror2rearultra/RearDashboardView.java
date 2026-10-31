@@ -1471,6 +1471,7 @@ public final class RearDashboardView extends View {
      */
     private void toggleAlwaysOnFromPanel() {
         DashboardWidgetLayout.IdleMode now = DashboardWidgetLayout.toggleAlwaysOn(getContext());
+        android.util.Log.i("Mirror2Rear", "Idle mode toggled from the panel: " + now);
         performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         MirrorSettings.saveDashboardSettings(getContext(),
                 MirrorSettings.loadDashboardSettings(getContext()));

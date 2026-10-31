@@ -352,7 +352,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">حدث نموذجي</string>
     <string name="dashboard_font_title">الخط</string>
-    <string name="dashboard_font_help">ترسم اللوحة نصّها بنفسها، فهي تتبع خط النظام: الخط المثبّت عبر «السمات» يصل من تلقاء نفسه، أما طبقة الخط فتحتاج إلى خيار السمة. و«بسيط» يتجاهل الاثنين ويستخدم الخط الذي جاء به الجهاز، لحين لا يصمد خط زخرفي في 126 × 294.</string>
     <string name="dashboard_font_widget_label">الخط</string>
     <string name="dashboard_font_widget_panel">مثل اللوحة</string>
     <string name="dashboard_font_system">النظام</string>
@@ -410,7 +409,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">أدنى سطوع لـ AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">أدنى سطوع لـ AOD: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">بعد 15 أو 30 ثانية يخفت السطوع وتنتهي جلسة الشاشة الخلفية. ويبقى Always on Display على السطوع المختار 30 ثانية، ثم يخفت بسلاسة إلى الحد الأدنى. لمس الشاشة الخلفية يعيد السطوع ويُعيد تشغيل المؤقّت. وتظل إزاحة مقاومة الاحتراق تعمل في وضع AOD.</string>
+    <string name="dashboard_quiet_title">إيقاف AOD</string>
+    <string name="dashboard_quiet_never">أبدًا</string>
+    <string name="dashboard_quiet_night">من الغروب إلى الشروق</string>
+    <string name="dashboard_quiet_schedule">حسب الجدول</string>
+    <string name="dashboard_quiet_sun">الغروب والشروق</string>
+    <string name="dashboard_quiet_sun_unknown">يلزم الموقع</string>
+    <string name="dashboard_quiet_polar_night">ليل قطبي</string>
+    <string name="dashboard_quiet_polar_day">شمس منتصف الليل</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="zero">بلا دقائق</item>
         <item quantity="one">دقيقة واحدة</item>
@@ -505,9 +511,7 @@
     <string name="shutter_countdown_seconds">%1$d ث</string>
     <string name="mirror_grid">شبكة الأثلاث فوق الكاميرا</string>
     <string name="mirror_level">مستوى الأفق فوق الكاميرا</string>
-    <string name="mirror_guides_help">تظهر الشبكة والمستوى فوق مرآة الكاميرا فقط وتُرسم على اللوحة وحدها، فلا تظهر في الصورة. يصبح المستوى أصفر عندما يكون الهاتف مستقيمًا.</string>
     <string name="notification_light">ضوء الإشعارات</string>
-    <string name="notification_light_help">عندما تكون الشاشة الرئيسية مطفأة، يضيء إشعار جديد اللوحة بأيقونة تطبيقه لبضع ثوانٍ بدلًا من مصباح LED الذي يفتقده هذا الهاتف. الحلقات بلون التطبيق، واحدة لكل إشعار منذ آخر تشغيل للشاشة، حتى خمس. يعمل ما دامت اللوحة قيد التشغيل، كما في وضع العرض الدائم، ويستخدم صلاحية الإشعارات نفسها التي تستخدمها أدوات الإشعارات. لا يعمل في الجيب أو مع قلب الهاتف أو في وضع عدم الإزعاج. تطفئه لمسة.</string>
     <string name="panel_trigger_bluetooth">جهاز Bluetooth متصل</string>
     <string name="panel_trigger_bluetooth_device">الجهاز</string>
     <string name="panel_trigger_wifi">على شبكة Wi‑Fi</string>

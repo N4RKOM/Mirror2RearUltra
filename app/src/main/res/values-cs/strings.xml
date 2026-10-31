@@ -350,7 +350,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Ukázková událost</string>
     <string name="dashboard_font_title">Písmo</string>
-    <string name="dashboard_font_help">Panel si text vykresluje sám, takže se řídí systémovým písmem: písmo nainstalované přes Motivy dorazí samo, kdežto překryv písma potřebuje volbu motivu. Prosté obojí ignoruje a použije písmo, se kterým zařízení přišlo — pro případy, kdy ozdobný řez nepřežije rozměr 126 na 294.</string>
     <string name="dashboard_font_widget_label">Písmo</string>
     <string name="dashboard_font_widget_panel">Jako panel</string>
     <string name="dashboard_font_system">Systémové</string>
@@ -408,7 +407,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">Minimální jas AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Minimální jas AOD: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">Po 15 nebo 30 sekundách jas klesne a relace zadní obrazovky skončí. Always on Display zůstane na zvoleném jasu 30 sekund a pak plynule ztlumí na minimum. Dotyk zadní obrazovky jas obnoví a časovač spustí znovu. Posun proti vypálení funguje i v AOD.</string>
+    <string name="dashboard_quiet_title">Vypínat AOD</string>
+    <string name="dashboard_quiet_never">Nikdy</string>
+    <string name="dashboard_quiet_night">Od západu do východu slunce</string>
+    <string name="dashboard_quiet_schedule">Podle rozvrhu</string>
+    <string name="dashboard_quiet_sun">Západ a východ slunce</string>
+    <string name="dashboard_quiet_sun_unknown">Je potřeba poloha</string>
+    <string name="dashboard_quiet_polar_night">Polární noc</string>
+    <string name="dashboard_quiet_polar_day">Polární den</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d minuta</item>
         <item quantity="few">%1$d minuty</item>
@@ -501,9 +507,7 @@
     <string name="shutter_countdown_seconds">%1$d s</string>
     <string name="mirror_grid">Mřížka třetin přes fotoaparát</string>
     <string name="mirror_level">Vodováha přes fotoaparát</string>
-    <string name="mirror_guides_help">Mřížka a vodováha se zobrazují jen přes zrcadlený fotoaparát a kreslí se pouze na panel – do snímku se nedostanou. Vodováha zežloutne, když je telefon rovně.</string>
     <string name="notification_light">Světlo oznámení</string>
-    <string name="notification_light_help">Když je hlavní displej vypnutý, nové oznámení na pár sekund rozsvítí panel ikonou aplikace – místo LED, kterou tento telefon nemá. Kroužky mají barvu aplikace, jeden za každé oznámení od posledního zapnutí displeje, nejvýš pět. Funguje, dokud je panel zapnutý, třeba v režimu Always on Display, a využívá stejný přístup k oznámením jako widgety oznámení. Nespustí se v kapse, displejem dolů ani v režimu Nerušit. Dotyk ho zhasne.</string>
     <string name="panel_trigger_bluetooth">Připojeno zařízení Bluetooth</string>
     <string name="panel_trigger_bluetooth_device">Zařízení</string>
     <string name="panel_trigger_wifi">Na síti Wi‑Fi</string>

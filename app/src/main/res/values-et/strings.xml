@@ -348,7 +348,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Näidissündmus</string>
     <string name="dashboard_font_title">Font</string>
-    <string name="dashboard_font_help">Paneel joonistab oma teksti ise, seega järgib ta süsteemi fonti: Teemade kaudu paigaldatud font jõuab kohale iseenesest, fondikate vajab aga teemavalikut. Lihtne eirab mõlemat ja kasutab fonti, millega seade tuli — juhuks, kui dekoratiivne kiri ei pea vastu mõõtudele 126 × 294.</string>
     <string name="dashboard_font_widget_label">Font</string>
     <string name="dashboard_font_widget_panel">Nagu paneelil</string>
     <string name="dashboard_font_system">Süsteem</string>
@@ -406,7 +405,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">AOD minimaalne heledus: 8%</string>
     <string name="dashboard_aod_min_brightness_value">AOD minimaalne heledus: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">15 või 30 sekundi pärast heledus hääbub ja tagaekraani seanss lõpeb. Always on Display püsib valitud heledusel 30 sekundit ja tumeneb siis sujuvalt miinimumini. Tagaekraani puudutamine taastab heleduse ja käivitab taimeri uuesti. Sissepõlemisnihe töötab ka AOD-režiimis.</string>
+    <string name="dashboard_quiet_title">Lülita AOD välja</string>
+    <string name="dashboard_quiet_never">Mitte kunagi</string>
+    <string name="dashboard_quiet_night">Päikeseloojangust päikesetõusuni</string>
+    <string name="dashboard_quiet_schedule">Ajakava järgi</string>
+    <string name="dashboard_quiet_sun">Päikeseloojang ja -tõus</string>
+    <string name="dashboard_quiet_sun_unknown">Asukoht on vajalik</string>
+    <string name="dashboard_quiet_polar_night">Polaaröö</string>
+    <string name="dashboard_quiet_polar_day">Keskööpäike</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d minut</item>
         <item quantity="other">%1$d minutit</item>
@@ -497,9 +503,7 @@
     <string name="shutter_countdown_seconds">%1$d s</string>
     <string name="mirror_grid">Kolmandike ruudustik kaamera kohal</string>
     <string name="mirror_level">Horisondi lood kaamera kohal</string>
-    <string name="mirror_guides_help">Ruudustik ja lood kuvatakse ainult peegeldatud kaamera kohal ning joonistatakse ainult paneelile – fotole need ei jõua. Lood muutub kollaseks, kui telefon on otse.</string>
     <string name="notification_light">Märguannete tuli</string>
-    <string name="notification_light_help">Kui põhiekraan on väljas, süütab uus märguanne paneeli mõneks sekundiks rakenduse ikooniga – LED-i asemel, mida sellel telefonil pole. Rõngad on rakenduse värvi, üks iga märguande kohta alates ekraani viimasest sisselülitamisest, kuni viis. Töötab, kuni paneel on sees, näiteks Always on Display režiimis, ja kasutab sama märguannete juurdepääsu kui märguannete vidinad. Ei käivitu taskus, ekraaniga alaspidi ega režiimis Mitte segada. Puudutus kustutab selle.</string>
     <string name="panel_trigger_bluetooth">Bluetooth-seade ühendatud</string>
     <string name="panel_trigger_bluetooth_device">Seade</string>
     <string name="panel_trigger_wifi">Wi‑Fi võrgus</string>

@@ -1,6 +1,10 @@
 package com.tpkarras.mirror2rearultra;
 
 import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.Window;
+import android.view.WindowManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,8 +39,13 @@ final class RearBrightnessController {
     private final AtomicBoolean closed = new AtomicBoolean(false);
     private final Listener listener;
     private Boolean hardwareAvailable;
+    private final Window window;
+    private final float originalWindowBrightness;
+    private final Handler main = new Handler(Looper.getMainLooper());
 
-    RearBrightnessController(Listener listener) {
+    RearBrightnessController(Window window, Listener listener) {
+        this.window = window;
+        this.originalWindowBrightness = window == null ? -1f : window.getAttributes().screenBrightness;
         this.listener = listener;
     }
 
@@ -45,6 +54,10 @@ final class RearBrightnessController {
             return;
         }
         int clampedPercent = Math.max(1, Math.min(100, percent));
+        if (window != null) {
+            applyWindowBrightness(clampedPercent);
+            return;
+        }
         executor.execute(() -> {
             boolean applied = applyHardwareBrightness(clampedPercent);
             DeviceCapabilityState.setHardwareBrightnessActive(applied);
@@ -74,6 +87,12 @@ final class RearBrightnessController {
         if (!closed.compareAndSet(false, true)) {
             return;
         }
+        if (window != null) {
+            main.post(() -> setWindowBrightness(originalWindowBrightness));
+            DeviceCapabilityState.setHardwareBrightnessActive(false);
+            executor.shutdown();
+            return;
+        }
         executor.execute(() -> {
             restoreOriginalBrightness();
             DeviceCapabilityState.setHardwareBrightnessActive(false);
@@ -82,6 +101,11 @@ final class RearBrightnessController {
     }
 
     void restoreWhileOpen() {
+        if (window != null) {
+            main.post(() -> { if (!closed.get()) setWindowBrightness(originalWindowBrightness); });
+            DeviceCapabilityState.setHardwareBrightnessActive(false);
+            return;
+        }
         if (!closed.get()) {
             executor.execute(() -> {
                 restoreOriginalBrightness();
@@ -132,6 +156,10 @@ final class RearBrightnessController {
         if (closed.get()) {
             return;
         }
+        if (window != null) {
+            applyWindowBrightness(0);
+            return;
+        }
         executor.execute(() -> {
             boolean applied = ensureHardwareState() && write(0);
             DeviceCapabilityState.setHardwareBrightnessActive(applied);
@@ -139,6 +167,22 @@ final class RearBrightnessController {
             // still goes dark - under the software overlay instead.
             listener.onBrightnessApplied(applied, 0);
         });
+    }
+
+    private void applyWindowBrightness(int percent) {
+        main.post(() -> {
+            if (closed.get()) return;
+            setWindowBrightness(percent == 0 ? 0f : PerceptualBrightness.toLinear(percent));
+            DeviceCapabilityState.setHardwareBrightnessActive(true);
+            // At zero, retain a black overlay too: firmware may clamp the backlight above zero.
+            listener.onBrightnessApplied(percent != 0, percent);
+        });
+    }
+
+    private void setWindowBrightness(float value) {
+        WindowManager.LayoutParams params = window.getAttributes();
+        params.screenBrightness = value;
+        window.setAttributes(params);
     }
 
     private boolean write(int value) {

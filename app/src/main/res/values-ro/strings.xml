@@ -349,7 +349,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Eveniment de exemplu</string>
     <string name="dashboard_font_title">Font</string>
-    <string name="dashboard_font_help">Panoul își desenează singur textul, deci urmează fontul sistemului: un font instalat prin Teme ajunge de la sine, în timp ce o suprapunere de font are nevoie de opțiunea din temă. Simplu le ignoră pe amândouă și folosește fontul cu care a venit dispozitivul, pentru cazurile în care o literă decorativă nu supraviețuiește la 126 pe 294.</string>
     <string name="dashboard_font_widget_label">Font</string>
     <string name="dashboard_font_widget_panel">Ca panoul</string>
     <string name="dashboard_font_system">Sistem</string>
@@ -407,7 +406,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">Luminozitate minimă AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Luminozitate minimă AOD: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">După 15 sau 30 de secunde, luminozitatea scade și sesiunea ecranului din spate se încheie. Always on Display rămâne la luminozitatea aleasă timp de 30 de secunde, apoi coboară lin până la minim. Atingerea ecranului din spate restabilește luminozitatea și repornește cronometrul. Deplasarea anti-ardere continuă să funcționeze în AOD.</string>
+    <string name="dashboard_quiet_title">Oprește AOD</string>
+    <string name="dashboard_quiet_never">Niciodată</string>
+    <string name="dashboard_quiet_night">De la apus la răsărit</string>
+    <string name="dashboard_quiet_schedule">După program</string>
+    <string name="dashboard_quiet_sun">Apus și răsărit</string>
+    <string name="dashboard_quiet_sun_unknown">Este necesară locația</string>
+    <string name="dashboard_quiet_polar_night">Noapte polară</string>
+    <string name="dashboard_quiet_polar_day">Soarele de la miezul nopții</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d minut</item>
         <item quantity="few">%1$d minute</item>
@@ -499,9 +505,7 @@
     <string name="shutter_countdown_seconds">%1$d s</string>
     <string name="mirror_grid">Grilă a treimilor peste cameră</string>
     <string name="mirror_level">Nivelă a orizontului peste cameră</string>
-    <string name="mirror_guides_help">Grila și nivela apar doar peste camera oglindită și sunt desenate numai pe panou: nu ajung niciodată în fotografie. Nivela devine galbenă când telefonul este drept.</string>
     <string name="notification_light">Lumină pentru notificări</string>
-    <string name="notification_light_help">Cu ecranul principal stins, o notificare nouă aprinde panoul câteva secunde cu pictograma aplicației, în locul LED-ului pe care acest telefon nu îl are. Inelele au culoarea aplicației, câte unul pentru fiecare notificare de la ultima aprindere a ecranului, până la cinci. Funcționează cât timp panoul este aprins, ca în Always on Display, și folosește același acces la notificări ca widgeturile de notificări. Nu în buzunar, cu ecranul în jos sau cu Nu deranja. O atingere o stinge.</string>
     <string name="panel_trigger_bluetooth">Dispozitiv Bluetooth conectat</string>
     <string name="panel_trigger_bluetooth_device">Dispozitiv</string>
     <string name="panel_trigger_wifi">Pe Wi‑Fi</string>

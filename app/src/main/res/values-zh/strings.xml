@@ -347,7 +347,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">示例日程</string>
     <string name="dashboard_font_title">字体</string>
-    <string name="dashboard_font_help">面板的文字是自己绘制的，因此跟随系统字体：通过主题安装的字体会自动生效，而字体覆盖层则需要开启主题选项。“朴素”两者都不理会，直接使用设备出厂自带的字体，适合装饰性字体撑不住 126 × 294 的情况。</string>
     <string name="dashboard_font_widget_label">字体</string>
     <string name="dashboard_font_widget_panel">与面板一致</string>
     <string name="dashboard_font_system">系统</string>
@@ -405,7 +404,14 @@
     <string name="dashboard_idle_always_on">息屏显示</string>
     <string name="dashboard_aod_min_brightness_default">息屏显示最低亮度：8%</string>
     <string name="dashboard_aod_min_brightness_value">息屏显示最低亮度：%1$d%%</string>
-    <string name="dashboard_idle_mode_help">15 或 30 秒后亮度渐暗，后屏会话随之结束。息屏显示会在所选亮度停留 30 秒，然后平滑降到最低亮度。触摸后屏会恢复亮度并重新计时。防烧屏位移在息屏显示下仍然有效。</string>
+    <string name="dashboard_quiet_title">关闭 AOD</string>
+    <string name="dashboard_quiet_never">从不</string>
+    <string name="dashboard_quiet_night">日落到日出</string>
+    <string name="dashboard_quiet_schedule">按时间表</string>
+    <string name="dashboard_quiet_sun">日落和日出</string>
+    <string name="dashboard_quiet_sun_unknown">需要位置信息</string>
+    <string name="dashboard_quiet_polar_night">极夜</string>
+    <string name="dashboard_quiet_polar_day">极昼</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="other">%1$d 分钟</item>
     </plurals>
@@ -495,9 +501,7 @@
     <string name="shutter_countdown_seconds">%1$d 秒</string>
     <string name="mirror_grid">在相机上显示三分线</string>
     <string name="mirror_level">在相机上显示水平仪</string>
-    <string name="mirror_guides_help">三分线和水平仪只在镜像的相机画面上显示，且只绘制在副屏上，不会出现在照片里。手机摆正时水平仪会变黄。</string>
     <string name="notification_light">通知灯</string>
-    <string name="notification_light_help">主屏幕关闭时，新通知会让副屏以应用图标亮起几秒，代替这台手机没有的通知 LED。圆环为应用的颜色，自上次亮屏以来每条通知一个，最多五个。副屏开启时（如息屏显示）有效，使用与通知小组件相同的通知访问权限。放在口袋里、屏幕朝下或开启勿扰时不亮。触摸即可关闭。</string>
     <string name="panel_trigger_bluetooth">已连接蓝牙设备</string>
     <string name="panel_trigger_bluetooth_device">设备</string>
     <string name="panel_trigger_wifi">已连接 Wi‑Fi</string>

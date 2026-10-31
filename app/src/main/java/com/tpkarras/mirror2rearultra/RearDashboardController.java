@@ -646,6 +646,8 @@ final class RearDashboardController implements
             JSONObject place = results.getJSONObject(0);
             double latitude = place.getDouble("latitude");
             double longitude = place.getDouble("longitude");
+            // Where night falls for the quiet hours, if the phone will not say.
+            QuietHours.offerWeatherPlace(context, latitude, longitude);
             String displayName = place.optString("name", city);
 
             JSONObject forecast = requestJson(

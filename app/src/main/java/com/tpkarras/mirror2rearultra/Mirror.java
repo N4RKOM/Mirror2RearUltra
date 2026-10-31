@@ -56,7 +56,9 @@ public class Mirror extends Activity implements
     private static final String POWER_INTERFACE = "android.os.IPowerManager";
     private static final int TRANSACTION_WAKE_REAR_SCREEN = 16777210;
     private static final int TRANSACTION_SLEEP_REAR_SCREEN = 16777211;
+    private static final IBinder REAR_POWER_TOKEN = new Binder();
     private static final long AOD_DIM_DELAY_MILLIS = 30_000L;
+    private static final long QUIET_HOURS_RECHECK_MILLIS = 3_600_000L;
     private static final long IDLE_FADE_STEP_MILLIS = 16L;
     private static final int IDLE_FADE_STEPS = 125;
     /**
@@ -126,6 +128,8 @@ public class Mirror extends Activity implements
     private NotificationPulseView notificationPulse;
     /** Whether the gesture under way began on the notification light, and so is not passed on. */
     private boolean swallowingPulseTouch;
+    /** Whether the gesture under way began on a dimmed or dark panel, and so only woke it. */
+    private boolean swallowingWakeTouch;
     private final NotificationWidgetState.ArrivalListener arrivalListener =
             (packageName, colour) -> runOnUiThread(
                     () -> onNotificationArrived(packageName, colour));
@@ -224,6 +228,17 @@ public class Mirror extends Activity implements
     private int sessionGeneration;
     private final Handler idleHandler = new Handler(Looper.getMainLooper());
     private boolean idleDimmed;
+    /**
+     * AOD has gone all the way out for the quiet hours rather than dimming.
+     *
+     * <p>Only ever set on top of {@link #idleDimmed}: it is what the dimmed
+     * panel looks like in those hours, and a touch clears both together.
+     */
+    private boolean quietDark;
+    /** Whether the fade under way ends dark rather than at the AOD level. */
+    private boolean idleFadeQuiet;
+    /** Looks again when the quiet hours begin or end. */
+    private final Runnable quietHoursTick = this::refreshQuietHours;
     private boolean idleFadeRunning;
     private int idleFadeStep;
     private float idleFadeStartOverlayAlpha;
@@ -273,6 +288,8 @@ public class Mirror extends Activity implements
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setShowWhenLocked(true);
+        setTurnScreenOn(true);
+        boolean firmwareWindowBrightness = RearWindowPolicy.configure(getWindow());
         // Touchable whatever the mode: the idle timer is reset by a touch on
         // the panel, and a mirror-only session used to refuse touches, so the
         // fifteen and thirty second timers ended the session with no way to
@@ -340,7 +357,8 @@ public class Mirror extends Activity implements
         updateMirrorControl(AutoProfileState.get().profileId);
         applyAppVisibility(null);
         textureView.setVisibility(View.INVISIBLE);
-        brightnessController = new RearBrightnessController((hardwareControlActive, appliedPercent) ->
+        brightnessController = new RearBrightnessController(firmwareWindowBrightness ? getWindow() : null,
+                (hardwareControlActive, appliedPercent) ->
                 runOnUiThread(() -> onHardwareBrightnessApplied(hardwareControlActive, appliedPercent))
         );
         autoBrightness = new AutoBrightnessSensor(this, factor -> runOnUiThread(() -> {
@@ -484,6 +502,9 @@ public class Mirror extends Activity implements
                 // connected, home Wi-Fi in range - applies now, not at the
                 // next change.
                 refreshTriggers();
+                // And the quiet hours, which may have just been set to
+                // begin earlier than the look already booked.
+                refreshQuietHours();
             }
             AutoProfileState.Snapshot automatic = AutoProfileState.get();
             String automaticProfileId = automatic.packageName == null
@@ -524,8 +545,8 @@ public class Mirror extends Activity implements
         if (touchLocked) {
             return true;
         }
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            resetIdleTimer();
+        if (handleWakeTouch(event)) {
+            return true;
         }
         if (handlePulseTouch(event)) {
             return true;
@@ -534,6 +555,29 @@ public class Mirror extends Activity implements
             return true;
         }
         return super.dispatchTouchEvent(event);
+    }
+
+    /**
+     * A touch on a dimmed or dark panel wakes it, and goes no further.
+     *
+     * <p>The widgets used to get it as well, so whatever brushed the panel
+     * while nobody was looking - a pocket lining the proximity sensor on the
+     * other side could not see, a hand round the phone through a restart -
+     * restyled widgets with its taps and, held for a moment, turned AOD off,
+     * which came back as a thirty-second timer. A setting changes now only
+     * when the panel is lit and the change can be seen happening.
+     */
+    private boolean handleWakeTouch(MotionEvent event) {
+        int action = event.getActionMasked();
+        if (action == MotionEvent.ACTION_DOWN) {
+            swallowingWakeTouch = idleDimmed || idleFadeRunning || panelFacingDown;
+            resetIdleTimer();
+        }
+        boolean swallowed = swallowingWakeTouch;
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            swallowingWakeTouch = false;
+        }
+        return swallowed;
     }
 
     /**
@@ -571,7 +615,9 @@ public class Mirror extends Activity implements
         boolean mainScreenOn = power == null || power.isInteractive();
         if (!NotificationPulse.shouldPulse(
                 DashboardWidgetLayout.isNotificationLightEnabled(this),
-                mainScreenOn, pocketed, panelFacingDown,
+                // Out for the quiet hours counts as out: lighting it for a
+                // message would undo the one thing the hours are for.
+                mainScreenOn, pocketed, panelFacingDown || quietDark,
                 CallWidgetState.get().ringing, shouldShowProjection())) {
             return;
         }
@@ -883,6 +929,7 @@ public class Mirror extends Activity implements
                 || status == BatteryManager.BATTERY_STATUS_FULL;
         configureSurroundings();
         triggerHandler.post(triggerTick);
+        triggerHandler.post(quietHoursTick);
         if (postureSensor != null) {
             postureSensor.start();
         }
@@ -904,6 +951,7 @@ public class Mirror extends Activity implements
             sensorManager.unregisterListener(this);
         }
         triggerHandler.removeCallbacks(triggerTick);
+        triggerHandler.removeCallbacks(quietHoursTick);
         surroundings.stop();
         if (postureSensor != null) {
             postureSensor.stop();
@@ -1181,6 +1229,16 @@ public class Mirror extends Activity implements
             return;
         }
         if (idleDimmed) {
+            if (quietDark) {
+                // By the backlight, as face down: the display itself carries
+                // this activity and cannot be slept under it. The overlay
+                // goes black too, for a panel whose backlight is out of reach.
+                brightnessOverlay.setAlpha(1f);
+                if (brightnessController != null) {
+                    brightnessController.blank();
+                }
+                return;
+            }
             if (dimsAodWithBacklight(DashboardWidgetLayout.loadIdleMode(this))) {
                 brightnessOverlay.setAlpha(aodVeilAlpha());
                 applyAodBacklight();
@@ -1264,6 +1322,7 @@ public class Mirror extends Activity implements
         idleFadeRunning = false;
         boolean wasDimmed = idleDimmed;
         idleDimmed = false;
+        quietDark = false;
         if (wasDimmed || wasFading) {
             applyProfileBrightness();
         }
@@ -1295,6 +1354,11 @@ public class Mirror extends Activity implements
         idleFadeRunning = true;
         idleFadeStep = 0;
         idleFadeStartOverlayAlpha = brightnessOverlay.getAlpha();
+        // Asked once for the whole fade: it lasts seconds, and the answer
+        // changing inside them is caught by the tick at the edge.
+        idleFadeQuiet = DashboardWidgetLayout.loadIdleMode(this)
+                == DashboardWidgetLayout.IdleMode.ALWAYS_ON
+                && QuietHours.now(this, System.currentTimeMillis()).quiet;
         idleHandler.post(idleFadeFrame);
     }
 
@@ -1307,7 +1371,7 @@ public class Mirror extends Activity implements
         DashboardWidgetLayout.IdleMode mode = DashboardWidgetLayout.loadIdleMode(this);
         boolean backlit = dimsAodWithBacklight(mode);
         float targetAlpha;
-        if (mode != DashboardWidgetLayout.IdleMode.ALWAYS_ON) {
+        if (mode != DashboardWidgetLayout.IdleMode.ALWAYS_ON || idleFadeQuiet) {
             targetAlpha = 1f;
         } else {
             targetAlpha = backlit ? aodVeilAlpha() : aodDimOverlayAlpha();
@@ -1325,7 +1389,45 @@ public class Mirror extends Activity implements
         idleDimmed = true;
         if (mode != DashboardWidgetLayout.IdleMode.ALWAYS_ON) {
             MirrorState.setActive(this, false);
+        } else if (idleFadeQuiet) {
+            quietDark = true;
+            applyProfileBrightness();
         }
+    }
+
+    /**
+     * Puts a dimmed AOD out when the quiet hours begin, and back to its
+     * level when they end.
+     *
+     * <p>A panel that is awake is left alone either way: it goes dark or dim
+     * when its own timer runs out, which asks the hours again.
+     */
+    private void refreshQuietHours() {
+        triggerHandler.removeCallbacks(quietHoursTick);
+        long now = System.currentTimeMillis();
+        if (DashboardWidgetLayout.loadQuietMode(this) == QuietHours.Mode.NIGHT) {
+            QuietHours.refreshPlaceFromDevice(this);
+        }
+        QuietHours.Verdict verdict = QuietHours.now(this, now);
+        if (verdict.nextChangeMillis != QuietHours.NEVER
+                || DashboardWidgetLayout.loadQuietMode(this) == QuietHours.Mode.NIGHT) {
+            // At most an hour between looks, so a clock set by hand, a new
+            // time zone or a place found since are not left for a day.
+            long delay = verdict.nextChangeMillis == QuietHours.NEVER
+                    ? QUIET_HOURS_RECHECK_MILLIS
+                    : Math.min(QUIET_HOURS_RECHECK_MILLIS,
+                            verdict.nextChangeMillis - now + 1_000L);
+            triggerHandler.postDelayed(quietHoursTick, Math.max(1_000L, delay));
+        }
+        boolean dark = verdict.quiet && idleDimmed && !idleFadeRunning
+                && DashboardWidgetLayout.loadIdleMode(this)
+                == DashboardWidgetLayout.IdleMode.ALWAYS_ON;
+        if (dark == quietDark) {
+            return;
+        }
+        quietDark = dark;
+        Log.i(TAG, dark ? "Quiet hours: putting AOD out" : "Quiet hours over: back to AOD");
+        applyProfileBrightness();
     }
 
     private float aodDimOverlayAlpha() {
@@ -1849,7 +1951,7 @@ public class Mirror extends Activity implements
             int transactionCode;
             if (enabled) {
                 transactionCode = TRANSACTION_WAKE_REAR_SCREEN;
-                data.writeStrongBinder(new Binder());
+                data.writeStrongBinder(REAR_POWER_TOKEN);
                 data.writeLong(SystemClock.uptimeMillis());
                 data.writeInt(1);
                 data.writeString("CAMERA_CALL");

@@ -348,7 +348,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Eksempelhendelse</string>
     <string name="dashboard_font_title">Skrift</string>
-    <string name="dashboard_font_help">Panelet tegner sin egen tekst og følger derfor systemskriften: en skrift som er installert via Temaer kommer med av seg selv, mens et skriftoverlegg trenger temavalget. Enkel ser bort fra begge og bruker skriften enheten kom med, for når en dekorativ skrift ikke tåler 126 ganger 294.</string>
     <string name="dashboard_font_widget_label">Skrift</string>
     <string name="dashboard_font_widget_panel">Som panelet</string>
     <string name="dashboard_font_system">System</string>
@@ -406,7 +405,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">Laveste AOD-lysstyrke: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Laveste AOD-lysstyrke: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">Etter 15 eller 30 sekunder tones lysstyrken ned og økten på bakskjermen avsluttes. Always on Display blir stående på den valgte lysstyrken i 30 sekunder og dempes så jevnt ned til laveste nivå. Å berøre bakskjermen gjenoppretter lysstyrken og starter tidtakeren på nytt. Innbrenningsdriften fortsetter å virke i AOD.</string>
+    <string name="dashboard_quiet_title">Slå av AOD</string>
+    <string name="dashboard_quiet_never">Aldri</string>
+    <string name="dashboard_quiet_night">Fra solnedgang til soloppgang</string>
+    <string name="dashboard_quiet_schedule">Etter tidsplan</string>
+    <string name="dashboard_quiet_sun">Solnedgang og soloppgang</string>
+    <string name="dashboard_quiet_sun_unknown">Posisjon kreves</string>
+    <string name="dashboard_quiet_polar_night">Mørketid</string>
+    <string name="dashboard_quiet_polar_day">Midnattssol</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d minutt</item>
         <item quantity="other">%1$d minutter</item>
@@ -497,9 +503,7 @@
     <string name="shutter_countdown_seconds">%1$d s</string>
     <string name="mirror_grid">Tredjedelsrutenett over kameraet</string>
     <string name="mirror_level">Vater over kameraet</string>
-    <string name="mirror_guides_help">Rutenettet og vateret vises bare over et speilet kamera og tegnes bare på panelet – de havner aldri på bildet. Vateret blir gult når telefonen står rett.</string>
     <string name="notification_light">Varsellys</string>
-    <string name="notification_light_help">Når hovedskjermen er av, lyser et nytt varsel opp panelet i noen sekunder med appens ikon – i stedet for LED-lampen denne telefonen mangler. Ringene har appens farge, én for hvert varsel siden skjermen sist var på, opptil fem. Virker så lenge panelet er på, som i Always on Display, og bruker samme varseltilgang som varselwidgetene. Ikke i lomma, med skjermen ned eller med Ikke forstyrr. Et trykk slukker det.</string>
     <string name="panel_trigger_bluetooth">Bluetooth-enhet tilkoblet</string>
     <string name="panel_trigger_bluetooth_device">Enhet</string>
     <string name="panel_trigger_wifi">På Wi‑Fi</string>

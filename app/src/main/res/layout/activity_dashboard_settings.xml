@@ -138,10 +138,6 @@
                     app:hyperValueTo="100" />
             </LinearLayout>
 
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/dashboard_font_help" />
-
             <!-- ===================== Panel screen =====================
                  When the panel dims and goes out, and how it keeps from
                  burning in while it stays on. -->
@@ -157,6 +153,29 @@
                     android:id="@+id/dashboard_idle_mode_input"
                     style="@style/HyperOS.ValueRow.Top"
                     app:rowTitle="@string/dashboard_idle_mode_title" />
+
+                <!-- When AOD goes out instead of dimming: from sunset to
+                     sunrise or between two times. Shown only for AOD, and
+                     only the rows for the chosen way. -->
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_quiet_mode_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/dashboard_quiet_title" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_quiet_sun_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/dashboard_quiet_sun" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_quiet_from_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_from" />
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/dashboard_quiet_to_input"
+                    style="@style/HyperOS.ValueRow"
+                    app:rowTitle="@string/panel_trigger_to" />
 
                 <TextView
                     android:id="@+id/dashboard_aod_min_brightness_value"
@@ -180,10 +199,6 @@
                     app:rowTitle="@string/dashboard_burn_in_title" />
             </LinearLayout>
 
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/dashboard_idle_mode_help" />
-
             <LinearLayout
                 style="@style/HyperOS.Group"
                 android:layout_marginTop="@dimen/section_spacing">
@@ -193,10 +208,6 @@
                     style="@style/HyperOS.Switch.Single"
                     android:text="@string/notification_light" />
             </LinearLayout>
-
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/notification_light_help" />
 
             <!-- ===================== Touch and sensors =====================
                  What a finger on the panel, a pocket and a table do to it. -->
@@ -255,10 +266,6 @@
                     style="@style/HyperOS.Switch.Bottom"
                     android:text="@string/mirror_level" />
             </LinearLayout>
-
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/mirror_guides_help" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

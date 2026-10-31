@@ -358,7 +358,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Sample event</string>
     <string name="dashboard_font_title">Font</string>
-    <string name="dashboard_font_help">The panel draws its own text, so it follows the system font: a font installed through Themes arrives on its own, while a font overlay needs the theme option. Plain ignores both and uses the font the device shipped with, for when a decorative face does not survive 126 by 294.</string>
     <string name="dashboard_font_widget_label">Font</string>
     <string name="dashboard_font_widget_panel">As the panel</string>
     <string name="dashboard_font_system">System</string>
@@ -425,7 +424,15 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">Minimum AOD brightness: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Minimum AOD brightness: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">After 15 or 30 seconds, brightness fades down and the rear-screen session ends. Always on Display stays at the selected brightness for 30 seconds, then smoothly dims to the minimum. Touching the rear screen restores brightness and restarts the timer. Burn-in shift continues to work in AOD.</string>
+    <string name="dashboard_quiet_title">Turn AOD off</string>
+    <string name="dashboard_quiet_never">Never</string>
+    <string name="dashboard_quiet_night">Sunset to sunrise</string>
+    <string name="dashboard_quiet_schedule">On a schedule</string>
+    <string name="dashboard_quiet_sun">Sunset and sunrise</string>
+    <string name="dashboard_quiet_sun_value" translatable="false">%1$s – %2$s</string>
+    <string name="dashboard_quiet_sun_unknown">Location needed</string>
+    <string name="dashboard_quiet_polar_night">Polar night</string>
+    <string name="dashboard_quiet_polar_day">Midnight sun</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d minute</item>
         <item quantity="other">%1$d minutes</item>
@@ -516,9 +523,7 @@
     <string name="shutter_countdown_seconds">%1$d s</string>
     <string name="mirror_grid">Rule-of-thirds grid over the camera</string>
     <string name="mirror_level">Horizon level over the camera</string>
-    <string name="mirror_guides_help">The grid and the level appear over a mirrored camera only, and are drawn on the panel alone: they never reach the photo. The level turns yellow when the phone is straight.</string>
     <string name="notification_light">Notification light</string>
-    <string name="notification_light_help">While the main screen is off, a new notification lights the panel with the icon of its app for a few seconds, in place of the LED this phone does not have. The rings are in the app’s colour, one for each notification since the screen was last on, up to five. It works while the panel is on, as in Always on Display, and uses the same notification access as the notification widgets. Not in a pocket, face down or with do not disturb on. A touch puts it out.</string>
     <string name="panel_trigger_bluetooth">Bluetooth device connected</string>
     <string name="panel_trigger_bluetooth_device">Device</string>
     <string name="panel_trigger_wifi">On Wi‑Fi</string>

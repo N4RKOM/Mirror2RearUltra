@@ -348,7 +348,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Δείγμα συμβάντος</string>
     <string name="dashboard_font_title">Γραμματοσειρά</string>
-    <string name="dashboard_font_help">Ο πίνακας σχεδιάζει μόνος του το κείμενό του, άρα ακολουθεί τη γραμματοσειρά του συστήματος: μια γραμματοσειρά εγκατεστημένη μέσω των Θεμάτων φτάνει από μόνη της, ενώ μια επικάλυψη γραμματοσειράς χρειάζεται την επιλογή του θέματος. Η Απλή τις αγνοεί και τις δύο και χρησιμοποιεί τη γραμματοσειρά με την οποία ήρθε η συσκευή, για τις φορές που μια διακοσμητική γραμματοσειρά δεν αντέχει στα 126 επί 294.</string>
     <string name="dashboard_font_widget_label">Γραμματοσειρά</string>
     <string name="dashboard_font_widget_panel">Όπως ο πίνακας</string>
     <string name="dashboard_font_system">Συστήματος</string>
@@ -406,7 +405,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">Ελάχιστη φωτεινότητα AOD: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Ελάχιστη φωτεινότητα AOD: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">Μετά από 15 ή 30 δευτερόλεπτα, η φωτεινότητα σβήνει σταδιακά και η συνεδρία της πίσω οθόνης τελειώνει. Το Always on Display μένει στην επιλεγμένη φωτεινότητα για 30 δευτερόλεπτα και έπειτα χαμηλώνει ομαλά στο ελάχιστο. Το άγγιγμα της πίσω οθόνης επαναφέρει τη φωτεινότητα και ξεκινά ξανά τον χρονομετρητή. Η μετατόπιση κατά του αποτυπώματος συνεχίζει να λειτουργεί στο AOD.</string>
+    <string name="dashboard_quiet_title">Απενεργοποίηση AOD</string>
+    <string name="dashboard_quiet_never">Ποτέ</string>
+    <string name="dashboard_quiet_night">Από τη δύση ως την ανατολή</string>
+    <string name="dashboard_quiet_schedule">Με πρόγραμμα</string>
+    <string name="dashboard_quiet_sun">Δύση και ανατολή</string>
+    <string name="dashboard_quiet_sun_unknown">Απαιτείται τοποθεσία</string>
+    <string name="dashboard_quiet_polar_night">Πολική νύχτα</string>
+    <string name="dashboard_quiet_polar_day">Ήλιος του μεσονυκτίου</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d λεπτό</item>
         <item quantity="other">%1$d λεπτά</item>
@@ -497,9 +503,7 @@
     <string name="shutter_countdown_seconds">%1$d δ</string>
     <string name="mirror_grid">Πλέγμα τρίτων πάνω από την κάμερα</string>
     <string name="mirror_level">Αλφάδι ορίζοντα πάνω από την κάμερα</string>
-    <string name="mirror_guides_help">Το πλέγμα και το αλφάδι εμφανίζονται μόνο πάνω από την κάμερα σε κατοπτρισμό και σχεδιάζονται μόνο στην οθόνη — δεν περνούν στη φωτογραφία. Το αλφάδι γίνεται κίτρινο όταν το τηλέφωνο είναι ίσιο.</string>
     <string name="notification_light">Φως ειδοποιήσεων</string>
-    <string name="notification_light_help">Όταν η κύρια οθόνη είναι σβηστή, μια νέα ειδοποίηση ανάβει την οθόνη για λίγα δευτερόλεπτα με το εικονίδιο της εφαρμογής, στη θέση του LED που δεν έχει αυτό το τηλέφωνο. Οι δακτύλιοι έχουν το χρώμα της εφαρμογής, ένας για κάθε ειδοποίηση από την τελευταία φορά που άναψε η οθόνη, έως πέντε. Λειτουργεί όσο η οθόνη είναι αναμμένη, όπως στο Always on Display, και χρησιμοποιεί την ίδια πρόσβαση στις ειδοποιήσεις με τα γραφικά στοιχεία ειδοποιήσεων. Όχι σε τσέπη, με την οθόνη προς τα κάτω ή στο Μην ενοχλείτε. Ένα άγγιγμα το σβήνει.</string>
     <string name="panel_trigger_bluetooth">Συνδέθηκε συσκευή Bluetooth</string>
     <string name="panel_trigger_bluetooth_device">Συσκευή</string>
     <string name="panel_trigger_wifi">Σε δίκτυο Wi‑Fi</string>

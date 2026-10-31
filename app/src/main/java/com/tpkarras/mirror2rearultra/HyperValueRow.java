@@ -42,6 +42,8 @@ public class HyperValueRow extends LinearLayout {
     private String[] entries = new String[0];
     private int selectedIndex = -1;
     @Nullable private OnItemSelectedListener listener;
+    /** Shown for reading only; see {@link #setReadOnly}. */
+    private boolean readOnly;
 
     public HyperValueRow(Context context) {
         this(context, null);
@@ -115,8 +117,19 @@ public class HyperValueRow extends LinearLayout {
         // The row is one control, so the whole thing dims rather than only its
         // label, and it stops taking focus while it cannot be used.
         setAlpha(enabled ? 1f : 0.45f);
-        setClickable(enabled);
-        setFocusable(enabled);
+        setClickable(enabled && !readOnly);
+        setFocusable(enabled && !readOnly);
+    }
+
+    /**
+     * Makes the row a statement rather than a control: no arrows, and no
+     * press to promise that something would change.
+     */
+    public void setReadOnly(boolean value) {
+        readOnly = value;
+        findViewById(R.id.hyper_row_chevron).setVisibility(value ? GONE : VISIBLE);
+        setClickable(isEnabled() && !value);
+        setFocusable(isEnabled() && !value);
     }
 
     /**

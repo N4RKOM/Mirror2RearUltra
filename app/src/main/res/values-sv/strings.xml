@@ -348,7 +348,6 @@
     </plurals>
     <string name="dashboard_builder_sample_event">Exempelhändelse</string>
     <string name="dashboard_font_title">Teckensnitt</string>
-    <string name="dashboard_font_help">Panelen ritar sin egen text och följer därför systemets teckensnitt: ett teckensnitt som installerats via Teman kommer med av sig självt, medan ett teckensnittslager behöver temaalternativet. Enkelt struntar i båda och använder teckensnittet enheten levererades med, för när ett dekorativt snitt inte klarar 126 gånger 294.</string>
     <string name="dashboard_font_widget_label">Teckensnitt</string>
     <string name="dashboard_font_widget_panel">Som panelen</string>
     <string name="dashboard_font_system">System</string>
@@ -406,7 +405,14 @@
     <string name="dashboard_idle_always_on">Always on Display</string>
     <string name="dashboard_aod_min_brightness_default">Minsta AOD-ljusstyrka: 8%</string>
     <string name="dashboard_aod_min_brightness_value">Minsta AOD-ljusstyrka: %1$d%%</string>
-    <string name="dashboard_idle_mode_help">Efter 15 eller 30 sekunder tonas ljusstyrkan ned och sessionen på den bakre skärmen avslutas. Always on Display stannar på den valda ljusstyrkan i 30 sekunder och dämpas sedan mjukt till miniminivån. Att röra vid den bakre skärmen återställer ljusstyrkan och startar om timern. Inbränningsdriften fortsätter att fungera i AOD.</string>
+    <string name="dashboard_quiet_title">Stäng av AOD</string>
+    <string name="dashboard_quiet_never">Aldrig</string>
+    <string name="dashboard_quiet_night">Från solnedgång till soluppgång</string>
+    <string name="dashboard_quiet_schedule">Enligt schema</string>
+    <string name="dashboard_quiet_sun">Solnedgång och soluppgång</string>
+    <string name="dashboard_quiet_sun_unknown">Plats krävs</string>
+    <string name="dashboard_quiet_polar_night">Polarnatt</string>
+    <string name="dashboard_quiet_polar_day">Midnattssol</string>
     <plurals name="dashboard_timer_minutes">
         <item quantity="one">%1$d minut</item>
         <item quantity="other">%1$d minuter</item>
@@ -497,9 +503,7 @@
     <string name="shutter_countdown_seconds">%1$d s</string>
     <string name="mirror_grid">Tredjedelsrutnät över kameran</string>
     <string name="mirror_level">Vattenpass över kameran</string>
-    <string name="mirror_guides_help">Rutnätet och vattenpasset visas bara över en speglad kamera och ritas bara på panelen – de hamnar aldrig på bilden. Vattenpasset blir gult när telefonen är rak.</string>
     <string name="notification_light">Aviseringslampa</string>
-    <string name="notification_light_help">När huvudskärmen är av tänder en ny avisering panelen i några sekunder med appens ikon – i stället för den lysdiod telefonen saknar. Ringarna har appens färg, en för varje avisering sedan skärmen senast var på, upp till fem. Fungerar så länge panelen är på, som i Always on Display, och använder samma aviseringsåtkomst som aviseringswidgetarna. Inte i fickan, med skärmen nedåt eller med Stör ej. En beröring släcker den.</string>
     <string name="panel_trigger_bluetooth">Bluetooth-enhet ansluten</string>
     <string name="panel_trigger_bluetooth_device">Enhet</string>
     <string name="panel_trigger_wifi">På Wi‑Fi</string>
