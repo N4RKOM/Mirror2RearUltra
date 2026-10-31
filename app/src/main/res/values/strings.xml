@@ -148,6 +148,7 @@
     <string name="dashboard_widget_temperature">Battery temperature</string>
     <string name="dashboard_widget_weather">Weather</string>
     <string name="dashboard_weather_city">Weather city</string>
+    <string name="dashboard_weather_city_device">Where the phone is</string>
     <string name="dashboard_weather_help">Weather comes from the city entered here - no location access is asked for it - and is refreshed about every 30 minutes.</string>
     <string name="dashboard_appearance_title">Appearance</string>
     <string name="dashboard_theme_title">Color style</string>

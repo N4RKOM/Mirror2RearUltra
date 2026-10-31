@@ -243,6 +243,7 @@
     <string name="dashboard_text_scale_value">Размер текста · %1$d%%</string>
     <string name="dashboard_theme_title">Цветовое оформление</string>
     <string name="dashboard_weather_city">Город для погоды</string>
+    <string name="dashboard_weather_city_device">Где находится телефон</string>
     <string name="dashboard_weather_city_missing">Выберите город для погоды</string>
     <string name="dashboard_weather_help">Погода берётся для введённого города — доступ к геолокации для неё не нужен — и обновляется примерно каждые 30 минут.</string>
     <string name="dashboard_weather_loading">Загрузка погоды…</string>

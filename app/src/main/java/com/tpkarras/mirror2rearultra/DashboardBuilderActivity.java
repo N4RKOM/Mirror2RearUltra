@@ -661,6 +661,9 @@ public class DashboardBuilderActivity extends AppCompatActivity {
             DashboardWidgetLayout.savePageLayout(this, editedPage, next);
             notifyDashboardChanged();
         }
+        // The list and an open widget's settings were built for the old layout:
+        // the grips, the hint, the size control and the alignment all depend on it.
+        renderRows();
     }
 
     // ------------------------------------------------------------------
@@ -1324,6 +1327,51 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                         .show();
             });
             special.addView(labelRow, spaced());
+        }
+
+        // The forecast's city, on every widget that reads the forecast: it
+        // used to be asked only at the foot of the list of all widgets.
+        if (widget == DashboardWidgetLayout.Widget.WEATHER
+                || widget == DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER
+                || widget == DashboardWidgetLayout.Widget.SUN
+                || widget == DashboardWidgetLayout.Widget.UV_INDEX
+                || widget == DashboardWidgetLayout.Widget.AIR_QUALITY) {
+            HyperValueRow cityRow = (HyperValueRow) getLayoutInflater()
+                    .inflate(R.layout.widget_value_row_single, column, false);
+            cityRow.setTitle(getString(R.string.dashboard_weather_city));
+            String city = MirrorSettings.loadDashboardSettings(this).weatherCity;
+            cityRow.setValue(city.isEmpty()
+                    ? getString(R.string.dashboard_weather_city_device) : city);
+            cityRow.setBackgroundResource(R.drawable.hyper_segment_track);
+            cityRow.setOnClickListener(view -> {
+                android.widget.EditText input = new android.widget.EditText(this);
+                input.setSingleLine(true);
+                input.setInputType(android.text.InputType.TYPE_CLASS_TEXT
+                        | android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+                input.setHint(R.string.dashboard_weather_city_device);
+                input.setFilters(new android.text.InputFilter[]{
+                        new android.text.InputFilter.LengthFilter(
+                                DashboardSettings.MAX_CITY_LENGTH)});
+                input.setText(MirrorSettings.loadDashboardSettings(this).weatherCity);
+                input.setSelection(input.getText().length());
+                new MaterialAlertDialogBuilder(this)
+                        .setTitle(R.string.dashboard_weather_city)
+                        .setView(input)
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            String typed = input.getText().toString().trim();
+                            DashboardSettings current = MirrorSettings.loadDashboardSettings(this);
+                            MirrorSettings.saveDashboardSettings(this,
+                                    current.withTexts(typed, current.customText));
+                            // Read back: the settings tidy the name they are given.
+                            String kept = MirrorSettings.loadDashboardSettings(this).weatherCity;
+                            cityRow.setValue(kept.isEmpty()
+                                    ? getString(R.string.dashboard_weather_city_device) : kept);
+                            notifyDashboardChanged();
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show();
+            });
+            special.addView(cityRow, spaced());
         }
 
         // Which stretch of time to follow.

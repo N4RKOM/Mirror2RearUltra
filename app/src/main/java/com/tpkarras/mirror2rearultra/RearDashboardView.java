@@ -96,7 +96,7 @@ public final class RearDashboardView extends View {
      * Where each icon's ink actually lies within the unit box it is drawn in,
      * measured once by drawing it. See {@link #drawIcon}.
      */
-    private static final Map<Icon, RectF> ICON_INK = new EnumMap<>(Icon.class);
+    private static final Map<WidgetIcon, RectF> ICON_INK = new EnumMap<>(WidgetIcon.class);
     @Nullable private Runnable drawnListener;
     /** Follow-up frames asked for in a row by {@link #drawFree}; see there. */
     private int freeSettlePasses;
@@ -771,7 +771,7 @@ public final class RearDashboardView extends View {
      * the dash back.
      */
     private void addLine(List<Line> lines, DashboardWidgetLayout.Widget widget,
-            boolean hasData, String value, Icon icon) {
+            boolean hasData, String value, WidgetIcon icon) {
         if (!hasData && DashboardWidgetLayout.loadPresence(getContext(), widget)
                 == DashboardWidgetLayout.Presence.WHEN_DATA) {
             return;
@@ -779,347 +779,32 @@ public final class RearDashboardView extends View {
         lines.add(new Line(widget, hasData ? value : "—", false, icon));
     }
 
+    /** Adds a widget's row the way its reading asks for it. */
+    private void addReading(List<Line> lines, DashboardWidgetLayout.Widget widget,
+            @Nullable WidgetReading reading) {
+        if (reading == null) {
+            return;
+        }
+        if (reading.progress >= 0f) {
+            progressFraction = reading.progress;
+        }
+        if (reading.buzz) {
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        }
+        if (reading.gated) {
+            addLine(lines, widget, reading.hasData, reading.text, reading.icon);
+        } else {
+            lines.add(new Line(widget, reading.text, reading.primary, reading.icon));
+        }
+    }
+
     private List<Line> createLines() {
         List<Line> lines = new ArrayList<>();
-        Date date = new Date(snapshot.timestampMillis);
-        Locale locale = Locale.getDefault();
-        if (settings.showClock) {
-            DashboardWidgetLayout.Variant variant = DashboardWidgetLayout.loadVariant(
-                    getContext(), DashboardWidgetLayout.Widget.CLOCK);
-            String pattern;
-            if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
-                pattern = android.text.format.DateFormat.is24HourFormat(getContext())
-                        ? "HH\nmm" : "h\nmm";
-            } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
-                pattern = android.text.format.DateFormat.is24HourFormat(getContext())
-                        ? "HH:mm:ss" : "h:mm:ss";
-            } else {
-                pattern = android.text.format.DateFormat.is24HourFormat(getContext())
-                        ? "HH:mm" : "h:mm";
+        WidgetEnv env = new WidgetEnv(getContext(), snapshot, settings, this::word, cityNames);
+        for (WidgetSpec spec : WidgetSpecs.all()) {
+            if (WidgetSpecs.isOn(getContext(), settings, spec.widget())) {
+                addReading(lines, spec.widget(), spec.read(env));
             }
-            lines.add(new Line(DashboardWidgetLayout.Widget.CLOCK,
-                    new SimpleDateFormat(pattern, locale).format(date),
-                    true,
-                    Icon.NONE
-            ));
-        }
-        if (settings.showDate) {
-            DashboardWidgetLayout.Variant variant = DashboardWidgetLayout.loadVariant(
-                    getContext(), DashboardWidgetLayout.Widget.DATE);
-            String pattern = variant == DashboardWidgetLayout.Variant.ALTERNATE
-                    ? "dd.MM" : variant == DashboardWidgetLayout.Variant.DETAILED
-                    ? "dd.MM.yyyy" : "d MMM";
-            lines.add(new Line(DashboardWidgetLayout.Widget.DATE,
-                    new SimpleDateFormat(pattern, locale).format(date),
-                    false,
-                    Icon.NONE
-            ));
-        }
-        if (settings.showBattery && snapshot.batteryPercent >= 0) {
-            String value = getResources().getString(
-                    snapshot.charging
-                            ? R.string.dashboard_battery_charging
-                            : R.string.dashboard_battery,
-                    snapshot.batteryPercent
-            );
-            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.BATTERY);
-            if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
-                value = snapshot.batteryPercent + "\n%";
-            } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
-                // A word either way. With only the charging one to offer, the
-                // detailed form was the ordinary form whenever the phone was
-                // off the charger, which is most of the time.
-                value += "\n" + getResources().getString(snapshot.charging
-                        ? R.string.dashboard_variant_charging
-                        : R.string.dashboard_variant_battery);
-            }
-            lines.add(new Line(DashboardWidgetLayout.Widget.BATTERY, value, false,
-                    snapshot.charging ? Icon.BATTERY_CHARGING : Icon.BATTERY));
-        }
-        if (settings.showTemperature && snapshot.temperatureTenthsCelsius >= 0) {
-            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.TEMPERATURE);
-            float degrees = inDegrees(snapshot.temperatureTenthsCelsius / 10f);
-            String value = variant == DashboardWidgetLayout.Variant.ALTERNATE
-                    ? Math.round(degrees) + "°"
-                    : variant == DashboardWidgetLayout.Variant.DETAILED
-                    ? String.format(locale, "%.1f %s", degrees, degreeName())
-                    : getResources().getString(R.string.dashboard_device_temperature, degrees);
-            lines.add(new Line(DashboardWidgetLayout.Widget.TEMPERATURE, value, false, Icon.TEMPERATURE));
-        }
-        if (settings.showWeather) {
-            String weather = weatherVariant(DashboardWidgetLayout.Widget.WEATHER);
-            if (!weather.isEmpty()) {
-                lines.add(new Line(DashboardWidgetLayout.Widget.WEATHER, weather, false, weatherIcon(snapshot.weatherCode)));
-            }
-        }
-        if (settings.showNextAlarm) {
-            boolean hasData = snapshot.nextAlarmMillis != null;
-            String value = "";
-            if (hasData) {
-                DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.NEXT_ALARM);
-                String timePattern = android.text.format.DateFormat.is24HourFormat(getContext())
-                        ? "HH:mm" : "h:mm";
-                String pattern = variant == DashboardWidgetLayout.Variant.ALTERNATE
-                        ? timePattern.replace(":", "\n")
-                        : variant == DashboardWidgetLayout.Variant.DETAILED
-                        ? "dd.MM\n" + timePattern : timePattern;
-                value = new SimpleDateFormat(pattern, locale).format(new Date(snapshot.nextAlarmMillis));
-            }
-            addLine(lines, DashboardWidgetLayout.Widget.NEXT_ALARM, hasData, value, Icon.ALARM);
-        }
-        if (settings.showMedia) {
-            boolean hasData = !snapshot.mediaTitle.isEmpty() || !snapshot.mediaArtist.isEmpty();
-            addLine(lines, DashboardWidgetLayout.Widget.MEDIA, hasData,
-                    mediaVariant(DashboardWidgetLayout.Widget.MEDIA), Icon.MEDIA);
-        }
-        if (settings.showCompass) {
-            boolean hasData = snapshot.headingDegrees != null;
-            String value = "";
-            if (hasData) {
-                String direction = cardinalDirection(snapshot.headingDegrees);
-                DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.COMPASS);
-                value = variant == DashboardWidgetLayout.Variant.ALTERNATE ? direction
-                        : variant == DashboardWidgetLayout.Variant.DETAILED
-                        ? Math.round(snapshot.headingDegrees) + "°\n" + direction
-                        : Math.round(snapshot.headingDegrees) + "° " + direction;
-            }
-            addLine(lines, DashboardWidgetLayout.Widget.COMPASS, hasData, value, Icon.COMPASS);
-        }
-        if (settings.showSpeed) {
-            boolean hasData = snapshot.speedMetersPerSecond != null;
-            boolean imperial = imperialUnits();
-            int speed = !hasData ? 0 : Math.round(snapshot.speedMetersPerSecond
-                    * (imperial ? 2.236936f : 3.6f));
-            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.SPEED);
-            String value = !hasData ? "" : variant == DashboardWidgetLayout.Variant.ALTERNATE
-                    ? String.valueOf(speed) : variant == DashboardWidgetLayout.Variant.DETAILED
-                    ? speed + "\n" + getResources().getString(imperial
-                            ? R.string.dashboard_speed_unit_imperial
-                            : R.string.dashboard_speed_unit)
-                    : getResources().getString(imperial
-                            ? R.string.dashboard_speed_short_imperial
-                            : R.string.dashboard_speed_short, speed);
-            addLine(lines, DashboardWidgetLayout.Widget.SPEED, hasData, value, Icon.SPEED);
-        }
-        if (settings.showAltitude) {
-            boolean hasData = snapshot.altitudeMeters != null;
-            boolean imperial = imperialUnits();
-            long altitude = !hasData ? 0L : Math.round(snapshot.altitudeMeters
-                    * (imperial ? 3.280840d : 1d));
-            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.ALTITUDE);
-            String value = !hasData ? "" : variant == DashboardWidgetLayout.Variant.ALTERNATE
-                    ? String.valueOf(altitude) : variant == DashboardWidgetLayout.Variant.DETAILED
-                    ? altitude + "\n" + getResources().getString(imperial
-                            ? R.string.dashboard_altitude_unit_imperial
-                            : R.string.dashboard_altitude_unit)
-                    : getResources().getString(imperial
-                            ? R.string.dashboard_altitude_short_imperial
-                            : R.string.dashboard_altitude_short, altitude);
-            addLine(lines, DashboardWidgetLayout.Widget.ALTITUDE, hasData, value, Icon.ALTITUDE);
-        }
-        if (settings.showSessionTimer) {
-            String value = formatElapsed(snapshot.sessionElapsedMillis);
-            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.SESSION_TIMER);
-            if (variant == DashboardWidgetLayout.Variant.ALTERNATE) value = value.replace(":", "\n");
-            else if (variant == DashboardWidgetLayout.Variant.DETAILED) value = formatElapsedDetailed(snapshot.sessionElapsedMillis);
-            lines.add(new Line(DashboardWidgetLayout.Widget.SESSION_TIMER, value, false, Icon.TIMER));
-        }
-        if (settings.showActiveProfile && !snapshot.activeProfileName.isEmpty()) {
-            lines.add(new Line(DashboardWidgetLayout.Widget.ACTIVE_PROFILE,
-                    textVariant(DashboardWidgetLayout.Widget.ACTIVE_PROFILE, snapshot.activeProfileName),
-                    false, Icon.PROFILE));
-        }
-        if (settings.showCustomText && !settings.customText.isEmpty()) {
-            lines.add(new Line(DashboardWidgetLayout.Widget.CUSTOM_TEXT,
-                    textVariant(DashboardWidgetLayout.Widget.CUSTOM_TEXT, settings.customText),
-                    false, Icon.TEXT));
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.NETWORK)) {
-            addLine(lines, DashboardWidgetLayout.Widget.NETWORK,
-                    !snapshot.networkSummary.isEmpty(),
-                    textVariant(DashboardWidgetLayout.Widget.NETWORK, snapshot.networkSummary), Icon.NETWORK);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.MEMORY)) {
-            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.MEMORY);
-            String value = percentVariant(snapshot.memoryPercent, variant,
-                    getResources().getString(R.string.dashboard_variant_memory));
-            addLine(lines, DashboardWidgetLayout.Widget.MEMORY,
-                    snapshot.memoryPercent >= 0, value, Icon.MEMORY);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.STORAGE)) {
-            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.STORAGE);
-            String value = percentVariant(snapshot.storagePercentFree, variant,
-                    getResources().getString(R.string.dashboard_variant_storage_free));
-            addLine(lines, DashboardWidgetLayout.Widget.STORAGE,
-                    snapshot.storagePercentFree >= 0, value, Icon.STORAGE);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.NOTIFICATIONS)) {
-            // Nothing unread is the empty case here, not a missing reading.
-            int count = NotificationWidgetState.getCount();
-            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.NOTIFICATIONS);
-            // Capped at nine rather than ninety-nine: the compact form is
-            // there to hold its width on a 126 pixel panel, and a cap that
-            // only bit past a hundred unread never did.
-            String value = variant == DashboardWidgetLayout.Variant.ALTERNATE
-                    ? (count > 9 ? "9+" : String.valueOf(count))
-                    : variant == DashboardWidgetLayout.Variant.DETAILED
-                    ? count + "\n" + getResources().getString(R.string.dashboard_variant_notifications)
-                    : String.valueOf(count);
-            addLine(lines, DashboardWidgetLayout.Widget.NOTIFICATIONS,
-                    count > 0, value, Icon.NOTIFICATIONS);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(
-                getContext(), DashboardWidgetLayout.Widget.TIMER)) {
-            long duration = DashboardWidgetLayout.timerMinutes(getContext()) * 60_000L;
-            if (TimerWidgetState.finishIfElapsed(getContext(), duration)) {
-                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-            }
-            long shown = duration > 0
-                    ? Math.max(0L, duration - TimerWidgetState.elapsedMillis(getContext()))
-                    : TimerWidgetState.elapsedMillis(getContext());
-            String value = formatElapsed(shown);
-            DashboardWidgetLayout.Variant variant =
-                    variantOf(DashboardWidgetLayout.Widget.TIMER);
-            if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
-                // Stacked, the way the session timer's compact form reads.
-                value = value.replace(":", "\n");
-            } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
-                value = formatElapsedDetailed(shown);
-            }
-            // A stopped countdown at zero has finished; a stopped stopwatch at
-            // zero has not started. Both are worth a row, so this one is
-            // always drawn rather than dropping out when there is no reading.
-            addLine(lines, DashboardWidgetLayout.Widget.TIMER, true, value, Icon.TIMER);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(
-                getContext(), DashboardWidgetLayout.Widget.LAST_NOTIFICATION)) {
-            // Three ways to say the same arrival, from least to most told.
-            // ALTERNATE names only the app on purpose: the panel points away
-            // from its owner, and "Telegram" answers "is it worth picking the
-            // phone up" without putting the message in front of the room.
-            DashboardWidgetLayout.Variant variant =
-                    variantOf(DashboardWidgetLayout.Widget.LAST_NOTIFICATION);
-            String app = snapshot.notificationApp;
-            String title = snapshot.notificationTitle;
-            String text = snapshot.notificationText;
-            String value;
-            if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
-                value = app.isEmpty() ? title : app;
-            } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
-                String head = app.isEmpty() ? title
-                        : title.isEmpty() ? app : app + " · " + title;
-                value = text.isEmpty() ? head : head.isEmpty() ? text : head + "\n" + text;
-            } else {
-                value = title.isEmpty() ? app.isEmpty() ? text : app : title;
-            }
-            addLine(lines, DashboardWidgetLayout.Widget.LAST_NOTIFICATION,
-                    !value.isEmpty(), value, Icon.MESSAGE);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.CALENDAR)) {
-            boolean hasData = snapshot.calendarStartMillis != null;
-            String value = "";
-            if (hasData) {
-                value = new SimpleDateFormat(
-                        android.text.format.DateFormat.is24HourFormat(getContext())
-                                ? "HH:mm" : "h:mm",
-                        locale).format(new Date(snapshot.calendarStartMillis));
-                if (!snapshot.calendarTitle.isEmpty()) {
-                    value += "  " + snapshot.calendarTitle;
-                }
-                DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.CALENDAR);
-                if (variant == DashboardWidgetLayout.Variant.ALTERNATE
-                        && !snapshot.calendarTitle.isEmpty()) {
-                    value = snapshot.calendarTitle;
-                } else if (variant == DashboardWidgetLayout.Variant.DETAILED
-                        && !snapshot.calendarTitle.isEmpty()) {
-                    value = value.replace("  ", "\n");
-                }
-            }
-            addLine(lines, DashboardWidgetLayout.Widget.CALENDAR, hasData, value, Icon.CALENDAR);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.STEPS)) {
-            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.STEPS);
-            // Stacked on the thousands, which is what compact means
-            // everywhere else here - the battery's figure over its sign, the
-            // clock's hours over its minutes. Grouping the digits, as this
-            // did, made the compact form the widest of the three.
-            //
-            // The separator is whatever the locale groups with, so it is found
-            // by keeping the digits rather than by naming it. Not \D, which
-            // counts only nought to nine: Persian and Arabic number in their
-            // own digits, and the whole count came back as empty lines.
-            String value = variant == DashboardWidgetLayout.Variant.ALTERNATE
-                    ? String.format(locale, "%,d", snapshot.stepsToday)
-                            .replaceAll("[^\\p{N}]", "\n")
-                    : variant == DashboardWidgetLayout.Variant.DETAILED
-                    ? snapshot.stepsToday + "\n" + getResources().getString(R.string.dashboard_variant_steps)
-                    : String.valueOf(snapshot.stepsToday);
-            addLine(lines, DashboardWidgetLayout.Widget.STEPS,
-                    snapshot.stepsToday >= 0, value, Icon.STEPS);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.CHARGING)) {
-            addLine(lines, DashboardWidgetLayout.Widget.CHARGING, snapshot.charge != null,
-                    chargeVariant(snapshot.charge, locale), Icon.CHARGE);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.SUN)) {
-            SunTimes.Next sun = snapshot.sun;
-            addLine(lines, DashboardWidgetLayout.Widget.SUN, sun != null,
-                    sunVariant(sun, locale),
-                    sun == null || sun.sunriseNext ? Icon.SUNRISE : Icon.SUNSET);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.LEVEL)) {
-            LevelReading level = snapshot.level;
-            String value = "";
-            if (level != null) {
-                DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.LEVEL);
-                // Without a sign: the icon's line already leans the way to
-                // turn, and a minus sign costs width on a narrow panel.
-                float roll = Math.abs(level.rollDegrees);
-                value = variant == DashboardWidgetLayout.Variant.ALTERNATE
-                        ? String.format(locale, "%.1f°", roll)
-                        : Math.round(roll) + "°";
-                if (variant == DashboardWidgetLayout.Variant.DETAILED) {
-                    value += "\n" + getResources().getString(R.string.dashboard_level_tilt,
-                            Math.round(level.pitchDegrees));
-                }
-            }
-            addLine(lines, DashboardWidgetLayout.Widget.LEVEL, level != null, value, Icon.LEVEL);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.SOUND_MODE)) {
-            SoundModeReading sound = snapshot.sound;
-            // Ringing is the ordinary state and says nothing, so like the
-            // other widgets with nothing to report it drops out unless set to
-            // stay: the row is there to warn that a call will not be heard.
-            boolean worthShowing = sound != null
-                    && (sound.mode != SoundModeReading.Mode.SOUND
-                    || DashboardWidgetLayout.loadPresence(getContext(),
-                    DashboardWidgetLayout.Widget.SOUND_MODE)
-                    == DashboardWidgetLayout.Presence.ALWAYS);
-            addLine(lines, DashboardWidgetLayout.Widget.SOUND_MODE, worthShowing,
-                    soundVariant(sound), soundIcon(sound));
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.WORLD_CLOCK)) {
-            lines.add(new Line(DashboardWidgetLayout.Widget.WORLD_CLOCK,
-                    worldClockVariant(locale), false, Icon.GLOBE));
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.QR_CODE)) {
-            // Drawn as a picture by drawFullscreenQr; the text is only what
-            // a page too full to hold the code would show in its place.
-            lines.add(new Line(DashboardWidgetLayout.Widget.QR_CODE, "QR", false, Icon.NONE));
-        }
-        addSmallWidgetLines(lines, locale);
-        if (DashboardWidgetLayout.isExtraEnabled(
-                getContext(), DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER)) {
-            String value = weatherVariant(DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER);
-            addLine(lines, DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER,
-                    true, value.isEmpty() ? "—" : value, weatherIcon(snapshot.weatherCode));
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(
-                getContext(), DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA)) {
-            boolean hasMedia = !snapshot.mediaTitle.isEmpty() || !snapshot.mediaArtist.isEmpty();
-            addLine(lines, DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA, true,
-                    hasMedia ? mediaVariant(DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA) : "—",
-                    Icon.MEDIA);
         }
         DashboardWidgetLayout.sort(getContext(), lines);
         lines.removeIf(line -> !DashboardWidgetLayout.isVisible(getContext(), line.widget));
@@ -1689,12 +1374,6 @@ public final class RearDashboardView extends View {
         int to = Math.min(source.size(), from + base + (page < remainder ? 1 : 0));
         result.addAll(source.subList(from, to));
         return result;
-    }
-
-    private static String cardinalDirection(float degrees) {
-        String[] directions = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
-        int index = Math.round(degrees / 45f) % directions.length;
-        return directions[index];
     }
 
     private DashboardWidgetLayout.Variant variantOf(DashboardWidgetLayout.Widget widget) {
@@ -2475,436 +2154,28 @@ public final class RearDashboardView extends View {
         return imperialUnits() ? "°F" : "°C";
     }
 
-    /**
-     * The weather as a widget's variant asks for it.
-     *
-     * <p>Shared with the full-screen weather widget, which read no variant at
-     * all: all three of its choices drew the same line, while the row
-     * offering them said otherwise.
-     */
-    private String weatherVariant(DashboardWidgetLayout.Widget widget) {
-        String weather = weatherLine();
-        if (weather.isEmpty()) {
-            return weather;
-        }
-        DashboardWidgetLayout.Variant variant = variantOf(widget);
-        if (variant == DashboardWidgetLayout.Variant.ALTERNATE
-                && snapshot.weatherTemperatureCelsius != null) {
-            return inDegrees(snapshot.weatherTemperatureCelsius) + "\n" + degreeName();
-        }
-        if (variant == DashboardWidgetLayout.Variant.DETAILED
-                && !snapshot.weatherPlace.isEmpty()) {
-            return weather + "\n" + snapshot.weatherPlace;
-        }
-        return weather;
+    private String word(int id, Object... arguments) {
+        return getResources().getString(id, arguments);
     }
 
-    /**
-     * What is playing, as a widget's variant asks for it.
-     *
-     * <p>Shared with the full-screen media widget for the same reason. That
-     * one also showed the title and nothing else, so a station that names
-     * only its artist left it blank.
-     */
-    private String mediaVariant(DashboardWidgetLayout.Widget widget) {
-        String title = snapshot.mediaTitle;
-        String artist = snapshot.mediaArtist;
-        DashboardWidgetLayout.Variant variant = variantOf(widget);
-        if (variant == DashboardWidgetLayout.Variant.ALTERNATE && !artist.isEmpty()) {
-            return artist;
-        }
-        if (variant == DashboardWidgetLayout.Variant.DETAILED
-                && !title.isEmpty() && !artist.isEmpty()) {
-            return title + "\n" + artist;
-        }
-        return title.isEmpty() ? artist : title;
-    }
-
-    /** Visual alternatives for text whose content is supplied by the user or system. */
-    private String textVariant(DashboardWidgetLayout.Widget widget, String value) {
-        DashboardWidgetLayout.Variant variant = variantOf(widget);
-        if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
-            return value.toUpperCase(Locale.getDefault());
-        }
-        if (variant != DashboardWidgetLayout.Variant.DETAILED || value.indexOf(' ') < 0) {
-            return value;
-        }
-        int middle = value.length() / 2;
-        int before = value.lastIndexOf(' ', middle);
-        int after = value.indexOf(' ', middle);
-        int split = before < 0 ? after : after < 0 || middle - before <= after - middle
-                ? before : after;
-        return split > 0 ? value.substring(0, split) + "\n" + value.substring(split + 1) : value;
-    }
-
-    private static String percentVariant(int percent, DashboardWidgetLayout.Variant variant,
-            String detail) {
-        if (variant == DashboardWidgetLayout.Variant.ALTERNATE) return String.valueOf(percent);
-        if (variant == DashboardWidgetLayout.Variant.DETAILED) return percent + "%\n" + detail;
-        return percent + "%";
-    }
-
-    /**
-     * Power first, since it is what says whether the charger is a fast one,
-     * then how long is left. Compact stacks the two; detailed adds the current
-     * and when the battery will be full, as a time of day.
-     */
-    private String chargeVariant(@Nullable ChargeReading charge, Locale locale) {
-        if (charge == null) {
-            return "";
-        }
-        if (charge.full) {
-            return getResources().getString(R.string.dashboard_charge_full);
-        }
-        float watts = charge.powerMilliwatts / 1_000f;
-        String power = getResources().getString(R.string.dashboard_charge_watts,
-                watts < 10f ? String.format(locale, "%.1f", watts)
-                        : String.valueOf(Math.round(watts)));
-        boolean known = charge.fullInMillis > 0L;
-        String left = known ? formatDuration(charge.fullInMillis) : "";
-        DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.CHARGING);
-        if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
-            return known ? power + "\n" + left : power;
-        }
-        if (variant == DashboardWidgetLayout.Variant.DETAILED) {
-            String amps = getResources().getString(R.string.dashboard_charge_amps,
-                    String.format(locale, "%.1f", charge.currentMilliamps / 1_000f));
-            String head = power + " · " + amps;
-            return known ? head + "\n" + getResources().getString(R.string.dashboard_charge_full_at,
-                    formatTimeOfDay(snapshot.timestampMillis + charge.fullInMillis, locale))
-                    : head;
-        }
-        return known ? power + " · " + left : power;
-    }
-
-    /**
-     * The next sunrise or sunset, which the icon tells apart. Compact gives
-     * the day's pair, sunrise over sunset; detailed says how long until the
-     * next one.
-     */
-    private String sunVariant(@Nullable SunTimes.Next sun, Locale locale) {
-        if (sun == null) {
-            return "";
-        }
-        String next = formatTimeOfDay(sun.eventMillis(), locale);
-        DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.SUN);
-        if (variant == DashboardWidgetLayout.Variant.ALTERNATE
-                && sun.sunriseMillis != SunTimes.NONE && sun.sunsetMillis != SunTimes.NONE) {
-            return formatTimeOfDay(sun.sunriseMillis, locale) + "\n"
-                    + formatTimeOfDay(sun.sunsetMillis, locale);
-        }
-        if (variant == DashboardWidgetLayout.Variant.DETAILED) {
-            String wait = formatDuration(sun.eventMillis() - snapshot.timestampMillis);
-            return next + "\n" + getResources().getString(sun.sunriseNext
-                    ? R.string.dashboard_sun_sunrise_in
-                    : R.string.dashboard_sun_sunset_in, wait);
-        }
-        return next;
-    }
-
-    /**
-     * The mode in a word. Compact gives the ring volume while the phone
-     * rings, and the word otherwise, since the volume of a phone that will
-     * not ring says nothing; detailed gives both.
-     */
-    private String soundVariant(@Nullable SoundModeReading sound) {
-        if (sound == null) {
-            return "";
-        }
-        int word;
-        switch (sound.mode) {
-            case VIBRATE: word = R.string.dashboard_sound_vibrate; break;
-            case SILENT: word = R.string.dashboard_sound_silent; break;
-            case DO_NOT_DISTURB: word = R.string.dashboard_sound_dnd; break;
-            default: word = R.string.dashboard_sound_on; break;
-        }
-        String name = getResources().getString(word);
-        DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.SOUND_MODE);
-        if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
-            return sound.mode == SoundModeReading.Mode.SOUND ? sound.volumePercent + "%" : name;
-        }
-        if (variant == DashboardWidgetLayout.Variant.DETAILED) {
-            return name + "\n" + getResources().getString(
-                    R.string.dashboard_sound_volume, sound.volumePercent);
-        }
-        return name;
-    }
-
-    private static Icon soundIcon(@Nullable SoundModeReading sound) {
-        if (sound == null) return Icon.SOUND_ON;
-        switch (sound.mode) {
-            case VIBRATE: return Icon.VIBRATE;
-            case SILENT: return Icon.SOUND_OFF;
-            case DO_NOT_DISTURB: return Icon.DO_NOT_DISTURB;
-            default: return Icon.SOUND_ON;
-        }
+    private boolean is24Hour() {
+        return android.text.format.DateFormat.is24HourFormat(getContext());
     }
 
     /** Zone ids to city names in the panel's language, which ICU looks up slowly. */
     private final Map<String, String> cityNames = new HashMap<>();
 
-    private String cityName(String zoneId, Locale locale) {
-        String key = locale.toLanguageTag() + "|" + zoneId;
-        String cached = cityNames.get(key);
-        if (cached != null) {
-            return cached;
-        }
-        String name = null;
-        try {
-            name = android.icu.text.TimeZoneNames.getInstance(locale)
-                    .getExemplarLocationName(zoneId);
-        } catch (RuntimeException ignored) {
-            // Falls back to the zone's own name below.
-        }
-        if (name == null || name.isEmpty()) {
-            name = WorldClock.fallbackName(zoneId);
-        }
-        cityNames.put(key, name);
-        return name;
-    }
-
-    /**
-     * The time there and where there is. Compact is the time alone; detailed
-     * puts the city on its own line with how far ahead or behind it is.
-     */
-    private String worldClockVariant(Locale locale) {
-        String zoneId = DashboardWidgetLayout.worldClockZone(getContext());
-        java.util.TimeZone zone = java.util.TimeZone.getTimeZone(zoneId);
-        SimpleDateFormat format = new SimpleDateFormat(
-                android.text.format.DateFormat.is24HourFormat(getContext()) ? "HH:mm" : "h:mm",
-                locale);
-        format.setTimeZone(zone);
-        String time = format.format(new Date(snapshot.timestampMillis));
-        String city = cityName(zoneId, locale);
-        DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.WORLD_CLOCK);
-        if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
-            return time;
-        }
-        if (variant == DashboardWidgetLayout.Variant.DETAILED) {
-            int minutes = (zone.getOffset(snapshot.timestampMillis)
-                    - java.util.TimeZone.getDefault().getOffset(snapshot.timestampMillis)) / 60_000;
-            return time + "\n" + getResources().getString(R.string.dashboard_world_clock_offset,
-                    city, WorldClock.differenceLabel(minutes));
-        }
-        return time + "  " + city;
-    }
-
-    /**
-     * The small widgets: UV, air, network speed, the moon, a countdown, how
-     * far through the day, and pressure. Each in three forms as the rest
-     * are - the reading, the bare figure, and the reading with a word.
-     */
-    private void addSmallWidgetLines(List<Line> lines, Locale locale) {
-        ExtraReadings extra = snapshot.extra;
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.UV_INDEX)) {
-            String value = "";
-            if (extra.uvIndex != null) {
-                String figure = String.valueOf(Math.round(extra.uvIndex));
-                DashboardWidgetLayout.Variant variant =
-                        variantOf(DashboardWidgetLayout.Widget.UV_INDEX);
-                String labelled = getResources().getString(R.string.dashboard_uv_value, figure);
-                value = variant == DashboardWidgetLayout.Variant.ALTERNATE ? figure
-                        : variant == DashboardWidgetLayout.Variant.DETAILED
-                        ? labelled + "\n" + getResources().getString(
-                                UV_BANDS[WidgetMath.uvBand(extra.uvIndex)])
-                        : labelled;
-            }
-            addLine(lines, DashboardWidgetLayout.Widget.UV_INDEX, extra.uvIndex != null,
-                    value, Icon.UV);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.AIR_QUALITY)) {
-            String value = "";
-            if (extra.airQuality != null) {
-                String figure = String.valueOf(extra.airQuality);
-                DashboardWidgetLayout.Variant variant =
-                        variantOf(DashboardWidgetLayout.Widget.AIR_QUALITY);
-                String labelled = getResources().getString(R.string.dashboard_air_value, figure);
-                value = variant == DashboardWidgetLayout.Variant.ALTERNATE ? figure
-                        : variant == DashboardWidgetLayout.Variant.DETAILED
-                        ? labelled + "\n" + getResources().getString(
-                                AIR_BANDS[WidgetMath.airBand(extra.airQuality)])
-                        : labelled;
-            }
-            addLine(lines, DashboardWidgetLayout.Widget.AIR_QUALITY, extra.airQuality != null,
-                    value, Icon.AIR);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.NETWORK_SPEED)) {
-            boolean hasData = extra.downBytesPerSecond >= 0L;
-            String value = "";
-            if (hasData) {
-                String down = android.text.format.Formatter.formatShortFileSize(
-                        getContext(), extra.downBytesPerSecond);
-                String up = android.text.format.Formatter.formatShortFileSize(
-                        getContext(), extra.upBytesPerSecond);
-                DashboardWidgetLayout.Variant variant =
-                        variantOf(DashboardWidgetLayout.Widget.NETWORK_SPEED);
-                value = variant == DashboardWidgetLayout.Variant.ALTERNATE
-                        ? "\u2193 " + down + "\n\u2191 " + up
-                        : variant == DashboardWidgetLayout.Variant.DETAILED
-                        ? "\u2193 " + perSecond(down) + "\n\u2191 " + perSecond(up)
-                        : "\u2193 " + perSecond(down);
-            }
-            addLine(lines, DashboardWidgetLayout.Widget.NETWORK_SPEED, hasData, value,
-                    Icon.NETWORK_SPEED);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.MOON)) {
-            double age = WidgetMath.moonAge(snapshot.timestampMillis);
-            String name = getResources().getString(MOON_PHASES[WidgetMath.moonPhase(age)]);
-            String lit = Math.round(WidgetMath.moonIllumination(age) * 100d) + "%";
-            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.MOON);
-            String value = variant == DashboardWidgetLayout.Variant.ALTERNATE ? lit
-                    : variant == DashboardWidgetLayout.Variant.DETAILED ? name + "\n" + lit
-                    : name;
-            lines.add(new Line(DashboardWidgetLayout.Widget.MOON, value, false, Icon.MOON));
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.COUNTDOWN)) {
-            long target = DashboardWidgetLayout.countdownDay(getContext());
-            String value = "";
-            if (target >= 0L) {
-                long days = WidgetMath.daysUntil(snapshot.timestampMillis,
-                        java.util.TimeZone.getDefault(), target);
-                String label = DashboardWidgetLayout.countdownLabel(getContext());
-                String count = days == 0L
-                        ? getResources().getString(R.string.dashboard_countdown_today)
-                        : days > 0L
-                        ? getResources().getString(R.string.dashboard_countdown_days, days)
-                        : getResources().getString(R.string.dashboard_countdown_ago, -days);
-                DashboardWidgetLayout.Variant variant =
-                        variantOf(DashboardWidgetLayout.Widget.COUNTDOWN);
-                if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
-                    value = days == 0L ? count : String.valueOf(Math.abs(days));
-                } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
-                    String when = label.isEmpty()
-                            ? java.text.DateFormat.getDateInstance(
-                                    java.text.DateFormat.MEDIUM, locale)
-                                    .format(new Date(target * 86_400_000L
-                                            - java.util.TimeZone.getDefault()
-                                            .getOffset(target * 86_400_000L)))
-                            : label;
-                    value = count + "\n" + when;
-                } else {
-                    value = label.isEmpty() ? count : label + " \u00b7 " + count;
-                }
-            }
-            addLine(lines, DashboardWidgetLayout.Widget.COUNTDOWN, target >= 0L, value,
-                    Icon.COUNTDOWN);
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.PROGRESS)) {
-            WidgetMath.Period period = DashboardWidgetLayout.progressPeriod(getContext());
-            long[] bounds = WidgetMath.periodBounds(snapshot.timestampMillis, period,
-                    java.util.Calendar.getInstance(locale));
-            progressFraction = (float) WidgetMath.fraction(snapshot.timestampMillis, bounds);
-            String percent = Math.round(progressFraction * 100f) + "%";
-            DashboardWidgetLayout.Variant variant = variantOf(DashboardWidgetLayout.Widget.PROGRESS);
-            String value;
-            if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
-                value = percent;
-            } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
-                long left = Math.max(0L, bounds[1] - snapshot.timestampMillis);
-                // Days past two of them: "2345 h" says nothing about a year.
-                String remaining = left > 48L * 3_600_000L
-                        ? getResources().getString(R.string.dashboard_countdown_days,
-                                (left + 86_399_999L) / 86_400_000L)
-                        : formatDuration(left);
-                value = percent + "\n" + getResources().getString(
-                        R.string.dashboard_progress_left, remaining);
-            } else {
-                value = getResources().getString(PERIOD_NAMES[period.ordinal()]) + " " + percent;
-            }
-            lines.add(new Line(DashboardWidgetLayout.Widget.PROGRESS, value, false, Icon.PROGRESS));
-        }
-        if (DashboardWidgetLayout.isExtraEnabled(getContext(), DashboardWidgetLayout.Widget.PRESSURE)) {
-            String value = "";
-            if (extra.pressureHpa != null) {
-                float hpa = extra.pressureHpa;
-                String main = imperialUnits()
-                        ? getResources().getString(R.string.dashboard_pressure_inhg,
-                                String.format(locale, "%.2f", WidgetMath.toInchesOfMercury(hpa)))
-                        : getResources().getString(R.string.dashboard_pressure_hpa,
-                                Math.round(hpa));
-                DashboardWidgetLayout.Variant variant =
-                        variantOf(DashboardWidgetLayout.Widget.PRESSURE);
-                if (variant == DashboardWidgetLayout.Variant.ALTERNATE) {
-                    value = getResources().getString(R.string.dashboard_pressure_mmhg,
-                            Math.round(WidgetMath.toMillimetresOfMercury(hpa)));
-                } else if (variant == DashboardWidgetLayout.Variant.DETAILED) {
-                    value = main + "\n" + getResources().getString(extra.pressureTrend > 0
-                            ? R.string.dashboard_pressure_rising : extra.pressureTrend < 0
-                            ? R.string.dashboard_pressure_falling
-                            : R.string.dashboard_pressure_steady);
-                } else {
-                    value = main;
-                }
-            }
-            addLine(lines, DashboardWidgetLayout.Widget.PRESSURE, extra.pressureHpa != null,
-                    value, Icon.PRESSURE);
-        }
-    }
-
-    private String perSecond(String size) {
-        return getResources().getString(R.string.dashboard_per_second, size);
-    }
-
-    private static final int[] UV_BANDS = {R.string.dashboard_uv_low,
-            R.string.dashboard_uv_moderate, R.string.dashboard_uv_high,
-            R.string.dashboard_uv_very_high, R.string.dashboard_uv_extreme};
-    private static final int[] AIR_BANDS = {R.string.dashboard_air_good,
-            R.string.dashboard_air_fair, R.string.dashboard_air_moderate,
-            R.string.dashboard_air_poor, R.string.dashboard_air_very_poor,
-            R.string.dashboard_air_extremely_poor};
-    private static final int[] MOON_PHASES = {R.string.dashboard_moon_new,
-            R.string.dashboard_moon_waxing_crescent, R.string.dashboard_moon_first_quarter,
-            R.string.dashboard_moon_waxing_gibbous, R.string.dashboard_moon_full,
-            R.string.dashboard_moon_waning_gibbous, R.string.dashboard_moon_last_quarter,
-            R.string.dashboard_moon_waning_crescent};
-    private static final int[] PERIOD_NAMES = {R.string.dashboard_progress_day,
-            R.string.dashboard_progress_week, R.string.dashboard_progress_month,
-            R.string.dashboard_progress_year};
-
     /** How far through its period the progress widget is, for its icon to fill. */
     private float progressFraction;
 
-    private String formatTimeOfDay(long millis, Locale locale) {
-        String pattern = android.text.format.DateFormat.is24HourFormat(getContext())
-                ? "HH:mm" : "h:mm";
-        return new SimpleDateFormat(pattern, locale).format(new Date(millis));
-    }
-
-    /**
-     * A length of time in words, "18 h 13 min". Not "18:13", which read as a
-     * time of day beside the clock. Rounded up, so the last minute reads
-     * 1 min and not nothing.
-     */
-    private String formatDuration(long millis) {
-        long minutes = Math.max(0L, (millis + 59_999L) / 60_000L);
-        return minutes >= 60L
-                ? getResources().getString(R.string.dashboard_duration_hours,
-                        minutes / 60L, minutes % 60L)
-                : getResources().getString(R.string.dashboard_duration_minutes, minutes);
-    }
-
-    private static String formatElapsed(long elapsedMillis) {
-        long totalSeconds = Math.max(0L, elapsedMillis / 1_000L);
-        long hours = totalSeconds / 3_600L;
-        long minutes = (totalSeconds % 3_600L) / 60L;
-        long seconds = totalSeconds % 60L;
-        return hours > 0
-                ? String.format(Locale.ROOT, "%d:%02d:%02d", hours, minutes, seconds)
-                : String.format(Locale.ROOT, "%02d:%02d", minutes, seconds);
-    }
-
-    private static String formatElapsedDetailed(long elapsedMillis) {
-        long totalSeconds = Math.max(0L, elapsedMillis / 1_000L);
-        return String.format(Locale.ROOT, "%d:%02d:%02d", totalSeconds / 3_600L,
-                (totalSeconds % 3_600L) / 60L, totalSeconds % 60L);
-    }
-
     private String weatherLine() {
         if (snapshot.weatherTemperatureCelsius != null && snapshot.weatherCode != null) {
-            return getResources().getString(
+            String reading = getResources().getString(
                     R.string.dashboard_weather_short,
                     inDegrees(snapshot.weatherTemperatureCelsius)
             );
+            // A tilde for a reading the fetch has failed to renew for a while.
+            return snapshot.extra.weatherStale ? "~" + reading : reading;
         }
         if (snapshot.weatherLoading) {
             return "…";
@@ -2912,30 +2183,8 @@ public final class RearDashboardView extends View {
         return "—";
     }
 
-    private static Icon weatherIcon(@Nullable Integer codeValue) {
-        if (codeValue == null) {
-            return Icon.WEATHER_CLOUD;
-        }
-        int code = codeValue;
-        if (code == 0) {
-            return Icon.WEATHER_CLEAR;
-        }
-        if (code <= 3) {
-            return Icon.WEATHER_CLOUD;
-        }
-        if (code == 45 || code == 48) {
-            return Icon.WEATHER_FOG;
-        }
-        if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
-            return Icon.WEATHER_RAIN;
-        }
-        if ((code >= 71 && code <= 77) || code == 85 || code == 86) {
-            return Icon.WEATHER_SNOW;
-        }
-        if (code >= 95) {
-            return Icon.WEATHER_STORM;
-        }
-        return Icon.WEATHER_CLOUD;
+    private static WidgetIcon weatherIcon(@Nullable Integer codeValue) {
+        return WidgetIcon.forWeather(codeValue);
     }
 
     /**
@@ -3126,7 +2375,7 @@ public final class RearDashboardView extends View {
     private float measuredWidth(Line line, float clockSize, float normalSize) {
         textPaint.setTextSize((line.primary ? clockSize : normalSize) * line.scale);
         textPaint.setFakeBoldText(line.primary);
-        float icon = line.icon == Icon.NONE ? 0f
+        float icon = line.icon == WidgetIcon.NONE ? 0f
                 : textPaint.getTextSize() * (ICON_BOX + ICON_GAP);
         if (line.text.indexOf('\n') >= 0) {
             textPaint.setTextSize(textPaint.getTextSize() * 0.58f);
@@ -3456,8 +2705,8 @@ public final class RearDashboardView extends View {
         // the text is stacked or shrunk to fit, so every widget of a size has
         // the same icon box and its value starts the same distance along.
         float nominal = textPaint.getTextSize();
-        float iconSize = line.icon == Icon.NONE ? 0f : nominal * ICON_BOX;
-        float gap = line.icon == Icon.NONE ? 0f : nominal * ICON_GAP;
+        float iconSize = line.icon == WidgetIcon.NONE ? 0f : nominal * ICON_BOX;
+        float gap = line.icon == WidgetIcon.NONE ? 0f : nominal * ICON_GAP;
         boolean multiline = line.text.indexOf('\n') >= 0;
         if (multiline) textPaint.setTextSize(textPaint.getTextSize() * 0.58f);
         fitTextToWidth(line, width - iconSize - gap);
@@ -3493,7 +2742,7 @@ public final class RearDashboardView extends View {
         // box, which sits lower than the digits it holds.
         textPaint.getTextBounds("0", 0, 1, inkBounds);
         float figureMiddle = baseline + (inkBounds.top + inkBounds.bottom) / 2f;
-        if (line.icon != Icon.NONE) {
+        if (line.icon != WidgetIcon.NONE) {
             float centerY = figureMiddle;
             drawIcon(canvas, line.icon, new RectF(
                     startX,
@@ -3539,7 +2788,7 @@ public final class RearDashboardView extends View {
             inkTop = Math.min(inkTop, partBaseline + inkBounds.top);
             inkBottom = Math.max(inkBottom, partBaseline + inkBounds.bottom);
         }
-        if (line.icon != Icon.NONE) {
+        if (line.icon != WidgetIcon.NONE) {
             float iconCentreY = figureMiddle;
             inkTop = Math.min(inkTop, iconCentreY - iconSize / 2f);
             inkBottom = Math.max(inkBottom, iconCentreY + iconSize / 2f);
@@ -3643,8 +2892,8 @@ public final class RearDashboardView extends View {
      * drawn into a bitmap and its ink found - and then drawn into whatever
      * box makes that ink fill {@link #ICON_FILL} of the one asked for.
      */
-    private void drawIcon(Canvas canvas, Icon icon, RectF bounds) {
-        if (icon == Icon.NONE || bounds.width() <= 0f || bounds.height() <= 0f) {
+    private void drawIcon(Canvas canvas, WidgetIcon icon, RectF bounds) {
+        if (icon == WidgetIcon.NONE || bounds.width() <= 0f || bounds.height() <= 0f) {
             return;
         }
         RectF ink = inkOf(icon);
@@ -3667,7 +2916,7 @@ public final class RearDashboardView extends View {
      * matters, into the middle of a canvas twice as large, since a few icons
      * - the network arcs, the stopwatch crown - reach past their box.
      */
-    private RectF inkOf(Icon icon) {
+    private RectF inkOf(WidgetIcon icon) {
         synchronized (ICON_INK) {
             RectF cached = ICON_INK.get(icon);
             if (cached != null) {
@@ -3711,7 +2960,7 @@ public final class RearDashboardView extends View {
     }
 
     /** One icon's drawing, inside {@code bounds}, at a given line weight. */
-    private void drawIconShape(Canvas canvas, Icon icon, RectF bounds, float strokeWidth) {
+    private void drawIconShape(Canvas canvas, WidgetIcon icon, RectF bounds, float strokeWidth) {
         iconPaint.setStrokeWidth(strokeWidth);
         iconPaint.setStyle(Paint.Style.STROKE);
         // The geometry keeps its own proportions whatever the line weight.
@@ -3721,7 +2970,7 @@ public final class RearDashboardView extends View {
         switch (icon) {
             case BATTERY:
             case BATTERY_CHARGING:
-                drawBatteryIcon(canvas, body, icon == Icon.BATTERY_CHARGING);
+                drawBatteryIcon(canvas, body, icon == WidgetIcon.BATTERY_CHARGING);
                 break;
             case TEMPERATURE:
                 float cx = body.centerX();
@@ -3868,14 +3117,14 @@ public final class RearDashboardView extends View {
                 break;
             case SUNRISE:
             case SUNSET:
-                drawHorizonSun(canvas, body, icon == Icon.SUNRISE);
+                drawHorizonSun(canvas, body, icon == WidgetIcon.SUNRISE);
                 break;
             case LEVEL:
                 drawLevel(canvas, body);
                 break;
             case SOUND_ON:
             case SOUND_OFF:
-                drawSpeaker(canvas, body, icon == Icon.SOUND_ON);
+                drawSpeaker(canvas, body, icon == WidgetIcon.SOUND_ON);
                 break;
             case VIBRATE:
                 // A phone with a buzz either side.
@@ -4322,7 +3571,7 @@ public final class RearDashboardView extends View {
         final DashboardWidgetLayout.Widget widget;
         final String text;
         final boolean primary;
-        final Icon icon;
+        final WidgetIcon icon;
         final float scale;
         final DashboardWidgetLayout.Position position;
         final DashboardWidgetLayout.Style style;
@@ -4339,12 +3588,12 @@ public final class RearDashboardView extends View {
          */
         final RectF bounds = new RectF();
 
-        Line(DashboardWidgetLayout.Widget widget, String text, boolean primary, Icon icon) {
+        Line(DashboardWidgetLayout.Widget widget, String text, boolean primary, WidgetIcon icon) {
             this.widget = widget;
             this.text = text;
             this.primary = primary;
             this.icon = DashboardWidgetLayout.isIconHidden(getContext(), widget)
-                    ? Icon.NONE : icon;
+                    ? WidgetIcon.NONE : icon;
             this.scale = DashboardWidgetLayout.scale(getContext(), widget);
             this.position = DashboardWidgetLayout.loadPosition(getContext(), widget);
             this.style = DashboardWidgetLayout.loadStyle(getContext(), widget);
@@ -4361,30 +3610,6 @@ public final class RearDashboardView extends View {
         RIGHT
     }
 
-    private enum Icon {
-        NONE,
-        BATTERY,
-        BATTERY_CHARGING,
-        TEMPERATURE,
-        WEATHER_CLEAR,
-        WEATHER_CLOUD,
-        WEATHER_FOG,
-        WEATHER_RAIN,
-        WEATHER_SNOW,
-        WEATHER_STORM,
-        ALARM,
-        MEDIA,
-        COMPASS,
-        SPEED,
-        ALTITUDE,
-        TIMER,
-        PROFILE,
-        TEXT
-        ,NETWORK, MEMORY, STORAGE, NOTIFICATIONS, MESSAGE, CALENDAR, STEPS
-        ,CHARGE, SUNRISE, SUNSET, LEVEL
-        ,SOUND_ON, VIBRATE, SOUND_OFF, DO_NOT_DISTURB, GLOBE
-        ,UV, AIR, NETWORK_SPEED, MOON, COUNTDOWN, PROGRESS, PRESSURE
-    }
 
     private static final class Palette {
         final int text;

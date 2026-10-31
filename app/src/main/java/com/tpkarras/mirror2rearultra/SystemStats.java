@@ -48,6 +48,12 @@ final class SystemStats {
         } else {
             network = context.getString(R.string.dashboard_network_connected);
         }
+        // Joined to a network that reaches nowhere: a captive portal or a dead
+        // router, which "Wi-Fi" alone reported as if all were well.
+        if (capabilities != null && !capabilities.hasCapability(
+                NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
+            network += " !";
+        }
 
         int memory = -1;
         ActivityManager manager = context.getSystemService(ActivityManager.class);

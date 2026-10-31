@@ -3,6 +3,7 @@ package com.tpkarras.mirror2rearultra;
 import android.Manifest;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
+import android.net.ConnectivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,12 +38,14 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.Set;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 final class RearDashboardController implements
@@ -54,17 +57,20 @@ final class RearDashboardController implements
         void onDashboardDataChanged(RearDashboardSnapshot snapshot);
     }
 
-    private static final long CLOCK_REFRESH_MILLIS = 1_000L;
     private static final long WEATHER_REFRESH_MILLIS = 30 * 60_000L;
+    /** First retry after a failed fetch; doubles per failure up to the normal period. */
+    private static final long WEATHER_RETRY_MILLIS = 2 * 60_000L;
+    /** A reading older than this is shown as approximate: the fetch keeps failing. */
+    private static final long WEATHER_STALE_MILLIS = 90 * 60_000L;
     private static final int MAX_RESPONSE_BYTES = 256 * 1024;
     /**
      * How often the charging widget reads the current. The battery broadcast
      * only comes when the level or the temperature moves, which on a slow
      * charger is minutes apart.
      */
-    private static final long CHARGE_REFRESH_MILLIS = 3_000L;
+    private static final long CHARGE_REFRESH_MILLIS = WidgetSpecs.CHARGE_TICK_MILLIS;
     /** The network speed is a rate, so it is sampled at a steady pace. */
-    private static final long TRAFFIC_REFRESH_MILLIS = 2_000L;
+    private static final long TRAFFIC_REFRESH_MILLIS = WidgetSpecs.TRAFFIC_TICK_MILLIS;
     /**
      * The level redraws at most this often. The sensor reports far faster,
      * and every report redraws the whole panel.
@@ -102,17 +108,11 @@ final class RearDashboardController implements
                 return;
             }
             publish();
-            // A running timer needs the second hand as much as the session
-            // timer does; without this it would step in half-minutes.
-            boolean needsSeconds = settings.showSessionTimer
-                    || TimerWidgetState.isRunning(context);
-            boolean readsCharger = charging && DashboardWidgetLayout.isExtraEnabled(
-                    context, DashboardWidgetLayout.Widget.CHARGING);
-            boolean readsTraffic = DashboardWidgetLayout.isExtraEnabled(
-                    context, DashboardWidgetLayout.Widget.NETWORK_SPEED);
-            mainHandler.postDelayed(this, needsSeconds ? CLOCK_REFRESH_MILLIS
-                    : readsTraffic ? TRAFFIC_REFRESH_MILLIS
-                    : readsCharger ? CHARGE_REFRESH_MILLIS : 30_000L);
+            // Each widget that is on says how soon it wants a frame - a
+            // running timer needs the second hand as much as the session
+            // timer does - and the panel ticks at the shortest.
+            mainHandler.postDelayed(this,
+                    WidgetSpecs.tickMillis(context, settings, charging, 30_000L));
         }
     };
 
@@ -146,7 +146,14 @@ final class RearDashboardController implements
     private Integer weatherTemperatureCelsius;
     private Integer weatherCode;
     private long weatherUpdatedAt;
+    /** When a fetch last succeeded, as opposed to merely finished; 0 before the first. */
+    private long weatherSucceededAt;
+    private int weatherFailures;
+    private final Runnable weatherRefresh = () -> refreshWeatherIfNeeded(true);
     private boolean weatherLoading;
+    private ConnectivityManager.NetworkCallback networkCallback;
+    private float smoothedDown = -1f;
+    private float smoothedUp = -1f;
     private Float headingDegrees;
     private Float speedMetersPerSecond;
     private Double altitudeMeters;
@@ -248,6 +255,7 @@ final class RearDashboardController implements
             // Receiver was already removed by the system.
         }
         listenForSound(false);
+        listenForNetwork(false);
         weatherExecutor.shutdownNow();
     }
 
@@ -325,6 +333,64 @@ final class RearDashboardController implements
         readSound();
     }
 
+    /**
+     * Redraws the network row when the connection changes. It was read every
+     * thirty seconds, so leaving the Wi-Fi showed the old name for half a
+     * minute.
+     */
+    private void listenForNetwork(boolean listen) {
+        ConnectivityManager connectivity = context.getSystemService(ConnectivityManager.class);
+        if (connectivity == null) {
+            return;
+        }
+        if (!listen) {
+            if (networkCallback != null) {
+                try {
+                    connectivity.unregisterNetworkCallback(networkCallback);
+                } catch (IllegalArgumentException alreadyGone) {
+                    // Not registered any more.
+                }
+                networkCallback = null;
+            }
+            return;
+        }
+        if (networkCallback != null) {
+            return;
+        }
+        networkCallback = new ConnectivityManager.NetworkCallback() {
+            private void changed() {
+                mainHandler.post(() -> {
+                    if (!started) {
+                        return;
+                    }
+                    systemStatsUpdatedAt = 0L;
+                    publish();
+                });
+            }
+
+            @Override
+            public void onAvailable(@NonNull android.net.Network network) {
+                changed();
+            }
+
+            @Override
+            public void onLost(@NonNull android.net.Network network) {
+                changed();
+            }
+
+            @Override
+            public void onCapabilitiesChanged(@NonNull android.net.Network network,
+                    @NonNull android.net.NetworkCapabilities capabilities) {
+                changed();
+            }
+        };
+        try {
+            connectivity.registerDefaultNetworkCallback(networkCallback);
+        } catch (RuntimeException unavailable) {
+            networkCallback = null;
+        }
+    }
+
     private void readSound() {
         AudioManager audio = context.getSystemService(AudioManager.class);
         NotificationManager notifications = context.getSystemService(NotificationManager.class);
@@ -343,17 +409,18 @@ final class RearDashboardController implements
         if (!started) {
             return;
         }
-        listenForSound(DashboardWidgetLayout.isExtraEnabled(
-                context, DashboardWidgetLayout.Widget.SOUND_MODE));
+        Set<WidgetSpec.Source> needs = WidgetSpecs.sources(context, settings);
+        listenForSound(needs.contains(WidgetSpec.Source.SOUND));
+        listenForNetwork(needs.contains(WidgetSpec.Source.CONNECTIVITY));
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
-            if (settings.showCompass) {
+            if (needs.contains(WidgetSpec.Source.HEADING)) {
                 Sensor rotation = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
                 if (rotation != null) {
                     sensorManager.registerListener(this, rotation, SensorManager.SENSOR_DELAY_NORMAL);
                 }
             }
-            if (DashboardWidgetLayout.isExtraEnabled(context, DashboardWidgetLayout.Widget.LEVEL)) {
+            if (needs.contains(WidgetSpec.Source.GRAVITY)) {
                 // Gravity alone, with the hand's shake already taken out;
                 // the raw accelerometer where a phone has no such sensor.
                 Sensor down = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
@@ -367,8 +434,7 @@ final class RearDashboardController implements
                 gravity = null;
                 levelReading = null;
             }
-            if (DashboardWidgetLayout.isExtraEnabled(
-                    context, DashboardWidgetLayout.Widget.PRESSURE)) {
+            if (needs.contains(WidgetSpec.Source.BAROMETER)) {
                 Sensor barometer = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
                 if (barometer != null) {
                     sensorManager.registerListener(
@@ -377,8 +443,7 @@ final class RearDashboardController implements
             } else {
                 pressureHpa = null;
             }
-            if (DashboardWidgetLayout.isExtraEnabled(context, DashboardWidgetLayout.Widget.STEPS)
-                    && hasActivityPermission()) {
+            if (needs.contains(WidgetSpec.Source.STEPS) && hasActivityPermission()) {
                 Sensor steps = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
                 if (steps != null) sensorManager.registerListener(
                         this, steps, SensorManager.SENSOR_DELAY_NORMAL);
@@ -386,7 +451,7 @@ final class RearDashboardController implements
         }
         if (locationManager != null) {
             locationManager.removeUpdates(this);
-            if ((settings.showSpeed || settings.showAltitude) && hasLocationPermission()) {
+            if (needs.contains(WidgetSpec.Source.LOCATION) && hasLocationPermission()) {
                 try {
                     locationManager.requestLocationUpdates(
                             LocationManager.GPS_PROVIDER,
@@ -510,6 +575,8 @@ final class RearDashboardController implements
             lastRxBytes = -1L;
             downBytesPerSecond = -1L;
             upBytesPerSecond = -1L;
+            smoothedDown = -1f;
+            smoothedUp = -1f;
             return;
         }
         long now = SystemClock.elapsedRealtime();
@@ -525,8 +592,14 @@ final class RearDashboardController implements
         }
         if (lastRxBytes >= 0L && now > trafficSampledAt) {
             long elapsed = now - trafficSampledAt;
-            downBytesPerSecond = Math.max(0L, (rx - lastRxBytes) * 1_000L / elapsed);
-            upBytesPerSecond = Math.max(0L, (tx - lastTxBytes) * 1_000L / elapsed);
+            // Averaged with the last sample: a transfer arrives in bursts, and
+            // the raw figure jumped between megabytes and nothing every two seconds.
+            float down = Math.max(0L, (rx - lastRxBytes) * 1_000L / elapsed);
+            float up = Math.max(0L, (tx - lastTxBytes) * 1_000L / elapsed);
+            smoothedDown = smoothedDown < 0f ? down : smoothedDown * 0.5f + down * 0.5f;
+            smoothedUp = smoothedUp < 0f ? up : smoothedUp * 0.5f + up * 0.5f;
+            downBytesPerSecond = Math.round(smoothedDown);
+            upBytesPerSecond = Math.round(smoothedUp);
         }
         lastRxBytes = rx;
         lastTxBytes = tx;
@@ -579,15 +652,9 @@ final class RearDashboardController implements
 
     private void refreshWeatherIfNeeded(boolean force) {
         String city = settings.weatherCity;
-        boolean weatherEnabled = settings.showWeather || DashboardWidgetLayout.isExtraEnabled(
-                context, DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER)
-                || DashboardWidgetLayout.isExtraEnabled(
-                        context, DashboardWidgetLayout.Widget.SUN)
-                || DashboardWidgetLayout.isExtraEnabled(
-                        context, DashboardWidgetLayout.Widget.UV_INDEX)
-                || DashboardWidgetLayout.isExtraEnabled(
-                        context, DashboardWidgetLayout.Widget.AIR_QUALITY);
-        if (!started || !weatherEnabled || city.isEmpty() || weatherLoading) {
+        boolean weatherEnabled = WidgetSpecs.sources(context, settings)
+                .contains(WidgetSpec.Source.WEATHER);
+        if (!started || !weatherEnabled || weatherLoading) {
             return;
         }
         long age = System.currentTimeMillis() - weatherUpdatedAt;
@@ -597,7 +664,12 @@ final class RearDashboardController implements
         weatherLoading = true;
         weatherRequestCity = city;
         publish();
-        weatherExecutor.execute(() -> loadWeather(city));
+        try {
+            weatherExecutor.execute(() -> loadWeather(city));
+        } catch (java.util.concurrent.RejectedExecutionException stopped) {
+            // stop() has shut the executor down; nothing is waiting on the answer.
+            weatherLoading = false;
+        }
     }
 
     private void loadWeather(String city) {
@@ -614,7 +686,10 @@ final class RearDashboardController implements
             }
             weatherLoading = false;
             weatherUpdatedAt = System.currentTimeMillis();
+            long delay = WEATHER_REFRESH_MILLIS;
             if (finalResult != null) {
+                weatherFailures = 0;
+                weatherSucceededAt = weatherUpdatedAt;
                 weatherPlace = finalResult.place;
                 weatherTemperatureCelsius = finalResult.temperatureCelsius;
                 weatherCode = finalResult.weatherCode;
@@ -624,31 +699,82 @@ final class RearDashboardController implements
                 WeatherForecastState.setSun(finalResult.sunrises, finalResult.sunsets);
                 uvIndex = finalResult.uvIndex;
                 airQuality = finalResult.airQuality;
+            } else {
+                // Half an hour of an old reading is too long to wait after a
+                // dropped connection; try again soon, backing off while the
+                // service stays out of reach.
+                weatherFailures++;
+                delay = Math.min(WEATHER_REFRESH_MILLIS,
+                        WEATHER_RETRY_MILLIS << Math.min(weatherFailures - 1, 4));
             }
             publish();
-            mainHandler.postDelayed(() -> refreshWeatherIfNeeded(false), WEATHER_REFRESH_MILLIS);
+            mainHandler.removeCallbacks(weatherRefresh);
+            mainHandler.postDelayed(weatherRefresh, delay);
         });
     }
 
-    private WeatherResult requestWeather(String city) throws IOException {
-        String encodedCity = URLEncoder.encode(city, StandardCharsets.UTF_8.name());
-        String language = Locale.getDefault().getLanguage();
-        JSONObject geocoding = requestJson(
-                "https://geocoding-api.open-meteo.com/v1/search?name=" + encodedCity
-                        + "&count=1&language=" + URLEncoder.encode(language, "UTF-8")
-                        + "&format=json"
-        );
+    /** Where the phone last was, or null when it has never said. */
+    @Nullable
+    private double[] devicePlace() {
+        QuietHours.refreshPlaceFromDevice(context);
+        return QuietHours.place(context);
+    }
+
+    /** The cached place's coordinates, or null for an entry that does not read. */
+    private static double[] parseCoordinates(String[] cached) {
         try {
-            JSONArray results = geocoding.optJSONArray("results");
-            if (results == null || results.length() == 0) {
-                throw new IOException("City not found");
+            return new double[]{Double.parseDouble(cached[0]), Double.parseDouble(cached[1])};
+        } catch (NumberFormatException damaged) {
+            return null;
+        }
+    }
+
+    private WeatherResult requestWeather(String city) throws IOException {
+        String language = Locale.getDefault().getLanguage();
+        String cacheKey = language + "|" + city;
+        android.content.SharedPreferences placeCache = context.getSharedPreferences(
+                "dashboard_weather_place", Context.MODE_PRIVATE);
+        // The city does not move: asked once per city and language, not on
+        // every refresh.
+        String[] cached = placeCache.getString(cacheKey, "").split(";", 3);
+        try {
+            double latitude;
+            double longitude;
+            String displayName;
+            // No city named: the weather where the phone is, by the last
+            // position it knew. It used to leave every weather widget empty
+            // until a city was typed in, with nothing to say why.
+            double[] known = city.isEmpty() ? devicePlace()
+                    : cached.length == 3 ? parseCoordinates(cached) : null;
+            if (city.isEmpty() && known == null) {
+                throw new IOException("No city and no known position");
             }
-            JSONObject place = results.getJSONObject(0);
-            double latitude = place.getDouble("latitude");
-            double longitude = place.getDouble("longitude");
-            // Where night falls for the quiet hours, if the phone will not say.
-            QuietHours.offerWeatherPlace(context, latitude, longitude);
-            String displayName = place.optString("name", city);
+            if (known != null) {
+                latitude = known[0];
+                longitude = known[1];
+                displayName = city.isEmpty() ? "" : cached[2];
+            } else {
+                String encodedCity = URLEncoder.encode(city, StandardCharsets.UTF_8.name());
+                JSONObject geocoding = requestJson(
+                        "https://geocoding-api.open-meteo.com/v1/search?name=" + encodedCity
+                                + "&count=1&language=" + URLEncoder.encode(language, "UTF-8")
+                                + "&format=json"
+                );
+                JSONArray results = geocoding.optJSONArray("results");
+                if (results == null || results.length() == 0) {
+                    throw new IOException("City not found");
+                }
+                JSONObject place = results.getJSONObject(0);
+                latitude = place.getDouble("latitude");
+                longitude = place.getDouble("longitude");
+                displayName = place.optString("name", city);
+                placeCache.edit().putString(cacheKey,
+                        latitude + ";" + longitude + ";" + displayName).apply();
+            }
+            if (!city.isEmpty()) {
+                // Where night falls for the quiet hours, if the phone will not say.
+                QuietHours.offerWeatherPlace(context, latitude, longitude);
+            }
 
             JSONObject forecast = requestJson(
                     "https://api.open-meteo.com/v1/forecast?latitude=" + latitude
@@ -804,7 +930,9 @@ final class RearDashboardController implements
                 levelReading,
                 soundReading,
                 new ExtraReadings(uvIndex, airQuality, downBytesPerSecond, upBytesPerSecond,
-                        pressureHpa, pressureTrend)
+                        pressureHpa, pressureTrend,
+                        weatherSucceededAt > 0L
+                                && now - weatherSucceededAt > WEATHER_STALE_MILLIS)
         ));
     }
 

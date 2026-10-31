@@ -20,10 +20,20 @@ final class ExtraReadings {
     @Nullable final Float pressureHpa;
     /** 1 rising, -1 falling, 0 steady or not yet known. */
     final int pressureTrend;
+    /** The weather has not been fetched for a long while, so its figures are old. */
+    final boolean weatherStale;
 
     ExtraReadings(@Nullable Float uvIndex, @Nullable Integer airQuality,
             long downBytesPerSecond, long upBytesPerSecond,
             @Nullable Float pressureHpa, int pressureTrend) {
+        this(uvIndex, airQuality, downBytesPerSecond, upBytesPerSecond, pressureHpa,
+                pressureTrend, false);
+    }
+
+    ExtraReadings(@Nullable Float uvIndex, @Nullable Integer airQuality,
+            long downBytesPerSecond, long upBytesPerSecond,
+            @Nullable Float pressureHpa, int pressureTrend, boolean weatherStale) {
+        this.weatherStale = weatherStale;
         this.uvIndex = uvIndex;
         this.airQuality = airQuality;
         this.downBytesPerSecond = downBytesPerSecond;
