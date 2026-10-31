@@ -3640,7 +3640,7 @@ public final class RearDashboardView extends View {
         Paint.Style previous = iconPaint.getStyle();
         int colour = iconPaint.getColor();
         iconPaint.setStyle(Paint.Style.FILL);
-        iconPaint.setColor(0xFFE53935);
+        iconPaint.setColor(ALERT_COLOUR);
         canvas.drawPath(north, iconPaint);
         iconPaint.setColor(colour);
         iconPaint.setStyle(previous);
