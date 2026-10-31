@@ -31,8 +31,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -79,6 +81,9 @@ public final class RearDashboardView extends View {
      */
     private final Map<DashboardWidgetLayout.Widget, RectF> previousBounds = new HashMap<>();
     private final List<Line> drawnLines = new ArrayList<>();
+    /** What each widget's line said in the snapshot before, to see what changed. */
+    @Nullable private Map<DashboardWidgetLayout.Widget, String> lastSignature;
+    private long lastVisual;
     /**
      * An icon's box beside its text, and the space between them, as parts of
      * the line's own size before any shrinking to fit.
@@ -247,7 +252,83 @@ public final class RearDashboardView extends View {
 
     void setSnapshot(RearDashboardSnapshot value) {
         snapshot = value;
-        invalidate();
+        redrawWhatChanged();
+    }
+
+    /**
+     * Redraws only what a new snapshot changed.
+     *
+     * <p>The panel may tick every second for a clock or a timer, and each
+     * snapshot used to repaint every widget on it. A snapshot that changes no
+     * line's text leaves the panel alone, and one that changes a few repaints
+     * the bands those lines sit in. Anything the lines do not show - a
+     * weather icon, a level's tilt - is folded into {@code visual}, and a
+     * change in it, in the widgets on screen, or a full-screen widget, falls
+     * back to repainting the lot.
+     */
+    private void redrawWhatChanged() {
+        Map<DashboardWidgetLayout.Widget, String> now = new LinkedHashMap<>();
+        for (Line line : createLines()) {
+            now.put(line.widget, line.text + '\u0000' + line.primary + '\u0000' + line.icon);
+        }
+        long visualNow = visualFingerprint(snapshot);
+        Map<DashboardWidgetLayout.Widget, String> before = lastSignature;
+        boolean sameVisual = visualNow == lastVisual;
+        lastSignature = now;
+        lastVisual = visualNow;
+        if (before == null || !sameVisual || !before.keySet().equals(now.keySet())
+                || containsFullscreenWidget(drawnLines)) {
+            invalidate();
+            return;
+        }
+        float reach = Math.abs(shiftX) + getResources().getDisplayMetrics().density * 12f;
+        RectF dirty = null;
+        for (Map.Entry<DashboardWidgetLayout.Widget, String> entry : now.entrySet()) {
+            if (entry.getValue().equals(before.get(entry.getKey()))) {
+                continue;
+            }
+            RectF bounds = null;
+            for (Line drawn : drawnLines) {
+                if (drawn.widget == entry.getKey()) {
+                    bounds = drawn.bounds;
+                    break;
+                }
+            }
+            if (bounds == null) {
+                // Not on the page in view: nothing on screen to repaint, unless
+                // the page has not been drawn yet.
+                if (drawnLines.isEmpty()) {
+                    invalidate();
+                    return;
+                }
+                continue;
+            }
+            if (bounds.isEmpty()) {
+                invalidate();
+                return;
+            }
+            // The whole band, since a longer text spreads sideways from its anchor.
+            RectF band = new RectF(0f, bounds.top - reach, getWidth(), bounds.bottom + reach);
+            if (dirty == null) {
+                dirty = band;
+            } else {
+                dirty.union(band);
+            }
+        }
+        if (dirty != null) {
+            invalidate((int) Math.floor(dirty.left), (int) Math.floor(dirty.top),
+                    (int) Math.ceil(dirty.right), (int) Math.ceil(dirty.bottom));
+        }
+    }
+
+    /** What a snapshot shows without its lines saying so. */
+    private static long visualFingerprint(RearDashboardSnapshot value) {
+        return Objects.hash(
+                value.batteryPercent,
+                value.weatherCode,
+                value.mediaPlaying,
+                value.level,
+                value.timestampMillis / (5 * 60_000L));
     }
 
     /**
