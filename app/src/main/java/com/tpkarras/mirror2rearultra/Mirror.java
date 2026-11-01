@@ -189,6 +189,10 @@ public class Mirror extends Activity implements
      */
     private boolean projectionOnDemand;
     private boolean projectionRequested;
+    /** A release was sent and its "gone" report has not come back yet. */
+    private boolean projectionReleasing;
+    private final Runnable clearRequestedAction = () -> projectionRequested = false;
+    private final Runnable retryProjectionAction = this::ensureProjectionSurface;
     private boolean projectionReleaseScheduled;
     private long projectionRetryAt;
     private final Handler projectionHandler = new Handler(Looper.getMainLooper());
@@ -451,9 +455,9 @@ public class Mirror extends Activity implements
     protected void onDestroy() {
         idleHandler.removeCallbacks(idleAction);
         idleHandler.removeCallbacks(idleFadeFrame);
-        projectionHandler.removeCallbacks(releaseProjectionAction);
+        projectionHandler.removeCallbacksAndMessages(null);
         if (projectionOnDemand) {
-            ForegroundService.setProjectionListener(null);
+            ForegroundService.clearProjectionListener(projectionListener);
         }
         MirrorState.removeListener(this);
         MirrorSettings.removeListener(this);
@@ -1816,10 +1820,12 @@ public class Mirror extends Activity implements
             return;
         }
         detachProjectionSurface();
+        projectionReleasing = true;
         try {
             startService(ForegroundService.createReleaseIntent(this));
         } catch (RuntimeException error) {
             Log.w(TAG, "Unable to release the projection", error);
+            projectionReleasing = false;
         }
         Log.i(TAG, "Projection released");
     }
@@ -1830,7 +1836,8 @@ public class Mirror extends Activity implements
         }
         projectionRequested = true;
         // A request that never answers must not block the next one for good.
-        projectionHandler.postDelayed(() -> projectionRequested = false, 10_000L);
+        projectionHandler.removeCallbacks(clearRequestedAction);
+        projectionHandler.postDelayed(clearRequestedAction, 10_000L);
         try {
             ActivityOptions options = ActivityOptions.makeBasic();
             options.setLaunchDisplayId(Display.DEFAULT_DISPLAY);
@@ -1845,7 +1852,9 @@ public class Mirror extends Activity implements
 
     private void onProjectionChanged(boolean live) {
         projectionRequested = false;
+        projectionHandler.removeCallbacks(clearRequestedAction);
         if (live) {
+            projectionReleasing = false;
             if (shouldShowProjection()) {
                 if (projectionSurface != null) {
                     attachProjectionSurface(projectionBufferWidth, projectionBufferHeight);
@@ -1859,10 +1868,20 @@ public class Mirror extends Activity implements
         }
         projectionReleaseScheduled = false;
         projectionHandler.removeCallbacks(releaseProjectionAction);
+        if (projectionReleasing) {
+            // The release asked for just now; if the image is wanted again
+            // meanwhile, that is a new request, not a refusal to wait out.
+            projectionReleasing = false;
+            if (shouldShowProjection()) {
+                ensureProjectionSurface();
+            }
+            return;
+        }
         if (shouldShowProjection()) {
             // Refused, or taken away: try again later rather than at once.
             projectionRetryAt = SystemClock.elapsedRealtime() + PROJECTION_RETRY_MILLIS;
-            projectionHandler.postDelayed(this::ensureProjectionSurface, PROJECTION_RETRY_MILLIS);
+            projectionHandler.removeCallbacks(retryProjectionAction);
+            projectionHandler.postDelayed(retryProjectionAction, PROJECTION_RETRY_MILLIS);
         }
     }
 

@@ -75,6 +75,13 @@ public class ForegroundService extends Service {
         projectionListener = listener;
     }
 
+    /** Removes the listener only if it is still the one given, not a newer owner's. */
+    static void clearProjectionListener(ProjectionListener listener) {
+        if (projectionListener == listener) {
+            projectionListener = null;
+        }
+    }
+
     /** A request for a capture came to nothing; lets the waiting side stop waiting. */
     static void reportProjectionDenied() {
         notifyProjection(false);
@@ -192,8 +199,8 @@ public class ForegroundService extends Service {
             if (!onDemand) {
                 MirrorState.setActive(this, false);
             }
+            notifyProjection(false);
         }
-        notifyProjection(false);
         super.onDestroy();
     }
 
