@@ -1,0 +1,45 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.tpkarras.rearunlock'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.tpkarras.rearunlock"
+        minSdk 30
+        targetSdk 36
+        versionCode 4
+        versionName "1.1.0"
+    }
+
+    // Release signing comes from the environment (CI) or gradle properties, never from the repository.
+    def signingStoreFile = System.getenv('KEYSTORE_FILE') ?: project.findProperty('keystoreFile')
+    if (signingStoreFile) {
+        signingConfigs {
+            release {
+                storeFile file(signingStoreFile)
+                storePassword System.getenv('KEYSTORE_PASSWORD') ?: project.findProperty('keystorePassword')
+                keyAlias System.getenv('KEY_ALIAS') ?: project.findProperty('keyAlias')
+                keyPassword System.getenv('KEY_PASSWORD') ?: project.findProperty('keyPassword')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            if (signingStoreFile) signingConfig signingConfigs.release
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Compile against the real API descriptors; implementation is supplied by LSPosed/Vector.
+    compileOnly files('libs/xposed-api-82.jar')
+}

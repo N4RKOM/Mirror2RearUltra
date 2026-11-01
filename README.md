@@ -25,6 +25,7 @@ The app is built for this one phone and its 294 × 126 rear panel. Other devices
 
 - [Features](#features)
 - [Requirements](#requirements)
+- [HyperOS 4: LSPosed module required](#hyperos-4-lsposed-module-required)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Permissions](#permissions)
@@ -70,11 +71,33 @@ The app is built for this one phone and its 294 × 126 rear panel. Other devices
 
 - Xiaomi Mi 11 Ultra (rear panel 294 × 126).
 - Android 11 or newer (`minSdk 30`). This branch targets HyperOS 4.
-- Root is optional; see [Root](#root).
+- **HyperOS 4: the [Rear Unlock LSPosed module](#hyperos-4-lsposed-module-required) and root access for LSPosed/Vector.** Without it the app cannot use the rear screen.
+- Root is otherwise optional; see [Root](#root).
+
+## HyperOS 4: LSPosed module required
+
+**On HyperOS 4 the app has no access to the rear screen without the M2RU Rear Unlock module.** The firmware refuses to start any app on the rear display (displayId 1) unless the app is on its built-in whitelist, and a normal app cannot add itself to it. Mirroring, the dashboard and every widget depend on that access, so without the module nothing is shown on the panel.
+
+The module (`com.tpkarras.rearunlock`, version 1.1.0) is a small LSPosed/Vector module. It hooks `system_server` at runtime and changes nothing on disk: no framework file or partition is patched.
+
+What it does:
+- Lets **only** `com.tpkarras.mirror2rearultra` start on the rear display, including while the main screen is locked. It overrides two firmware checks in `ActivityStarterImpl`: `isShouldShowOnRearDisplay` and `isAllowedToStartOnRearDisplay`. Every other app keeps the firmware's original answer.
+- Fixes rear power handling on the tested firmware, where the legacy rear wake and sleep calls are empty. Calls from the app's own UID are forwarded to the current rear power group, and while the app's session is alive the rear panel does not follow the main screen's power key. Stopping the session or killing the app releases it.
+- Does not dismiss the keyguard and does not grant screen-capture consent.
+
+Setup:
+1. Install LSPosed or Vector (this needs root). Then install `Mirror2RearUltra-RearUnlock-module.apk` from the same [Releases](../../releases) page as the app. Its source is in [`rearunlock/`](rearunlock/).
+2. In LSPosed/Vector enable **M2RU Rear Unlock** and set its scope to **System Framework** (`system`, user 0).
+3. Reboot. A changed module only loads into the system process after a reboot.
+4. Check the LSPosed/Vector log for the `[M2RU-rear] hooked ...` lines. An enabled module and a saved scope alone do not prove it loaded.
+
+To roll back, disable the module and reboot; there is nothing to undo in the firmware.
+
+The module was verified on a Mi 11 Ultra (`star`) running Android 17 (API 37): the rear panel showed the dashboard with the main screen locked, and single and double taps worked. Other firmware builds may have different class or method names; in that case the module logs the failure and does nothing.
 
 ## Installation
 
-Download the APK from the repository's Releases page, or [build it yourself](#building).
+Download `Mirror2RearUltra-<version>.apk` from the repository's Releases page, or [build it yourself](#building). On HyperOS 4 also install the Rear Unlock module from the same release (see above).
 
 ## Usage
 
@@ -117,7 +140,7 @@ Weather uses the city entered in settings and does not request location.
 ./gradlew assembleDebug
 ```
 
-The Gradle plugin needs JDK 11 or newer. If the system Java is older, point `JAVA_HOME` at a newer JDK, for example the one bundled with Android Studio. Run the unit tests with `./gradlew testDebugUnitTest`.
+The module is built separately: run `./gradlew assembleRelease` inside `rearunlock/`. The Gradle plugin needs JDK 11 or newer. If the system Java is older, point `JAVA_HOME` at a newer JDK, for example the one bundled with Android Studio. Run the unit tests with `./gradlew testDebugUnitTest`.
 
 ## Troubleshooting
 
@@ -128,7 +151,7 @@ The Gradle plugin needs JDK 11 or newer. If the system Java is older, point `JAV
 
 ## Known issues
 
-- On a locked screen the system refuses to start anything on the rear display.
+- Without the [Rear Unlock module](#hyperos-4-lsposed-module-required) the system refuses to start the app on the rear display on HyperOS 4. With the module this also works on a locked screen.
 
 ## Special thanks
 

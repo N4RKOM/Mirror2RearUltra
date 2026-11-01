@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="xposed_desc">Lets com.tpkarras.mirror2rearultra launch on the Mi 11 Ultra rear display (displayId 1), including while the screen is locked. Enable with scope: System Framework. Reboot after enabling.</string>
+</resources>

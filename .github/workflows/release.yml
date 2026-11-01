@@ -48,10 +48,20 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew testDebugUnitTest assembleRelease
 
-      - name: Name the APK after the tag
+      - name: Build signed Rear Unlock module APK
+        working-directory: rearunlock
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease
+
+      - name: Name the APKs
         run: |
           mkdir -p dist
           cp app/build/outputs/apk/release/*.apk "dist/Mirror2RearUltra-${GITHUB_REF_NAME}.apk"
+          cp rearunlock/app/build/outputs/apk/release/*.apk "dist/Mirror2RearUltra-RearUnlock-module.apk"
 
       - name: Publish to Releases
         if: startsWith(github.ref, 'refs/tags/')
@@ -61,9 +71,9 @@ jobs:
           target_commitish: ${{ steps.branch.outputs.name }}
           generate_release_notes: true
 
-      - name: Keep the APK as a build artifact (manual runs)
+      - name: Keep the APKs as a build artifact (manual runs)
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         uses: actions/upload-artifact@v4
         with:
-          name: release-apk
+          name: release-apks
           path: dist/*.apk

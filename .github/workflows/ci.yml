@@ -26,7 +26,13 @@ jobs:
       - name: Unit tests and debug build
         run: ./gradlew testDebugUnitTest assembleDebug
 
+      - name: Rear Unlock module (debug build)
+        working-directory: rearunlock
+        run: ./gradlew assembleDebug
+
       - uses: actions/upload-artifact@v4
         with:
           name: debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            rearunlock/app/build/outputs/apk/debug/*.apk
