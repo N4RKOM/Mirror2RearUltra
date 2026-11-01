@@ -2,7 +2,7 @@
 
 LSPosed/Vector module for [Mirror2RearUltra](../README.md). It is built and attached to every release together with the app.
 
-Package: `com.tpkarras.rearunlock`.
+Package: `com.n4r.rearunlock`.
 Target app: `com.tpkarras.mirror2rearultra` only.
 
 The legacy Xposed module hooks these firmware methods in `system_server`:
@@ -34,7 +34,7 @@ An enabled module/saved scope alone does not prove successful loading or hooking
 
 ## Rollback
 
-Disable `com.tpkarras.rearunlock` in Vector/LSPosed, then reboot.
+Disable `com.n4r.rearunlock` in Vector/LSPosed, then reboot.
 No firmware patch needs to be undone.
 
 ## 1.1.0 power compatibility

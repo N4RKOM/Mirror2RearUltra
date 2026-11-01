@@ -1,4 +1,4 @@
-package com.tpkarras.rearunlock;
+package com.n4r.rearunlock;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;

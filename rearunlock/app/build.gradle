@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.tpkarras.rearunlock'
+    namespace 'com.n4r.rearunlock'
     compileSdk 36
 
     defaultConfig {
-        applicationId "com.tpkarras.rearunlock"
+        applicationId "com.n4r.rearunlock"
         minSdk 30
         targetSdk 36
         versionCode 4
