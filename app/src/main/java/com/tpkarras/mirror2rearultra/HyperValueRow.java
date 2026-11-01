@@ -44,6 +44,7 @@ public class HyperValueRow extends LinearLayout {
     @Nullable private OnItemSelectedListener listener;
     /** Shown for reading only; see {@link #setReadOnly}. */
     private boolean readOnly;
+    @Nullable private View chooserAnchor;
 
     public HyperValueRow(Context context) {
         this(context, null);
@@ -104,6 +105,24 @@ public class HyperValueRow extends LinearLayout {
         return titleView.getText();
     }
 
+    /** The label shown as the current value. */
+    public CharSequence getValueText() {
+        return valueView.getText();
+    }
+
+    /**
+     * Opens the choices below another view. A screen can show this row as
+     * something else - a Compose row, say - and still reuse the same list.
+     */
+    public void showChooserFrom(View anchor) {
+        chooserAnchor = anchor;
+        try {
+            showChooser();
+        } finally {
+            chooserAnchor = null;
+        }
+    }
+
     /** Index of the current value in the entries, or -1 if nothing matches. */
     public int getSelectedIndex() {
         return selectedIndex;
@@ -144,15 +163,16 @@ public class HyperValueRow extends LinearLayout {
         if (entries.length == 0) {
             return;
         }
+        View anchor = chooserAnchor != null ? chooserAnchor : this;
         ListPopupWindow popup = new ListPopupWindow(getContext());
         PickerAdapter adapter = new PickerAdapter();
         popup.setAdapter(adapter);
-        popup.setAnchorView(this);
+        popup.setAnchorView(anchor);
         popup.setModal(true);
         popup.setBackgroundDrawable(
                 androidx.core.content.ContextCompat.getDrawable(
                         getContext(), R.drawable.hyper_popup_background));
-        int width = measurePopupWidth(adapter);
+        int width = measurePopupWidth(adapter, anchor.getWidth());
         popup.setWidth(width);
         // Align the panel with the value it is changing, at the trailing edge
         // of the row, instead of letting it default to the leading edge where
@@ -183,9 +203,9 @@ public class HyperValueRow extends LinearLayout {
     }
 
     /** Widest entry plus the checkmark, clamped so the panel stays readable. */
-    private int measurePopupWidth(PickerAdapter adapter) {
+    private int measurePopupWidth(PickerAdapter adapter, int anchorWidth) {
         int minimum = Math.round(getResources().getDisplayMetrics().density * 200);
-        int maximum = Math.max(minimum, Math.round(getWidth() * 0.95f));
+        int maximum = Math.max(minimum, Math.round(anchorWidth * 0.95f));
         int widest = 0;
         int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
         View reused = null;

@@ -290,11 +290,9 @@ final class SettingsBackupCodec {
             );
             profiles.add(profile);
         }
-        if (!profileIds.containsAll(Set.of(
-                MirrorProfile.CAMERA_ID,
-                MirrorProfile.NAVIGATION_ID,
-                MirrorProfile.VIDEO_ID
-        ))) {
+        // Older backups also carry the Maps and Video profiles; they are read
+        // and then ignored, so only the one profile every backup has is required.
+        if (!profileIds.contains(MirrorProfile.CAMERA_ID)) {
             throw new BackupException("missing_builtin_profile");
         }
 

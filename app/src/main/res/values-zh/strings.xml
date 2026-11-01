@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">后屏仪表盘</string>
     <string name="dashboard_card_help">在后屏上显示自己的信息，可以单独显示，也可以叠加在镜像画面之上。</string>
     <string name="dashboard_customize">自定义仪表盘</string>
-    <string name="dashboard_settings_heading">内容与小组件</string>
     <string name="dashboard_output_title">输出模式</string>
     <string name="dashboard_mode_title">后屏内容</string>
     <string name="dashboard_restart_notice">请重新启动后屏输出以应用此模式更改。</string>
@@ -562,4 +561,6 @@
     <string name="app_theme_dark">深色</string>
     <string name="app_language_title">语言</string>
     <string name="app_language_system">系统默认</string>
+    <string name="backup_export_short">导出</string>
+    <string name="backup_import_short">导入</string>
 </resources>

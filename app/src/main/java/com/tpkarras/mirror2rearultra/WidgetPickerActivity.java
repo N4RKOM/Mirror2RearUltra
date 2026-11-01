@@ -626,8 +626,6 @@ public class WidgetPickerActivity extends AppCompatActivity implements MediaWidg
         boolean on = isWidgetOn(widget);
         ImageView icon = card.findViewById(R.id.widget_gallery_icon);
         icon.setImageResource(WidgetCatalog.icon(widget));
-        icon.setImageTintList(ColorStateList.valueOf(
-                com.google.android.material.color.MaterialColors.getColor(this, R.attr.hyperOnAccentContainer, 0)));
         String name = WidgetCatalog.label(this, widget);
         ((TextView) card.findViewById(R.id.widget_gallery_name)).setText(name);
         TextView state = card.findViewById(R.id.widget_gallery_state);

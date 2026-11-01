@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">Dashibodi ya nyuma</string>
     <string name="dashboard_card_help">Onyesha taarifa zako mwenyewe kwenye skrini ya nyuma, peke yake au juu ya picha iliyoakisiwa.</string>
     <string name="dashboard_customize">Boresha dashibodi</string>
-    <string name="dashboard_settings_heading">Maudhui na wijeti</string>
     <string name="dashboard_output_title">Hali ya utoaji</string>
     <string name="dashboard_mode_title">Maudhui ya skrini ya nyuma</string>
     <string name="dashboard_restart_notice">Anzisha upya utoaji wa nyuma ili mabadiliko haya ya hali yatumike.</string>
@@ -564,4 +563,6 @@
     <string name="app_theme_dark">Nyeusi</string>
     <string name="app_language_title">Lugha</string>
     <string name="app_language_system">Chaguo-msingi la mfumo</string>
+    <string name="backup_export_short">Hamisha</string>
+    <string name="backup_import_short">Leta</string>
 </resources>

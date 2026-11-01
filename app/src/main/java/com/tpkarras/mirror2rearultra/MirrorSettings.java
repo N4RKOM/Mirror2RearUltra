@@ -193,8 +193,6 @@ final class MirrorSettings {
         SharedPreferences preferences = preferences(context);
         List<MirrorProfile> profiles = new ArrayList<>();
         profiles.add(loadProfile(preferences, MirrorProfile.CAMERA_ID));
-        profiles.add(loadProfile(preferences, MirrorProfile.NAVIGATION_ID));
-        profiles.add(loadProfile(preferences, MirrorProfile.VIDEO_ID));
 
         List<MirrorProfile> customProfiles = new ArrayList<>();
         for (String id : customProfileIds(preferences)) {
@@ -579,10 +577,6 @@ final class MirrorSettings {
             return context.getString(R.string.profile_camera);
         }
         switch (profile.id) {
-            case MirrorProfile.NAVIGATION_ID:
-                return context.getString(R.string.profile_navigation);
-            case MirrorProfile.VIDEO_ID:
-                return context.getString(R.string.profile_video);
             case MirrorProfile.CAMERA_ID:
                 return context.getString(R.string.profile_camera);
             default:
@@ -690,12 +684,6 @@ final class MirrorSettings {
 
     private static MirrorProfile defaults(String id) {
         switch (id) {
-            case MirrorProfile.NAVIGATION_ID:
-                return new MirrorProfile(MirrorProfile.Id.NAVIGATION,
-                        MirrorProfile.ScaleMode.FIT, 0, false, 95);
-            case MirrorProfile.VIDEO_ID:
-                return new MirrorProfile(MirrorProfile.Id.VIDEO,
-                        MirrorProfile.ScaleMode.FIT, 90, false, 93);
             case MirrorProfile.CAMERA_ID:
                 return new MirrorProfile(MirrorProfile.Id.CAMERA,
                         MirrorProfile.ScaleMode.FILL, 0, true, 100);
@@ -706,9 +694,9 @@ final class MirrorSettings {
     }
 
     private static boolean profileExists(SharedPreferences preferences, @Nullable String id) {
+        // Maps and Video used to be built in. A stored choice of either now
+        // reads as "no such profile", which falls back to Camera everywhere.
         return MirrorProfile.CAMERA_ID.equals(id)
-                || MirrorProfile.NAVIGATION_ID.equals(id)
-                || MirrorProfile.VIDEO_ID.equals(id)
                 || (id != null && customProfileIds(preferences).contains(id));
     }
 

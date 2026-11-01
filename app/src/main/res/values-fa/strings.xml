@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">داشبورد پشت</string>
     <string name="dashboard_card_help">اطلاعات خودتان را روی صفحهٔ عقب نشان دهید، به‌تنهایی یا روی تصویر آینه‌شده.</string>
     <string name="dashboard_customize">سفارشی‌سازی داشبورد</string>
-    <string name="dashboard_settings_heading">محتوا و ابزارک‌ها</string>
     <string name="dashboard_output_title">حالت خروجی</string>
     <string name="dashboard_mode_title">محتوای صفحهٔ عقب</string>
     <string name="dashboard_restart_notice">برای اعمال این تغییر حالت، خروجی پشت را دوباره راه‌اندازی کنید.</string>
@@ -564,4 +563,6 @@
     <string name="app_theme_dark">تیره</string>
     <string name="app_language_title">زبان</string>
     <string name="app_language_system">پیش‌فرض سیستم</string>
+    <string name="backup_export_short">برون‌بری</string>
+    <string name="backup_import_short">درون‌ریزی</string>
 </resources>

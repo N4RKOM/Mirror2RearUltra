@@ -938,9 +938,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         android.content.res.ColorStateList color = ContextCompat.getColorStateList(this,
                 picked ? R.color.hyper_text_button_text : R.color.hyper_row_title_text);
         ((TextView) row.findViewById(R.id.builder_item_title)).setTextColor(color);
-        ((android.widget.ImageView) row.findViewById(R.id.builder_item_icon))
-                .setImageTintList(ContextCompat.getColorStateList(this, picked
-                        ? R.color.hyper_text_button_text : R.color.hyper_text_secondary));
+        // The icon is a coloured tile and keeps its own colours; only the title shows the pick.
     }
 
     /** Reorders within the edited page, by where the finger lets go. */

@@ -26,11 +26,10 @@ import java.util.TimeZone;
  * the camera helpers of the mirror.
  *
  * <p>The controls live in the {@code panel_section_*} layouts and in
- * {@code activity_dashboard_settings}. A host puts whichever of them it shows
- * in its own layout and hands this the root: the widgets tab folds the looks,
- * the screen and the touch sections open under their rows, and
- * {@link DashboardSettingsActivity} shows the mode and the mirror tools on pages
- * of their own. A section the host does not have is simply not bound.
+ * {@code activity_settings}. A host puts whichever of them it shows in its own
+ * layout and hands this the root: the widgets tab folds the looks, the screen
+ * and the touch sections open under their rows, and the settings tab holds the
+ * content mode. A section the host does not have is simply not bound.
  *
  * <p>Everything about widgets is done in {@link DashboardBuilderActivity},
  * which opens {@link WidgetPickerActivity} from its own list.
@@ -187,10 +186,10 @@ final class PanelSettingsController {
                 R.id.dashboard_notification_light_switch,
                 R.id.dashboard_tap_variant_switch,
                 R.id.dashboard_pocket_lock_switch,
-                R.id.dashboard_face_down_switch,
-                R.id.dashboard_mirror_grid_switch,
-                R.id.dashboard_mirror_level_switch);
-        MiuixRows.installExpandableSwitch(host, R.id.dashboard_shutter_switch,
+                R.id.dashboard_face_down_switch);
+        MiuixRows.installSwitchWithIcon(host, R.id.dashboard_mirror_grid_switch, R.drawable.ic_row_grid);
+        MiuixRows.installSwitchWithIcon(host, R.id.dashboard_mirror_level_switch, R.drawable.ic_row_level);
+        MiuixRows.installExpandableSwitch(host, R.id.dashboard_shutter_switch, R.drawable.ic_row_camera,
                 R.id.dashboard_shutter_access_status, R.id.dashboard_shutter_access_button,
                 R.id.dashboard_shutter_delay_input);
     }

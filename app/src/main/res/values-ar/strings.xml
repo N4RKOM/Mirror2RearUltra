@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">لوحة الشاشة الخلفية</string>
     <string name="dashboard_card_help">اعرض معلوماتك الخاصة على الشاشة الخلفية، وحدها أو فوق الصورة المنسوخة.</string>
     <string name="dashboard_customize">تخصيص اللوحة</string>
-    <string name="dashboard_settings_heading">المحتوى والأدوات</string>
     <string name="dashboard_output_title">وضع الإخراج</string>
     <string name="dashboard_mode_title">محتوى الشاشة الخلفية</string>
     <string name="dashboard_restart_notice">أعد تشغيل الإخراج الخلفي لتطبيق تغيير الوضع هذا.</string>
@@ -572,4 +571,6 @@
     <string name="app_theme_dark">داكن</string>
     <string name="app_language_title">اللغة</string>
     <string name="app_language_system">افتراضي النظام</string>
+    <string name="backup_export_short">تصدير</string>
+    <string name="backup_import_short">استيراد</string>
 </resources>

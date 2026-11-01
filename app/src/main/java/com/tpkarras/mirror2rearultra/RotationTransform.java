@@ -11,25 +11,40 @@ final class RotationTransform {
         this.scaleY = scaleY;
     }
 
+    /** For a panel that is taller than wide, the way it is built into the phone. */
     static RotationTransform forRotation(
             int displayRotation,
             int manualRotationDegrees,
             boolean mirrorHorizontally
     ) {
+        return forRotation(displayRotation, manualRotationDegrees, mirrorHorizontally, false);
+    }
+
+    /**
+     * @param widePanel the panel is wider than tall in its own frame, which
+     *        means it is built in sideways: held upright it is a vertical
+     *        strip, so the picture has to be turned a quarter to fill it
+     */
+    static RotationTransform forRotation(
+            int displayRotation,
+            int manualRotationDegrees,
+            boolean mirrorHorizontally,
+            boolean widePanel
+    ) {
         int degrees;
         switch (displayRotation) {
             case 1:
-                degrees = -90;
+                degrees = widePanel ? 0 : -90;
                 break;
             case 2:
-                degrees = -180;
+                degrees = widePanel ? 90 : -180;
                 break;
             case 3:
-                degrees = 90;
+                degrees = widePanel ? 180 : 90;
                 break;
             case 0:
             default:
-                degrees = 0;
+                degrees = widePanel ? -90 : 0;
                 break;
         }
         degrees = normalizeDegrees(degrees + manualRotationDegrees);
@@ -43,6 +58,20 @@ final class RotationTransform {
                 axesSwapped ? 1f : -1f,
                 axesSwapped ? -1f : 1f
         );
+    }
+
+    /**
+     * Turn of the picture as the panel sees it, for sizing: the capture is a
+     * portrait picture when the screen is held upright and a landscape one
+     * when it is on its side, so a sideways hold counts as a quarter turn.
+     */
+    static int contentQuarterTurnDegrees(
+            int displayRotation, int manualRotationDegrees, boolean widePanel) {
+        if (!widePanel) {
+            return manualRotationDegrees;
+        }
+        return forRotation(displayRotation, manualRotationDegrees, false, true).degrees
+                + (displayRotation % 2 == 1 ? 90 : 0);
     }
 
     private static int normalizeDegrees(int value) {

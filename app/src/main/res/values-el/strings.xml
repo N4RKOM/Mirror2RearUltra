@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">Πίσω πίνακας</string>
     <string name="dashboard_card_help">Δείξτε δικές σας πληροφορίες στην πίσω οθόνη, μόνες τους ή πάνω από την κατοπτρισμένη εικόνα.</string>
     <string name="dashboard_customize">Προσαρμογή πίνακα</string>
-    <string name="dashboard_settings_heading">Περιεχόμενο και γραφικά στοιχεία</string>
     <string name="dashboard_output_title">Λειτουργία εξόδου</string>
     <string name="dashboard_mode_title">Περιεχόμενο πίσω οθόνης</string>
     <string name="dashboard_restart_notice">Επανεκκινήστε την πίσω έξοδο για να εφαρμοστεί αυτή η αλλαγή λειτουργίας.</string>
@@ -564,4 +563,6 @@
     <string name="app_theme_dark">Σκούρο</string>
     <string name="app_language_title">Γλώσσα</string>
     <string name="app_language_system">Προεπιλογή συστήματος</string>
+    <string name="backup_export_short">Εξαγωγή</string>
+    <string name="backup_import_short">Εισαγωγή</string>
 </resources>

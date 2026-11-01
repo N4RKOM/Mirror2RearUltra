@@ -40,4 +40,27 @@ public class RotationTransformTest {
         assertEquals(1f, transform.scaleX, 0f);
         assertEquals(1f, transform.scaleY, 0f);
     }
+
+    @Test
+    public void widePanelTurnsAQuarterWhenHeldUpright() {
+        RotationTransform transform = RotationTransform.forRotation(0, 0, true, true);
+
+        assertEquals(-90, transform.degrees);
+        assertEquals(1f, transform.scaleX, 0f);
+        assertEquals(-1f, transform.scaleY, 0f);
+    }
+
+    @Test
+    public void widePanelNeedsNoTurnOnItsSide() {
+        assertEquals(0, RotationTransform.forRotation(1, 0, false, true).degrees);
+        assertEquals(-180, RotationTransform.forRotation(3, 0, false, true).degrees);
+        assertEquals(90, RotationTransform.forRotation(2, 0, false, true).degrees);
+    }
+
+    @Test
+    public void sizingCountsASidewaysHoldAsAQuarterTurnOnAWidePanel() {
+        assertEquals(90, RotationTransform.contentQuarterTurnDegrees(1, 0, true));
+        assertEquals(-90, RotationTransform.contentQuarterTurnDegrees(0, 0, true));
+        assertEquals(0, RotationTransform.contentQuarterTurnDegrees(1, 0, false));
+    }
 }

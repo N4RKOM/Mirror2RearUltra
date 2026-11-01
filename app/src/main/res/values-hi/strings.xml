@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">पिछला डैशबोर्ड</string>
     <string name="dashboard_card_help">पिछली स्क्रीन पर अपनी जानकारी दिखाएँ — अकेले या मिरर की गई इमेज के ऊपर।</string>
     <string name="dashboard_customize">डैशबोर्ड अपने मुताबिक करें</string>
-    <string name="dashboard_settings_heading">सामग्री और विजेट</string>
     <string name="dashboard_output_title">आउटपुट मोड</string>
     <string name="dashboard_mode_title">पिछली स्क्रीन की सामग्री</string>
     <string name="dashboard_restart_notice">यह मोड लागू करने के लिए पिछला आउटपुट फिर से शुरू करें।</string>
@@ -564,4 +563,6 @@
     <string name="app_theme_dark">गहरा</string>
     <string name="app_language_title">भाषा</string>
     <string name="app_language_system">सिस्टम डिफ़ॉल्ट</string>
+    <string name="backup_export_short">निर्यात</string>
+    <string name="backup_import_short">आयात</string>
 </resources>

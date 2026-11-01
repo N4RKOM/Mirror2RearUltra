@@ -30,12 +30,10 @@ import java.util.regex.Pattern;
  * while the camera was left with none. A touch is delivered by where it lands,
  * which no amount of focus can redirect.
  *
- * <p>Where the button is comes from the system's own dump of what each display
- * has on top. The accessibility dump was tried first and could not be used:
- * it describes whichever window is active, which while the panel is being
- * touched is the panel's own. This one covers every display at once and says
- * which is which, so the camera can be picked out by name however the focus
- * has moved.
+ * <p>Where the button is comes from the accessibility dump of every window
+ * ({@code uiautomator dump --windows}), so the camera can be picked out by its
+ * package however the focus has moved; the dump of only the active window
+ * would be the panel's own while it is being touched.
  *
  * <p>Both the reading and the tap go through the root shell the panel's
  * backlight already uses: an ordinary app may neither read another app's
@@ -54,21 +52,22 @@ final class PanelShutter {
     private static final long MINIMUM_GAP_MILLIS = 700L;
     /** How long a fruitless search stands before another is worth making. */
     private static final long RETRY_MILLIS = 10_000L;
-    private static final String DUMP_COMMAND = "dumpsys activity top";
-    /** The heading each display's top activity is dumped under. */
-    private static final Pattern ACTIVITY =
-            Pattern.compile("^\\s*ACTIVITY (\\S+)/\\S+ \\S+ pid=\\S+.*displayId=(\\d+)");
+    private static final String DUMP_FILE = "/data/local/tmp/mirror2rear_ui.xml";
     /**
-     * One view: its indent, its flags, and its box within its parent.
+     * The accessibility dump of every window, from the root shell.
      *
-     * <p>The flags are nine characters, of which the first is the visibility
-     * and the seventh says whether it can be clicked.
+     * <p>{@code dumpsys activity top} was used before and cannot be: it walks
+     * every task the phone remembers, view by view, and on a phone with a few
+     * dozen of them it runs out of its ten seconds before it reaches the
+     * camera. This one lists the windows on screen and takes about two.
      */
-    private static final Pattern VIEW = Pattern.compile(
-            "^(\\s*)[\\w.$]+\\{[0-9a-f]+ (\\S{9}) \\S+ (-?\\d+),(-?\\d+)-(-?\\d+),(-?\\d+)(.*)$");
+    private static final String DUMP_COMMAND = "uiautomator dump --windows " + DUMP_FILE
+            + " >/dev/null 2>&1; cat " + DUMP_FILE;
+    private static final Pattern NODE = Pattern.compile("<node\\s[^>]*>");
+    private static final Pattern BOUNDS = Pattern.compile(
+            "\\[(-?\\d+),(-?\\d+)\\]\\[(-?\\d+),(-?\\d+)\\]");
     /** What a shutter button calls itself. */
     private static final Pattern SHUTTER_NAME = Pattern.compile("shutter|capture");
-    private static final int MAXIMUM_DEPTH = 64;
 
     /** Two threads: a tap must not queue behind a search that takes seconds. */
     private final ExecutorService presser = Executors.newSingleThreadExecutor();
@@ -220,10 +219,8 @@ final class PanelShutter {
     /**
      * The middle of the shutter button of the camera app, or null.
      *
-     * <p>Each view in the dump is placed within its parent, so the parents'
-     * corners are carried down the indenting to turn the button's box into a
-     * place on the screen. Only the camera's own section is read, and only
-     * the one on the main screen: the panel is in the same dump.
+     * <p>Only views of the camera's own package are read, so the panel, which
+     * is in the same dump, cannot be taken for it.
      */
     @Nullable
     private static int[] findButton(String packageName) {
@@ -239,50 +236,51 @@ final class PanelShutter {
      */
     @Nullable
     static int[] shutterPointIn(String dump, String packageName) {
-        boolean inside = false;
-        int[] indents = new int[MAXIMUM_DEPTH];
-        int[] lefts = new int[MAXIMUM_DEPTH];
-        int[] tops = new int[MAXIMUM_DEPTH];
-        int depth = 0;
-        for (String line : dump.split("\n")) {
-            Matcher activity = ACTIVITY.matcher(line);
-            if (activity.find()) {
-                inside = packageName.equals(activity.group(1)) && "0".equals(activity.group(2));
-                depth = 0;
+        int[] best = null;
+        boolean bestIsShutter = false;
+        Matcher nodes = NODE.matcher(dump);
+        while (nodes.find()) {
+            String node = nodes.group();
+            if (!packageName.equals(attribute(node, "package"))) {
                 continue;
             }
-            if (!inside) {
+            String id = attribute(node, "resource-id");
+            String name = id.substring(id.indexOf('/') + 1).toLowerCase(Locale.ROOT);
+            if (!SHUTTER_NAME.matcher(name).find()) {
                 continue;
             }
-            Matcher view = VIEW.matcher(line);
-            if (!view.matches()) {
+            // Cameras answer the finger through a touch listener, so the
+            // button is often not marked clickable; a view that is neither a
+            // button nor clickable is a layer that merely has the word in it.
+            boolean pressable = attribute(node, "class").endsWith("Button")
+                    || "true".equals(attribute(node, "clickable"));
+            if (!pressable) {
                 continue;
             }
-            int indent = view.group(1).length();
-            while (depth > 0 && indents[depth - 1] >= indent) {
-                depth--;
-            }
-            int left = Integer.parseInt(view.group(3));
-            int top = Integer.parseInt(view.group(4));
-            int x = depth > 0 ? lefts[depth - 1] + left : left;
-            int y = depth > 0 ? tops[depth - 1] + top : top;
-            if (depth < MAXIMUM_DEPTH) {
-                indents[depth] = indent;
-                lefts[depth] = x;
-                tops[depth] = y;
-                depth++;
-            }
-            String flags = view.group(2);
-            if (flags.charAt(0) != 'V' || flags.charAt(6) != 'C') {
+            Matcher bounds = BOUNDS.matcher(attribute(node, "bounds"));
+            if (!bounds.matches()) {
                 continue;
             }
-            if (SHUTTER_NAME.matcher(view.group(7).toLowerCase(Locale.ROOT)).find()) {
-                int width = Integer.parseInt(view.group(5)) - left;
-                int height = Integer.parseInt(view.group(6)) - top;
-                return new int[] {x + width / 2, y + height / 2};
+            int left = Integer.parseInt(bounds.group(1));
+            int top = Integer.parseInt(bounds.group(2));
+            int right = Integer.parseInt(bounds.group(3));
+            int bottom = Integer.parseInt(bounds.group(4));
+            if (right <= left || bottom <= top) {
+                continue;
+            }
+            boolean shutter = name.contains("shutter");
+            if (best == null || (shutter && !bestIsShutter)) {
+                best = new int[] {(left + right) / 2, (top + bottom) / 2};
+                bestIsShutter = shutter;
             }
         }
-        return null;
+        return best;
+    }
+
+    private static String attribute(String node, String name) {
+        Matcher match = Pattern.compile(
+                "\\s" + Pattern.quote(name) + "=\"([^\"]*)\"").matcher(node);
+        return match.find() ? match.group(1) : "";
     }
 
     /** @return what the command printed, or null when it could not be run */

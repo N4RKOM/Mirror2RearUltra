@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">Dashbord på baksiden</string>
     <string name="dashboard_card_help">Vis egen informasjon på bakskjermen, alene eller oppå det speilede bildet.</string>
     <string name="dashboard_customize">Tilpass dashbordet</string>
-    <string name="dashboard_settings_heading">Innhold og moduler</string>
     <string name="dashboard_output_title">Utgangsmodus</string>
     <string name="dashboard_mode_title">Innhold på bakskjermen</string>
     <string name="dashboard_restart_notice">Start bakutgangen på nytt for å ta i bruk dette modusbyttet.</string>
@@ -564,4 +563,6 @@
     <string name="app_theme_dark">Mørkt</string>
     <string name="app_language_title">Språk</string>
     <string name="app_language_system">Systemstandard</string>
+    <string name="backup_export_short">Eksporter</string>
+    <string name="backup_import_short">Importer</string>
 </resources>

@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">Tagaekraani töölaud</string>
     <string name="dashboard_card_help">Näidake tagaekraanil oma teavet, kas üksi või peegeldatud pildi peal.</string>
     <string name="dashboard_customize">Kohanda töölauda</string>
-    <string name="dashboard_settings_heading">Sisu ja vidinad</string>
     <string name="dashboard_output_title">Väljundrežiim</string>
     <string name="dashboard_mode_title">Tagaekraani sisu</string>
     <string name="dashboard_restart_notice">Režiimimuudatuse rakendamiseks taaskäivitage tagaväljund.</string>
@@ -564,4 +563,6 @@
     <string name="app_theme_dark">Tume</string>
     <string name="app_language_title">Keel</string>
     <string name="app_language_system">Süsteemi vaikimisi</string>
+    <string name="backup_export_short">Ekspordi</string>
+    <string name="backup_import_short">Impordi</string>
 </resources>

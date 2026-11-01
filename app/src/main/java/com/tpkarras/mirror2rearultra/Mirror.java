@@ -1088,10 +1088,12 @@ public class Mirror extends Activity implements
             return;
         }
         showCropMask(null);
+        boolean widePanel = rearMetrics.widthPixels > rearMetrics.heightPixels;
         RotationTransform transform = RotationTransform.forRotation(
                 rotation,
                 profile.rotationDegrees,
-                profile.mirrorHorizontally
+                profile.mirrorHorizontally,
+                widePanel
         );
 
         ProjectionGeometry.Scale scale = ProjectionGeometry.calculateScale(
@@ -1101,7 +1103,8 @@ public class Mirror extends Activity implements
                 textureView.getWidth(),
                 mode == null ? rearMetrics.widthPixels : mode.getPhysicalWidth(),
                 mode == null ? rearMetrics.heightPixels : mode.getPhysicalHeight(),
-                profile.rotationDegrees
+                RotationTransform.contentQuarterTurnDegrees(
+                        rotation, profile.rotationDegrees, widePanel)
         );
 
         float calibrationZoom = profile.zoomPercent / 100f;

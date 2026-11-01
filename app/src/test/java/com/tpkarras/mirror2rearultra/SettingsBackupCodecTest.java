@@ -82,15 +82,14 @@ public class SettingsBackupCodecTest {
     }
 
     @Test
-    public void rejectsBackupWithoutAllBuiltInProfiles() throws Exception {
+    public void readsBackupWithoutTheRetiredBuiltInProfiles() throws Exception {
         SettingsBackupCodec.Data source = sampleData(false);
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         SettingsBackupCodec.write(source, output);
 
-        assertThrows(
-                SettingsBackupCodec.BackupException.class,
-                () -> SettingsBackupCodec.read(new ByteArrayInputStream(output.toByteArray()))
-        );
+        SettingsBackupCodec.Data restored =
+                SettingsBackupCodec.read(new ByteArrayInputStream(output.toByteArray()));
+        assertEquals(source.profiles.size(), restored.profiles.size());
     }
 
     @Test

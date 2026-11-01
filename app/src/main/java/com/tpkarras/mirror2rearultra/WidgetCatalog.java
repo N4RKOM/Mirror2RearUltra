@@ -46,46 +46,46 @@ final class WidgetCatalog {
         }
     }
 
-    /** The drawing shown for a widget on its gallery card. */
+    /** The tile shown for a widget: its glyph in white on its group's colour. */
     static int icon(DashboardWidgetLayout.Widget widget) {
         switch (widget) {
-            case CLOCK: return R.drawable.ic_widget_clock;
-            case DATE: return R.drawable.ic_widget_date;
-            case BATTERY: return R.drawable.ic_widget_battery;
-            case TEMPERATURE: return R.drawable.ic_widget_temperature;
-            case WEATHER: return R.drawable.ic_widget_weather;
-            case NEXT_ALARM: return R.drawable.ic_widget_next_alarm;
-            case MEDIA: return R.drawable.ic_widget_media;
-            case COMPASS: return R.drawable.ic_widget_compass;
-            case SPEED: return R.drawable.ic_widget_speed;
-            case ALTITUDE: return R.drawable.ic_widget_altitude;
-            case SESSION_TIMER: return R.drawable.ic_widget_session_timer;
-            case ACTIVE_PROFILE: return R.drawable.ic_widget_active_profile;
-            case CUSTOM_TEXT: return R.drawable.ic_widget_custom_text;
-            case NETWORK: return R.drawable.ic_widget_network;
-            case MEMORY: return R.drawable.ic_widget_memory;
-            case STORAGE: return R.drawable.ic_widget_storage;
-            case NOTIFICATIONS: return R.drawable.ic_widget_notifications;
-            case CALENDAR: return R.drawable.ic_widget_calendar;
-            case STEPS: return R.drawable.ic_widget_steps;
-            case FULLSCREEN_WEATHER: return R.drawable.ic_widget_fullscreen_weather;
-            case FULLSCREEN_MEDIA: return R.drawable.ic_widget_fullscreen_media;
-            case LAST_NOTIFICATION: return R.drawable.ic_widget_last_notification;
-            case TIMER: return R.drawable.ic_widget_timer;
-            case CHARGING: return R.drawable.ic_widget_charging;
-            case SUN: return R.drawable.ic_widget_sun;
-            case LEVEL: return R.drawable.ic_widget_level;
-            case SOUND_MODE: return R.drawable.ic_widget_sound_mode;
-            case WORLD_CLOCK: return R.drawable.ic_widget_world_clock;
-            case QR_CODE: return R.drawable.ic_widget_qr_code;
-            case UV_INDEX: return R.drawable.ic_widget_uv_index;
-            case AIR_QUALITY: return R.drawable.ic_widget_air_quality;
-            case NETWORK_SPEED: return R.drawable.ic_widget_network_speed;
-            case MOON: return R.drawable.ic_widget_moon;
-            case COUNTDOWN: return R.drawable.ic_widget_countdown;
-            case PROGRESS: return R.drawable.ic_widget_progress;
-            case PRESSURE: return R.drawable.ic_widget_pressure;
-            default: return R.drawable.ic_group_other;
+            case CLOCK: return R.drawable.ic_wtile_clock;
+            case DATE: return R.drawable.ic_wtile_date;
+            case BATTERY: return R.drawable.ic_wtile_battery;
+            case TEMPERATURE: return R.drawable.ic_wtile_temperature;
+            case WEATHER: return R.drawable.ic_wtile_weather;
+            case NEXT_ALARM: return R.drawable.ic_wtile_next_alarm;
+            case MEDIA: return R.drawable.ic_wtile_media;
+            case COMPASS: return R.drawable.ic_wtile_compass;
+            case SPEED: return R.drawable.ic_wtile_speed;
+            case ALTITUDE: return R.drawable.ic_wtile_altitude;
+            case SESSION_TIMER: return R.drawable.ic_wtile_session_timer;
+            case ACTIVE_PROFILE: return R.drawable.ic_wtile_active_profile;
+            case CUSTOM_TEXT: return R.drawable.ic_wtile_custom_text;
+            case NETWORK: return R.drawable.ic_wtile_network;
+            case MEMORY: return R.drawable.ic_wtile_memory;
+            case STORAGE: return R.drawable.ic_wtile_storage;
+            case NOTIFICATIONS: return R.drawable.ic_wtile_notifications;
+            case CALENDAR: return R.drawable.ic_wtile_calendar;
+            case STEPS: return R.drawable.ic_wtile_steps;
+            case FULLSCREEN_WEATHER: return R.drawable.ic_wtile_fullscreen_weather;
+            case FULLSCREEN_MEDIA: return R.drawable.ic_wtile_fullscreen_media;
+            case LAST_NOTIFICATION: return R.drawable.ic_wtile_last_notification;
+            case TIMER: return R.drawable.ic_wtile_timer;
+            case CHARGING: return R.drawable.ic_wtile_charging;
+            case SUN: return R.drawable.ic_wtile_sun;
+            case LEVEL: return R.drawable.ic_wtile_level;
+            case SOUND_MODE: return R.drawable.ic_wtile_sound_mode;
+            case WORLD_CLOCK: return R.drawable.ic_wtile_world_clock;
+            case QR_CODE: return R.drawable.ic_wtile_qr_code;
+            case UV_INDEX: return R.drawable.ic_wtile_uv_index;
+            case AIR_QUALITY: return R.drawable.ic_wtile_air_quality;
+            case NETWORK_SPEED: return R.drawable.ic_wtile_network_speed;
+            case MOON: return R.drawable.ic_wtile_moon;
+            case COUNTDOWN: return R.drawable.ic_wtile_countdown;
+            case PROGRESS: return R.drawable.ic_wtile_progress;
+            case PRESSURE: return R.drawable.ic_wtile_pressure;
+            default: return R.drawable.ic_wtile_other;
         }
     }
 

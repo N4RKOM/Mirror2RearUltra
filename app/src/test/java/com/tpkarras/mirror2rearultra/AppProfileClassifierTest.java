@@ -7,19 +7,17 @@ import org.junit.Test;
 
 public class AppProfileClassifierTest {
     @Test
-    public void recognizesSupportedAppFamilies() {
+    public void recognizesTheCameraFamily() {
         assertEquals(
                 MirrorProfile.CAMERA_ID,
                 AppProfileClassifier.classify("com.shamim.cam")
         );
-        assertEquals(
-                MirrorProfile.NAVIGATION_ID,
-                AppProfileClassifier.classify("com.google.android.apps.maps")
-        );
-        assertEquals(
-                MirrorProfile.VIDEO_ID,
-                AppProfileClassifier.classify("org.videolan.vlc")
-        );
+    }
+
+    @Test
+    public void mapsAndVideoAppsAreLeftToTheUser() {
+        assertNull(AppProfileClassifier.classify("com.google.android.apps.maps"));
+        assertNull(AppProfileClassifier.classify("org.videolan.vlc"));
     }
 
     @Test

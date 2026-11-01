@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">Painéal cúil</string>
     <string name="dashboard_card_help">Taispeáin d\'eolas féin ar an scáileán cúil, leis féin nó os cionn na híomhá scáthánaithe.</string>
     <string name="dashboard_customize">Saincheap an painéal</string>
-    <string name="dashboard_settings_heading">Ábhar agus giuirléidí</string>
     <string name="dashboard_output_title">Mód aschuir</string>
     <string name="dashboard_mode_title">Ábhar an scáileáin chúil</string>
     <string name="dashboard_restart_notice">Atosaigh an t-aschur cúil chun an t-athrú móid seo a chur i bhfeidhm.</string>
@@ -570,4 +569,6 @@
     <string name="app_theme_dark">Dorcha</string>
     <string name="app_language_title">Teanga</string>
     <string name="app_language_system">Réamhshocrú an chórais</string>
+    <string name="backup_export_short">Easpórtáil</string>
+    <string name="backup_import_short">Iompórtáil</string>
 </resources>

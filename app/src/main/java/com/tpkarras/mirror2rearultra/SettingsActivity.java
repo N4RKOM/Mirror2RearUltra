@@ -45,8 +45,8 @@ import java.util.concurrent.Executors;
  *
  * <p>This used to be the whole app - every setting on one scroll, with
  * per-profile controls sitting beside app-wide ones. Anything scoped to a
- * profile now lives in {@link ImageSettingsActivity}, and the two long device
- * sections became {@link AutomationActivity} and
+ * profile now lives in {@link ImageSettingsActivity}, profile switching in
+ * {@link ProfileManagerActivity}, and the long device section became
  * {@link DeviceProtectionActivity}. What remains here is app-wide, short, and
  * either read-only or infrequent.
  */
@@ -54,8 +54,10 @@ public class SettingsActivity extends AppCompatActivity implements
         MirrorState.Listener,
         DeviceCapabilityState.Listener {
 
-    private HyperValueRow profileInput;
+    private LinearLayout profileChips;
+    private PanelPreviewView hubPreview;
     private TextView profileSummary;
+    private TextView toggleButton;
     private TextView statusValue;
     private TextView rootStatusValue;
     private TextView hardwareBrightnessStatusValue;
@@ -83,11 +85,8 @@ public class SettingsActivity extends AppCompatActivity implements
     private int homePage = 1;
 
     private MirrorProfile activeProfile;
-    /** Guards the listeners while the UI is being written from stored state. */
-    private boolean bindingUi;
     private String[] scaleLabels;
     private List<MirrorProfile> profiles;
-    private String[] profileLabels;
     private ActivityResultLauncher<String> exportDocumentLauncher;
     private ActivityResultLauncher<String[]> importDocumentLauncher;
     private final ExecutorService backupExecutor = Executors.newSingleThreadExecutor();
@@ -124,8 +123,11 @@ public class SettingsActivity extends AppCompatActivity implements
                 findViewById(R.id.settings_scroll), AppLook.blur(this));
         navigation.followScroll(findViewById(R.id.settings_scroll));
 
-        profileInput = findViewById(R.id.profile_input);
-        profileSummary = findViewById(R.id.profile_summary);
+        profileChips = findViewById(R.id.hub_profile_chips);
+        hubPreview = findViewById(R.id.hub_panel_preview);
+        hubPreview.fitToRearPanel();
+        profileSummary = findViewById(R.id.hub_profile_summary);
+        toggleButton = findViewById(R.id.hub_toggle_button);
         statusValue = findViewById(R.id.status_value);
         rootStatusValue = findViewById(R.id.root_status_value);
         hardwareBrightnessStatusValue = findViewById(R.id.hardware_brightness_status_value);
@@ -139,10 +141,6 @@ public class SettingsActivity extends AppCompatActivity implements
         bindAppearance();
         panelSettings = new PanelSettingsController(this, settingsContent,
                 this::onPanelSettingsChanged);
-        MiuixRows.installWithIcon(this, R.id.image_settings_button, R.drawable.ic_row_image);
-        MiuixRows.installWithIcon(this, R.id.manage_profiles_button, R.drawable.ic_row_profiles);
-        MiuixRows.installWithIcon(this, R.id.automation_button, R.drawable.ic_row_automation);
-        MiuixRows.installWithIcon(this, R.id.mirror_tools_button, R.drawable.ic_row_shutter);
         MiuixRows.installWithIcon(this, R.id.device_protection_button,
                 R.drawable.ic_row_protection);
         MiuixRows.installWithIcon(this, R.id.app_about_button, R.drawable.ic_row_about);
@@ -150,7 +148,9 @@ public class SettingsActivity extends AppCompatActivity implements
         findViewById(R.id.app_about_button).setOnClickListener(view -> showAbout());
         findViewById(R.id.app_source_button).setOnClickListener(view -> openSource());
         MiuixRows.installWithIcon(this, R.id.widgets_home_add_button, R.drawable.ic_row_add);
-        MiuixRows.installWithIcon(this, R.id.general_content_button, R.drawable.ic_row_content);
+        MiuixRows.installChoiceRow(this, R.id.dashboard_mode_input, R.drawable.ic_row_content);
+        bindStockCenter();
+        MiuixRows.installSwitchWithIcon(this, R.id.stock_center_switch, R.drawable.ic_row_screen);
         MiuixRows.installExpandableRow(this, R.id.widgets_home_appearance_button,
                 R.drawable.ic_row_appearance, R.id.widgets_home_appearance_panel);
         MiuixRows.installExpandableRow(this, R.id.widgets_home_screen_button,
@@ -244,17 +244,7 @@ public class SettingsActivity extends AppCompatActivity implements
 
     private void bindInteractions() {
         bindWidgetsHome();
-        profileInput.setOnItemSelectedListener(position -> {
-            if (bindingUi || position < 0 || position >= profiles.size()) {
-                return;
-            }
-            activeProfile = MirrorSettings.selectProfile(this, profiles.get(position).id);
-            updateProfileSummary(activeProfile);
-            settingsContent.announceForAccessibility(getString(
-                    R.string.profile_selected_announcement,
-                    profileName(activeProfile)
-            ));
-        });
+        toggleButton.setOnClickListener(view -> toggleMirroring());
 
         findViewById(R.id.image_settings_button).setOnClickListener(view ->
                 startActivity(new Intent(this, ImageSettingsActivity.class))
@@ -262,15 +252,6 @@ public class SettingsActivity extends AppCompatActivity implements
 
         findViewById(R.id.manage_profiles_button).setOnClickListener(view ->
                 startActivity(new Intent(this, ProfileManagerActivity.class))
-        );
-
-        findViewById(R.id.mirror_tools_button).setOnClickListener(view ->
-                startActivity(DashboardSettingsActivity.intentFor(this,
-                        DashboardSettingsActivity.SECTION_MIRROR_TOOLS))
-        );
-
-        findViewById(R.id.automation_button).setOnClickListener(view ->
-                startActivity(new Intent(this, AutomationActivity.class))
         );
 
         findViewById(R.id.device_protection_button).setOnClickListener(view ->
@@ -297,12 +278,33 @@ public class SettingsActivity extends AppCompatActivity implements
     // ------------------------------------------------------------------
 
     private void bindAppearance() {
-        HyperValueRow themeRow = findViewById(R.id.app_theme_input);
         String[] themes = {getString(R.string.app_theme_system), getString(R.string.app_theme_light),
                 getString(R.string.app_theme_dark)};
-        themeRow.setEntries(themes);
-        themeRow.setValue(themes[AppLook.theme(this)]);
-        themeRow.setOnItemSelectedListener(position -> AppLook.setTheme(this, position));
+        com.google.android.material.button.MaterialButtonToggleGroup themeGroup =
+                (com.google.android.material.button.MaterialButtonToggleGroup) getLayoutInflater()
+                        .inflate(R.layout.widget_segment_group, null, false);
+        themeGroup.setContentDescription(getString(R.string.app_theme_title));
+        int[] themeIds = new int[themes.length];
+        for (int index = 0; index < themes.length; index++) {
+            com.google.android.material.button.MaterialButton segment =
+                    (com.google.android.material.button.MaterialButton) getLayoutInflater()
+                            .inflate(R.layout.widget_segment_button, themeGroup, false);
+            segment.setId(View.generateViewId());
+            segment.setText(themes[index]);
+            themeIds[index] = segment.getId();
+            themeGroup.addView(segment, new LinearLayout.LayoutParams(0, dp(42), 1f));
+        }
+        themeGroup.check(themeIds[AppLook.theme(this)]);
+        themeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) return;
+            for (int index = 0; index < themeIds.length; index++) {
+                if (themeIds[index] == checkedId) {
+                    AppLook.setTheme(this, index);
+                    return;
+                }
+            }
+        });
+        ((android.widget.FrameLayout) findViewById(R.id.app_theme_segments)).addView(themeGroup);
 
         HyperValueRow languageRow = findViewById(R.id.app_language_input);
         List<String> tags = AppLook.languageTags();
@@ -329,7 +331,32 @@ public class SettingsActivity extends AppCompatActivity implements
             AppLook.setBlur(this, checked);
             navigation.setFrosted(AppLook.blur(this));
         });
-        MiuixRows.installSwitches(this, R.id.app_monet_switch, R.id.app_blur_switch);
+        MiuixRows.installTitleWithIcon(this, R.id.app_theme_title_row, R.drawable.ic_row_appearance);
+        MiuixRows.installChoiceRow(this, R.id.app_language_input, R.drawable.ic_row_language);
+        MiuixRows.installSwitchWithIcon(this, R.id.app_monet_switch, R.drawable.ic_row_wallpaper);
+        MiuixRows.installSwitchWithIcon(this, R.id.app_blur_switch, R.drawable.ic_row_blur);
+    }
+
+    private void bindStockCenter() {
+        com.google.android.material.materialswitch.MaterialSwitch center = findViewById(R.id.stock_center_switch);
+        center.setOnCheckedChangeListener(null);
+        center.setEnabled(false);
+        StockPanelCenter.query((enabled, ok) -> runOnUiThread(() -> {
+            center.setChecked(enabled);
+            center.setEnabled(ok);
+            center.setOnCheckedChangeListener((button, checked) -> {
+                center.setEnabled(false);
+                StockPanelCenter.setEnabled(checked, (state, done) -> runOnUiThread(() -> {
+                    if (!done) {
+                        android.widget.Toast.makeText(this, R.string.stock_center_failed,
+                                android.widget.Toast.LENGTH_SHORT).show();
+                        bindStockCenter();
+                        return;
+                    }
+                    center.setEnabled(true);
+                }));
+            });
+        }));
     }
 
     // ------------------------------------------------------------------
@@ -353,13 +380,6 @@ public class SettingsActivity extends AppCompatActivity implements
                 openBuilder(null));
         findViewById(R.id.widgets_home_templates_button).setOnClickListener(view ->
                 startActivity(new Intent(this, DashboardTemplatesActivity.class)));
-        bindSectionRow(R.id.general_content_button,
-                DashboardSettingsActivity.SECTION_MODE);
-    }
-
-    private void bindSectionRow(int buttonId, int section) {
-        findViewById(buttonId).setOnClickListener(view ->
-                startActivity(DashboardSettingsActivity.intentFor(this, section)));
     }
 
     private void openBuilder(@Nullable DashboardWidgetLayout.Widget widget) {
@@ -433,15 +453,8 @@ public class SettingsActivity extends AppCompatActivity implements
                 ? R.string.widgets_home_empty : R.string.widgets_home_preview_hint);
         for (int index = 0; index < onPage.size(); index++) {
             DashboardWidgetLayout.Widget widget = onPage.get(index);
-            MaterialButton row = (MaterialButton) getLayoutInflater()
-                    .inflate(R.layout.widget_builder_row, homeRows, false);
-            row.setText(WidgetCatalog.label(this, widget));
-            row.setShapeAppearanceModel(ShapeAppearanceModel.builder(this, 0,
-                    onPage.size() == 1 ? R.style.HyperOS_Shape_Group
-                            : index == 0 ? R.style.HyperOS_Shape_RowTop
-                            : index == onPage.size() - 1 ? R.style.HyperOS_Shape_RowBottom
-                            : R.style.HyperOS_Shape_RowMiddle).build());
-            row.setOnClickListener(view -> openBuilder(widget));
+            View row = MiuixRows.arrowRow(this, WidgetCatalog.label(this, widget),
+                    WidgetCatalog.icon(widget), () -> openBuilder(widget));
             homeRows.addView(row, new LinearLayout.LayoutParams(-1, -2));
         }
     }
@@ -495,15 +508,12 @@ public class SettingsActivity extends AppCompatActivity implements
     /** One line under each settings row saying what it is set to. */
     private void renderHomeSummaries() {
         DashboardSettings settings = MirrorSettings.loadDashboardSettings(this);
-        String[] modes = getResources().getStringArray(R.array.dashboard_mode_entries);
         String[] themes = getResources().getStringArray(R.array.dashboard_theme_entries);
         String[] idle = {
                 getString(R.string.dashboard_idle_15_seconds),
                 getString(R.string.dashboard_idle_30_seconds),
                 getString(R.string.dashboard_idle_always_on),
         };
-        ((TextView) findViewById(R.id.general_content_summary)).setText(
-                labelAt(modes, settings.contentMode.ordinal()));
         ((TextView) findViewById(R.id.widgets_home_appearance_summary)).setText(getString(
                 R.string.widgets_home_appearance_summary,
                 labelAt(themes, settings.theme.ordinal()), settings.textScalePercent));
@@ -630,16 +640,60 @@ public class SettingsActivity extends AppCompatActivity implements
                 scaleLabels[profile.scaleMode.ordinal()],
                 profile.rotationDegrees
         ));
+        hubPreview.setProfile(profile);
+        ((TextView) findViewById(R.id.hub_image_summary)).setText(getString(
+                R.string.hub_tile_image,
+                scaleLabels[profile.scaleMode.ordinal()],
+                profile.rotationDegrees,
+                profile.zoomPercent
+        ));
+        ((TextView) findViewById(R.id.hub_profiles_summary)).setText(getString(
+                R.string.hub_tile_profiles,
+                profiles.size(),
+                getString(MirrorSettings.isAutoProfileEnabled(this)
+                        ? R.string.hub_auto_on : R.string.hub_auto_off)));
     }
 
-    private void updateStatus(boolean active) {
-        statusValue.setText(active ? R.string.status_active : R.string.status_inactive);
+    /** Same start and stop as the Quick Settings tile, from the home screen. */
+    private void toggleMirroring() {
+        if (MirrorState.isActive() && !MirrorState.isDashboardOnly()) {
+            MirrorState.setActive(this, false);
+            if (ForegroundService.isRunning()) {
+                startService(ForegroundService.createStopIntent(this));
+            }
+            updateStatus(MirrorState.isActive());
+            return;
+        }
+        if (MirrorState.isActive()) {
+            MirrorState.setActive(this, false);
+        }
+        MirrorState.armSession(this, false);
+        startActivity(new Intent(this, DisplayActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP));
+    }
+
+    private void selectProfile(MirrorProfile profile) {
+        if (activeProfile != null && activeProfile.id.equals(profile.id)) {
+            return;
+        }
+        activeProfile = MirrorSettings.selectProfile(this, profile.id);
+        refreshProfileOptions(activeProfile.id);
+        updateProfileSummary(activeProfile);
+        settingsContent.announceForAccessibility(getString(
+                R.string.profile_selected_announcement,
+                profileName(activeProfile)
+        ));
+    }
+
+    private void updateStatus(boolean running) {
+        // Only the widgets running is not a broadcast, and must not read as one.
+        boolean active = running && !MirrorState.isDashboardOnly();
+        statusValue.setText(active ? R.string.hub_status_on : R.string.hub_status_off);
         statusValue.setContentDescription(getString(
                 active ? R.string.status_active_accessibility : R.string.status_inactive_accessibility
         ));
         // Running reads green at a glance; off stays on the plain surface.
         View card = findViewById(R.id.status_card);
-        ImageView icon = findViewById(R.id.status_icon);
         TextView title = findViewById(R.id.status_title);
         int onColor = ContextCompat.getColor(this, active
                 ? R.color.hyper_on_success_container : R.color.hyper_text_primary);
@@ -647,11 +701,13 @@ public class SettingsActivity extends AppCompatActivity implements
                 ? R.color.hyper_on_success_container : R.color.hyper_text_secondary);
         card.setBackgroundTintList(active ? ColorStateList.valueOf(
                 ContextCompat.getColor(this, R.color.hyper_success_container)) : null);
-        icon.setImageResource(active ? R.drawable.ic_status_on : R.drawable.ic_status_off);
-        icon.setImageTintList(ColorStateList.valueOf(active
-                ? ContextCompat.getColor(this, R.color.hyper_success) : quietColor));
         title.setTextColor(quietColor);
         statusValue.setTextColor(onColor);
+        profileSummary.setTextColor(quietColor);
+        // The button follows the tile: it stops a mirror session, and starts one
+        // when nothing, or only the widgets, is running.
+        boolean mirroring = active;
+        toggleButton.setText(mirroring ? R.string.hub_stop : R.string.hub_start);
     }
 
     private void updateCapabilityUi(DeviceCapabilityState.Snapshot snapshot) {
@@ -689,19 +745,7 @@ public class SettingsActivity extends AppCompatActivity implements
 
     private void refreshProfileOptions(String selectedId) {
         profiles = MirrorSettings.loadProfiles(this);
-        profileLabels = new String[profiles.size()];
-        int selectedIndex = 0;
-        for (int index = 0; index < profiles.size(); index++) {
-            MirrorProfile profile = profiles.get(index);
-            profileLabels[index] = profileName(profile);
-            if (profile.id.equals(selectedId)) {
-                selectedIndex = index;
-            }
-        }
-        bindingUi = true;
-        profileInput.setEntries(profileLabels);
-        profileInput.setValue(profileLabels[selectedIndex]);
-        bindingUi = false;
+        ProfileChips.bind(this, profileChips, profiles, selectedId, this::selectProfile);
     }
 
     private static final String SOURCE_URL = "https://github.com/tpkarras/Mirror2RearUltra";

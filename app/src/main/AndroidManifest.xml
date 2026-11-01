@@ -117,10 +117,6 @@
             android:theme="@style/Theme.Mirror2RearUltra.Mirror">
         </activity>
         <activity
-            android:name=".DashboardSettingsActivity"
-            android:exported="false"
-            android:label="@string/dashboard_settings_title" />
-        <activity
             android:name=".DashboardBuilderActivity"
             android:exported="false"
             android:label="@string/dashboard_builder_title" />
@@ -140,10 +136,6 @@
             android:name=".ImageSettingsActivity"
             android:exported="false"
             android:label="@string/profile_image_title" />
-        <activity
-            android:name=".AutomationActivity"
-            android:exported="false"
-            android:label="@string/auto_profile_title" />
         <activity
             android:name=".DeviceProtectionActivity"
             android:exported="false"

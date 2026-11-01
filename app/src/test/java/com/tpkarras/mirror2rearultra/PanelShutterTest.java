@@ -6,47 +6,39 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 /**
- * Finding a camera's shutter button in the system's dump of what is on top.
+ * Finding a camera's shutter button in the accessibility dump of all windows.
  *
- * <p>The lines are a real dump from the phone, trimmed to the button and its
- * parents. Each view is placed within its parent, so the answer is only right
- * if every corner along the way is added up: the bottom bar at 0,1794, the row
- * inside it at 286,32, the holder at 120,0, and a 268-wide button at 0,0.
+ * <p>The nodes are trimmed from a real dump of the phone: the camera's shutter
+ * is an ImageButton that is not marked clickable (it takes touches through a
+ * listener), a layer next to it has "capture" in its name, and the panel's own
+ * window is in the same dump.
  */
 public class PanelShutterTest {
     private static final String CAMERA = "com.shamim.cam";
     private static final String DUMP = String.join("\n",
-            "  ACTIVITY com.shamim.cam/com.android.camera.CameraLauncher 2566cda pid=30940"
-                    + " userId=0 uid=10295 displayId=0(type=INTERNAL)",
-            "    View Hierarchy:",
-            "      DecorView@5e30cb9[CameraLauncher]",
-            "        android.widget.LinearLayout{b6a7e80 V.E...... ........ 0,0-1080,2400}",
-            "          android.widget.FrameLayout{a1b0f03 V.E...... ........ 0,0-1080,2400}",
-            "            android.support.v7.widget.FitWindowsLinearLayout{31753b2 V.E......"
-                    + " ........ 0,0-1080,2400 #7f0b0039 app:id/action_bar_root}",
-            "              android.support.v7.widget.ContentFrameLayout{62211bd V.E......"
-                    + " ........ 0,0-1080,2400 #1020002 android:id/content}",
-            "                com.google.android.apps.camera.ui.views.MainActivityLayout{5c62514"
-                    + " V.E...... ........ 0,0-1080,2400 #7f0b0053 app:id/activity_root_view}",
-            "                  com.google.android.apps.camera.bottombar.BottomBar{e515df0"
-                    + " V.E...... ........ 0,1794-1080,2127 #7f0b007d app:id/bottom_bar}",
-            "                    android.widget.RelativeLayout{b06691c V.E...... ........"
-                    + " 286,32-795,300 #7f0b03b9 app:id/zoom_lock_view_parent}",
-            "                      android.widget.FrameLayout{5b7d28f V.E...... ........"
-                    + " 120,0-388,268 #7f0b00a9 app:id/center_placeholder}",
-            "                        com.google.android.apps.camera.ui.shutterbutton"
-                    + ".ShutterButton{79dfdee VFED..C.. ........ 0,0-268,268 #7f0b02a1"
-                    + " app:id/shutter_button}",
-            "  ACTIVITY com.tpkarras.mirror2rearultra/.Mirror 396c283 pid=11703 userId=0"
-                    + " uid=10259 displayId=2(type=INTERNAL)",
-            "    View Hierarchy:",
-            "      DecorView@1234567[Mirror]",
-            "        android.widget.FrameLayout{2222222 V.E...... ........ 0,0-126,294}",
-            "          android.view.View{383237f V.ED..C.. ........ 0,0-126,294 #7f090240"
-                    + " app:id/shutter_flash}");
+            "<hierarchy rotation=\"0\">",
+            "<window index=\"1\" title=\"Camera\" bounds=\"[0,0][1079,2399]\" active=\"true\">",
+            node(CAMERA, "android.widget.FrameLayout", "com.shamim.cam:id/capture_overlay_layout",
+                    "false", "[0,354][1080,1794]"),
+            node(CAMERA, "android.widget.ImageButton", "com.shamim.cam:id/thumbnail_button",
+                    "true", "[782,1834][1034,2086]"),
+            node(CAMERA, "android.widget.ImageButton", "com.shamim.cam:id/shutter_button",
+                    "false", "[406,1826][674,2094]"),
+            "</window>",
+            "<window index=\"0\" title=\"Mirror2RearUltra\" bounds=\"[0,0][294,126]\">",
+            node("com.tpkarras.mirror2rearultra", "android.view.View",
+                    "com.tpkarras.mirror2rearultra:id/shutter_flash", "true", "[0,0][294,126]"),
+            "</window>",
+            "</hierarchy>");
+
+    private static String node(String pkg, String cls, String id, String clickable, String bounds) {
+        return "<node index=\"0\" text=\"\" resource-id=\"" + id + "\" class=\"" + cls
+                + "\" package=\"" + pkg + "\" content-desc=\"\" clickable=\"" + clickable
+                + "\" enabled=\"true\" bounds=\"" + bounds + "\" />";
+    }
 
     @Test
-    public void theButtonIsWhereItsParentsPutIt() {
+    public void theShutterIsFoundEvenWhenNotMarkedClickable() {
         assertArrayEquals(new int[] {540, 1960}, PanelShutter.shutterPointIn(DUMP, CAMERA));
     }
 
@@ -56,16 +48,14 @@ public class PanelShutterTest {
     }
 
     @Test
-    public void thePanelsOwnViewsAreNotMistakenForAShutter() {
-        // The panel is in the same dump, it is on another display, and it has
-        // a view whose name ends in the very word being looked for.
-        assertNull(PanelShutter.shutterPointIn(DUMP, "com.tpkarras.mirror2rearultra"));
+    public void aPlainLayerWithTheWordInItsNameIsNotAShutter() {
+        String onlyLayer = DUMP.replace("shutter_button", "preview_frame");
+        assertNull(PanelShutter.shutterPointIn(onlyLayer, CAMERA));
     }
 
     @Test
-    public void aButtonThatIsNotOnScreenIsNotPressed() {
-        // A gone view keeps its place in the dump and its name with it.
-        String hidden = DUMP.replace("VFED..C..", "GFED..C..");
-        assertNull(PanelShutter.shutterPointIn(hidden, CAMERA));
+    public void aButtonWithNoAreaIsNotPressed() {
+        String empty = DUMP.replace("[406,1826][674,2094]", "[0,0][0,0]");
+        assertNull(PanelShutter.shutterPointIn(empty, CAMERA));
     }
 }

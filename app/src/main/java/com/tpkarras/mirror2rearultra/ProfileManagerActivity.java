@@ -1,9 +1,13 @@
 package com.tpkarras.mirror2rearultra;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -12,7 +16,9 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -22,8 +28,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -37,21 +45,42 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-public class ProfileManagerActivity extends AppCompatActivity {
-    private HyperValueRow profileInput;
-    private TextInputEditText searchInput;
+/**
+ * Which profile is in use and which apps switch to it: choosing, adding,
+ * renaming and deleting profiles, assigning apps, and the automatic switching
+ * (with the floating control) that those assignments depend on.
+ */
+public class ProfileManagerActivity extends AppCompatActivity
+        implements AutoProfileState.Listener {
+    private LinearLayout profileChips;
+    private PanelPreviewView preview;
+    private TextView profileName;
+    private TextView profileSummary;
+    private TextView profileExtra;
+    private LinearLayout assignedStrip;
+    private TextView assignedStripLabel;
+    private View assignedStripCard;
+    private MaterialButton appsTab;
+    private MaterialSwitch autoProfileSwitch;
+    private MaterialSwitch autoVisibilitySwitch;
+    private TextView autoProfileStatus;
+    private View usageAccessButton;
+    private View usageAccessGroup;
+    private TextView overlayAccessStatus;
+    private View overlayAccessButton;
+    private EditText searchInput;
     private LinearLayout appsContainer;
     private TextView appsEmpty;
-    private TextView assignedAppsSummary;
-    private MaterialButton addProfileButton;
-    private MaterialButton renameProfileButton;
-    private MaterialButton deleteProfileButton;
+    private View addProfileButton;
+    private View renameProfileButton;
+    private View deleteProfileButton;
     private ViewGroup content;
 
     private List<MirrorProfile> profiles = List.of();
     private List<AppEntry> apps = List.of();
     private MirrorProfile activeProfile;
-    private boolean bindingProfile;
+    /** Guards the automation listeners while the UI is written from stored state. */
+    private boolean bindingUi;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,11 +91,26 @@ public class ProfileManagerActivity extends AppCompatActivity {
 
         MaterialToolbar toolbar = findViewById(R.id.profile_manager_toolbar);
         toolbar.setNavigationOnClickListener(view -> finish());
-        profileInput = findViewById(R.id.profile_manager_input);
+        profileChips = findViewById(R.id.profile_manager_chips);
+        preview = findViewById(R.id.profile_manager_preview);
+        preview.fitToRearPanel();
+        profileName = findViewById(R.id.profile_manager_name);
+        profileSummary = findViewById(R.id.profile_manager_summary);
+        autoProfileSwitch = findViewById(R.id.auto_profile_switch);
+        autoVisibilitySwitch = findViewById(R.id.auto_visibility_switch);
+        autoProfileStatus = findViewById(R.id.auto_profile_status);
+        usageAccessButton = findViewById(R.id.usage_access_button);
+        usageAccessGroup = findViewById(R.id.usage_access_group);
+        overlayAccessStatus = findViewById(R.id.overlay_access_status);
+        overlayAccessButton = findViewById(R.id.overlay_access_button);
         searchInput = findViewById(R.id.app_search_input);
         appsContainer = findViewById(R.id.apps_container);
         appsEmpty = findViewById(R.id.apps_empty);
-        assignedAppsSummary = findViewById(R.id.assigned_apps_summary);
+        profileExtra = findViewById(R.id.profile_manager_extra);
+        assignedStrip = findViewById(R.id.assigned_strip);
+        assignedStripLabel = findViewById(R.id.assigned_strip_label);
+        assignedStripCard = findViewById(R.id.assigned_strip_card);
+        appsTab = findViewById(R.id.profile_manager_tab_apps);
         addProfileButton = findViewById(R.id.add_profile_button);
         renameProfileButton = findViewById(R.id.rename_profile_button);
         deleteProfileButton = findViewById(R.id.delete_profile_button);
@@ -82,20 +126,93 @@ public class ProfileManagerActivity extends AppCompatActivity {
 
         activeProfile = MirrorSettings.loadActiveProfile(this);
         refreshProfiles(activeProfile.id);
+        bindTabs();
+        bindHelpToggle(R.id.overlay_help_button, R.id.overlay_help);
+        bindHelpToggle(R.id.auto_help_button, R.id.auto_help);
+        twoLine(autoProfileSwitch, R.string.auto_switch_title, R.string.auto_switch_hint);
+        twoLine(autoVisibilitySwitch, R.string.auto_visibility_title, R.string.auto_visibility_hint);
         bindInteractions();
         renderApps();
+        MiuixRows.installSwitches(this, R.id.auto_profile_switch, R.id.auto_visibility_switch);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        AutoProfileState.addListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        AutoProfileState.removeListener(this);
+        super.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bindingUi = true;
+        autoProfileSwitch.setChecked(MirrorSettings.isAutoProfileEnabled(this));
+        autoVisibilitySwitch.setChecked(MirrorSettings.isAutoVisibilityEnabled(this));
+        bindingUi = false;
+        // Returning from the system usage-access screen is the common way back
+        // here, so re-arm the monitor if the permission has just been granted.
+        if (MirrorSettings.isAutoProfileEnabled(this)
+                && ForegroundAppMonitor.hasUsageAccess(this)) {
+            MirrorSettings.setAutoProfileEnabled(this, true);
+        }
+        updateAutoProfileUi(AutoProfileState.get());
+        updateOverlayAccessUi();
+    }
+
+    @Override
+    public void onAutoProfileChanged(AutoProfileState.Snapshot snapshot) {
+        runOnUiThread(() -> updateAutoProfileUi(snapshot));
+    }
+
+    /** A "?" next to a header that shows or hides that group's explanation. */
+    private void bindHelpToggle(int buttonId, int helpId) {
+        View help = findViewById(helpId);
+        findViewById(buttonId).setOnClickListener(view ->
+                help.setVisibility(help.getVisibility() == View.VISIBLE
+                        ? View.GONE : View.VISIBLE));
+    }
+
+    /** Profile and Apps share the page below the chips; one is shown at a time. */
+    private void bindTabs() {
+        MaterialButtonToggleGroup tabs = findViewById(R.id.profile_manager_tabs);
+        View profilesPage = findViewById(R.id.profile_manager_page_profiles);
+        View appsPage = findViewById(R.id.profile_manager_page_apps);
+        tabs.check(R.id.profile_manager_tab_profiles);
+        tabs.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            boolean apps = checkedId == R.id.profile_manager_tab_apps;
+            profilesPage.setVisibility(apps ? View.GONE : View.VISIBLE);
+            appsPage.setVisibility(apps ? View.VISIBLE : View.GONE);
+        });
     }
 
     private void bindInteractions() {
-        profileInput.setOnItemSelectedListener(position -> {
-            if (bindingProfile || position < 0 || position >= profiles.size()) {
+        autoProfileSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (bindingUi) {
                 return;
             }
-            activeProfile = MirrorSettings.selectProfile(this, profiles.get(position).id);
-            updateProfileActions();
-            renderApps();
+            MirrorSettings.setAutoProfileEnabled(this, checked);
+            updateAutoProfileUi(AutoProfileState.get());
         });
+        autoVisibilitySwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (bindingUi) {
+                return;
+            }
+            MirrorSettings.setAutoVisibilityEnabled(this, checked);
+            updateAutoProfileUi(AutoProfileState.get());
+        });
+        usageAccessButton.setOnClickListener(view -> openUsageAccessSettings());
+        overlayAccessButton.setOnClickListener(view -> openOverlayAccessSettings());
 
+        findViewById(R.id.app_search_clear).setOnClickListener(view -> searchInput.setText(""));
         addProfileButton.setOnClickListener(view -> showProfileNameDialog(false));
         renameProfileButton.setOnClickListener(view -> showProfileNameDialog(true));
         deleteProfileButton.setOnClickListener(view -> confirmDeleteProfile());
@@ -106,6 +223,8 @@ public class ProfileManagerActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence value, int start, int before, int count) {
+                findViewById(R.id.app_search_clear).setVisibility(
+                        value.length() == 0 ? View.GONE : View.VISIBLE);
                 renderApps();
             }
 
@@ -117,28 +236,50 @@ public class ProfileManagerActivity extends AppCompatActivity {
 
     private void refreshProfiles(String selectedId) {
         profiles = MirrorSettings.loadProfiles(this);
-        String[] labels = new String[profiles.size()];
         int selectedIndex = 0;
         for (int index = 0; index < profiles.size(); index++) {
-            MirrorProfile profile = profiles.get(index);
-            labels[index] = MirrorSettings.profileDisplayName(this, profile);
-            if (profile.id.equals(selectedId)) {
+            if (profiles.get(index).id.equals(selectedId)) {
                 selectedIndex = index;
             }
         }
         activeProfile = profiles.get(selectedIndex);
-        bindingProfile = true;
-        profileInput.setEntries(labels);
-        profileInput.setValue(labels[selectedIndex]);
-        bindingProfile = false;
+        ProfileChips.bind(this, profileChips, profiles, activeProfile.id, this::selectProfile,
+                () -> showProfileNameDialog(false));
         updateProfileActions();
+    }
+
+    private void selectProfile(MirrorProfile profile) {
+        if (activeProfile != null && activeProfile.id.equals(profile.id)) {
+            return;
+        }
+        activeProfile = MirrorSettings.selectProfile(this, profile.id);
+        refreshProfiles(activeProfile.id);
+        renderApps();
     }
 
     private void updateProfileActions() {
         boolean custom = activeProfile != null && activeProfile.isCustom();
         renameProfileButton.setEnabled(custom);
         deleteProfileButton.setEnabled(custom);
+        renameProfileButton.setAlpha(custom ? 1f : 0.4f);
+        deleteProfileButton.setAlpha(custom ? 1f : 0.4f);
         addProfileButton.setEnabled(true);
+        if (activeProfile != null) {
+            preview.setProfile(activeProfile);
+            profileName.setText(MirrorSettings.profileDisplayName(this, activeProfile));
+            profileSummary.setText(getString(
+                    R.string.profile_mode_summary,
+                    getResources().getStringArray(R.array.scale_mode_entries)[
+                            activeProfile.scaleMode.ordinal()],
+                    activeProfile.rotationDegrees,
+                    activeProfile.zoomPercent));
+            profileExtra.setText(getString(
+                    R.string.profile_extra,
+                    activeProfile.brightnessPercent,
+                    getString(activeProfile.mirrorHorizontally
+                            ? R.string.profile_extra_mirrored
+                            : R.string.profile_extra_not_mirrored)));
+        }
     }
 
     private void showProfileNameDialog(boolean rename) {
@@ -223,22 +364,23 @@ public class ProfileManagerActivity extends AppCompatActivity {
         Set<String> assigned = MirrorSettings.assignedPackages(this, activeProfile.id);
         appsContainer.removeAllViews();
         int visibleCount = 0;
-        for (AppEntry app : apps) {
+        List<AppEntry> ordered = new ArrayList<>(apps);
+        ordered.sort(Comparator.comparing(
+                (AppEntry app) -> assigned.contains(app.packageName) ? 0 : 1));
+        for (AppEntry app : ordered) {
             if (!query.isEmpty()
                     && !app.label.toLowerCase(Locale.ROOT).contains(query)
                     && !app.packageName.toLowerCase(Locale.ROOT).contains(query)) {
                 continue;
             }
-            MaterialCheckBox checkBox = new MaterialCheckBox(this);
-            checkBox.setLayoutParams(new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            ));
-            checkBox.setMinHeight(dp(60));
-            checkBox.setPadding(dp(18), dp(8), dp(18), dp(8));
-            checkBox.setBackgroundResource(R.drawable.hyper_row_bg_middle);
-            checkBox.setText(appRowLabel(app));
+            View row = getLayoutInflater().inflate(R.layout.item_app_row, appsContainer, false);
+            ((ImageView) row.findViewById(R.id.app_row_icon)).setImageDrawable(app.icon);
+            ((TextView) row.findViewById(R.id.app_row_name)).setText(app.label);
+            ((TextView) row.findViewById(R.id.app_row_detail)).setText(
+                    appRowDetail(app, assigned));
+            MaterialCheckBox checkBox = row.findViewById(R.id.app_row_check);
             checkBox.setChecked(assigned.contains(app.packageName));
+            row.setOnClickListener(view -> checkBox.setChecked(!checkBox.isChecked()));
             checkBox.setOnCheckedChangeListener((button, checked) -> {
                 if (checked) {
                     MirrorSettings.assignApp(this, app.packageName, activeProfile.id);
@@ -248,7 +390,7 @@ public class ProfileManagerActivity extends AppCompatActivity {
                 }
                 updateAssignedCount();
             });
-            appsContainer.addView(checkBox);
+            appsContainer.addView(row);
             visibleCount++;
         }
         appsEmpty.setVisibility(visibleCount == 0 ? View.VISIBLE : View.GONE);
@@ -256,28 +398,64 @@ public class ProfileManagerActivity extends AppCompatActivity {
         updateAssignedCount();
     }
 
-    /**
-     * Two-tier row label: the app name reads at full weight, the package name
-     * drops to secondary size and colour behind it. Both were previously drawn
-     * at the same size, which made the list hard to scan.
-     */
-    private CharSequence appRowLabel(AppEntry app) {
-        SpannableStringBuilder text = new SpannableStringBuilder(app.label);
-        int start = text.length() + 1;
-        text.append('\n').append(app.packageName);
-        text.setSpan(new RelativeSizeSpan(0.8f), start, text.length(),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        text.setSpan(new ForegroundColorSpan(androidx.core.content.ContextCompat.getColor(
-                        this, R.color.hyper_text_secondary)),
-                start, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        return text;
+    /** The line under an app's name: its package, or the profile that has it already. */
+    private String appRowDetail(AppEntry app, Set<String> assigned) {
+        String otherId = assigned.contains(app.packageName)
+                ? null : MirrorSettings.assignedProfileId(this, app.packageName);
+        for (MirrorProfile profile : profiles) {
+            if (profile.id.equals(otherId)) {
+                return getString(R.string.assigned_to_profile,
+                        MirrorSettings.profileDisplayName(this, profile));
+            }
+        }
+        return app.packageName;
     }
 
     private void updateAssignedCount() {
-        int count = activeProfile == null
-                ? 0
-                : MirrorSettings.assignedPackages(this, activeProfile.id).size();
-        assignedAppsSummary.setText(getString(R.string.assigned_apps_count, count));
+        Set<String> assigned = activeProfile == null
+                ? Set.of() : MirrorSettings.assignedPackages(this, activeProfile.id);
+        appsTab.setText(getString(R.string.profile_apps_tab, assigned.size()));
+        assignedStripLabel.setText(getString(R.string.assigned_apps_to_profile,
+                activeProfile == null ? "" : MirrorSettings.profileDisplayName(this, activeProfile),
+                assigned.size()));
+        assignedStrip.removeAllViews();
+        PackageManager manager = getPackageManager();
+        int shown = 0;
+        for (String packageName : assigned) {
+            if (shown == 7) {
+                TextView more = new TextView(this);
+                more.setText("+" + (assigned.size() - shown));
+                more.setTextColor(androidx.core.content.ContextCompat.getColor(
+                        this, R.color.hyper_text_secondary));
+                more.setGravity(android.view.Gravity.CENTER_VERTICAL);
+                assignedStrip.addView(more);
+                break;
+            }
+            try {
+                android.widget.ImageView icon = new android.widget.ImageView(this);
+                icon.setImageDrawable(manager.getApplicationIcon(packageName));
+                icon.setContentDescription(applicationName(packageName));
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dp(36), dp(36));
+                params.setMarginEnd(dp(8));
+                assignedStrip.addView(icon, params);
+                shown++;
+            } catch (PackageManager.NameNotFoundException ignored) {
+                // The app was removed since it was assigned; the list drops it too.
+            }
+        }
+        TextView add = new TextView(this);
+        add.setText("+");
+        add.setTextSize(20);
+        add.setGravity(android.view.Gravity.CENTER);
+        add.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.hyper_accent));
+        add.setBackgroundResource(R.drawable.hyper_chip_background);
+        add.setSelected(true);
+        add.setContentDescription(getString(R.string.add_apps));
+        add.setOnClickListener(view -> {
+            View picker = findViewById(R.id.apps_picker);
+            picker.setVisibility(picker.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+        });
+        assignedStrip.addView(add, new LinearLayout.LayoutParams(dp(36), dp(36)));
     }
 
     @SuppressWarnings("deprecation")
@@ -295,7 +473,8 @@ public class ProfileManagerActivity extends AppCompatActivity {
             CharSequence label = info.loadLabel(manager);
             byPackage.putIfAbsent(packageName, new AppEntry(
                     label == null ? packageName : label.toString(),
-                    packageName
+                    packageName,
+                    info.loadIcon(manager)
             ));
         }
         List<AppEntry> result = new ArrayList<>(byPackage.values());
@@ -315,6 +494,111 @@ public class ProfileManagerActivity extends AppCompatActivity {
         content.setLayoutParams(params);
     }
 
+    /** A title with a quieter line of explanation under it, drawn by {@link MiuixRows}. */
+    private void twoLine(MaterialSwitch row, int titleRes, int hintRes) {
+        row.setText(titleRes);
+        row.setTag(getString(hintRes));
+    }
+
+    private enum Tone { QUIET, WAIT, BAD, GOOD }
+
+    /** Paints a state pill: a tinted background with text in the same hue. */
+    private void setPill(TextView pill, CharSequence label, Tone tone) {
+        int text;
+        int fill;
+        switch (tone) {
+            case GOOD:
+                text = androidx.core.content.ContextCompat.getColor(
+                        this, R.color.hyper_on_success_container);
+                fill = androidx.core.content.ContextCompat.getColor(
+                        this, R.color.hyper_success_container);
+                break;
+            case WAIT:
+                text = androidx.core.content.ContextCompat.getColor(this, R.color.hyper_warning);
+                fill = androidx.core.graphics.ColorUtils.setAlphaComponent(text, 40);
+                break;
+            case BAD:
+                text = androidx.core.content.ContextCompat.getColor(this, R.color.hyper_error);
+                fill = androidx.core.graphics.ColorUtils.setAlphaComponent(text, 40);
+                break;
+            case QUIET:
+            default:
+                text = androidx.core.content.ContextCompat.getColor(
+                        this, R.color.hyper_text_secondary);
+                fill = androidx.core.graphics.ColorUtils.setAlphaComponent(text, 30);
+                break;
+        }
+        pill.setText(label);
+        pill.setTextColor(text);
+        pill.setBackgroundTintList(android.content.res.ColorStateList.valueOf(fill));
+    }
+
+    private void updateAutoProfileUi(AutoProfileState.Snapshot snapshot) {
+        boolean enabled = MirrorSettings.isAutoProfileEnabled(this)
+                || MirrorSettings.isAutoVisibilityEnabled(this);
+        boolean permitted = ForegroundAppMonitor.hasUsageAccess(this);
+        usageAccessGroup.setVisibility(enabled && !permitted ? View.VISIBLE : View.GONE);
+        if (!enabled) {
+            setPill(autoProfileStatus, getString(R.string.auto_state_off), Tone.QUIET);
+            return;
+        }
+        if (!permitted) {
+            setPill(autoProfileStatus, getString(R.string.auto_state_permission), Tone.BAD);
+            return;
+        }
+        if (snapshot.packageName == null) {
+            setPill(autoProfileStatus, getString(R.string.auto_state_waiting), Tone.WAIT);
+            return;
+        }
+        String appName = applicationName(snapshot.packageName);
+        if (snapshot.profileId == null) {
+            setPill(autoProfileStatus,
+                    getString(R.string.auto_profile_manual_for_app, appName), Tone.WAIT);
+        } else {
+            setPill(autoProfileStatus, getString(
+                    R.string.auto_profile_current,
+                    MirrorSettings.profileDisplayName(
+                            this, MirrorSettings.loadProfile(this, snapshot.profileId)),
+                    appName
+            ), Tone.GOOD);
+        }
+    }
+
+    private String applicationName(String packageName) {
+        PackageManager manager = getPackageManager();
+        try {
+            ApplicationInfo info = manager.getApplicationInfo(packageName, 0);
+            return String.valueOf(manager.getApplicationLabel(info));
+        } catch (PackageManager.NameNotFoundException error) {
+            return packageName;
+        }
+    }
+
+    private void openUsageAccessSettings() {
+        try {
+            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+        } catch (ActivityNotFoundException error) {
+            startActivity(new Intent(Settings.ACTION_SETTINGS));
+        }
+    }
+
+    private void updateOverlayAccessUi() {
+        boolean permitted = Settings.canDrawOverlays(this);
+        setPill(overlayAccessStatus, getString(permitted
+                ? R.string.overlay_state_granted : R.string.overlay_state_required),
+                permitted ? Tone.GOOD : Tone.BAD);
+        overlayAccessButton.setVisibility(permitted ? View.GONE : View.VISIBLE);
+    }
+
+    private void openOverlayAccessSettings() {
+        try {
+            startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName())));
+        } catch (ActivityNotFoundException error) {
+            startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION));
+        }
+    }
+
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
@@ -322,10 +606,12 @@ public class ProfileManagerActivity extends AppCompatActivity {
     private static final class AppEntry {
         final String label;
         final String packageName;
+        final android.graphics.drawable.Drawable icon;
 
-        AppEntry(String label, String packageName) {
+        AppEntry(String label, String packageName, android.graphics.drawable.Drawable icon) {
             this.label = label;
             this.packageName = packageName;
+            this.icon = icon;
         }
     }
 }

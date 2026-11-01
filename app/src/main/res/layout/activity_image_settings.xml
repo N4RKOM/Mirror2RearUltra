@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Image and calibration - everything here belongs to one profile.
+    Image and calibration.
 
-    The profile picker is the first row rather than something you set two
-    screens away, so the scope of the Image group below it is visible while you
-    change it, and switching profile re-binds those rows in place.
+    Profiles are chips at the top, with a live miniature of the rear panel
+    under them, so what the profile picker scopes is visible while you change
+    it. Switching profile re-binds the rows in place.
 
-    The Calibration group is mixed on purpose: projection quality and the
-    calibration grid apply to every profile, while zoom, the offsets and the
-    reset belong to the selected one. They sit together because they are used
-    together while lining the rear panel up. The profile picker therefore
-    scopes the Image group, not the whole page.
+    Two tabs under the preview, so the sliders on the Calibration tab sit
+    beside the miniature they move. Image and Fine tuning belong to the
+    selected profile; "All profiles" (projection quality and the calibration
+    grid) does not, and shares the Calibration tab because the grid is used
+    while lining the panel up. Each header has a "?" that shows the group's
+    explanation, which stays out of the way until asked for.
 
     image_settings_content stays a direct child of the NestedScrollView -
     SettingsLayout.constrainContentOnWideScreens needs FrameLayout.LayoutParams.
@@ -50,24 +51,134 @@
 
             <!-- ===================== Which profile ===================== -->
 
-            <LinearLayout style="@style/HyperOS.Group">
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:scrollbars="none">
 
-                <com.tpkarras.mirror2rearultra.HyperValueRow
-                    android:id="@+id/profile_input"
-                    style="@style/HyperOS.ValueRow.Single"
-                    app:rowTitle="@string/profile_selected_title" />
+                <LinearLayout
+                    android:id="@+id/profile_chips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <!-- ===================== Live preview ===================== -->
+
+            <LinearLayout
+                style="@style/HyperOS.Group"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/spacing_md">
+
+                <com.tpkarras.mirror2rearultra.PanelPreviewView
+                    android:id="@+id/panel_preview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="76dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/panel_preview_title"
+                        android:textAppearance="@style/HyperOS.Text.RowTitle" />
+
+                    <TextView
+                        android:id="@+id/panel_preview_zoom"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_xs"
+                        android:textAppearance="@style/HyperOS.Text.RowSummary" />
+
+                    <TextView
+                        android:id="@+id/panel_preview_offset"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="0dp"
+                        android:textAppearance="@style/HyperOS.Text.RowSummary" />
+                </LinearLayout>
             </LinearLayout>
 
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/profile_help" />
+
+            <!-- ===================== Which tab ===================== -->
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/image_settings_tabs"
+                style="@style/HyperOS.SegmentGroup"
+                android:layout_marginTop="@dimen/spacing_sm">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/image_settings_tab_image"
+                    style="@style/HyperOS.Segment"
+                    android:layout_weight="1"
+                    android:text="@string/image_settings_title" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/image_settings_tab_calibration"
+                    style="@style/HyperOS.Segment"
+                    android:layout_weight="1"
+                    android:text="@string/calibration_title" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/image_settings_tab_capture"
+                    style="@style/HyperOS.Segment"
+                    android:layout_weight="1"
+                    android:text="@string/capture_tab_title" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <LinearLayout
+                android:id="@+id/image_settings_page_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
             <!-- ===================== Image ===================== -->
 
-            <TextView
-                style="@style/HyperOS.SectionHeader"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/section_spacing"
-                android:text="@string/image_settings_title" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/HyperOS.SectionHeader"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/image_settings_title" />
+
+                <ImageButton
+                    android:id="@+id/help_image_button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/help_toggle"
+                    android:src="@drawable/ic_help"
+                    app:tint="@color/hyper_text_secondary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/help_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/HyperOS.GroupFootnote"
+                    android:text="@string/profile_help" />
+                <TextView
+                    style="@style/HyperOS.GroupFootnote"
+                    android:text="@string/brightness_mode_help" />
+            </LinearLayout>
 
             <LinearLayout style="@style/HyperOS.Group">
 
@@ -89,11 +200,32 @@
                     android:text="@string/mirror_horizontally" />
 
 
-                <TextView
-                    android:id="@+id/brightness_value"
-                    style="@style/HyperOS.SliderLabel"
-                    android:labelFor="@id/brightness_slider"
-                    android:text="@string/brightness_accessibility" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/row_padding_horizontal"
+                    android:paddingTop="@dimen/row_padding_vertical"
+                android:paddingBottom="@dimen/spacing_sm">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_row_brightness" />
+
+                    <TextView
+                        android:id="@+id/brightness_value"
+                        style="@style/HyperOS.SliderLabel"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                        android:paddingStart="@dimen/spacing_md"
+                        android:labelFor="@id/brightness_slider"
+                        android:text="@string/brightness_accessibility" />
+                </LinearLayout>
 
                 <com.tpkarras.mirror2rearultra.HyperSlider
                     android:id="@+id/brightness_slider"
@@ -109,33 +241,57 @@
                     android:text="@string/auto_brightness_title" />
             </LinearLayout>
 
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/brightness_mode_help" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/image_settings_page_calibration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
 
             <!-- ===================== Calibration ===================== -->
 
-            <TextView
-                style="@style/HyperOS.SectionHeader"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/section_spacing"
-                android:text="@string/calibration_title" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/HyperOS.SectionHeader"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/fine_tuning_title" />
+
+                <ImageButton
+                    android:id="@+id/help_fine_button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/help_toggle"
+                    android:src="@drawable/ic_help"
+                    app:tint="@color/hyper_text_secondary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/help_fine"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/HyperOS.GroupFootnote"
+                    android:text="@string/calibration_help" />
+                <TextView
+                    style="@style/HyperOS.GroupFootnote"
+                    android:text="@string/overlay_frame_help" />
+            </LinearLayout>
 
             <LinearLayout style="@style/HyperOS.Group">
-
-                <com.tpkarras.mirror2rearultra.HyperValueRow
-                    android:id="@+id/quality_mode_input"
-                    style="@style/HyperOS.ValueRow.Top"
-                    app:rowTitle="@string/quality_mode_title" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/calibration_grid_switch"
-                    style="@style/HyperOS.Switch"
-                    android:text="@string/calibration_grid_switch" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/calibration_preview_button"
-                    style="@style/HyperOS.ActionRow"
-                    android:text="@string/calibration_preview" />
 
                 <TextView
                     android:id="@+id/calibration_framed_notice"
@@ -143,11 +299,32 @@
                     android:text="@string/calibration_framed_notice"
                     android:visibility="gone" />
 
-                <TextView
-                    android:id="@+id/zoom_value"
-                    style="@style/HyperOS.SliderLabel"
-                    android:labelFor="@id/zoom_slider"
-                    android:text="@string/zoom_default" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/row_padding_horizontal"
+                    android:paddingTop="@dimen/row_padding_vertical"
+                android:paddingBottom="@dimen/spacing_sm">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_row_zoom" />
+
+                    <TextView
+                        android:id="@+id/zoom_value"
+                        style="@style/HyperOS.SliderLabel"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                        android:paddingStart="@dimen/spacing_md"
+                        android:labelFor="@id/zoom_slider"
+                        android:text="@string/zoom_default" />
+                </LinearLayout>
 
                 <com.tpkarras.mirror2rearultra.HyperSlider
                     android:id="@+id/zoom_slider"
@@ -157,16 +334,32 @@
                     app:hyperValueFrom="100"
                     app:hyperValueTo="200" />
 
-                <TextView
-                    style="@style/HyperOS.RowSummary"
-                    android:text="@string/zoom_quality_warning" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/row_padding_horizontal"
+                    android:paddingTop="@dimen/row_padding_vertical"
+                android:paddingBottom="@dimen/spacing_sm">
 
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_row_offset_h" />
 
-                <TextView
-                    android:id="@+id/horizontal_offset_value"
-                    style="@style/HyperOS.SliderLabel"
-                    android:labelFor="@id/horizontal_offset_slider"
-                    android:text="@string/horizontal_offset_default" />
+                    <TextView
+                        android:id="@+id/horizontal_offset_value"
+                        style="@style/HyperOS.SliderLabel"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                        android:paddingStart="@dimen/spacing_md"
+                        android:labelFor="@id/horizontal_offset_slider"
+                        android:text="@string/horizontal_offset_default" />
+                </LinearLayout>
 
                 <com.tpkarras.mirror2rearultra.HyperSlider
                     android:id="@+id/horizontal_offset_slider"
@@ -176,11 +369,32 @@
                     app:hyperValueFrom="-50"
                     app:hyperValueTo="50" />
 
-                <TextView
-                    android:id="@+id/vertical_offset_value"
-                    style="@style/HyperOS.SliderLabel"
-                    android:labelFor="@id/vertical_offset_slider"
-                    android:text="@string/vertical_offset_default" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/row_padding_horizontal"
+                    android:paddingTop="@dimen/row_padding_vertical"
+                android:paddingBottom="@dimen/spacing_sm">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_row_offset_v" />
+
+                    <TextView
+                        android:id="@+id/vertical_offset_value"
+                        style="@style/HyperOS.SliderLabel"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                        android:paddingStart="@dimen/spacing_md"
+                        android:labelFor="@id/vertical_offset_slider"
+                        android:text="@string/vertical_offset_default" />
+                </LinearLayout>
 
                 <com.tpkarras.mirror2rearultra.HyperSlider
                     android:id="@+id/vertical_offset_slider"
@@ -197,17 +411,118 @@
                     android:text="@string/reset_calibration" />
             </LinearLayout>
 
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/quality_mode_help" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/calibration_help" />
+                <TextView
+                    style="@style/HyperOS.SectionHeader"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/all_profiles_title" />
 
-            <TextView
-                style="@style/HyperOS.GroupFootnote"
-                android:text="@string/overlay_frame_help" />
+                <ImageButton
+                    android:id="@+id/help_all_button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/help_toggle"
+                    android:src="@drawable/ic_help"
+                    app:tint="@color/hyper_text_secondary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/help_all"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/HyperOS.GroupFootnote"
+                    android:text="@string/quality_mode_help" />
+            </LinearLayout>
+
+            <LinearLayout style="@style/HyperOS.Group">
+
+                <com.tpkarras.mirror2rearultra.HyperValueRow
+                    android:id="@+id/quality_mode_input"
+                    style="@style/HyperOS.ValueRow.Top"
+                    app:rowTitle="@string/quality_mode_title" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/calibration_grid_switch"
+                    style="@style/HyperOS.Switch"
+                    android:text="@string/calibration_grid_switch" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/calibration_preview_button"
+                    style="@style/HyperOS.ActionRow.Bottom"
+                    android:text="@string/calibration_preview" />
+
+            </LinearLayout>
+
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/image_settings_page_capture"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/HyperOS.SectionHeader"
+                    android:layout_marginTop="@dimen/section_spacing"
+                    android:text="@string/panel_mirror_tools_title" />
+
+            <LinearLayout
+                android:id="@+id/dashboard_section_mirror_tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout style="@style/HyperOS.Group">
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/dashboard_shutter_switch"
+                        style="@style/HyperOS.Switch.Top"
+                        android:text="@string/panel_shutter_on_tap" />
+
+                    <TextView
+                        android:id="@+id/dashboard_shutter_access_status"
+                        style="@style/HyperOS.RowSummary"
+                        android:text="@string/shutter_service_off" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dashboard_shutter_access_button"
+                        style="@style/HyperOS.ActionRow"
+                        android:text="@string/shutter_service_open" />
+
+                    <!-- After the service's status, which sat under it and read
+                         as though the countdown were what was switched off. -->
+                    <com.tpkarras.mirror2rearultra.HyperValueRow
+                        android:id="@+id/dashboard_shutter_delay_input"
+                        style="@style/HyperOS.ValueRow"
+                        app:rowTitle="@string/shutter_countdown_title" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/dashboard_mirror_grid_switch"
+                        style="@style/HyperOS.Switch"
+                        android:text="@string/mirror_grid" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/dashboard_mirror_level_switch"
+                        style="@style/HyperOS.Switch.Bottom"
+                        android:text="@string/mirror_level" />
+                </LinearLayout>
+            </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

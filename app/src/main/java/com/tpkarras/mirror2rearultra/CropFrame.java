@@ -161,8 +161,9 @@ final class CropFrame {
             contentWidth = side;
             contentHeight = side / screenAspect;
         }
+        boolean widePanel = panelWidth > panelHeight;
         RotationTransform transform = RotationTransform.forRotation(
-                displayRotation, profile.rotationDegrees, profile.mirrorHorizontally);
+                displayRotation, profile.rotationDegrees, profile.mirrorHorizontally, widePanel);
         degrees = transform.degrees;
         int quarter = Math.floorMod(transform.degrees / 90, 4);
         cos = quarter == 0 ? 1 : quarter == 2 ? -1 : 0;
@@ -175,7 +176,8 @@ final class CropFrame {
                 side,
                 screenWidth,
                 screenHeight,
-                profile.rotationDegrees
+                RotationTransform.contentQuarterTurnDegrees(
+                        displayRotation, profile.rotationDegrees, widePanel)
         );
         unitScaleX = transform.scaleX * scale.x;
         unitScaleY = transform.scaleY * scale.y;

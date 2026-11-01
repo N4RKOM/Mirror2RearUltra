@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">Panoul din spate</string>
     <string name="dashboard_card_help">Afișați informații proprii pe ecranul din spate, singure sau peste imaginea oglindită.</string>
     <string name="dashboard_customize">Personalizează panoul</string>
-    <string name="dashboard_settings_heading">Conținut și widgeturi</string>
     <string name="dashboard_output_title">Mod de ieșire</string>
     <string name="dashboard_mode_title">Conținutul ecranului din spate</string>
     <string name="dashboard_restart_notice">Reporniți ieșirea din spate pentru a aplica această schimbare de mod.</string>
@@ -566,4 +565,6 @@
     <string name="app_theme_dark">Întunecat</string>
     <string name="app_language_title">Limbă</string>
     <string name="app_language_system">Implicit sistem</string>
+    <string name="backup_export_short">Exportă</string>
+    <string name="backup_import_short">Importă</string>
 </resources>

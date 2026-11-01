@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">背面ダッシュボード</string>
     <string name="dashboard_card_help">背面画面に独自の情報を表示します。単独でも、ミラーリング映像に重ねても使えます。</string>
     <string name="dashboard_customize">ダッシュボードをカスタマイズ</string>
-    <string name="dashboard_settings_heading">内容とウィジェット</string>
     <string name="dashboard_output_title">出力モード</string>
     <string name="dashboard_mode_title">背面画面の内容</string>
     <string name="dashboard_restart_notice">このモード変更を反映するには背面出力を再起動してください。</string>
@@ -562,4 +561,6 @@
     <string name="app_theme_dark">ダーク</string>
     <string name="app_language_title">言語</string>
     <string name="app_language_system">システムのデフォルト</string>
+    <string name="backup_export_short">エクスポート</string>
+    <string name="backup_import_short">インポート</string>
 </resources>

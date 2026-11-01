@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">Dashboard achterop</string>
     <string name="dashboard_card_help">Toon eigen informatie op het achterscherm, op zichzelf of over het gespiegelde beeld heen.</string>
     <string name="dashboard_customize">Dashboard aanpassen</string>
-    <string name="dashboard_settings_heading">Inhoud en widgets</string>
     <string name="dashboard_output_title">Uitvoermodus</string>
     <string name="dashboard_mode_title">Inhoud van het achterscherm</string>
     <string name="dashboard_restart_notice">Start de achteruitvoer opnieuw om deze moduswijziging toe te passen.</string>
@@ -564,4 +563,6 @@
     <string name="app_theme_dark">Donker</string>
     <string name="app_language_title">Taal</string>
     <string name="app_language_system">Systeemstandaard</string>
+    <string name="backup_export_short">Exporteren</string>
+    <string name="backup_import_short">Importeren</string>
 </resources>

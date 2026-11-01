@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">Zadní panel</string>
     <string name="dashboard_card_help">Zobrazujte na zadní obrazovce vlastní informace, samostatně nebo přes zrcadlený obraz.</string>
     <string name="dashboard_customize">Přizpůsobit panel</string>
-    <string name="dashboard_settings_heading">Obsah a widgety</string>
     <string name="dashboard_output_title">Režim výstupu</string>
     <string name="dashboard_mode_title">Obsah zadní obrazovky</string>
     <string name="dashboard_restart_notice">Aby se změna režimu projevila, restartujte zadní výstup.</string>
@@ -568,4 +567,6 @@
     <string name="app_theme_dark">Tmavý</string>
     <string name="app_language_title">Jazyk</string>
     <string name="app_language_system">Podle systému</string>
+    <string name="backup_export_short">Export</string>
+    <string name="backup_import_short">Import</string>
 </resources>

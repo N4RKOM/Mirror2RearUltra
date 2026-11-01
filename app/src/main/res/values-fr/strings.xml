@@ -137,7 +137,6 @@
     <string name="dashboard_settings_title">Tableau de bord arrière</string>
     <string name="dashboard_card_help">Affichez des informations indépendantes sur l\'écran arrière, seules ou par-dessus l\'image dupliquée.</string>
     <string name="dashboard_customize">Personnaliser le tableau de bord</string>
-    <string name="dashboard_settings_heading">Contenu et widgets</string>
     <string name="dashboard_output_title">Mode de sortie</string>
     <string name="dashboard_mode_title">Contenu de l\'écran arrière</string>
     <string name="dashboard_restart_notice">Redémarrez la sortie arrière pour appliquer ce changement de mode.</string>
@@ -564,4 +563,6 @@
     <string name="app_theme_dark">Sombre</string>
     <string name="app_language_title">Langue</string>
     <string name="app_language_system">Par défaut du système</string>
+    <string name="backup_export_short">Exporter</string>
+    <string name="backup_import_short">Importer</string>
 </resources>
