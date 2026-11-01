@@ -16,3 +16,8 @@ local.properties
 
 # Codebase index, rebuilt on demand and large
 .codebase-memory/
+
+# Signing keys
+*.jks
+*.keystore
+keystore.properties

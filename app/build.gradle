@@ -16,8 +16,22 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Release signing comes from the environment (CI) or gradle properties, never from the repository.
+    def signingStoreFile = System.getenv('KEYSTORE_FILE') ?: project.findProperty('keystoreFile')
+    if (signingStoreFile) {
+        signingConfigs {
+            release {
+                storeFile file(signingStoreFile)
+                storePassword System.getenv('KEYSTORE_PASSWORD') ?: project.findProperty('keystorePassword')
+                keyAlias System.getenv('KEY_ALIAS') ?: project.findProperty('keyAlias')
+                keyPassword System.getenv('KEY_PASSWORD') ?: project.findProperty('keyPassword')
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (signingStoreFile) signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
