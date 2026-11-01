@@ -36,7 +36,7 @@
     <application
         android:name=".MirrorApp"
         android:allowBackup="false"
-        android:icon="@drawable/ic_rear2screenultra"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Mirror2RearUltra" >
@@ -75,7 +75,7 @@
             android:name=".QuickTileService"
             android:enabled="true"
             android:exported="true"
-            android:icon="@drawable/ic_rear2screenultra_icon"
+            android:icon="@drawable/ic_tile_mirror"
             android:label="@string/quicktile"
 
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" >
@@ -90,7 +90,7 @@
             android:name=".DashboardTileService"
             android:enabled="true"
             android:exported="true"
-            android:icon="@drawable/ic_rear2screenultra_icon"
+            android:icon="@drawable/ic_tile_widgets"
             android:label="@string/dashboard_quicktile"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
