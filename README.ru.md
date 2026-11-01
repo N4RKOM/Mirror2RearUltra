@@ -6,6 +6,8 @@
 
 Приложение сделано для одного телефона и его заднего экрана 294 × 126. Другие устройства не проверялись и не поддерживаются.
 
+> **Эта ветка (`HyperOS4`) адаптирована под HyperOS 4.**
+
 <p align="center">
   <img src="docs/images/ru/mirror.png" width="22%" alt="Экран «Зеркало»">
   <img src="docs/images/ru/image.png" width="22%" alt="Изображение и калибровка">
@@ -67,7 +69,7 @@
 ## Требования
 
 - Xiaomi Mi 11 Ultra (задний экран 294 × 126).
-- Android 11 или новее (`minSdk 30`), MIUI/HyperOS.
+- Android 11 или новее (`minSdk 30`). Эта ветка рассчитана на HyperOS 4.
 - Root необязателен; см. [Root](#root).
 
 ## Установка

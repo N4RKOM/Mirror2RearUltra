@@ -6,6 +6,8 @@ Rear-screen mirroring, calibration and widget dashboard for the **Xiaomi Mi 11 U
 
 The app is built for this one phone and its 294 × 126 rear panel. Other devices are not tested and not supported.
 
+> **This branch (`HyperOS4`) is adapted for HyperOS 4.**
+
 <p align="center">
   <img src="docs/images/mirror.png" width="22%" alt="Mirror screen">
   <img src="docs/images/image.png" width="22%" alt="Image and calibration">
@@ -67,7 +69,7 @@ The app is built for this one phone and its 294 × 126 rear panel. Other devices
 ## Requirements
 
 - Xiaomi Mi 11 Ultra (rear panel 294 × 126).
-- Android 11 or newer (`minSdk 30`) on MIUI/HyperOS.
+- Android 11 or newer (`minSdk 30`). This branch targets HyperOS 4.
 - Root is optional; see [Root](#root).
 
 ## Installation
