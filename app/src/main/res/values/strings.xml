@@ -422,6 +422,12 @@
     <string name="overlay_access_required">Display-over-other-apps access is required</string>
     <string name="overlay_access_granted">Floating button access granted</string>
     <string name="grant_overlay_access">Grant floating-window access</string>
+    <string name="silent_capture_title">Mirror without asking</string>
+    <string name="silent_capture_help">Allows screen capture without the system dialog (needs root, once). Mirroring then starts with an assigned app and stops shortly after it leaves, so the screen-access indicator is only shown while it is in use.</string>
+    <string name="silent_capture_off">Asks on every session</string>
+    <string name="silent_capture_on">Allowed: mirroring starts with the app</string>
+    <string name="silent_capture_grant">Allow with root</string>
+    <string name="silent_capture_failed">Root access was not granted</string>
     <string name="overlay_start_mirroring">Start mirroring</string>
     <string name="overlay_stop_mirroring">Stop mirroring</string>
     <string name="dashboard_idle_mode_title">Rear screen timeout</string>
@@ -702,4 +708,6 @@
     <string name="overlay_state_required">Not allowed</string>
     <string name="backup_export_short">Export</string>
     <string name="backup_import_short">Import</string>
+    <string name="silent_state_on">Allowed</string>
+    <string name="silent_state_off">Not allowed</string>
 </resources>

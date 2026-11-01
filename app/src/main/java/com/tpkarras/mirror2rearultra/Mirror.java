@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Matrix;
@@ -75,6 +76,11 @@ public class Mirror extends Activity implements
     private static final float SHUTTER_TAP_SLOP_PIXELS = 12f;
     private static final long SHUTTER_TAP_MILLIS = 500L;
     static final String EXTRA_SESSION_HAS_PROJECTION = "session_has_projection";
+    static final String EXTRA_PROJECTION_ON_DEMAND = "projection_on_demand";
+    /** How long the capture is kept after the image was last wanted. */
+    private static final long PROJECTION_LINGER_MILLIS = 8_000L;
+    /** How long to leave a refused or failed request alone before asking again. */
+    private static final long PROJECTION_RETRY_MILLIS = 20_000L;
     static final String EXTRA_DASHBOARD_ONLY = "dashboard_only";
 
     private TextureView textureView;
@@ -175,6 +181,20 @@ public class Mirror extends Activity implements
     private DashboardSettings dashboardSettings;
     private RearContentMode sessionContentMode;
     private boolean sessionHasProjection;
+    /**
+     * The capture comes and goes with the image instead of lasting the whole
+     * session: asked for when an assigned app is in front, let go of shortly
+     * after it leaves. Only when the system has agreed in advance to skip its
+     * dialog - see {@link ProjectionConsent} - otherwise every return would ask.
+     */
+    private boolean projectionOnDemand;
+    private boolean projectionRequested;
+    private boolean projectionReleaseScheduled;
+    private long projectionRetryAt;
+    private final Handler projectionHandler = new Handler(Looper.getMainLooper());
+    private final Runnable releaseProjectionAction = this::releaseIdleProjection;
+    private final ForegroundService.ProjectionListener projectionListener =
+            this::onProjectionChanged;
     private String appliedDashboardProfileId;
     /** The template the surroundings asked for, or null when none applies. */
     private String activeTriggerSlot;
@@ -275,6 +295,12 @@ public class Mirror extends Activity implements
                 EXTRA_SESSION_HAS_PROJECTION,
                 sessionContentMode.usesProjection()
         );
+        projectionOnDemand = !sessionHasProjection
+                && sessionContentMode.usesProjection()
+                && getIntent().getBooleanExtra(EXTRA_PROJECTION_ON_DEMAND, false);
+        if (projectionOnDemand) {
+            ForegroundService.setProjectionListener(projectionListener);
+        }
         originalSubscreenSwitch = Settings.System.getInt(
                 getContentResolver(),
                 "subscreen_switch",
@@ -425,6 +451,10 @@ public class Mirror extends Activity implements
     protected void onDestroy() {
         idleHandler.removeCallbacks(idleAction);
         idleHandler.removeCallbacks(idleFadeFrame);
+        projectionHandler.removeCallbacks(releaseProjectionAction);
+        if (projectionOnDemand) {
+            ForegroundService.setProjectionListener(null);
+        }
         MirrorState.removeListener(this);
         MirrorSettings.removeListener(this);
         unregisterRuntimeListeners();
@@ -462,7 +492,8 @@ public class Mirror extends Activity implements
                 // service just to deliver the message.
                 if (MirrorState.isActive()) {
                     MirrorState.setActive(this, false);
-                    if (sessionHasProjection && ForegroundService.isRunning()) {
+                    if ((sessionHasProjection || projectionOnDemand)
+                            && ForegroundService.isRunning()) {
                         startService(ForegroundService.createStopIntent(this));
                     }
                 }
@@ -1027,6 +1058,11 @@ public class Mirror extends Activity implements
                 || !projectionSurface.isValid()) {
             return;
         }
+        if (projectionOnDemand && !ForegroundService.isProjectionLive()) {
+            // The surface is kept and handed over once the capture is up.
+            requestProjection();
+            return;
+        }
         try {
             startService(ForegroundService.createAttachSurfaceIntent(
                     this,
@@ -1045,7 +1081,7 @@ public class Mirror extends Activity implements
         if (projectionSurface == null) {
             return;
         }
-        if (MirrorState.isActive()) {
+        if (MirrorState.isActive() && (!projectionOnDemand || ForegroundService.isProjectionLive())) {
             try {
                 startService(ForegroundService.createDetachSurfaceIntent(this));
             } catch (RuntimeException error) {
@@ -1583,7 +1619,10 @@ public class Mirror extends Activity implements
         AutoProfileState.set(profileId, packageName);
         // Entering another app is a new explicit decision. Never carry an
         // active capture into it, even when both apps use the same profile.
-        manualProjectionEnabled = false;
+        // With the capture granted in advance there is no cost to starting it
+        // with the app, so the image comes up on its own and the button only
+        // turns it off. Otherwise the button stays the way to start it.
+        manualProjectionEnabled = projectionOnDemand && profileId != null;
         if (MirrorSettings.isAutoProfileEnabled(this)) {
             activeProfile = profileId == null
                     ? MirrorSettings.loadActiveProfile(this)
@@ -1750,6 +1789,83 @@ public class Mirror extends Activity implements
         }
         if (!showProjection) {
             detachProjectionSurface();
+        }
+        updateProjectionLease();
+    }
+
+    /**
+     * Keeps the capture only as long as the image is wanted.
+     *
+     * <p>It goes a few seconds after the image does, not at once: leaving an
+     * app for the one beside it, or a notification shade pulled down, is not
+     * worth a new capture.
+     */
+    private void updateProjectionLease() {
+        if (!projectionOnDemand) {
+            return;
+        }
+        if (shouldShowProjection()) {
+            projectionHandler.removeCallbacks(releaseProjectionAction);
+            projectionReleaseScheduled = false;
+        } else if (ForegroundService.isProjectionLive() && !projectionReleaseScheduled) {
+            projectionReleaseScheduled = true;
+            projectionHandler.postDelayed(releaseProjectionAction, PROJECTION_LINGER_MILLIS);
+        }
+    }
+
+    private void releaseIdleProjection() {
+        projectionReleaseScheduled = false;
+        if (shouldShowProjection() || !ForegroundService.isProjectionLive()) {
+            return;
+        }
+        detachProjectionSurface();
+        try {
+            startService(ForegroundService.createReleaseIntent(this));
+        } catch (RuntimeException error) {
+            Log.w(TAG, "Unable to release the projection", error);
+        }
+        Log.i(TAG, "Projection released");
+    }
+
+    private void requestProjection() {
+        if (projectionRequested || SystemClock.elapsedRealtime() < projectionRetryAt) {
+            return;
+        }
+        projectionRequested = true;
+        // A request that never answers must not block the next one for good.
+        projectionHandler.postDelayed(() -> projectionRequested = false, 10_000L);
+        try {
+            ActivityOptions options = ActivityOptions.makeBasic();
+            options.setLaunchDisplayId(Display.DEFAULT_DISPLAY);
+            startActivity(new Intent(this, ProjectionRequestActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), options.toBundle());
+        } catch (RuntimeException error) {
+            Log.w(TAG, "Unable to ask for the projection", error);
+            projectionRequested = false;
+            projectionRetryAt = SystemClock.elapsedRealtime() + PROJECTION_RETRY_MILLIS;
+        }
+    }
+
+    private void onProjectionChanged(boolean live) {
+        projectionRequested = false;
+        if (live) {
+            if (shouldShowProjection()) {
+                if (projectionSurface != null) {
+                    attachProjectionSurface(projectionBufferWidth, projectionBufferHeight);
+                } else {
+                    ensureProjectionSurface();
+                }
+                applyRotationTransform();
+            }
+            updateProjectionLease();
+            return;
+        }
+        projectionReleaseScheduled = false;
+        projectionHandler.removeCallbacks(releaseProjectionAction);
+        if (shouldShowProjection()) {
+            // Refused, or taken away: try again later rather than at once.
+            projectionRetryAt = SystemClock.elapsedRealtime() + PROJECTION_RETRY_MILLIS;
+            projectionHandler.postDelayed(this::ensureProjectionSurface, PROJECTION_RETRY_MILLIS);
         }
     }
 
@@ -1920,7 +2036,7 @@ public class Mirror extends Activity implements
     }
 
     private boolean usesProjection() {
-        return sessionHasProjection && sessionContentMode.usesProjection();
+        return (sessionHasProjection || projectionOnDemand) && sessionContentMode.usesProjection();
     }
 
     private void updateOutputVisibility() {

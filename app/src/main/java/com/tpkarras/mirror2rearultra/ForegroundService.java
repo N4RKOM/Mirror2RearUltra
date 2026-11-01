@@ -28,6 +28,8 @@ public class ForegroundService extends Service {
     private static final String ACTION_STOP = "com.tpkarras.mirror2rearultra.action.STOP";
     private static final String ACTION_ATTACH_SURFACE = "com.tpkarras.mirror2rearultra.action.ATTACH_SURFACE";
     private static final String ACTION_DETACH_SURFACE = "com.tpkarras.mirror2rearultra.action.DETACH_SURFACE";
+    private static final String ACTION_RELEASE = "com.tpkarras.mirror2rearultra.action.RELEASE";
+    private static final String EXTRA_ON_DEMAND = "on_demand";
     private static final String EXTRA_RESULT_CODE = "result_code";
     private static final String EXTRA_RESULT_DATA = "result_data";
     private static final String EXTRA_SURFACE = "surface";
@@ -47,16 +49,61 @@ public class ForegroundService extends Service {
     private int surfaceDensityDpi;
     private boolean shuttingDown;
     private static volatile boolean running;
+    private static volatile boolean projectionLive;
+    private static volatile ProjectionListener projectionListener;
+    /**
+     * The capture was asked for as it was needed rather than for the whole
+     * session, so losing it ends only the capture and not the session.
+     */
+    private boolean onDemand;
+
+    /** Told, on the main thread, when a capture appears, goes, or is refused. */
+    interface ProjectionListener {
+        void onProjectionChanged(boolean live);
+    }
 
     static boolean isRunning() {
         return running;
     }
 
+    /** Whether a capture is up and can take a surface. */
+    static boolean isProjectionLive() {
+        return projectionLive;
+    }
+
+    static void setProjectionListener(@Nullable ProjectionListener listener) {
+        projectionListener = listener;
+    }
+
+    /** A request for a capture came to nothing; lets the waiting side stop waiting. */
+    static void reportProjectionDenied() {
+        notifyProjection(false);
+    }
+
+    private static void notifyProjection(boolean live) {
+        projectionLive = live;
+        ProjectionListener listener = projectionListener;
+        if (listener != null) {
+            new Handler(Looper.getMainLooper()).post(() -> listener.onProjectionChanged(live));
+        }
+    }
+
     static Intent createStartIntent(Context context, int resultCode, Intent resultData) {
+        return createStartIntent(context, resultCode, resultData, false);
+    }
+
+    static Intent createStartIntent(
+            Context context, int resultCode, Intent resultData, boolean onDemand) {
         return new Intent(context, ForegroundService.class)
                 .setAction(ACTION_START)
                 .putExtra(EXTRA_RESULT_CODE, resultCode)
-                .putExtra(EXTRA_RESULT_DATA, resultData);
+                .putExtra(EXTRA_RESULT_DATA, resultData)
+                .putExtra(EXTRA_ON_DEMAND, onDemand);
+    }
+
+    /** Lets go of the capture and the service, leaving the session as it is. */
+    static Intent createReleaseIntent(Context context) {
+        return new Intent(context, ForegroundService.class).setAction(ACTION_RELEASE);
     }
 
     static Intent createStopIntent(Context context) {
@@ -113,6 +160,10 @@ public class ForegroundService extends Service {
                 detachSurface();
                 break;
             case ACTION_STOP:
+                onDemand = false;
+                shutdown(false);
+                break;
+            case ACTION_RELEASE:
                 shutdown(false);
                 break;
             default:
@@ -138,8 +189,11 @@ public class ForegroundService extends Service {
         running = false;
         if (!shuttingDown) {
             releaseProjection(false);
-            MirrorState.setActive(this, false);
+            if (!onDemand) {
+                MirrorState.setActive(this, false);
+            }
         }
+        notifyProjection(false);
         super.onDestroy();
     }
 
@@ -181,6 +235,7 @@ public class ForegroundService extends Service {
     }
 
     private void startProjection(Intent intent) {
+        onDemand = intent.getBooleanExtra(EXTRA_ON_DEMAND, false);
         int resultCode = intent.getIntExtra(EXTRA_RESULT_CODE, 0);
         Intent resultData = getParcelableIntentExtra(intent, EXTRA_RESULT_DATA);
         MediaProjectionManager manager = getSystemService(MediaProjectionManager.class);
@@ -207,7 +262,10 @@ public class ForegroundService extends Service {
                 }
             };
             mediaProjection.registerCallback(projectionCallback, mainHandler);
-            MirrorState.setActive(this, true);
+            if (!onDemand) {
+                MirrorState.setActive(this, true);
+            }
+            notifyProjection(true);
             createOrUpdateVirtualDisplay();
         } catch (RuntimeException error) {
             Log.e(TAG, "Unable to create media projection", error);
@@ -289,7 +347,10 @@ public class ForegroundService extends Service {
         }
         shuttingDown = true;
         releaseProjection(projectionAlreadyStopped);
-        MirrorState.setActive(this, false);
+        notifyProjection(false);
+        if (!onDemand) {
+            MirrorState.setActive(this, false);
+        }
         stopForeground(STOP_FOREGROUND_REMOVE);
         stopSelf();
     }

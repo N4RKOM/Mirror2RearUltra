@@ -706,4 +706,12 @@
     <string name="overlay_state_required">Нет доступа</string>
     <string name="backup_export_short">Экспорт</string>
     <string name="backup_import_short">Импорт</string>
+    <string name="silent_capture_title">Зеркало без запроса доступа</string>
+    <string name="silent_capture_help">Разрешает захват экрана без системного диалога (один раз, нужен root). Зеркало включается вместе с приложением из профиля и выключается вскоре после выхода из него, поэтому индикатор доступа к экрану виден только пока оно нужно.</string>
+    <string name="silent_capture_off">Запрос при каждом сеансе</string>
+    <string name="silent_capture_on">Разрешено: зеркало включается с приложением</string>
+    <string name="silent_capture_grant">Разрешить через root</string>
+    <string name="silent_capture_failed">Root-доступ не получен</string>
+    <string name="silent_state_on">Разрешено</string>
+    <string name="silent_state_off">Не разрешено</string>
 </resources>

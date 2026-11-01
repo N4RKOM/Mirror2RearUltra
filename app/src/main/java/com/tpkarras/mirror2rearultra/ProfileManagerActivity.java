@@ -21,6 +21,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -68,6 +69,8 @@ public class ProfileManagerActivity extends AppCompatActivity
     private View usageAccessGroup;
     private TextView overlayAccessStatus;
     private View overlayAccessButton;
+    private TextView silentCaptureStatus;
+    private View silentCaptureButton;
     private EditText searchInput;
     private LinearLayout appsContainer;
     private TextView appsEmpty;
@@ -103,6 +106,8 @@ public class ProfileManagerActivity extends AppCompatActivity
         usageAccessGroup = findViewById(R.id.usage_access_group);
         overlayAccessStatus = findViewById(R.id.overlay_access_status);
         overlayAccessButton = findViewById(R.id.overlay_access_button);
+        silentCaptureStatus = findViewById(R.id.silent_capture_status);
+        silentCaptureButton = findViewById(R.id.silent_capture_button);
         searchInput = findViewById(R.id.app_search_input);
         appsContainer = findViewById(R.id.apps_container);
         appsEmpty = findViewById(R.id.apps_empty);
@@ -163,6 +168,7 @@ public class ProfileManagerActivity extends AppCompatActivity
         }
         updateAutoProfileUi(AutoProfileState.get());
         updateOverlayAccessUi();
+        updateSilentCaptureUi();
     }
 
     @Override
@@ -211,6 +217,7 @@ public class ProfileManagerActivity extends AppCompatActivity
         });
         usageAccessButton.setOnClickListener(view -> openUsageAccessSettings());
         overlayAccessButton.setOnClickListener(view -> openOverlayAccessSettings());
+        silentCaptureButton.setOnClickListener(view -> grantSilentCapture());
 
         findViewById(R.id.app_search_clear).setOnClickListener(view -> searchInput.setText(""));
         addProfileButton.setOnClickListener(view -> showProfileNameDialog(false));
@@ -588,6 +595,28 @@ public class ProfileManagerActivity extends AppCompatActivity
                 ? R.string.overlay_state_granted : R.string.overlay_state_required),
                 permitted ? Tone.GOOD : Tone.BAD);
         overlayAccessButton.setVisibility(permitted ? View.GONE : View.VISIBLE);
+    }
+
+    private void updateSilentCaptureUi() {
+        boolean silent = ProjectionConsent.isSilent(this);
+        setPill(silentCaptureStatus, getString(silent
+                ? R.string.silent_state_on : R.string.silent_state_off),
+                silent ? Tone.GOOD : Tone.QUIET);
+        silentCaptureButton.setVisibility(silent ? View.GONE : View.VISIBLE);
+    }
+
+    private void grantSilentCapture() {
+        silentCaptureButton.setEnabled(false);
+        new Thread(() -> {
+            boolean granted = ProjectionConsent.grantWithRoot(getApplicationContext());
+            runOnUiThread(() -> {
+                silentCaptureButton.setEnabled(true);
+                updateSilentCaptureUi();
+                if (!granted) {
+                    Toast.makeText(this, R.string.silent_capture_failed, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }, "silent-capture-grant").start();
     }
 
     private void openOverlayAccessSettings() {

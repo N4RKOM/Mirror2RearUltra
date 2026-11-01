@@ -64,6 +64,14 @@ public class DisplayActivity extends AppCompatActivity {
             return;
         }
 
+        // With the system's consent already given in advance there is nothing
+        // to ask: the session starts without a capture and takes one when an
+        // assigned app comes to the front, dropping it again when it leaves.
+        if (ProjectionConsent.isSilent(this)) {
+            launchRearActivity(rearDisplayId, false, false, true);
+            return;
+        }
+
         mediaProjectionManager = getSystemService(MediaProjectionManager.class);
         if (mediaProjectionManager == null) {
             showFatalError(R.string.projection_failed);
@@ -115,12 +123,18 @@ public class DisplayActivity extends AppCompatActivity {
     }
 
     private void launchRearActivity(int rearDisplayId, boolean hasProjection, boolean dashboardOnly) {
+        launchRearActivity(rearDisplayId, hasProjection, dashboardOnly, false);
+    }
+
+    private void launchRearActivity(
+            int rearDisplayId, boolean hasProjection, boolean dashboardOnly, boolean onDemand) {
         try {
             ActivityOptions options = ActivityOptions.makeBasic();
             options.setLaunchDisplayId(rearDisplayId);
             Intent mirrorIntent = new Intent(this, Mirror.class)
                     .putExtra(Mirror.EXTRA_SESSION_HAS_PROJECTION, hasProjection)
                     .putExtra(Mirror.EXTRA_DASHBOARD_ONLY, dashboardOnly)
+                    .putExtra(Mirror.EXTRA_PROJECTION_ON_DEMAND, onDemand)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(mirrorIntent, options.toBundle());
             finish();

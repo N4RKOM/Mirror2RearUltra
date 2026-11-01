@@ -394,6 +394,57 @@
                         android:text="@string/grant_overlay_access" />
                 </LinearLayout>
 
+                <!-- Screen capture without the system dialog, granted once with root. -->
+                <LinearLayout
+                    style="@style/HyperOS.Group"
+                    android:layout_marginTop="@dimen/section_spacing">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:minHeight="@dimen/row_min_height"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="@dimen/row_padding_horizontal"
+                        android:paddingVertical="@dimen/spacing_sm">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/silent_capture_title"
+                                android:textAppearance="@style/HyperOS.Text.RowTitle" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/spacing_xs"
+                                android:text="@string/silent_capture_help"
+                                android:textAppearance="@style/HyperOS.Text.RowSummary" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/silent_capture_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_md"
+                            android:background="@drawable/hyper_pill_background"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="5dp"
+                            android:textAppearance="@style/HyperOS.Text.RowSummary" />
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/silent_capture_button"
+                        style="@style/HyperOS.ActionRow.Bottom"
+                        android:text="@string/silent_capture_grant" />
+                </LinearLayout>
+
                 <!-- Apps already given to the selected profile, at a glance. -->
                 <LinearLayout
                     android:id="@+id/assigned_strip_card"

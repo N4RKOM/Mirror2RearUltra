@@ -109,6 +109,12 @@
             android:theme="@style/Theme.Mirror2RearUltra">
         </activity>
         <activity
+            android:name=".ProjectionRequestActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity
             android:name=".Mirror"
             android:excludeFromRecents="true"
             android:exported="false"
