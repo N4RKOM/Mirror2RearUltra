@@ -78,7 +78,7 @@ public class Mirror extends Activity implements
     static final String EXTRA_SESSION_HAS_PROJECTION = "session_has_projection";
     static final String EXTRA_PROJECTION_ON_DEMAND = "projection_on_demand";
     /** How long the capture is kept after the image was last wanted. */
-    private static final long PROJECTION_LINGER_MILLIS = 8_000L;
+    private static final long PROJECTION_LINGER_MILLIS = 1_500L;
     /** How long to leave a refused or failed request alone before asking again. */
     private static final long PROJECTION_RETRY_MILLIS = 20_000L;
     static final String EXTRA_DASHBOARD_ONLY = "dashboard_only";
@@ -1619,10 +1619,7 @@ public class Mirror extends Activity implements
         AutoProfileState.set(profileId, packageName);
         // Entering another app is a new explicit decision. Never carry an
         // active capture into it, even when both apps use the same profile.
-        // With the capture granted in advance there is no cost to starting it
-        // with the app, so the image comes up on its own and the button only
-        // turns it off. Otherwise the button stays the way to start it.
-        manualProjectionEnabled = projectionOnDemand && profileId != null;
+        manualProjectionEnabled = false;
         if (MirrorSettings.isAutoProfileEnabled(this)) {
             activeProfile = profileId == null
                     ? MirrorSettings.loadActiveProfile(this)

@@ -423,9 +423,9 @@
     <string name="overlay_access_granted">Floating button access granted</string>
     <string name="grant_overlay_access">Grant floating-window access</string>
     <string name="silent_capture_title">Mirror without asking</string>
-    <string name="silent_capture_help">Allows screen capture without the system dialog (needs root, once). Mirroring then starts with an assigned app and stops shortly after it leaves, so the screen-access indicator is only shown while it is in use.</string>
+    <string name="silent_capture_help">Allows screen capture without the system dialog (needs root, once). Mirroring then starts with the floating button and stops shortly after the assigned app leaves, so the screen-access indicator is only shown while it is in use.</string>
     <string name="silent_capture_off">Asks on every session</string>
-    <string name="silent_capture_on">Allowed: mirroring starts with the app</string>
+    <string name="silent_capture_on">Allowed: the button starts mirroring</string>
     <string name="silent_capture_grant">Allow with root</string>
     <string name="silent_capture_failed">Root access was not granted</string>
     <string name="overlay_start_mirroring">Start mirroring</string>
