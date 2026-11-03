@@ -52,3 +52,17 @@ system brightness setting is not overwritten. Older firmware retains sysfs contr
 On-device validation on 2026-10-31 confirmed loaded hooks, rear output while the main
 display was locked, and physical single/double-tap interaction after a Quick Settings
 tile launch. The system rear brightness remained unchanged after those interactions.
+
+## 1.2.0 load stamp
+
+Once the system is up the module writes `<module versionCode>:<boot count>` to the secure
+setting `m2ru_rearunlock_stamp` (boot count is `Settings.Global.BOOT_COUNT`). An installed,
+enabled module with a saved scope proves nothing until it is loaded into `system_server`; the
+stamp does. A stamp from an earlier boot, or left by a module that has since been disabled,
+carries an older boot count and does not count. Read it without any permission:
+`adb shell settings get secure m2ru_rearunlock_stamp`.
+
+The recommended scope is declared as `android` in `xposedscope`. For legacy modules Vector/LSPosed
+swap the two names, so `android` there is shown as **System Framework**; declaring `system`
+would be shown as Android System. If the module was enabled before 1.2.0 with Android System
+ticked, untick it: only System Framework is needed.

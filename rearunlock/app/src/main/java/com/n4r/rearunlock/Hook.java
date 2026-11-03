@@ -48,6 +48,7 @@ public class Hook implements IXposedHookLoadPackage {
         hook(impl, "isShouldShowOnRearDisplay", "android.content.pm.ActivityInfo", allowTarget());
         hook(impl, "isAllowedToStartOnRearDisplay", "com.android.server.wm.ActivityRecord", allowTarget());
         RearPowerHooks.install(lpparam.classLoader);
+        LoadStamp.install();
     }
 
     private static XC_MethodHook allowTarget() {

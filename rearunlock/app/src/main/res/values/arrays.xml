@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Legacy modules name the system server "android"; LSPosed/Vector swap that to its own
+         "system" (System Framework). Writing "system" here would be swapped to the real
+         "android" package and the manager would recommend Android System instead. -->
     <string-array name="xposedscope">
-        <item>system</item>
+        <item>android</item>
     </string-array>
 </resources>

@@ -78,11 +78,12 @@ The app is built for this one phone and its 294 × 126 rear panel. Other devices
 
 **On HyperOS 4 the app has no access to the rear screen without the M2RU Rear Unlock module.** The firmware refuses to start any app on the rear display (displayId 1) unless the app is on its built-in whitelist, and a normal app cannot add itself to it. Mirroring, the dashboard and every widget depend on that access, so without the module nothing is shown on the panel.
 
-The module (`com.n4r.rearunlock`, version 1.1.0) is a small LSPosed/Vector module. It hooks `system_server` at runtime and changes nothing on disk: no framework file or partition is patched.
+The module (`com.n4r.rearunlock`, version 1.2.0) is a small LSPosed/Vector module. It hooks `system_server` at runtime and changes nothing on disk: no framework file or partition is patched.
 
 What it does:
 - Lets **only** `com.tpkarras.mirror2rearultra` start on the rear display, including while the main screen is locked. It overrides two firmware checks in `ActivityStarterImpl`: `isShouldShowOnRearDisplay` and `isAllowedToStartOnRearDisplay`. Every other app keeps the firmware's original answer.
 - Fixes rear power handling on the tested firmware, where the legacy rear wake and sleep calls are empty. Calls from the app's own UID are forwarded to the current rear power group, and while the app's session is alive the rear panel does not follow the main screen's power key. Stopping the session or killing the app releases it.
+- Writes a load stamp, `<module versionCode>:<boot count>`, to the secure setting `m2ru_rearunlock_stamp` once the system is up, so the app can tell that the module is really loaded and not just installed. A stamp from an earlier boot does not count.
 - Does not dismiss the keyguard and does not grant screen-capture consent.
 
 Setup:
