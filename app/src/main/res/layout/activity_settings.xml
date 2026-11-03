@@ -3,6 +3,11 @@
     <androidx.core.widget.NestedScrollView android:id="@+id/settings_scroll" android:layout_width="match_parent" android:layout_height="match_parent" android:clipToPadding="false" android:fillViewport="true" android:scrollbars="none">
         <LinearLayout android:id="@+id/settings_content" style="@style/HyperOS.Page" android:paddingBottom="112dp">
             <TextView style="@style/HyperOS.PageTitle" android:text="@string/settings_title" android:id="@+id/section_title" />
+            <!-- The rear screen shows nothing on HyperOS 4 without the Rear Unlock module. -->
+            <LinearLayout android:id="@+id/module_banner" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/spacing_md" android:background="@drawable/hyper_surface_background" android:orientation="vertical" android:padding="@dimen/spacing_md" android:visibility="gone">
+                <TextView android:id="@+id/module_banner_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/HyperOS.Text.RowTitle" android:textColor="@color/hyper_error" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/module_banner_button" style="@style/HyperOS.Button.Primary" android:layout_width="match_parent" android:layout_height="@dimen/button_height" android:layout_marginTop="@dimen/spacing_md" android:text="@string/module_banner_action" />
+            </LinearLayout>
             <!-- Widgets tab: the rear panel first, then what is on the page, then the
                  settings that reach every page. A page's own tools stay in the builder. -->
             <LinearLayout android:id="@+id/section_widgets" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">

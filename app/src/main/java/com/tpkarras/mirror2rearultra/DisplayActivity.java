@@ -10,6 +10,7 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -41,6 +42,11 @@ public class DisplayActivity extends AppCompatActivity {
         if (!MirrorState.isActive()) {
             finish();
             return;
+        }
+
+        if (RearUnlockModule.state(this) != RearUnlockModule.State.LOADED) {
+            // Not a stop: the user may know better, and the stamp can only say what it saw.
+            Toast.makeText(this, R.string.module_start_warning, Toast.LENGTH_LONG).show();
         }
 
         // Recent Xiaomi firmware replaced MiSubScreenUI with SubscreenCenter.

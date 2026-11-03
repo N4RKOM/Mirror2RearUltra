@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    First-run setup: what the rear screen needs, and how each part stands.
+
+    The groups are empty here; OnboardingActivity fills them with rows and
+    rebuilds them whenever the screen comes back from a system page, so a
+    permission just granted shows as granted.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/hyper_background"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/onboarding_toolbar"
+        style="@style/HyperOS.Toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:navigationContentDescription="@string/abc_action_bar_up_description"
+        app:navigationIcon="@drawable/ic_hyper_back" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/onboarding_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/onboarding_content"
+            style="@style/HyperOS.Page">
+
+            <TextView
+                style="@style/HyperOS.PageTitle"
+                android:text="@string/onboarding_title" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/spacing_xs"
+                android:text="@string/onboarding_intro"
+                android:textAppearance="@style/HyperOS.Text.RowSummary" />
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/onboarding_module_header" />
+
+            <LinearLayout
+                android:id="@+id/onboarding_module_group"
+                style="@style/HyperOS.Group" />
+
+            <TextView
+                android:id="@+id/onboarding_module_steps"
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/onboarding_module_steps" />
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/onboarding_access_header" />
+
+            <LinearLayout
+                android:id="@+id/onboarding_access_group"
+                style="@style/HyperOS.Group" />
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/onboarding_restricted_note" />
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/onboarding_widgets_header" />
+
+            <LinearLayout
+                android:id="@+id/onboarding_widgets_group"
+                style="@style/HyperOS.Group" />
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/onboarding_widgets_note" />
+
+            <TextView
+                style="@style/HyperOS.SectionHeader"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:text="@string/onboarding_root_header" />
+
+            <LinearLayout
+                android:id="@+id/onboarding_root_group"
+                style="@style/HyperOS.Group" />
+
+            <TextView
+                style="@style/HyperOS.GroupFootnote"
+                android:text="@string/onboarding_root_note" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/onboarding_done_button"
+                style="@style/HyperOS.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:layout_marginTop="@dimen/spacing_lg" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

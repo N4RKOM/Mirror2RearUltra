@@ -60,6 +60,9 @@ public class SettingsActivity extends AppCompatActivity implements
     private TextView toggleButton;
     private TextView statusValue;
     private TextView rootStatusValue;
+    /** Shown over the home screen while the rear screen cannot work without the module. */
+    private View moduleBanner;
+    private TextView moduleBannerText;
     private TextView hardwareBrightnessStatusValue;
     private View capabilityRefreshButton;
     private TextView backupStatus;
@@ -134,6 +137,15 @@ public class SettingsActivity extends AppCompatActivity implements
         capabilityRefreshButton = findViewById(R.id.capability_refresh_button);
         backupStatus = findViewById(R.id.backup_status);
         settingsContent = findViewById(R.id.settings_content);
+        moduleBanner = findViewById(R.id.module_banner);
+        moduleBannerText = findViewById(R.id.module_banner_text);
+        findViewById(R.id.module_banner_button).setOnClickListener(
+                view -> startActivity(OnboardingActivity.intent(this)));
+        if (savedInstanceState == null && !OnboardingActivity.wasShown(this)) {
+            // Fresh data means a fresh setup, whatever the phone already has working:
+            // permissions and root are per install, not per phone.
+            startActivity(OnboardingActivity.intent(this));
+        }
 
         scaleLabels = getResources().getStringArray(R.array.scale_mode_entries);
 
@@ -218,6 +230,27 @@ public class SettingsActivity extends AppCompatActivity implements
         renderStoredSettings();
         renderWidgetsHome();
         panelSettings.onResume();
+        updateModuleBanner();
+    }
+
+    private void updateModuleBanner() {
+        int text;
+        switch (RearUnlockModule.state(this)) {
+            case LOADED:
+                moduleBanner.setVisibility(View.GONE);
+                return;
+            case OUTDATED:
+                text = R.string.module_banner_outdated;
+                break;
+            case NOT_LOADED:
+                text = R.string.module_banner_not_loaded;
+                break;
+            default:
+                text = R.string.module_banner_missing;
+                break;
+        }
+        moduleBannerText.setText(text);
+        moduleBanner.setVisibility(View.VISIBLE);
     }
 
     @Override

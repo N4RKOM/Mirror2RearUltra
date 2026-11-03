@@ -18,6 +18,8 @@
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- The mirroring notification; Android 13 and newer hide it until this is allowed. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- A tap on the panel fires the shutter out of sight; the tick says it went. -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission
@@ -27,6 +29,8 @@
     <queries>
         <package android:name="com.xiaomi.misubscreenui" />
         <package android:name="com.xiaomi.subscreencenter" />
+        <!-- The LSPosed module whose load stamp the setup screen reads. -->
+        <package android:name="com.n4r.rearunlock" />
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
@@ -123,6 +127,10 @@
             android:showWhenLocked="true"
             android:theme="@style/Theme.Mirror2RearUltra.Mirror">
         </activity>
+        <activity
+            android:name=".OnboardingActivity"
+            android:exported="false"
+            android:label="@string/onboarding_title" />
         <activity
             android:name=".DashboardBuilderActivity"
             android:exported="false"
