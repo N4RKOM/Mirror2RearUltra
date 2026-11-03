@@ -154,6 +154,7 @@
     <string name="dashboard_text_scale_value">Text size · %1$d%%</string>
     <string name="dashboard_text_scale_default">Text size · 100%</string>
     <string name="dashboard_background_opacity_value">Background opacity · %1$d%%</string>
+    <string name="dashboard_full_card">Background card over the whole panel</string>
     <string name="dashboard_background_opacity_default">Background opacity · 55%</string>
     <string name="dashboard_battery">%1$d%%</string>
     <string name="dashboard_battery_charging">%1$d%%</string>

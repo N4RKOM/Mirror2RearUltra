@@ -56,5 +56,10 @@
             app:hyperStepSize="5"
             app:hyperValueFrom="0"
             app:hyperValueTo="100" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/dashboard_full_card_switch"
+            style="@style/HyperOS.Switch.Bottom"
+            android:text="@string/dashboard_full_card" />
     </LinearLayout>
 </LinearLayout>

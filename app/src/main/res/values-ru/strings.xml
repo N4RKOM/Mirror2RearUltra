@@ -104,6 +104,7 @@
     <string name="dashboard_appearance_title">Внешний вид</string>
     <string name="dashboard_background_opacity_default">Непрозрачность фона · 55%</string>
     <string name="dashboard_background_opacity_value">Непрозрачность фона · %1$d%%</string>
+    <string name="dashboard_full_card">Фон под виджетами на весь экран</string>
     <string name="dashboard_battery">%1$d%%</string>
     <string name="dashboard_battery_charging">%1$d%%</string>
     <string name="dashboard_builder_center">Центр</string>

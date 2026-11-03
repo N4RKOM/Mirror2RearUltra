@@ -94,6 +94,7 @@ final class DashboardWidgetLayout {
     private static final String PAGE_TRANSITION = "page_transition";
     private static final String FONT = "font";
     private static final String AUTO_BRIGHTNESS = "auto_brightness";
+    private static final String FULL_SCREEN_CARD = "full_screen_card";
     private static final String IMPERIAL_UNITS = "imperial_units";
     private static final String IDLE_MODE_BEFORE_AOD = "idle_mode_before_aod";
     private static final String TIMER_MINUTES = "timer_minutes";
@@ -375,6 +376,21 @@ final class DashboardWidgetLayout {
 
     static void setAutoBrightnessEnabled(Context context, boolean enabled) {
         prefs(context).edit().putBoolean(AUTO_BRIGHTNESS, enabled).apply();
+    }
+
+    /**
+     * Whether the card behind the widgets covers the whole panel, square.
+     *
+     * <p>Off, it is the rounded card inset from the edges, as tall as its
+     * content in some layouts. On, it is one flat layer edge to edge, which is
+     * what a picture behind the widgets wants to be tinted by.
+     */
+    static boolean isFullScreenCard(Context context) {
+        return prefs(context).getBoolean(FULL_SCREEN_CARD, false);
+    }
+
+    static void setFullScreenCard(Context context, boolean enabled) {
+        prefs(context).edit().putBoolean(FULL_SCREEN_CARD, enabled).apply();
     }
 
     /**

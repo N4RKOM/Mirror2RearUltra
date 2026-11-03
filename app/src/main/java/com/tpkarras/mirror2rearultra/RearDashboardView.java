@@ -757,8 +757,13 @@ public final class RearDashboardView extends View {
         if (contentMode == RearContentMode.DASHBOARD) {
             backgroundPaint.setColor(palette.surface);
             canvas.drawRect(0, 0, getWidth(), getHeight(), backgroundPaint);
-            drawCustomImage(canvas);
         }
+        // Under the widgets in either mode. The builder's preview always
+        // draws in dashboard mode, so a picture drawn only there showed in the
+        // app and never on a panel that mirrors the camera behind the widgets.
+        // Over the camera it takes its own opacity, so the picture stays a
+        // tint on the live view rather than hiding it.
+        drawCustomImage(canvas);
         panelPaint.setColor(surface);
         textPaint.setColor(palette.text);
 
@@ -2028,11 +2033,26 @@ public final class RearDashboardView extends View {
         return false;
     }
 
+    /**
+     * The card behind a page's widgets: the rounded one at {@code box}, or the
+     * whole panel when that is asked for. Drawn past the edges by more than the
+     * burn-in drift, which moves the canvas under it.
+     */
+    private void drawCard(Canvas canvas, RectF box, float radius) {
+        if (DashboardWidgetLayout.isFullScreenCard(getContext())) {
+            float margin = 16f * contentDensity();
+            canvas.drawRect(-margin, -margin, getWidth() + margin, getHeight() + margin,
+                    panelPaint);
+        } else {
+            canvas.drawRoundRect(box, radius, radius, panelPaint);
+        }
+    }
+
     /** The rounded card both full-screen widgets stand on. */
     private RectF fullscreenPanel(Canvas canvas, float density) {
         float pad = Math.min(10f * density, getWidth() * 0.06f);
         RectF panel = new RectF(pad, pad, getWidth() - pad, getHeight() - pad);
-        canvas.drawRoundRect(panel, 20f * density, 20f * density, panelPaint);
+        drawCard(canvas, panel, 20f * density);
         return panel;
     }
 
@@ -2686,9 +2706,9 @@ public final class RearDashboardView extends View {
         float padding = Math.min(6f * density, getWidth() * 0.04f);
         int opacity = Math.round(settings.backgroundOpacityPercent * 2.55f);
         if (opacity > 0) {
-            canvas.drawRoundRect(
+            drawCard(canvas,
                     new RectF(padding, padding, getWidth() - padding, getHeight() - padding),
-                    20f * density, 20f * density, panelPaint);
+                    20f * density);
         }
         convertCentredPositions(lines, clockSize, normalSize);
         float[][] fallback = freePlacement(lines, clockSize, normalSize, padding);
@@ -2930,7 +2950,7 @@ public final class RearDashboardView extends View {
                 getWidth() - panelPadding,
                 Math.min(getHeight() - panelPadding, y + total + panelPadding)
         );
-        canvas.drawRoundRect(panel, 20f * density, 20f * density, panelPaint);
+        drawCard(canvas, panel, 20f * density);
         for (int index = 0; index < lines.size(); index++) {
             Line line = lines.get(index);
             float size = (line.primary ? clockSize : normalSize) * line.scale;
@@ -2953,7 +2973,7 @@ public final class RearDashboardView extends View {
         float scale = settings.textScalePercent / 100f;
         float padding = 8f * density;
         RectF panel = new RectF(padding, padding, getWidth() - padding, getHeight() - padding);
-        canvas.drawRoundRect(panel, getHeight() / 2f, getHeight() / 2f, panelPaint);
+        drawCard(canvas, panel, getHeight() / 2f);
 
         int firstSecondary = lines.get(0).primary ? 1 : 0;
         if (firstSecondary == 1) {
@@ -3015,12 +3035,9 @@ public final class RearDashboardView extends View {
         float size = clamp(shortSide * 0.095f * scale, 11f * density, 30f * density);
         float primarySize = clamp(shortSide * 0.19f * scale, 24f * density, 60f * density);
         float padding = Math.min(12f * density, shortSide * 0.06f);
-        canvas.drawRoundRect(
+        drawCard(canvas,
                 new RectF(padding, padding, getWidth() - padding, getHeight() - padding),
-                20f * density,
-                20f * density,
-                panelPaint
-        );
+                20f * density);
         for (int index = 0; index < lines.size(); index++) {
             Line line = lines.get(index);
             boolean bottom = index >= 2;
@@ -3045,7 +3062,7 @@ public final class RearDashboardView extends View {
         float scale = settings.textScalePercent / 100f;
         float padding = Math.min(10f * density, getHeight() * 0.06f);
         RectF panel = new RectF(padding, padding, getWidth() - padding, getHeight() - padding);
-        canvas.drawRoundRect(panel, getHeight() / 2f, getHeight() / 2f, panelPaint);
+        drawCard(canvas, panel, getHeight() / 2f);
 
         int secondaryStart = lines.get(0).primary ? 1 : 0;
         if (secondaryStart == 1) {
@@ -3084,12 +3101,9 @@ public final class RearDashboardView extends View {
         float primarySize = clamp(shortSide * 0.19f * scale, 22f * density, 58f * density);
         float normalSize = clamp(shortSide * 0.085f * scale, 10f * density, 28f * density);
         float padding = 10f * density;
-        canvas.drawRoundRect(
+        drawCard(canvas,
                 new RectF(padding, padding, getWidth() - padding, getHeight() - padding),
-                getHeight() / 2f,
-                getHeight() / 2f,
-                panelPaint
-        );
+                getHeight() / 2f);
         boolean landscape = getWidth() > getHeight() * 1.4f;
         if (landscape) {
             float cellWidth = (getWidth() - padding * 4f) / lines.size();

@@ -84,6 +84,7 @@ final class PanelSettingsController {
     private MaterialSwitch faceDownSwitch;
     private HyperSlider textScaleSlider;
     private HyperSlider backgroundOpacitySlider;
+    private MaterialSwitch fullCardSwitch;
     private TextView textScaleValue;
     private TextView backgroundOpacityValue;
     private TextView restartNotice;
@@ -125,6 +126,7 @@ final class PanelSettingsController {
         faceDownSwitch = root.findViewById(R.id.dashboard_face_down_switch);
         textScaleSlider = root.findViewById(R.id.dashboard_text_scale_slider);
         backgroundOpacitySlider = root.findViewById(R.id.dashboard_background_opacity_slider);
+        fullCardSwitch = root.findViewById(R.id.dashboard_full_card_switch);
         textScaleValue = root.findViewById(R.id.dashboard_text_scale_value);
         backgroundOpacityValue = root.findViewById(R.id.dashboard_background_opacity_value);
         restartNotice = root.findViewById(R.id.dashboard_restart_notice);
@@ -219,6 +221,9 @@ final class PanelSettingsController {
                 R.id.dashboard_tap_variant_switch,
                 R.id.dashboard_pocket_lock_switch,
                 R.id.dashboard_face_down_switch);
+        if (fullCardSwitch != null) {
+            MiuixRows.installSwitches(host, R.id.dashboard_full_card_switch);
+        }
         if (autoBrightnessSwitch != null && autoBrightnessSwitch.getVisibility() == View.VISIBLE) {
             MiuixRows.installSwitches(host, R.id.auto_brightness_switch);
         }
@@ -290,6 +295,12 @@ final class PanelSettingsController {
                 updateBackgroundOpacityValue(Math.round(value));
                 if (fromUser) {
                     saveIfReady();
+                }
+            });
+            fullCardSwitch.setOnCheckedChangeListener((button, checked) -> {
+                if (!bindingUi) {
+                    DashboardWidgetLayout.setFullScreenCard(host, checked);
+                    tellPanel();
                 }
             });
         }
@@ -439,6 +450,7 @@ final class PanelSettingsController {
             renderOwnFonts();
             textScaleSlider.setValue(settings.textScalePercent);
             backgroundOpacitySlider.setValue(settings.backgroundOpacityPercent);
+            fullCardSwitch.setChecked(DashboardWidgetLayout.isFullScreenCard(host));
             updateTextScaleValue(settings.textScalePercent);
             updateBackgroundOpacityValue(settings.backgroundOpacityPercent);
         }
