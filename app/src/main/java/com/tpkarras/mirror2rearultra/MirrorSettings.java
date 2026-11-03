@@ -59,6 +59,11 @@ final class MirrorSettings {
     private static final String KEY_CUSTOM_PROFILES = "custom_profiles";
     private static final String KEY_ASSIGNMENTS_INITIALIZED = "assignments_initialized";
     private static final String KEY_BRIGHTNESS_SCALE = "brightness_scale";
+    /**
+     * The one brightness every profile shows at. Named so that it does not end
+     * in "_brightness": the scale migration below converts every key that does.
+     */
+    private static final String KEY_SHARED_BRIGHTNESS = "brightness_shared";
     /** Slider positions stopped being a share of output and became a perceived one. */
     private static final int BRIGHTNESS_SCALE_PERCEPTUAL = 2;
     private static final String APP_ASSIGNMENT_PREFIX = "app_assignment_";
@@ -76,6 +81,23 @@ final class MirrorSettings {
             id = MirrorProfile.CAMERA_ID;
         }
         return loadProfile(preferences, id);
+    }
+
+    /**
+     * Sets the panel's brightness for every profile at once.
+     *
+     * <p>How bright the rear screen is belongs to the room and the panel, not
+     * to what it is showing, so a profile switch no longer moves it. The value
+     * still rides on each loaded profile's {@code brightnessPercent}, which is
+     * what the panel and the previews already read.
+     */
+    static MirrorProfile saveSharedBrightness(Context context, int percent) {
+        preferences(context).edit()
+                .putInt(KEY_SHARED_BRIGHTNESS, Math.max(10, Math.min(100, percent)))
+                .apply();
+        MirrorProfile active = loadActiveProfile(context);
+        notifyListeners(active);
+        return active;
     }
 
     static MirrorProfile selectProfile(Context context, String id) {
@@ -541,6 +563,11 @@ final class MirrorSettings {
 
         Set<String> customIds = new LinkedHashSet<>();
         for (MirrorProfile profile : data.profiles) {
+            if (profile.id.equals(data.activeProfileId)) {
+                // A backup from before the level was shared has one per
+                // profile; the one that was in use is the one that was seen.
+                editor.putInt(KEY_SHARED_BRIGHTNESS, profile.brightnessPercent);
+            }
             if (profile.isCustom()) {
                 customIds.add(profile.id);
             }
@@ -617,19 +644,26 @@ final class MirrorSettings {
                 return;
             }
             brightnessScaleChecked = true;
-            if (preferences.getInt(KEY_BRIGHTNESS_SCALE, 1) >= BRIGHTNESS_SCALE_PERCEPTUAL) {
-                return;
-            }
-            SharedPreferences.Editor editor = preferences.edit();
-            for (Map.Entry<String, ?> entry : preferences.getAll().entrySet()) {
-                if (!entry.getKey().endsWith("_brightness")
-                        || !(entry.getValue() instanceof Integer)) {
-                    continue;
+            if (preferences.getInt(KEY_BRIGHTNESS_SCALE, 1) < BRIGHTNESS_SCALE_PERCEPTUAL) {
+                SharedPreferences.Editor editor = preferences.edit();
+                for (Map.Entry<String, ?> entry : preferences.getAll().entrySet()) {
+                    if (!entry.getKey().endsWith("_brightness")
+                            || !(entry.getValue() instanceof Integer)) {
+                        continue;
+                    }
+                    editor.putInt(entry.getKey(),
+                            PerceptualBrightness.toPercent((Integer) entry.getValue() / 100f));
                 }
-                editor.putInt(entry.getKey(),
-                        PerceptualBrightness.toPercent((Integer) entry.getValue() / 100f));
+                editor.putInt(KEY_BRIGHTNESS_SCALE, BRIGHTNESS_SCALE_PERCEPTUAL).apply();
             }
-            editor.putInt(KEY_BRIGHTNESS_SCALE, BRIGHTNESS_SCALE_PERCEPTUAL).apply();
+            if (!preferences.contains(KEY_SHARED_BRIGHTNESS)) {
+                // Profiles used to keep a level each. The one in use becomes
+                // everyone's, so the panel does not change when this arrives.
+                String id = preferences.getString(KEY_ACTIVE_PROFILE, MirrorProfile.CAMERA_ID);
+                preferences.edit().putInt(KEY_SHARED_BRIGHTNESS,
+                        preferences.getInt(prefix(id) + "brightness",
+                                defaults(id).brightnessPercent)).apply();
+            }
         }
     }
 
@@ -678,7 +712,10 @@ final class MirrorSettings {
                 ),
                 preferences.getInt(prefix + "rotation", defaults.rotationDegrees),
                 preferences.getBoolean(prefix + "mirror", defaults.mirrorHorizontally),
-                preferences.getInt(prefix + "brightness", defaults.brightnessPercent),
+                // The shared level wins; a profile's own is only what it had
+                // before the level was shared.
+                preferences.getInt(KEY_SHARED_BRIGHTNESS,
+                        preferences.getInt(prefix + "brightness", defaults.brightnessPercent)),
                 preferences.getInt(prefix + "zoom", defaults.zoomPercent),
                 preferences.getInt(prefix + "offset_x", defaults.horizontalOffsetPercent),
                 preferences.getInt(prefix + "offset_y", defaults.verticalOffsetPercent),

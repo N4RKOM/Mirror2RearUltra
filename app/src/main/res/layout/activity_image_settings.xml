@@ -175,9 +175,6 @@
                 <TextView
                     style="@style/HyperOS.GroupFootnote"
                     android:text="@string/profile_help" />
-                <TextView
-                    style="@style/HyperOS.GroupFootnote"
-                    android:text="@string/brightness_mode_help" />
             </LinearLayout>
 
             <LinearLayout style="@style/HyperOS.Group">
@@ -196,49 +193,9 @@
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/mirror_switch"
-                    style="@style/HyperOS.Switch"
+                    style="@style/HyperOS.Switch.Bottom"
                     android:text="@string/mirror_horizontally" />
 
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="@dimen/row_padding_horizontal"
-                    android:paddingTop="@dimen/row_padding_vertical"
-                android:paddingBottom="@dimen/spacing_sm">
-
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_row_brightness" />
-
-                    <TextView
-                        android:id="@+id/brightness_value"
-                        style="@style/HyperOS.SliderLabel"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:paddingTop="0dp"
-                    android:paddingBottom="0dp"
-                        android:paddingStart="@dimen/spacing_md"
-                        android:labelFor="@id/brightness_slider"
-                        android:text="@string/brightness_accessibility" />
-                </LinearLayout>
-
-                <com.tpkarras.mirror2rearultra.HyperSlider
-                    android:id="@+id/brightness_slider"
-                    style="@style/HyperOS.Slider.Row"
-                    android:contentDescription="@string/brightness_accessibility"
-                    app:hyperStepSize="1"
-                    app:hyperValueFrom="10"
-                    app:hyperValueTo="100" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/auto_brightness_switch"
-                    style="@style/HyperOS.Switch.Bottom"
-                    android:text="@string/auto_brightness_title" />
             </LinearLayout>
 
 

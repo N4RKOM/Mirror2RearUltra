@@ -8,9 +8,61 @@
 
     <LinearLayout style="@style/HyperOS.Group">
 
+        <!-- The rear screen's brightness is one for every profile, and the
+             light sensor only takes it down from there. Moved here from the
+             image page: it is a setting of the screen, not of the picture. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingEnd="@dimen/spacing_sm"
+            android:paddingTop="@dimen/spacing_xs">
+
+            <TextView
+                android:id="@+id/brightness_value"
+                style="@style/HyperOS.SliderLabel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:labelFor="@id/brightness_slider"
+                android:text="@string/brightness_accessibility" />
+
+            <ImageButton
+                android:id="@+id/brightness_help_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/help_toggle"
+                android:src="@drawable/ic_help"
+                app:tint="@color/hyper_text_secondary" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/brightness_help"
+            style="@style/HyperOS.GroupFootnote"
+            android:paddingStart="@dimen/row_padding_horizontal"
+            android:paddingEnd="@dimen/row_padding_horizontal"
+            android:paddingTop="0dp"
+            android:paddingBottom="@dimen/spacing_sm"
+            android:text="@string/brightness_mode_help"
+            android:visibility="gone" />
+
+        <com.tpkarras.mirror2rearultra.HyperSlider
+            android:id="@+id/brightness_slider"
+            style="@style/HyperOS.Slider.Row"
+            android:contentDescription="@string/brightness_accessibility"
+            app:hyperStepSize="1"
+            app:hyperValueFrom="10"
+            app:hyperValueTo="100" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/auto_brightness_switch"
+            style="@style/HyperOS.Switch"
+            android:text="@string/auto_brightness_title" />
+
         <com.tpkarras.mirror2rearultra.HyperValueRow
             android:id="@+id/dashboard_idle_mode_input"
-            style="@style/HyperOS.ValueRow.Top"
+            style="@style/HyperOS.ValueRow"
             app:rowTitle="@string/dashboard_idle_mode_title" />
 
         <!-- When AOD goes out instead of dimming: from sunset to

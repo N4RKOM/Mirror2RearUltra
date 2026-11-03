@@ -58,6 +58,9 @@ final class PanelSettingsController {
     private HyperValueRow fontRemoveInput;
     private final ActivityResultLauncher<String> fontPickerLauncher;
     private String[] fontLabels;
+    private HyperSlider brightnessSlider;
+    private TextView brightnessValue;
+    private MaterialSwitch autoBrightnessSwitch;
     private HyperSlider aodMinBrightnessSlider;
     private TextView aodMinBrightnessValue;
     private String[] burnInLabels;
@@ -131,6 +134,9 @@ final class PanelSettingsController {
         fontInput = root.findViewById(R.id.dashboard_font_input);
         fontAddButton = root.findViewById(R.id.dashboard_font_add_button);
         fontRemoveInput = root.findViewById(R.id.dashboard_font_remove_input);
+        brightnessSlider = root.findViewById(R.id.brightness_slider);
+        brightnessValue = root.findViewById(R.id.brightness_value);
+        autoBrightnessSwitch = root.findViewById(R.id.auto_brightness_switch);
         aodMinBrightnessSlider = root.findViewById(R.id.dashboard_aod_min_brightness_slider);
         aodMinBrightnessValue = root.findViewById(R.id.dashboard_aod_min_brightness_value);
         quietModeInput = root.findViewById(R.id.dashboard_quiet_mode_input);
@@ -183,6 +189,18 @@ final class PanelSettingsController {
             };
             pageTransitionInput.setEntries(pageTransitionLabels);
         }
+        View brightnessHelpButton = root.findViewById(R.id.brightness_help_button);
+        View brightnessHelp = root.findViewById(R.id.brightness_help);
+        if (brightnessHelpButton != null && brightnessHelp != null) {
+            brightnessHelpButton.setOnClickListener(view -> brightnessHelp.setVisibility(
+                    brightnessHelp.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE));
+        }
+        if (autoBrightnessSwitch != null) {
+            // No sensor, no promise: the row would do nothing on a device
+            // without one, and there would be no way to tell from looking at it.
+            boolean hasLightSensor = new AutoBrightnessSensor(host, factor -> { }).isAvailable();
+            autoBrightnessSwitch.setVisibility(hasLightSensor ? View.VISIBLE : View.GONE);
+        }
         if (shutterDelayInput != null) {
             shutterDelayLabels = new String[ShutterCountdown.CHOICES.length];
             for (int index = 0; index < ShutterCountdown.CHOICES.length; index++) {
@@ -201,6 +219,9 @@ final class PanelSettingsController {
                 R.id.dashboard_tap_variant_switch,
                 R.id.dashboard_pocket_lock_switch,
                 R.id.dashboard_face_down_switch);
+        if (autoBrightnessSwitch != null && autoBrightnessSwitch.getVisibility() == View.VISIBLE) {
+            MiuixRows.installSwitches(host, R.id.auto_brightness_switch);
+        }
         MiuixRows.installSwitchWithIcon(host, R.id.dashboard_mirror_grid_switch, R.drawable.ic_row_grid);
         MiuixRows.installSwitchWithIcon(host, R.id.dashboard_mirror_level_switch, R.drawable.ic_row_level);
         MiuixRows.installExpandableSwitch(host, R.id.dashboard_shutter_switch, R.drawable.ic_row_camera,
@@ -225,6 +246,25 @@ final class PanelSettingsController {
     }
 
     private void bindInteractions() {
+        if (brightnessSlider != null) {
+            // One level for every profile.
+            brightnessSlider.addOnChangeListener((slider, value, fromUser) -> {
+                int percent = Math.round(value);
+                updateBrightnessValue(percent);
+                if (fromUser && !bindingUi) {
+                    MirrorSettings.saveSharedBrightness(host, percent);
+                    changed();
+                }
+            });
+            autoBrightnessSwitch.setOnCheckedChangeListener((button, checked) -> {
+                if (!bindingUi) {
+                    DashboardWidgetLayout.setAutoBrightnessEnabled(host, checked);
+                    // The session watches the profile store, not this one, so a
+                    // save is what tells a running panel that the switch moved.
+                    tellPanel();
+                }
+            });
+        }
         if (modeInput != null) {
             modeInput.setOnItemSelectedListener(position -> {
                 saveFromUi();
@@ -382,6 +422,12 @@ final class PanelSettingsController {
 
     private void render(DashboardSettings settings) {
         bindingUi = true;
+        if (brightnessSlider != null) {
+            int brightness = MirrorSettings.loadActiveProfile(host).brightnessPercent;
+            brightnessSlider.setValue(brightness);
+            updateBrightnessValue(brightness);
+            autoBrightnessSwitch.setChecked(DashboardWidgetLayout.isAutoBrightnessEnabled(host));
+        }
         if (modeInput != null) {
             modeInput.setValue(labelAt(modeLabels, settings.contentMode.ordinal()));
             restartNotice.setVisibility(View.GONE);
@@ -601,6 +647,12 @@ final class PanelSettingsController {
     private void tellPanel() {
         MirrorSettings.saveDashboardSettings(host, MirrorSettings.loadDashboardSettings(host));
         changed();
+    }
+
+    private void updateBrightnessValue(int percent) {
+        String text = host.getString(R.string.brightness_value, percent);
+        brightnessValue.setText(text);
+        brightnessSlider.setContentDescription(text);
     }
 
     private void updateAodMinBrightnessValue(int percent) {

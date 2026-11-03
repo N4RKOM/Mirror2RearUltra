@@ -39,9 +39,6 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
     private HyperValueRow scaleModeInput;
     private HyperValueRow rotationInput;
     private MaterialSwitch mirrorSwitch;
-    private HyperSlider brightnessSlider;
-    private MaterialSwitch autoBrightnessSwitch;
-    private TextView brightnessValue;
     private HyperValueRow qualityModeInput;
     private MaterialSwitch calibrationGridSwitch;
     private View calibrationPreviewButton;
@@ -82,13 +79,6 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
         scaleModeInput = findViewById(R.id.scale_mode_input);
         rotationInput = findViewById(R.id.rotation_input);
         mirrorSwitch = findViewById(R.id.mirror_switch);
-        brightnessSlider = findViewById(R.id.brightness_slider);
-        autoBrightnessSwitch = findViewById(R.id.auto_brightness_switch);
-        // No sensor, no promise: the row would do nothing on a device without
-        // one, and there would be no way to tell from looking at it.
-        boolean hasLightSensor = new AutoBrightnessSensor(this, factor -> { }).isAvailable();
-        autoBrightnessSwitch.setVisibility(hasLightSensor ? View.VISIBLE : View.GONE);
-        brightnessValue = findViewById(R.id.brightness_value);
         qualityModeInput = findViewById(R.id.quality_mode_input);
         calibrationGridSwitch = findViewById(R.id.calibration_grid_switch);
         calibrationPreviewButton = findViewById(R.id.calibration_preview_button);
@@ -120,10 +110,6 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
         MiuixRows.installChoiceRow(this, R.id.scale_mode_input, R.drawable.ic_row_scale);
         MiuixRows.installChoiceRow(this, R.id.rotation_input, R.drawable.ic_row_rotate);
         MiuixRows.installSwitchWithIcon(this, R.id.mirror_switch, R.drawable.ic_row_flip);
-        if (autoBrightnessSwitch.getVisibility() == View.VISIBLE) {
-            MiuixRows.installSwitchWithIcon(this, R.id.auto_brightness_switch,
-                    R.drawable.ic_row_auto_brightness);
-        }
         MiuixRows.installChoiceRow(this, R.id.quality_mode_input, R.drawable.ic_row_quality);
         MiuixRows.installSwitchWithIcon(this, R.id.calibration_grid_switch, R.drawable.ic_row_grid);
         MiuixRows.installChoiceRow(this, R.id.dashboard_shutter_delay_input, R.drawable.ic_row_timer);
@@ -216,25 +202,6 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
             }
         });
 
-        autoBrightnessSwitch.setOnCheckedChangeListener((button, checked) -> {
-            if (bindingUi) {
-                return;
-            }
-            DashboardWidgetLayout.setAutoBrightnessEnabled(this, checked);
-            // The session watches the profile store, not this one, so a save
-            // is what tells a running panel that the switch moved.
-            MirrorSettings.saveDashboardSettings(this,
-                    MirrorSettings.loadDashboardSettings(this));
-        });
-
-        brightnessSlider.addOnChangeListener((slider, value, fromUser) -> {
-            int percent = Math.round(value);
-            updateBrightnessValue(percent);
-            if (fromUser && !bindingUi && activeProfile != null) {
-                save(activeProfile.withBrightnessPercent(percent));
-            }
-        });
-
         zoomSlider.addOnChangeListener((slider, value, fromUser) -> {
             int percent = Math.round(value);
             updateZoomValue(percent);
@@ -310,9 +277,6 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
         scaleModeInput.setValue(scaleLabels[profile.scaleMode.ordinal()]);
         rotationInput.setValue(rotationLabels[profile.rotationDegrees / 90]);
         mirrorSwitch.setChecked(profile.mirrorHorizontally);
-        brightnessSlider.setValue(profile.brightnessPercent);
-        updateBrightnessValue(profile.brightnessPercent);
-        autoBrightnessSwitch.setChecked(DashboardWidgetLayout.isAutoBrightnessEnabled(this));
         // A frame overrules all three, so the sliders say so rather than
         // moving something nothing on the panel is following.
         boolean framed = profile.hasCrop();
@@ -389,12 +353,6 @@ public class ImageSettingsActivity extends AppCompatActivity implements MirrorSt
         panelPreviewZoom.setText(getString(R.string.panel_preview_zoom, profile.zoomPercent));
         panelPreviewOffset.setText(getString(R.string.panel_preview_offset,
                 profile.horizontalOffsetPercent, profile.verticalOffsetPercent));
-    }
-
-    private void updateBrightnessValue(int percent) {
-        String text = getString(R.string.brightness_value, percent);
-        brightnessValue.setText(text);
-        brightnessSlider.setContentDescription(text);
     }
 
     private void updateZoomValue(int percent) {
