@@ -94,6 +94,7 @@ public class SettingsActivity extends AppCompatActivity implements
     private ActivityResultLauncher<String> exportDocumentLauncher;
     private ActivityResultLauncher<String[]> importDocumentLauncher;
     private final ExecutorService backupExecutor = Executors.newSingleThreadExecutor();
+    private UpdateSheet updateSheet;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -157,8 +158,11 @@ public class SettingsActivity extends AppCompatActivity implements
         MiuixRows.installWithIcon(this, R.id.device_protection_button,
                 R.drawable.ic_row_protection);
         MiuixRows.installWithIcon(this, R.id.app_about_button, R.drawable.ic_row_about);
+        updateSheet = new UpdateSheet(this);
+        MiuixRows.installWithIcon(this, R.id.app_update_button, R.drawable.ic_row_update);
         MiuixRows.installWithIcon(this, R.id.app_source_button, R.drawable.ic_row_link);
         findViewById(R.id.app_about_button).setOnClickListener(view -> showAbout());
+        findViewById(R.id.app_update_button).setOnClickListener(view -> updateSheet.show());
         findViewById(R.id.app_source_button).setOnClickListener(view -> openSource());
         MiuixRows.installWithIcon(this, R.id.widgets_home_add_button, R.drawable.ic_row_add);
         MiuixRows.installChoiceRow(this, R.id.dashboard_mode_input, R.drawable.ic_row_content);
@@ -220,6 +224,9 @@ public class SettingsActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         backupExecutor.shutdownNow();
+        if (updateSheet != null) {
+            updateSheet.dispose();
+        }
         super.onDestroy();
     }
 
@@ -232,6 +239,9 @@ public class SettingsActivity extends AppCompatActivity implements
         renderWidgetsHome();
         panelSettings.onResume();
         updateModuleBanner();
+        if (updateSheet != null) {
+            updateSheet.onActivityResumed();
+        }
     }
 
     private void updateModuleBanner() {
@@ -823,8 +833,12 @@ public class SettingsActivity extends AppCompatActivity implements
     private static final String SOURCE_URL = "https://github.com/tpkarras/Mirror2RearUltra";
 
     private void openSource() {
+        openLink(SOURCE_URL);
+    }
+
+    private void openLink(String url) {
         try {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(SOURCE_URL)));
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
         } catch (android.content.ActivityNotFoundException ignored) {
             // No browser installed: nothing to open.
         }

@@ -108,6 +108,10 @@
                 </LinearLayout>
                 <TextView android:id="@+id/backup_status" style="@style/HyperOS.GroupFootnote" android:accessibilityLiveRegion="polite" android:text="@string/backup_status_ready" />
                 <TextView style="@style/HyperOS.GroupFootnote" android:text="@string/backup_help" />
+                <TextView style="@style/HyperOS.SectionHeader" android:layout_marginTop="@dimen/section_spacing" android:text="@string/update_group_title" />
+                <LinearLayout style="@style/HyperOS.Group">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/app_update_button" style="@style/HyperOS.NavRow.Single" android:text="@string/update_check_title" />
+                </LinearLayout>
                 <TextView style="@style/HyperOS.SectionHeader" android:layout_marginTop="@dimen/section_spacing" android:text="@string/app_group_title" />
                 <LinearLayout style="@style/HyperOS.Group">
                     <com.google.android.material.button.MaterialButton android:id="@+id/app_about_button" style="@style/HyperOS.NavRow.Top" android:text="@string/app_about_title" />

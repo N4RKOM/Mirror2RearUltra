@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The update sheet: what is out, what changed, and the one step to take next. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/hyper_sheet_background"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/spacing_md">
+
+    <View
+        android:layout_width="36dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:layout_marginBottom="@dimen/spacing_md"
+        android:background="@drawable/hyper_sheet_handle"
+        android:importantForAccessibility="no" />
+
+    <TextView
+        android:id="@+id/update_sheet_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:accessibilityLiveRegion="polite"
+        android:paddingHorizontal="@dimen/spacing_lg"
+        android:textAppearance="@style/HyperOS.Text.Title" />
+
+    <TextView
+        android:id="@+id/update_sheet_version"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/spacing_lg"
+        android:paddingTop="@dimen/spacing_xs"
+        android:textAppearance="@style/HyperOS.Text.Summary" />
+
+    <ProgressBar
+        android:id="@+id/update_sheet_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_lg"
+        android:layout_marginTop="@dimen/spacing_md"
+        android:indeterminate="true"
+        android:max="100"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/update_sheet_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:accessibilityLiveRegion="polite"
+        android:paddingHorizontal="@dimen/spacing_lg"
+        android:paddingTop="@dimen/spacing_sm"
+        android:textAppearance="@style/HyperOS.Text.Summary"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/update_sheet_notes_block"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/update_sheet_notes_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/spacing_lg"
+            android:paddingTop="@dimen/spacing_lg"
+            android:paddingBottom="@dimen/spacing_sm"
+            android:textAppearance="@style/HyperOS.Text.SectionHeader" />
+
+        <com.tpkarras.mirror2rearultra.MaxHeightScrollView
+            android:id="@+id/update_sheet_notes_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fadeScrollbars="true"
+            android:scrollbars="vertical">
+
+            <TextView
+                android:id="@+id/update_sheet_notes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/spacing_lg"
+                android:textAppearance="@style/HyperOS.Text.Body"
+                android:textIsSelectable="true" />
+        </com.tpkarras.mirror2rearultra.MaxHeightScrollView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/spacing_lg"
+        android:paddingTop="@dimen/spacing_lg">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/update_sheet_action"
+            style="@style/HyperOS.Button.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/update_sheet_close"
+            style="@style/HyperOS.Button.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:text="@string/app_about_close" />
+    </LinearLayout>
+</LinearLayout>

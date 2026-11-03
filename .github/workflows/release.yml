@@ -63,13 +63,23 @@ jobs:
           cp app/build/outputs/apk/release/*.apk "dist/Mirror2RearUltra-${GITHUB_REF_NAME}.apk"
           cp rearunlock/app/build/outputs/apk/release/*.apk "dist/Mirror2RearUltra-RearUnlock-module.apk"
 
+      - name: Write release notes from the commits since the previous tag
+        run: |
+          PREV=$(git describe --tags --abbrev=0 --match 'v*' "$GITHUB_SHA^" 2>/dev/null || true)
+          RANGE="${PREV:+$PREV..}$GITHUB_SHA"
+          git log --no-merges --pretty='- %s' "$RANGE" | head -50 > release-notes.md
+          if [ -n "$PREV" ]; then
+            printf '\n**Full Changelog**: https://github.com/%s/compare/%s...%s\n' \
+              "$GITHUB_REPOSITORY" "$PREV" "$GITHUB_REF_NAME" >> release-notes.md
+          fi
+
       - name: Publish to Releases
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*.apk
           target_commitish: ${{ steps.branch.outputs.name }}
-          generate_release_notes: true
+          body_path: release-notes.md
 
       - name: Keep the APKs as a build artifact (manual runs)
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
