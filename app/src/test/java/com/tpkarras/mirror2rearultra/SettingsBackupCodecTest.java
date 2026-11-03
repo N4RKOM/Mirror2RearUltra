@@ -147,6 +147,63 @@ public class SettingsBackupCodecTest {
         assertNull(profile(restored, MirrorProfile.NAVIGATION_ID).landscapeCrop);
     }
 
+    @Test
+    public void aBackupWithManyTemplatesAndWidgetSettingsStillRestores() throws Exception {
+        // Every named template carries a line for each widget setting, so a few
+        // dozen of them run into thousands of entries. The export wrote such a
+        // file and the import refused it whole - nothing came back, neither the
+        // widgets nor the mirror settings that travelled with them.
+        SettingsBackupCodec.Data base = sampleData(true);
+        Map<String, String> layout = new LinkedHashMap<>();
+        Map<String, String> templates = new LinkedHashMap<>();
+        for (int index = 0; index < 400; index++) {
+            layout.put("free_x_WIDGET_" + index, "i:" + index);
+        }
+        for (int index = 0; index < 5_000; index++) {
+            templates.put("T_1793524168297.position_WIDGET_" + index, "s:NORMAL");
+        }
+        SettingsBackupCodec.Data source = new SettingsBackupCodec.Data(
+                base.activeProfileId, base.projectionQuality, base.autoProfileEnabled,
+                base.autoVisibilityEnabled, base.calibrationGridEnabled,
+                base.temperatureProtectionEnabled, base.temperatureThreshold,
+                base.batteryProtectionEnabled, base.batteryThreshold, base.dashboardSettings,
+                base.profiles, base.assignments, base.dashboardImage, layout, templates);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        SettingsBackupCodec.write(source, output);
+        SettingsBackupCodec.Data restored = SettingsBackupCodec.read(
+                new ByteArrayInputStream(output.toByteArray()));
+
+        assertEquals(layout, restored.dashboardLayoutState);
+        assertEquals(templates, restored.dashboardTemplateState);
+        assertEquals(base.profiles.size(), restored.profiles.size());
+    }
+
+    @Test
+    public void aBackupOfOnlyTheCameraProfileRestores() throws Exception {
+        // The app no longer keeps the Maps and Video profiles, so what it
+        // exports holds one profile plus any custom ones. The import wanted at
+        // least three and refused every file the app had written.
+        List<MirrorProfile> profiles = new java.util.ArrayList<>();
+        profiles.add(profile(sampleData(true), MirrorProfile.CAMERA_ID));
+        SettingsBackupCodec.Data base = sampleData(true);
+        SettingsBackupCodec.Data source = new SettingsBackupCodec.Data(
+                MirrorProfile.CAMERA_ID, base.projectionQuality, base.autoProfileEnabled,
+                base.autoVisibilityEnabled, base.calibrationGridEnabled,
+                base.temperatureProtectionEnabled, base.temperatureThreshold,
+                base.batteryProtectionEnabled, base.batteryThreshold, base.dashboardSettings,
+                profiles, new LinkedHashMap<>(), null,
+                base.dashboardLayoutState, base.dashboardTemplateState);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        SettingsBackupCodec.write(source, output);
+        SettingsBackupCodec.Data restored = SettingsBackupCodec.read(
+                new ByteArrayInputStream(output.toByteArray()));
+
+        assertEquals(1, restored.profiles.size());
+        assertEquals(MirrorProfile.CAMERA_ID, restored.activeProfileId);
+    }
+
     private static SettingsBackupCodec.Data withProfiles(
             SettingsBackupCodec.Data source, List<MirrorProfile> profiles) {
         return new SettingsBackupCodec.Data(

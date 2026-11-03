@@ -19,11 +19,19 @@ final class SettingsBackupCodec {
     static final int SCHEMA_VERSION = 2;
     /** The last schema that wrote brightness as a share of the panel's output. */
     private static final int SCHEMA_LINEAR_BRIGHTNESS = 1;
-    static final int MAX_BACKUP_BYTES = 1_048_576;
+    /**
+     * Room for the panel's templates as well as everything else. A backup that
+     * carries a few dozen of them runs to several hundred kilobytes, and the
+     * limits here used to be the ones a profile-only file needed - so the
+     * export wrote a file that the import then refused whole.
+     */
+    static final int MAX_BACKUP_BYTES = 16 * 1_048_576;
     private static final String FORMAT = "Mirror2RearUltra settings";
     private static final int MAX_PROFILES = 50;
     private static final int MAX_ASSIGNMENTS = 2_000;
-    private static final int MAX_DASHBOARD_STATE_ENTRIES = 2_000;
+    private static final int MAX_DASHBOARD_STATE_ENTRIES = 100_000;
+    private static final int MAX_STATE_KEY_LENGTH = 200;
+    private static final int MAX_STATE_VALUE_LENGTH = 20_000;
 
     static final class Data {
         final String activeProfileId;
@@ -248,7 +256,10 @@ final class SettingsBackupCodec {
             throw new BackupException("unsupported_schema");
         }
 
-        int profileCount = integer(properties, "profile.count", 3, MAX_PROFILES);
+        // At least one: the app itself writes only the camera profile (and
+        // custom ones) now, and a floor of three - the built-ins an older
+        // build wrote - refused every backup it made.
+        int profileCount = integer(properties, "profile.count", 1, MAX_PROFILES);
         List<MirrorProfile> profiles = new ArrayList<>(profileCount);
         Set<String> profileIds = new HashSet<>();
         for (int index = 0; index < profileCount; index++) {
@@ -428,7 +439,8 @@ final class SettingsBackupCodec {
             String prefix = name + "." + index + ".";
             String key = required(properties, prefix + "key");
             String value = required(properties, prefix + "value");
-            if (key.isEmpty() || key.length() > 100 || value.length() > 2_000
+            if (key.isEmpty() || key.length() > MAX_STATE_KEY_LENGTH
+                    || value.length() > MAX_STATE_VALUE_LENGTH
                     || result.put(key, value) != null) {
                 throw new BackupException("invalid_" + name);
             }

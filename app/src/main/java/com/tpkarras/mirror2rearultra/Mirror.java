@@ -966,7 +966,7 @@ public class Mirror extends Activity implements
             int state = own.getState();
             boolean turnedOn = state == Display.STATE_ON && lastPanelState != Display.STATE_ON;
             lastPanelState = state;
-            if (turnedOn && panelFacingDown && brightnessController != null) {
+            if (turnedOn && (panelFacingDown || quietDark) && brightnessController != null) {
                 brightnessController.blank();
             }
         }
@@ -1470,9 +1470,11 @@ public class Mirror extends Activity implements
         }
         idleFadeRunning = false;
         idleDimmed = true;
-        if (mode != DashboardWidgetLayout.IdleMode.ALWAYS_ON) {
-            MirrorState.setActive(this, false);
-        } else if (idleFadeQuiet) {
+        if (mode != DashboardWidgetLayout.IdleMode.ALWAYS_ON || idleFadeQuiet) {
+            // The 15 and 30 second timers put the panel out the way the quiet
+            // hours do and keep the session. They used to end it, and a panel
+            // with no session has nothing left to take the touch that was
+            // meant to wake it: the user had to start the widgets again.
             quietDark = true;
             applyProfileBrightness();
         }
@@ -1502,9 +1504,11 @@ public class Mirror extends Activity implements
                             verdict.nextChangeMillis - now + 1_000L);
             triggerHandler.postDelayed(quietHoursTick, Math.max(1_000L, delay));
         }
-        boolean dark = verdict.quiet && idleDimmed && !idleFadeRunning
-                && DashboardWidgetLayout.loadIdleMode(this)
-                == DashboardWidgetLayout.IdleMode.ALWAYS_ON;
+        // A panel a timer has put out stays out whatever the hour says; only
+        // an AOD that is merely dimmed follows the quiet hours.
+        boolean dark = idleDimmed && !idleFadeRunning
+                && (DashboardWidgetLayout.loadIdleMode(this)
+                != DashboardWidgetLayout.IdleMode.ALWAYS_ON || verdict.quiet);
         if (dark == quietDark) {
             return;
         }
