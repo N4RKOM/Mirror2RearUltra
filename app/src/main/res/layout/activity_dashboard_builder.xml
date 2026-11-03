@@ -319,6 +319,60 @@
                             app:hyperStepSize="5"
                             app:hyperValueFrom="10"
                             app:hyperValueTo="100" />
+
+                        <!-- Placed as the mirrored image is on the image and
+                             calibration screen. -->
+                        <com.tpkarras.mirror2rearultra.HyperValueRow
+                            android:id="@+id/dashboard_custom_image_scale_input"
+                            style="@style/HyperOS.ValueRow"
+                            app:rowTitle="@string/scale_mode_title" />
+
+                        <com.tpkarras.mirror2rearultra.HyperValueRow
+                            android:id="@+id/dashboard_custom_image_rotation_input"
+                            style="@style/HyperOS.ValueRow"
+                            app:rowTitle="@string/rotation_title" />
+
+                        <TextView
+                            android:id="@+id/dashboard_custom_image_zoom_value"
+                            style="@style/HyperOS.SliderLabel"
+                            android:labelFor="@id/dashboard_custom_image_zoom_slider"
+                            android:text="@string/zoom_default" />
+
+                        <com.tpkarras.mirror2rearultra.HyperSlider
+                            android:id="@+id/dashboard_custom_image_zoom_slider"
+                            style="@style/HyperOS.Slider.Row"
+                            android:contentDescription="@string/zoom_accessibility"
+                            app:hyperStepSize="5"
+                            app:hyperValueFrom="100"
+                            app:hyperValueTo="200" />
+
+                        <TextView
+                            android:id="@+id/dashboard_custom_image_horizontal_value"
+                            style="@style/HyperOS.SliderLabel"
+                            android:labelFor="@id/dashboard_custom_image_horizontal_slider"
+                            android:text="@string/horizontal_offset_default" />
+
+                        <com.tpkarras.mirror2rearultra.HyperSlider
+                            android:id="@+id/dashboard_custom_image_horizontal_slider"
+                            style="@style/HyperOS.Slider.Row"
+                            android:contentDescription="@string/horizontal_offset_accessibility"
+                            app:hyperStepSize="5"
+                            app:hyperValueFrom="-50"
+                            app:hyperValueTo="50" />
+
+                        <TextView
+                            android:id="@+id/dashboard_custom_image_vertical_value"
+                            style="@style/HyperOS.SliderLabel"
+                            android:labelFor="@id/dashboard_custom_image_vertical_slider"
+                            android:text="@string/vertical_offset_default" />
+
+                        <com.tpkarras.mirror2rearultra.HyperSlider
+                            android:id="@+id/dashboard_custom_image_vertical_slider"
+                            style="@style/HyperOS.Slider.Row"
+                            android:contentDescription="@string/vertical_offset_accessibility"
+                            app:hyperStepSize="5"
+                            app:hyperValueFrom="-50"
+                            app:hyperValueTo="50" />
                     </LinearLayout>
 
                     <TextView

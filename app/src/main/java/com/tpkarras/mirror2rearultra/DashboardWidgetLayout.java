@@ -95,6 +95,11 @@ final class DashboardWidgetLayout {
     private static final String FONT = "font";
     private static final String AUTO_BRIGHTNESS = "auto_brightness";
     private static final String FULL_SCREEN_CARD = "full_screen_card";
+    private static final String BACKGROUND_IMAGE_SCALE = "background_image_scale";
+    private static final String BACKGROUND_IMAGE_ROTATION = "background_image_rotation";
+    private static final String BACKGROUND_IMAGE_ZOOM = "background_image_zoom";
+    private static final String BACKGROUND_IMAGE_OFFSET_X = "background_image_offset_x";
+    private static final String BACKGROUND_IMAGE_OFFSET_Y = "background_image_offset_y";
     private static final String IMPERIAL_UNITS = "imperial_units";
     private static final String IDLE_MODE_BEFORE_AOD = "idle_mode_before_aod";
     private static final String TIMER_MINUTES = "timer_minutes";
@@ -391,6 +396,35 @@ final class DashboardWidgetLayout {
 
     static void setFullScreenCard(Context context, boolean enabled) {
         prefs(context).edit().putBoolean(FULL_SCREEN_CARD, enabled).apply();
+    }
+
+    /** How the picture behind the widgets is scaled, turned, zoomed and shifted. */
+    static BackgroundImagePlacement loadBackgroundImagePlacement(Context context) {
+        SharedPreferences preferences = prefs(context);
+        BackgroundImagePlacement fallback = BackgroundImagePlacement.DEFAULT;
+        MirrorProfile.ScaleMode mode = fallback.scaleMode;
+        try {
+            mode = MirrorProfile.ScaleMode.valueOf(preferences.getString(
+                    BACKGROUND_IMAGE_SCALE, fallback.scaleMode.name()));
+        } catch (IllegalArgumentException ignored) {
+            // A name this version does not know reads as the default.
+        }
+        return new BackgroundImagePlacement(
+                mode,
+                preferences.getInt(BACKGROUND_IMAGE_ROTATION, fallback.rotationDegrees),
+                preferences.getInt(BACKGROUND_IMAGE_ZOOM, fallback.zoomPercent),
+                preferences.getInt(BACKGROUND_IMAGE_OFFSET_X, fallback.horizontalOffsetPercent),
+                preferences.getInt(BACKGROUND_IMAGE_OFFSET_Y, fallback.verticalOffsetPercent));
+    }
+
+    static void saveBackgroundImagePlacement(Context context, BackgroundImagePlacement value) {
+        prefs(context).edit()
+                .putString(BACKGROUND_IMAGE_SCALE, value.scaleMode.name())
+                .putInt(BACKGROUND_IMAGE_ROTATION, value.rotationDegrees)
+                .putInt(BACKGROUND_IMAGE_ZOOM, value.zoomPercent)
+                .putInt(BACKGROUND_IMAGE_OFFSET_X, value.horizontalOffsetPercent)
+                .putInt(BACKGROUND_IMAGE_OFFSET_Y, value.verticalOffsetPercent)
+                .apply();
     }
 
     /**

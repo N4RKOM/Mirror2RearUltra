@@ -204,7 +204,7 @@
     <string name="dashboard_media_play_pause">Play / pause</string>
     <string name="dashboard_media_next">Next</string>
     <string name="dashboard_custom_image_title">Custom background</string>
-    <string name="dashboard_custom_image_help">Shown behind widgets in Dashboard mode. The image is copied into the app.</string>
+    <string name="dashboard_custom_image_help">Shown behind widgets in Dashboard and Hybrid modes. The image is copied into the app. Animated GIF and WebP play (up to 25 MB).</string>
     <string name="dashboard_custom_image_show">Show image</string>
     <string name="dashboard_custom_image_not_selected">No image selected</string>
     <string name="dashboard_custom_image_selected">Image selected</string>

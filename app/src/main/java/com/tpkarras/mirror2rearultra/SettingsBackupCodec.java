@@ -25,7 +25,7 @@ final class SettingsBackupCodec {
      * limits here used to be the ones a profile-only file needed - so the
      * export wrote a file that the import then refused whole.
      */
-    static final int MAX_BACKUP_BYTES = 16 * 1_048_576;
+    static final int MAX_BACKUP_BYTES = 48 * 1_048_576;
     private static final String FORMAT = "Mirror2RearUltra settings";
     private static final int MAX_PROFILES = 50;
     private static final int MAX_ASSIGNMENTS = 2_000;
@@ -343,7 +343,7 @@ final class SettingsBackupCodec {
             } catch (IllegalArgumentException error) {
                 throw new BackupException("invalid_dashboard_image", error);
             }
-            if (dashboardImage.length > DashboardImageStore.MAX_BACKUP_BYTES) {
+            if (dashboardImage.length > DashboardImageStore.MAX_STORED_BYTES) {
                 throw new BackupException("dashboard_image_too_large");
             }
         }

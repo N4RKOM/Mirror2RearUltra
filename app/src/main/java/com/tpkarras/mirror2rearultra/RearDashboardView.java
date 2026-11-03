@@ -14,6 +14,7 @@ import android.graphics.Typeface;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -53,6 +54,8 @@ public final class RearDashboardView extends View {
     );
     private RearContentMode contentMode = RearContentMode.DASHBOARD;
     private Bitmap customImage;
+    /** Set instead of {@link #customImage} when the picture is a GIF or WebP that moves. */
+    private AnimatedImageDrawable customAnimation;
     private long customImageStamp;
     private static final int NOTICE_COLOUR = 0xFFF2A93B;
     private static final int ALERT_COLOUR = 0xFFEF5350;
@@ -285,16 +288,67 @@ public final class RearDashboardView extends View {
         // passes through here, the opacity slider's included, and decoding the
         // picture on each step of a drag made the slider stutter.
         if (!value.showCustomImage) {
+            releaseAnimation();
             customImage = null;
             customImageStamp = 0L;
         } else {
             long stamp = DashboardImageStore.stamp(getContext());
-            if (customImage == null || stamp != customImageStamp) {
-                customImage = DashboardImageStore.load(getContext());
+            if ((customImage == null && customAnimation == null) || stamp != customImageStamp) {
+                releaseAnimation();
+                customImage = null;
+                if (DashboardImageStore.isAnimated(getContext())) {
+                    customAnimation = DashboardImageStore.loadAnimation(getContext());
+                    if (customAnimation != null) {
+                        customAnimation.setCallback(this);
+                    }
+                }
+                if (customAnimation == null) {
+                    customImage = DashboardImageStore.load(getContext());
+                }
                 customImageStamp = stamp;
             }
         }
+        updateAnimationRunning();
         invalidate();
+    }
+
+    private void releaseAnimation() {
+        if (customAnimation != null) {
+            customAnimation.stop();
+            customAnimation.setCallback(null);
+            customAnimation = null;
+        }
+    }
+
+    /**
+     * Runs the background animation only while somebody could see it: the
+     * panel is lit, the view is on screen, and the mode shows a dashboard.
+     * Each frame repaints the page, so a picture that moves behind a dark
+     * panel would be spending the battery for nothing.
+     */
+    private void updateAnimationRunning() {
+        AnimatedImageDrawable animation = customAnimation;
+        if (animation == null) {
+            return;
+        }
+        boolean wanted = !paused && isShown() && isAttachedToWindow()
+                && contentMode.showsDashboard();
+        if (wanted && !animation.isRunning()) {
+            animation.start();
+        } else if (!wanted && animation.isRunning()) {
+            animation.stop();
+        }
+    }
+
+    @Override
+    protected boolean verifyDrawable(Drawable who) {
+        return who == customAnimation || super.verifyDrawable(who);
+    }
+
+    @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
+        updateAnimationRunning();
     }
 
     /**
@@ -307,6 +361,7 @@ public final class RearDashboardView extends View {
             return;
         }
         paused = value;
+        updateAnimationRunning();
         if (value) {
             removeCallbacks(pageFlip);
             removeCallbacks(progressTick);
@@ -1197,11 +1252,15 @@ public final class RearDashboardView extends View {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         CallWidgetState.addListener(callListener);
+        updateAnimationRunning();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         CallWidgetState.removeListener(callListener);
+        if (customAnimation != null) {
+            customAnimation.stop();
+        }
         cancelPendingLongPress();
         removeCallbacks(pageFlip);
         removeCallbacks(progressTick);
@@ -1210,15 +1269,33 @@ public final class RearDashboardView extends View {
     }
 
     private void drawCustomImage(Canvas canvas) {
-        if (customImage == null) return;
-        float scale = Math.max(getWidth() / (float) customImage.getWidth(),
-                getHeight() / (float) customImage.getHeight());
-        float width = customImage.getWidth() * scale;
-        float height = customImage.getHeight() * scale;
-        RectF destination = new RectF((getWidth() - width) / 2f, (getHeight() - height) / 2f,
-                (getWidth() + width) / 2f, (getHeight() + height) / 2f);
-        imagePaint.setAlpha(Math.round(settings.customImageOpacityPercent * 2.55f));
-        canvas.drawBitmap(customImage, null, destination, imagePaint);
+        AnimatedImageDrawable animation = customAnimation;
+        if (customImage == null && animation == null) return;
+        BackgroundImagePlacement placement =
+                DashboardWidgetLayout.loadBackgroundImagePlacement(getContext());
+        int pictureWidth = animation != null ? animation.getIntrinsicWidth() : customImage.getWidth();
+        int pictureHeight = animation != null ? animation.getIntrinsicHeight() : customImage.getHeight();
+        if (pictureWidth <= 0 || pictureHeight <= 0) return;
+        float[] scales = placement.scales(pictureWidth, pictureHeight, getWidth(), getHeight());
+        int alpha = Math.round(settings.customImageOpacityPercent * 2.55f);
+        imagePaint.setAlpha(alpha);
+        // Turned and scaled about the picture's own centre, which is first put
+        // where the panel's centre is, plus the shift. Scaling after the turn
+        // is along the picture's own sides, which is what Stretch needs.
+        canvas.save();
+        canvas.translate(getWidth() / 2f + placement.offsetX(getWidth()),
+                getHeight() / 2f + placement.offsetY(getHeight()));
+        canvas.rotate(placement.rotationDegrees);
+        canvas.scale(scales[0], scales[1]);
+        if (animation != null) {
+            animation.setBounds(-pictureWidth / 2, -pictureHeight / 2,
+                    pictureWidth - pictureWidth / 2, pictureHeight - pictureHeight / 2);
+            animation.setAlpha(alpha);
+            animation.draw(canvas);
+        } else {
+            canvas.drawBitmap(customImage, -pictureWidth / 2f, -pictureHeight / 2f, imagePaint);
+        }
+        canvas.restore();
     }
 
     /**

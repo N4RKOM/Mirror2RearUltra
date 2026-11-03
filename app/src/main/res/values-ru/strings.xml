@@ -139,7 +139,7 @@
     <string name="dashboard_card_help">Показывайте независимые данные отдельно или поверх транслируемого изображения.</string>
     <string name="dashboard_custom_image_choose">Выбрать</string>
     <string name="dashboard_custom_image_error">Не удалось использовать изображение</string>
-    <string name="dashboard_custom_image_help">Показывается под виджетами в режиме «Панель». Изображение копируется в приложение.</string>
+    <string name="dashboard_custom_image_help">Показывается под виджетами в режимах «Панель» и «Гибрид». Изображение копируется в приложение. Анимированные GIF и WebP воспроизводятся (до 25 МБ).</string>
     <string name="dashboard_custom_image_loading">Подготовка изображения…</string>
     <string name="dashboard_custom_image_not_selected">Изображение не выбрано</string>
     <string name="dashboard_custom_image_opacity_default">Прозрачность изображения: 70%</string>

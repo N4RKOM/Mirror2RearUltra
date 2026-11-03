@@ -78,6 +78,16 @@ public class DashboardBuilderActivity extends AppCompatActivity {
     private View customImageRemoveButton;
     private HyperSlider customImageOpacitySlider;
     private TextView customImageOpacityValue;
+    private HyperValueRow customImageScaleInput;
+    private HyperValueRow customImageRotationInput;
+    private HyperSlider customImageZoomSlider;
+    private HyperSlider customImageHorizontalSlider;
+    private HyperSlider customImageVerticalSlider;
+    private TextView customImageZoomValue;
+    private TextView customImageHorizontalValue;
+    private TextView customImageVerticalValue;
+    private String[] customImageScaleLabels;
+    private String[] customImageRotationLabels;
     /** Guards the image controls while they are written from stored state. */
     private boolean bindingImage;
     private ActivityResultLauncher<String> imagePickerLauncher;
@@ -350,6 +360,98 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 saveCustomImage();
             }
         });
+        bindCustomImagePlacement();
+    }
+
+    /** Scaling, extra turn, zoom and shift: the same controls the mirrored image has. */
+    private void bindCustomImagePlacement() {
+        customImageScaleInput = findViewById(R.id.dashboard_custom_image_scale_input);
+        customImageRotationInput = findViewById(R.id.dashboard_custom_image_rotation_input);
+        customImageZoomSlider = findViewById(R.id.dashboard_custom_image_zoom_slider);
+        customImageHorizontalSlider = findViewById(R.id.dashboard_custom_image_horizontal_slider);
+        customImageVerticalSlider = findViewById(R.id.dashboard_custom_image_vertical_slider);
+        customImageZoomValue = findViewById(R.id.dashboard_custom_image_zoom_value);
+        customImageHorizontalValue = findViewById(R.id.dashboard_custom_image_horizontal_value);
+        customImageVerticalValue = findViewById(R.id.dashboard_custom_image_vertical_value);
+        customImageScaleLabels = getResources().getStringArray(R.array.scale_mode_entries);
+        customImageRotationLabels = getResources().getStringArray(R.array.rotation_entries);
+        customImageScaleInput.setEntries(customImageScaleLabels);
+        customImageRotationInput.setEntries(customImageRotationLabels);
+
+        customImageScaleInput.setOnItemSelectedListener(position -> {
+            MirrorProfile.ScaleMode[] modes = MirrorProfile.ScaleMode.values();
+            if (!bindingImage && position >= 0 && position < modes.length) {
+                savePlacement(DashboardWidgetLayout.loadBackgroundImagePlacement(this)
+                        .withScaleMode(modes[position]));
+            }
+        });
+        customImageRotationInput.setOnItemSelectedListener(position -> {
+            if (!bindingImage && position >= 0) {
+                savePlacement(DashboardWidgetLayout.loadBackgroundImagePlacement(this)
+                        .withRotationDegrees(position * 90));
+            }
+        });
+        customImageZoomSlider.addOnChangeListener((slider, value, fromUser) -> {
+            int percent = Math.round(value);
+            showPlacementValue(customImageZoomValue, customImageZoomSlider,
+                    R.string.zoom_value, percent);
+            if (fromUser) {
+                savePlacement(DashboardWidgetLayout.loadBackgroundImagePlacement(this)
+                        .withZoomPercent(percent));
+            }
+        });
+        customImageHorizontalSlider.addOnChangeListener((slider, value, fromUser) -> {
+            int percent = Math.round(value);
+            showPlacementValue(customImageHorizontalValue, customImageHorizontalSlider,
+                    R.string.horizontal_offset_value, percent);
+            if (fromUser) {
+                savePlacement(DashboardWidgetLayout.loadBackgroundImagePlacement(this)
+                        .withHorizontalOffsetPercent(percent));
+            }
+        });
+        customImageVerticalSlider.addOnChangeListener((slider, value, fromUser) -> {
+            int percent = Math.round(value);
+            showPlacementValue(customImageVerticalValue, customImageVerticalSlider,
+                    R.string.vertical_offset_value, percent);
+            if (fromUser) {
+                savePlacement(DashboardWidgetLayout.loadBackgroundImagePlacement(this)
+                        .withVerticalOffsetPercent(percent));
+            }
+        });
+    }
+
+    private void savePlacement(BackgroundImagePlacement placement) {
+        DashboardWidgetLayout.saveBackgroundImagePlacement(this, placement);
+        refreshPreview();
+    }
+
+    private void showPlacementValue(TextView label, HyperSlider slider, int format, int percent) {
+        String text = getString(format, percent);
+        label.setText(text);
+        slider.setContentDescription(text);
+    }
+
+    private void renderCustomImagePlacement(boolean enabled) {
+        BackgroundImagePlacement placement =
+                DashboardWidgetLayout.loadBackgroundImagePlacement(this);
+        customImageScaleInput.setValue(customImageScaleLabels[placement.scaleMode.ordinal()]);
+        customImageRotationInput.setValue(
+                customImageRotationLabels[placement.rotationDegrees / 90]);
+        customImageZoomSlider.setValue(placement.zoomPercent);
+        customImageHorizontalSlider.setValue(placement.horizontalOffsetPercent);
+        customImageVerticalSlider.setValue(placement.verticalOffsetPercent);
+        showPlacementValue(customImageZoomValue, customImageZoomSlider,
+                R.string.zoom_value, placement.zoomPercent);
+        showPlacementValue(customImageHorizontalValue, customImageHorizontalSlider,
+                R.string.horizontal_offset_value, placement.horizontalOffsetPercent);
+        showPlacementValue(customImageVerticalValue, customImageVerticalSlider,
+                R.string.vertical_offset_value, placement.verticalOffsetPercent);
+        // Without a picture there is nothing for them to move.
+        customImageScaleInput.setEnabled(enabled);
+        customImageRotationInput.setEnabled(enabled);
+        customImageZoomSlider.setEnabled(enabled);
+        customImageHorizontalSlider.setEnabled(enabled);
+        customImageVerticalSlider.setEnabled(enabled);
     }
 
     private void renderCustomImage() {
@@ -363,6 +465,7 @@ public class DashboardBuilderActivity extends AppCompatActivity {
         customImageRemoveButton.setVisibility(exists ? View.VISIBLE : View.GONE);
         customImageOpacitySlider.setValue(settings.customImageOpacityPercent);
         showCustomImageOpacity(settings.customImageOpacityPercent);
+        renderCustomImagePlacement(exists);
         bindingImage = false;
     }
 
