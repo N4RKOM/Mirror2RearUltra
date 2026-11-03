@@ -70,7 +70,7 @@ final class DashboardWidgetLayout {
     /** How many of the variants a widget offers; the clock and the date have more than three. */
     static int variantCount(Widget widget) {
         return widget == Widget.CLOCK || widget == Widget.FULLSCREEN_MEDIA ? 5
-                : widget == Widget.DATE ? 4 : 3;
+                : widget == Widget.DATE || widget == Widget.FULLSCREEN_WEATHER ? 4 : 3;
     }
 
     private static final String PREFS = "dashboard_widget_layout";

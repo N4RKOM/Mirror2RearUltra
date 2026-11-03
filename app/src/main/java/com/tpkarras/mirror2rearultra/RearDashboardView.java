@@ -2155,9 +2155,31 @@ public final class RearDashboardView extends View {
      * forecast, and a rule between the two so the eye knows which is which.
      */
     private void drawFullscreenWeather(Canvas canvas, float density) {
-        RectF panel = fullscreenPanel(canvas, density);
         WeatherForecastState.Snapshot forecast = WeatherForecastState.get();
+        if (forecast.dates.length == 0 && widgetSelectedListener != null) {
+            // The builder's preview fetches nothing; without a stand-in its page would be bare.
+            forecast = PreviewSupport.sampleForecast();
+        }
         int days = Math.min(4, forecast.dates.length);
+        // The looks are drawn for a panel lying down with a forecast to show;
+        // standing upright, or with no forecast, the stacked card still serves.
+        if (getWidth() >= getHeight() * 1.35f && days > 0) {
+            fillWholePanel(canvas, density);
+            drawWeatherSheet(canvas, forecast, days);
+            return;
+        }
+        drawStackedWeather(canvas, density, forecast, days);
+    }
+
+    /** The card behind a full-bleed page: past the edges, which the burn-in drift moves under it. */
+    private void fillWholePanel(Canvas canvas, float density) {
+        float bleed = 16f * density;
+        canvas.drawRect(-bleed, -bleed, getWidth() + bleed, getHeight() + bleed, panelPaint);
+    }
+
+    private void drawStackedWeather(Canvas canvas, float density,
+            WeatherForecastState.Snapshot forecast, int days) {
+        RectF panel = fullscreenPanel(canvas, density);
         boolean wide = panel.width() >= panel.height() * 1.35f;
         float share = days == 0 ? 1f : wide ? 0.36f : 0.40f;
         RectF now = wide
@@ -2204,6 +2226,186 @@ public final class RearDashboardView extends View {
             }
         }
         textPaint.setTextAlign(Paint.Align.LEFT);
+    }
+
+    /**
+     * Today and the days ahead on a page that runs to the panel's edges, in
+     * whichever of four looks was chosen.
+     *
+     * <p>The looks are laid out on a 294 by 126 sheet - the panel's own size -
+     * which is scaled and centred on whatever this view measures, so the
+     * proportions hold in the builder's preview as well as on the panel.
+     */
+    private void drawWeatherSheet(Canvas canvas, WeatherForecastState.Snapshot forecast,
+            int days) {
+        float scale = Math.min(getWidth() / 294f, getHeight() / 126f);
+        int state = canvas.save();
+        canvas.translate((getWidth() - 294f * scale) / 2f, (getHeight() - 126f * scale) / 2f);
+        canvas.scale(scale, scale);
+        String temperature = snapshot.weatherTemperatureCelsius == null
+                ? "—" : inDegrees(snapshot.weatherTemperatureCelsius) + "°";
+        String place = snapshot.weatherPlace;
+        int ink = currentPalette.text;
+        int soft = mutedColour();
+        int rule = Color.argb(60, Color.red(ink), Color.green(ink), Color.blue(ink));
+        WidgetIcon now = weatherIcon(snapshot.weatherCode);
+        String today = inDegrees(forecast.maximums[0]) + "° / "
+                + inDegrees(forecast.minimums[0]) + "°";
+
+        switch (variantOf(DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER)) {
+            case ALTERNATE: {
+                // Icon, temperature and place across the top, a plate for each day below.
+                drawSheetIcon(canvas, now, 28f, 30f, 34f);
+                sheetText(canvas, temperature, 52f, 46f, 42f, ink, true, Paint.Align.LEFT, 120f);
+                sheetText(canvas, place, 284f, 24f, 13f, ink, true, Paint.Align.RIGHT, 140f);
+                sheetText(canvas, today, 284f, 41f, 12f, soft, false, Paint.Align.RIGHT, 140f);
+                boolean rain = anyRain(forecast, days);
+                for (int index = 0; index < days; index++) {
+                    float x = 4f + index * 72.5f;
+                    fillRect(canvas, new RectF(x, 62f, x + 68.5f, 122f), faint(ink), 8f);
+                    sheetText(canvas, dayName(forecast.dates[index]), x + 7f, 77f, 11f, soft,
+                            false, Paint.Align.LEFT, 36f);
+                    if (rain) {
+                        sheetText(canvas, rainChance(forecast, index), x + 62f, 77f, 11f, soft,
+                                false, Paint.Align.RIGHT, 30f);
+                    }
+                    drawSheetIcon(canvas, weatherIcon(forecast.codes[index]), x + 34f, 93f, 20f);
+                    drawHighLow(canvas, forecast, index, x + 34f, 115f, 13f, ink, soft);
+                }
+                break;
+            }
+            case DETAILED: {
+                // Today on the left, a bar from the low to the high of each day on the right.
+                drawSheetIcon(canvas, now, 58f, 24f, 26f);
+                sheetText(canvas, temperature, 58f, 86f, 44f, ink, true, Paint.Align.CENTER, 100f);
+                sheetText(canvas, place, 58f, 108f, 12f, soft, false, Paint.Align.CENTER, 100f);
+                drawSheetRule(canvas, 116f, 10f, 116f, 116f, rule);
+                int lowest = Integer.MAX_VALUE;
+                int highest = Integer.MIN_VALUE;
+                for (int index = 0; index < days; index++) {
+                    lowest = Math.min(lowest, inDegrees(forecast.minimums[index]));
+                    highest = Math.max(highest, inDegrees(forecast.maximums[index]));
+                }
+                float span = Math.max(1, highest - lowest);
+                for (int index = 0; index < days; index++) {
+                    float y = 21f + index * 28.5f;
+                    sheetText(canvas, dayName(forecast.dates[index]), 126f, y + 4f, 12f, soft,
+                            false, Paint.Align.LEFT, 30f);
+                    drawSheetIcon(canvas, weatherIcon(forecast.codes[index]), 162f, y, 18f);
+                    sheetText(canvas, inDegrees(forecast.minimums[index]) + "°", 196f, y + 4f,
+                            12f, soft, false, Paint.Align.RIGHT, 28f);
+                    float from = 206f + (inDegrees(forecast.minimums[index]) - lowest) / span * 56f;
+                    float to = 206f + (inDegrees(forecast.maximums[index]) - lowest) / span * 56f;
+                    fillRect(canvas, new RectF(206f, y - 2f, 262f, y + 2f), rule, 2f);
+                    fillRect(canvas, new RectF(from, y - 2f, Math.max(to, from + 6f), y + 2f),
+                            ink, 2f);
+                    sheetText(canvas, inDegrees(forecast.maximums[index]) + "°", 286f, y + 4f,
+                            12f, ink, true, Paint.Align.RIGHT, 30f);
+                }
+                break;
+            }
+            case FOURTH: {
+                // Only today, as large as it will go; the days ahead shrink to a strip.
+                drawSheetIcon(canvas, now, 40f, 45f, 50f);
+                sheetText(canvas, temperature, 78f, 80f, 66f, ink, true, Paint.Align.LEFT, 118f);
+                sheetText(canvas, place, 202f, 52f, 15f, ink, true, Paint.Align.LEFT, 86f);
+                sheetText(canvas, today, 202f, 74f, 13f, soft, false, Paint.Align.LEFT, 86f);
+                drawSheetRule(canvas, 0f, 92f, 294f, 92f, rule);
+                for (int index = 0; index < days; index++) {
+                    float x = index * 73.5f;
+                    sheetText(canvas, dayName(forecast.dates[index]), x + 6f, 112f, 11f, soft,
+                            false, Paint.Align.LEFT, 24f);
+                    drawSheetIcon(canvas, weatherIcon(forecast.codes[index]), x + 31f, 106f, 14f);
+                    sheetText(canvas, inDegrees(forecast.maximums[index]) + "°", x + 68f, 112f,
+                            13f, ink, true, Paint.Align.RIGHT, 24f);
+                }
+                break;
+            }
+            default: {
+                // Today large on the left, a column of figures for each day on the right.
+                drawSheetIcon(canvas, now, 30f, 28f, 32f);
+                sheetText(canvas, temperature, 10f, 92f, 60f, ink, true, Paint.Align.LEFT, 112f);
+                sheetText(canvas, place, 12f, 114f, 12f, soft, false, Paint.Align.LEFT, 110f);
+                drawSheetRule(canvas, 130f, 10f, 130f, 116f, rule);
+                boolean rain = anyRain(forecast, days);
+                for (int index = 0; index < days; index++) {
+                    float x = 151f + index * 41f;
+                    sheetText(canvas, dayName(forecast.dates[index]), x, 20f, 12f, soft, false,
+                            Paint.Align.CENTER, 38f);
+                    drawSheetIcon(canvas, weatherIcon(forecast.codes[index]), x, 45f, 22f);
+                    sheetText(canvas, inDegrees(forecast.maximums[index]) + "°", x, 78f, 16f,
+                            ink, true, Paint.Align.CENTER, 38f);
+                    sheetText(canvas, inDegrees(forecast.minimums[index]) + "°", x, 96f, 16f,
+                            soft, false, Paint.Align.CENTER, 38f);
+                    if (rain) {
+                        sheetText(canvas, rainChance(forecast, index), x, 115f, 11f, soft, false,
+                                Paint.Align.CENTER, 38f);
+                    }
+                }
+                break;
+            }
+        }
+        canvas.restoreToCount(state);
+        textPaint.setTextAlign(Paint.Align.LEFT);
+        textPaint.setColor(currentPalette.text);
+    }
+
+    /** Whether any of the days has a chance of rain worth saying, which decides if the row is kept. */
+    private boolean anyRain(WeatherForecastState.Snapshot forecast, int days) {
+        for (int index = 0; index < days; index++) {
+            if (!rainChance(forecast, index).isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void drawSheetIcon(Canvas canvas, WidgetIcon icon, float x, float y, float size) {
+        drawIcon(canvas, icon, new RectF(x - size / 2f, y - size / 2f, x + size / 2f,
+                y + size / 2f));
+    }
+
+    private void drawSheetRule(Canvas canvas, float x1, float y1, float x2, float y2, int colour) {
+        iconPaint.setColor(colour);
+        iconPaint.setStyle(Paint.Style.STROKE);
+        iconPaint.setStrokeWidth(1f);
+        canvas.drawLine(x1, y1, x2, y2, iconPaint);
+    }
+
+    /**
+     * A piece of text on the sheet, placed by its baseline and kept inside
+     * {@code maxWidth}: shrunk to fit where it can be, cut with an ellipsis
+     * where it cannot.
+     */
+    private void sheetText(Canvas canvas, String text, float x, float baseline, float size,
+            int colour, boolean bold, Paint.Align align, float maxWidth) {
+        if (text.isEmpty()) {
+            return;
+        }
+        textPaint.setFakeBoldText(bold);
+        textPaint.setTextAlign(align);
+        textPaint.setColor(colour);
+        float fitted = fitTextSize(text, maxWidth, size, size * 0.6f);
+        textPaint.setTextSize(fitted);
+        canvas.drawText(TextUtils.ellipsize(text, textPaint, maxWidth,
+                TextUtils.TruncateAt.END).toString(), x, baseline, textPaint);
+        textPaint.setFakeBoldText(false);
+    }
+
+    /** A day's high in the reading's colour and its low softer, as one centred phrase. */
+    private void drawHighLow(Canvas canvas, WeatherForecastState.Snapshot forecast, int index,
+            float centreX, float baseline, float size, int ink, int soft) {
+        String high = inDegrees(forecast.maximums[index]) + "°";
+        String low = inDegrees(forecast.minimums[index]) + "°";
+        textPaint.setTextSize(size);
+        textPaint.setFakeBoldText(true);
+        float highWidth = textPaint.measureText(high);
+        textPaint.setFakeBoldText(false);
+        float gap = size * 0.35f;
+        float start = centreX - (highWidth + gap + textPaint.measureText(low)) / 2f;
+        sheetText(canvas, high, start, baseline, size, ink, true, Paint.Align.LEFT, 40f);
+        sheetText(canvas, low, start + highWidth + gap, baseline, size, soft, false,
+                Paint.Align.LEFT, 30f);
     }
 
     /** The condition, the temperature and the place, centred in what is left. */
@@ -2422,8 +2624,7 @@ public final class RearDashboardView extends View {
         // The card runs to the panel's edges: the margin it used to keep was
         // space a finger could have hit, and the looks that follow put their
         // controls in zones that touch, so there is nothing to leave round them.
-        float bleed = 16f * density;
-        canvas.drawRect(-bleed, -bleed, w + bleed, h + bleed, panelPaint);
+        fillWholePanel(canvas, density);
 
         boolean backdrop = variant == DashboardWidgetLayout.Variant.FOURTH
                 && live && media.artwork != null;

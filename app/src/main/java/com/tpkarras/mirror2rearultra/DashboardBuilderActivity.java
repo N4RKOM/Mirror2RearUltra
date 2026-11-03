@@ -1878,6 +1878,13 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     getString(R.string.dashboard_variant_date_year),
                     getString(R.string.dashboard_variant_date_weekday)};
         }
+        if (widget == DashboardWidgetLayout.Widget.FULLSCREEN_WEATHER) {
+            return new String[]{
+                    getString(R.string.dashboard_variant_default),
+                    getString(R.string.dashboard_variant_weather_tiles),
+                    getString(R.string.dashboard_variant_weather_range),
+                    getString(R.string.dashboard_variant_weather_big)};
+        }
         if (widget == DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA) {
             return new String[]{
                     getString(R.string.dashboard_variant_default),

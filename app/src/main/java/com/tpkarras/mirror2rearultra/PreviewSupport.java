@@ -35,6 +35,24 @@ final class PreviewSupport {
      * reading": a widget with no reading is dropped, so a page made of them
      * would look empty here while the panel showed it.
      */
+    /**
+     * Four days to stand in for a forecast the preview has not fetched, so the
+     * full-screen weather looks can be judged against something rather than
+     * an empty page.
+     */
+    static WeatherForecastState.Snapshot sampleForecast() {
+        String[] dates = new String[4];
+        java.text.SimpleDateFormat format =
+                new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
+        java.util.Calendar day = java.util.Calendar.getInstance();
+        for (int index = 0; index < dates.length; index++) {
+            dates[index] = format.format(day.getTime());
+            day.add(java.util.Calendar.DAY_OF_MONTH, 1);
+        }
+        return new WeatherForecastState.Snapshot(dates, new int[]{7, 6, 4, 5},
+                new int[]{16, 12, 9, 13}, new int[]{0, 3, 61, 2}, new int[]{0, 40, 80, 10});
+    }
+
     static RearDashboardSnapshot snapshot(Context context) {
         MediaWidgetState.Snapshot media = MediaWidgetState.get();
         boolean playing = media != null && media.hasMedia();

@@ -436,6 +436,9 @@
     <string name="dashboard_variant_media_cover">Обложка</string>
     <string name="dashboard_variant_media_backdrop">Обложка на фоне</string>
     <string name="dashboard_variant_media_tiles">Плитки</string>
+    <string name="dashboard_variant_weather_tiles">Плитки</string>
+    <string name="dashboard_variant_weather_range">Диапазон</string>
+    <string name="dashboard_variant_weather_big">Крупно сейчас</string>
     <string name="dashboard_variant_charging">зарядка</string>
     <string name="dashboard_variant_battery">заряд</string>
     <string name="dashboard_variant_memory">ОЗУ</string>
