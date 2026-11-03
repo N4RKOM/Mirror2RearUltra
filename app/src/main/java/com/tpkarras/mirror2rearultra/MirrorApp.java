@@ -12,6 +12,7 @@ public class MirrorApp extends Application {
     public void onCreate() {
         super.onCreate();
         AppLook.applyStored(this);
+        DefaultDashboard.seedOnFirstRun(this);
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             // Before the screen inflates, so every view picks up the wallpaper accent.
             @Override

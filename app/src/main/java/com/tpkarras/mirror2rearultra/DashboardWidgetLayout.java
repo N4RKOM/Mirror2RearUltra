@@ -1341,6 +1341,9 @@ final class DashboardWidgetLayout {
 
     static void reset(Context context) { prefs(context).edit().clear().apply(); }
 
+    /** Whether anything has ever been stored here, as opposed to a fresh install. */
+    static boolean hasStoredState(Context context) { return !prefs(context).getAll().isEmpty(); }
+
     static Map<String, String> exportState(Context context) {
         Map<String, String> result = new LinkedHashMap<>();
         for (Map.Entry<String, ?> entry : prefs(context).getAll().entrySet()) {

@@ -408,6 +408,11 @@ final class MirrorSettings {
         );
     }
 
+    /** Whether the dashboard's settings have ever been written, as opposed to a fresh install. */
+    static boolean hasDashboardSettings(Context context) {
+        return preferences(context).contains(KEY_DASHBOARD_LAYOUT);
+    }
+
     static void saveDashboardSettings(Context context, DashboardSettings settings) {
         SharedPreferences.Editor editor = preferences(context).edit();
         writeDashboardSettings(editor, settings).apply();

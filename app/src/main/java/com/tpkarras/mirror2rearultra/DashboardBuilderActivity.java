@@ -1856,13 +1856,17 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                 .setMessage(R.string.dashboard_builder_reset_message)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.dashboard_builder_reset_confirm, (dialog, which) -> {
-                    DashboardWidgetLayout.reset(this);
-                    DashboardSettings current = MirrorSettings.loadDashboardSettings(this);
-                    DashboardSettings defaults = DashboardSettings.defaults();
-                    current = current.withLayout(defaults.layout);
-                    for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values())
-                        current = current.withWidget(widget, defaults.isWidgetVisible(widget));
-                    MirrorSettings.saveDashboardSettings(this, current);
+                    // The shipped arrangement; the built-in one only when that
+                    // cannot be read.
+                    if (!DefaultDashboard.apply(this)) {
+                        DashboardWidgetLayout.reset(this);
+                        DashboardSettings current = MirrorSettings.loadDashboardSettings(this);
+                        DashboardSettings defaults = DashboardSettings.defaults();
+                        current = current.withLayout(defaults.layout);
+                        for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values())
+                            current = current.withWidget(widget, defaults.isWidgetVisible(widget));
+                        MirrorSettings.saveDashboardSettings(this, current);
+                    }
                     editedPage = 1;
                     selectedWidget = null;
                     reload();
