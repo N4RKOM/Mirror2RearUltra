@@ -2,13 +2,16 @@ package com.tpkarras.mirror2rearultra;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 public class DefaultDashboardTest {
@@ -30,6 +33,31 @@ public class DefaultDashboardTest {
         for (String value : data.layout.values()) {
             assertNotNull(DashboardWidgetLayout.decodeStateValue(value));
         }
+    }
+
+    @Test
+    public void theShippedPanelLookReads() throws Exception {
+        DefaultDashboard.Data data = shipped();
+
+        assertEquals(RearContentMode.HYBRID, data.contentMode);
+        assertEquals(Integer.valueOf(25), data.backgroundOpacity);
+    }
+
+    @Test
+    public void anAssetWithoutAPanelLookLeavesItAlone() throws Exception {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+                + "<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">"
+                + "<properties>"
+                + "<entry key=\"format\">Mirror2RearUltra default dashboard</entry>"
+                + "<entry key=\"settings.layout\">FREE</entry>"
+                + "<entry key=\"layout.count\">0</entry>"
+                + "</properties>";
+
+        DefaultDashboard.Data data = DefaultDashboard.read(
+                new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
+
+        assertNull(data.contentMode);
+        assertNull(data.backgroundOpacity);
     }
 
     @Test

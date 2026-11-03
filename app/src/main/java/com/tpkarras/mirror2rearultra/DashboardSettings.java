@@ -223,6 +223,14 @@ final class DashboardSettings {
                 customImageOpacityPercent);
     }
 
+    DashboardSettings withBackgroundOpacity(int opacityPercent) {
+        return new DashboardSettings(contentMode, layout, theme, showClock, showDate, showBattery,
+                showTemperature, showWeather, showNextAlarm, showMedia, showCompass, showSpeed,
+                showAltitude, showSessionTimer, showActiveProfile, showCustomText, weatherCity,
+                customText, textScalePercent, opacityPercent, showCustomImage,
+                customImageOpacityPercent);
+    }
+
     /** The background image's switch and opacity, set in the builder. */
     DashboardSettings withCustomImage(boolean show, int opacityPercent) {
         return new DashboardSettings(contentMode, layout, theme, showClock, showDate, showBattery,

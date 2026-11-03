@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -16,7 +18,8 @@ import java.util.Properties;
  *
  * <p>It lives in {@code assets/default_dashboard.xml}: the stored widget
  * layout as it was taken from a phone, plus which of the always-available
- * widgets are on and the arrangement of the page. Nothing here is special
+ * widgets are on, the arrangement of the page, and optionally what the panel
+ * shows and how opaque its background is. Nothing here is special
  * once it is applied - it is written into the same stores everything else
  * edits, so it can be changed from the builder like any other arrangement.
  *
@@ -34,12 +37,19 @@ final class DefaultDashboard {
         final Map<String, String> layout;
         final DashboardSettings.Layout arrangement;
         final Map<DashboardWidgetLayout.Widget, Boolean> visible;
+        /** What the panel shows, or null when the asset leaves it as it is. */
+        @Nullable final RearContentMode contentMode;
+        /** The panel's background opacity, or null when the asset leaves it as it is. */
+        @Nullable final Integer backgroundOpacity;
 
         Data(Map<String, String> layout, DashboardSettings.Layout arrangement,
-                Map<DashboardWidgetLayout.Widget, Boolean> visible) {
+                Map<DashboardWidgetLayout.Widget, Boolean> visible,
+                @Nullable RearContentMode contentMode, @Nullable Integer backgroundOpacity) {
             this.layout = Collections.unmodifiableMap(layout);
             this.arrangement = arrangement;
             this.visible = Collections.unmodifiableMap(visible);
+            this.contentMode = contentMode;
+            this.backgroundOpacity = backgroundOpacity;
         }
     }
 
@@ -75,9 +85,19 @@ final class DefaultDashboard {
         }
         DashboardSettings.Layout arrangement;
         Map<DashboardWidgetLayout.Widget, Boolean> visible = new LinkedHashMap<>();
+        RearContentMode contentMode = null;
+        Integer backgroundOpacity = null;
         try {
             arrangement = DashboardSettings.Layout.valueOf(
                     properties.getProperty("settings.layout", ""));
+            String mode = properties.getProperty("settings.mode");
+            if (mode != null) {
+                contentMode = RearContentMode.valueOf(mode);
+            }
+            String opacity = properties.getProperty("settings.backgroundOpacity");
+            if (opacity != null) {
+                backgroundOpacity = Integer.valueOf(opacity);
+            }
             for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values()) {
                 String flag = properties.getProperty("settings.visible." + widget.name());
                 if (flag != null) {
@@ -87,7 +107,7 @@ final class DefaultDashboard {
         } catch (IllegalArgumentException error) {
             throw new IOException("Unknown arrangement", error);
         }
-        return new Data(layout, arrangement, visible);
+        return new Data(layout, arrangement, visible, contentMode, backgroundOpacity);
     }
 
     /**
@@ -106,6 +126,12 @@ final class DefaultDashboard {
         DashboardWidgetLayout.importState(context, data.layout);
         DashboardSettings settings = MirrorSettings.loadDashboardSettings(context)
                 .withLayout(data.arrangement);
+        if (data.contentMode != null) {
+            settings = settings.withContentMode(data.contentMode);
+        }
+        if (data.backgroundOpacity != null) {
+            settings = settings.withBackgroundOpacity(data.backgroundOpacity);
+        }
         for (Map.Entry<DashboardWidgetLayout.Widget, Boolean> entry : data.visible.entrySet()) {
             settings = settings.withWidget(entry.getKey(), entry.getValue());
         }
