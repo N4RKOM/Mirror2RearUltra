@@ -218,6 +218,7 @@ public final class RearDashboardView extends View {
     private long pageFlipPeriodMillis;
     /** How many pages the arrangement is actually showing, for the dots. */
     private int pagesOnPanel = 1;
+    private boolean paused;
     private final Runnable pageFlip = this::invalidate;
     /** Moves the progress along while a track is playing, and no oftener. */
     private final Runnable progressTick = this::invalidate;
@@ -294,6 +295,24 @@ public final class RearDashboardView extends View {
             }
         }
         invalidate();
+    }
+
+    /**
+     * Stops the redraws the view asks for itself - the page rotation and the
+     * track's progress line - while the panel is out. Resuming draws once,
+     * and each of them re-arms from that frame.
+     */
+    void setPaused(boolean value) {
+        if (paused == value) {
+            return;
+        }
+        paused = value;
+        if (value) {
+            removeCallbacks(pageFlip);
+            removeCallbacks(progressTick);
+        } else {
+            invalidate();
+        }
     }
 
     void setSnapshot(RearDashboardSnapshot value) {
@@ -1161,7 +1180,7 @@ public final class RearDashboardView extends View {
     /** Wakes the view when the next page is due, and not before. */
     private void schedulePageFlip() {
         removeCallbacks(pageFlip);
-        if (pageFlipPeriodMillis <= 0L) {
+        if (paused || pageFlipPeriodMillis <= 0L) {
             return;
         }
         long period = pageFlipPeriodMillis;
@@ -2313,7 +2332,7 @@ public final class RearDashboardView extends View {
             iconPaint.setStrokeWidth(Math.max(1f, density * 1.4f));
             canvas.drawLine(ruleLeft, rule,
                     ruleLeft + (ruleRight - ruleLeft) * through, rule, iconPaint);
-            if (media.playing) {
+            if (media.playing && !paused) {
                 // Nothing else on the panel moves this often, so the redraw is
                 // asked for only while there is something to move.
                 removeCallbacks(progressTick);

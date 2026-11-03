@@ -118,6 +118,10 @@ final class RearDashboardController implements
 
     private DashboardSettings settings;
     private boolean started;
+    /** The panel is out: nothing is read or redrawn until {@link #resume}. */
+    private boolean paused;
+    /** A quarter of an hour, in the microseconds a sensor is asked for. */
+    private static final int PAUSED_BAROMETER_MICROS = 15 * 60 * 1_000_000;
     private int batteryPercent = -1;
     private int temperatureTenthsCelsius = -1;
     private boolean charging;
@@ -192,6 +196,16 @@ final class RearDashboardController implements
             return;
         }
         started = true;
+        registerBattery();
+        MediaWidgetState.addListener(this);
+        NotificationWidgetState.addListener(this);
+        configureDynamicSources();
+        publish();
+        mainHandler.post(clockTick);
+        refreshWeatherIfNeeded(true);
+    }
+
+    private void registerBattery() {
         IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent sticky;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -204,12 +218,74 @@ final class RearDashboardController implements
             sticky = context.registerReceiver(batteryReceiver, filter);
         }
         readBattery(sticky);
-        MediaWidgetState.addListener(this);
-        NotificationWidgetState.addListener(this);
+    }
+
+    /**
+     * Stops reading and redrawing while nobody can see the panel.
+     *
+     * <p>A panel the idle timer has put out used to go on ticking, listening
+     * to its sensors, holding a GPS fix and asking for the weather, all for a
+     * picture that was black. Everything is let go here and taken up again by
+     * {@link #resume}, which brings the numbers up to date before the panel
+     * is lit. The two sensors that keep a record while nobody looks - the step
+     * counter, which is a total since boot and so loses nothing, and the
+     * barometer, whose trend needs a sample every quarter of an hour - are
+     * kept, the barometer at that rate.
+     */
+    void pause() {
+        if (!started || paused) {
+            return;
+        }
+        paused = true;
+        mainHandler.removeCallbacks(clockTick);
+        mainHandler.removeCallbacks(weatherRefresh);
+        try {
+            context.unregisterReceiver(batteryReceiver);
+        } catch (IllegalArgumentException ignored) {
+            // Already gone.
+        }
+        listenForSound(false);
+        listenForNetwork(false);
+        if (locationManager != null) {
+            locationManager.removeUpdates(this);
+        }
+        if (sensorManager != null) {
+            sensorManager.unregisterListener(this);
+            Set<WidgetSpec.Source> needs = WidgetSpecs.sources(context, settings);
+            if (needs.contains(WidgetSpec.Source.BAROMETER)) {
+                Sensor barometer = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+                if (barometer != null) {
+                    sensorManager.registerListener(this, barometer, PAUSED_BAROMETER_MICROS);
+                }
+            }
+            if (needs.contains(WidgetSpec.Source.STEPS) && hasActivityPermission()) {
+                Sensor steps = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+                if (steps != null) {
+                    sensorManager.registerListener(
+                            this, steps, SensorManager.SENSOR_DELAY_NORMAL);
+                }
+            }
+        }
+    }
+
+    /** Takes everything up again and draws a current frame, before the panel is lit. */
+    void resume() {
+        if (!started || !paused) {
+            return;
+        }
+        paused = false;
+        registerBattery();
         configureDynamicSources();
         publish();
         mainHandler.post(clockTick);
-        refreshWeatherIfNeeded(true);
+        // The refresh timer was dropped with the rest: fetch if the reading
+        // has gone stale meanwhile, otherwise wait out what is left of it.
+        mainHandler.removeCallbacks(weatherRefresh);
+        long age = System.currentTimeMillis() - weatherUpdatedAt;
+        refreshWeatherIfNeeded(false);
+        if (!weatherLoading && age < WEATHER_REFRESH_MILLIS) {
+            mainHandler.postDelayed(weatherRefresh, WEATHER_REFRESH_MILLIS - age);
+        }
     }
 
     void updateSettings(DashboardSettings updatedSettings) {
@@ -416,7 +492,7 @@ final class RearDashboardController implements
     }
 
     private void configureDynamicSources() {
-        if (!started) {
+        if (!started || paused) {
             return;
         }
         Set<WidgetSpec.Source> needs = WidgetSpecs.sources(context, settings);
@@ -691,7 +767,7 @@ final class RearDashboardController implements
         String city = settings.weatherCity;
         boolean weatherEnabled = WidgetSpecs.sources(context, settings)
                 .contains(WidgetSpec.Source.WEATHER);
-        if (!started || !weatherEnabled || weatherLoading) {
+        if (!started || paused || !weatherEnabled || weatherLoading) {
             return;
         }
         long age = System.currentTimeMillis() - weatherUpdatedAt;
@@ -745,8 +821,11 @@ final class RearDashboardController implements
                         WEATHER_RETRY_MILLIS << Math.min(weatherFailures - 1, 4));
             }
             publish();
-            mainHandler.removeCallbacks(weatherRefresh);
-            mainHandler.postDelayed(weatherRefresh, delay);
+            // A panel that is out has no timer; resume() arms it again.
+            if (!paused) {
+                mainHandler.removeCallbacks(weatherRefresh);
+                mainHandler.postDelayed(weatherRefresh, delay);
+            }
         });
     }
 
@@ -920,6 +999,9 @@ final class RearDashboardController implements
     }
 
     private void publish() {
+        if (paused) {
+            return;
+        }
         refreshSystemStatsIfNeeded();
         refreshCalendar();
         refreshCharge();

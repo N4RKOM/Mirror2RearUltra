@@ -1406,10 +1406,31 @@ public class Mirror extends Activity implements
         boolean wasDimmed = idleDimmed;
         idleDimmed = false;
         quietDark = false;
+        // Before the panel is lit, so the first frame it shows is current.
+        syncDashboardPause();
         if (wasDimmed || wasFading) {
             applyProfileBrightness();
         }
         idleHandler.postDelayed(idleAction, idleDelayMillis());
+    }
+
+    /**
+     * Lets the widgets rest while the panel is out, and wakes them with it.
+     *
+     * <p>Only a panel that is really dark rests. An AOD that is merely dimmed
+     * still shows a clock that has to keep time.
+     */
+    private void syncDashboardPause() {
+        if (dashboardController != null) {
+            if (quietDark) {
+                dashboardController.pause();
+            } else {
+                dashboardController.resume();
+            }
+        }
+        if (dashboardView != null) {
+            dashboardView.setPaused(quietDark);
+        }
     }
 
     private long idleDelayMillis() {
@@ -1476,6 +1497,7 @@ public class Mirror extends Activity implements
             // with no session has nothing left to take the touch that was
             // meant to wake it: the user had to start the widgets again.
             quietDark = true;
+            syncDashboardPause();
             applyProfileBrightness();
         }
     }
@@ -1513,6 +1535,7 @@ public class Mirror extends Activity implements
             return;
         }
         quietDark = dark;
+        syncDashboardPause();
         Log.i(TAG, dark ? "Quiet hours: putting AOD out" : "Quiet hours over: back to AOD");
         applyProfileBrightness();
     }
