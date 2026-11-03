@@ -51,6 +51,8 @@ final class PanelSettingsController {
     private HyperValueRow themeInput;
     private HyperValueRow burnInInput;
     private HyperValueRow idleModeInput;
+    private HyperValueRow pageTransitionInput;
+    private String[] pageTransitionLabels;
     private HyperValueRow fontInput;
     private View fontAddButton;
     private HyperValueRow fontRemoveInput;
@@ -125,6 +127,7 @@ final class PanelSettingsController {
         restartNotice = root.findViewById(R.id.dashboard_restart_notice);
         burnInInput = root.findViewById(R.id.dashboard_burn_in_input);
         idleModeInput = root.findViewById(R.id.dashboard_idle_mode_input);
+        pageTransitionInput = root.findViewById(R.id.dashboard_page_transition_input);
         fontInput = root.findViewById(R.id.dashboard_font_input);
         fontAddButton = root.findViewById(R.id.dashboard_font_add_button);
         fontRemoveInput = root.findViewById(R.id.dashboard_font_remove_input);
@@ -168,6 +171,17 @@ final class PanelSettingsController {
                     host.getString(R.string.dashboard_quiet_schedule),
             };
             quietModeInput.setEntries(quietModeLabels);
+        }
+        if (pageTransitionInput != null) {
+            pageTransitionLabels = new String[]{
+                    host.getString(R.string.dashboard_page_transition_off),
+                    host.getString(R.string.dashboard_page_transition_slide),
+                    host.getString(R.string.dashboard_page_transition_parallax),
+                    host.getString(R.string.dashboard_page_transition_fade),
+                    host.getString(R.string.dashboard_page_transition_vertical),
+                    host.getString(R.string.dashboard_page_transition_zoom),
+            };
+            pageTransitionInput.setEntries(pageTransitionLabels);
         }
         if (shutterDelayInput != null) {
             shutterDelayLabels = new String[ShutterCountdown.CHOICES.length];
@@ -287,6 +301,15 @@ final class PanelSettingsController {
                 }
             });
         }
+        if (pageTransitionInput != null) {
+            pageTransitionInput.setOnItemSelectedListener(position -> {
+                if (position >= 0 && position < DashboardWidgetLayout.PageTransition.values().length) {
+                    DashboardWidgetLayout.savePageTransition(host,
+                            DashboardWidgetLayout.PageTransition.values()[position]);
+                    tellPanel();
+                }
+            });
+        }
         if (tapVariantSwitch != null) {
             pocketLockSwitch.setOnCheckedChangeListener((button, checked) -> {
                 if (!bindingUi) {
@@ -391,6 +414,10 @@ final class PanelSettingsController {
             int aodMinBrightness = DashboardWidgetLayout.loadAodMinBrightnessPercent(host);
             aodMinBrightnessSlider.setValue(aodMinBrightness);
             updateAodMinBrightnessValue(aodMinBrightness);
+        }
+        if (pageTransitionInput != null) {
+            pageTransitionInput.setValue(labelAt(pageTransitionLabels,
+                    DashboardWidgetLayout.loadPageTransition(host).ordinal()));
         }
         if (tapVariantSwitch != null) {
             pocketLockSwitch.setChecked(DashboardWidgetLayout.isPocketLockEnabled(host));

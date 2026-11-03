@@ -301,6 +301,13 @@
     <string name="dashboard_burn_in_small">Слабый</string>
     <string name="dashboard_burn_in_normal">Обычный</string>
     <string name="dashboard_burn_in_large">Широкий</string>
+    <string name="dashboard_page_transition_title">Переход между страницами</string>
+    <string name="dashboard_page_transition_off">Без анимации</string>
+    <string name="dashboard_page_transition_slide">Сдвиг</string>
+    <string name="dashboard_page_transition_parallax">Сдвиг с параллаксом</string>
+    <string name="dashboard_page_transition_fade">Затухание</string>
+    <string name="dashboard_page_transition_vertical">Вертикальный сдвиг</string>
+    <string name="dashboard_page_transition_zoom">Масштаб</string>
     <string name="dashboard_builder_preview_note">Предпросмотр повторяет форму заднего экрана. Заряд, температура, текущий трек и часы — настоящие, остальное — образец.</string>
     <string name="dashboard_widgets_title">Виджеты</string>
     <string name="default_custom_profile_name">Пользовательский профиль</string>

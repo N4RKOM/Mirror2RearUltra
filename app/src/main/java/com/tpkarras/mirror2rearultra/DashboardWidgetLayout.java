@@ -43,6 +43,16 @@ final class DashboardWidgetLayout {
     enum Orientation { AUTO, LANDSCAPE, PORTRAIT }
     enum Style { DEFAULT, ACCENT, MUTED }
     enum IdleMode { TIMEOUT_15, TIMEOUT_30, ALWAYS_ON }
+
+    /**
+     * How the panel moves from one page to the next: not at all, the old page
+     * pushed out by the new one, or the same with the old page lagging behind
+     * and fading so the two do not overprint each other. The rest are the old
+     * page fading into the new one, the same sliding up or down, and a page
+     * that grows into place. New values go at the end: the settings screen
+     * lists them in this order.
+     */
+    enum PageTransition { OFF, SLIDE, PARALLAX, FADE, VERTICAL, ZOOM }
     /**
      * Which typeface the panel draws with.
      *
@@ -81,6 +91,7 @@ final class DashboardWidgetLayout {
     private static final String PRESENCE_PREFIX = "presence_";
     private static final String GAP_PREFIX = "gap_";
     private static final String BURN_IN_SHIFT = "burn_in_shift";
+    private static final String PAGE_TRANSITION = "page_transition";
     private static final String FONT = "font";
     private static final String AUTO_BRIGHTNESS = "auto_brightness";
     private static final String IMPERIAL_UNITS = "imperial_units";
@@ -877,6 +888,19 @@ final class DashboardWidgetLayout {
 
     static void saveBurnInShiftDp(Context context, int dp) {
         prefs(context).edit().putInt(BURN_IN_SHIFT, Math.max(0, Math.min(6, dp))).apply();
+    }
+
+    static PageTransition loadPageTransition(Context context) {
+        try {
+            return PageTransition.valueOf(prefs(context).getString(
+                    PAGE_TRANSITION, PageTransition.PARALLAX.name()));
+        } catch (IllegalArgumentException error) {
+            return PageTransition.PARALLAX;
+        }
+    }
+
+    static void savePageTransition(Context context, PageTransition transition) {
+        prefs(context).edit().putString(PAGE_TRANSITION, transition.name()).apply();
     }
 
     /**

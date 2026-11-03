@@ -260,6 +260,13 @@
     <string name="dashboard_burn_in_small">Slight</string>
     <string name="dashboard_burn_in_normal">Normal</string>
     <string name="dashboard_burn_in_large">Wide</string>
+    <string name="dashboard_page_transition_title">Page transition</string>
+    <string name="dashboard_page_transition_off">None</string>
+    <string name="dashboard_page_transition_slide">Slide</string>
+    <string name="dashboard_page_transition_parallax">Slide with parallax</string>
+    <string name="dashboard_page_transition_fade">Fade</string>
+    <string name="dashboard_page_transition_vertical">Vertical slide</string>
+    <string name="dashboard_page_transition_zoom">Zoom</string>
     <string name="dashboard_builder_preview_note">The preview matches the shape of the rear panel. Battery, temperature, the current track and the clock are live; the rest are sample values.</string>
     <string name="dashboard_builder_reset">Reset</string>
     <string name="dashboard_builder_reset_title">Reset widget layout?</string>

@@ -58,6 +58,18 @@
             app:rowTitle="@string/dashboard_burn_in_title" />
     </LinearLayout>
 
+    <!-- How a page gives way to the next one. Not tied to AOD: it is
+         seen on every page turn, swipe or timer. -->
+    <LinearLayout
+        style="@style/HyperOS.Group"
+        android:layout_marginTop="@dimen/section_spacing">
+
+        <com.tpkarras.mirror2rearultra.HyperValueRow
+            android:id="@+id/dashboard_page_transition_input"
+            style="@style/HyperOS.ValueRow.Single"
+            app:rowTitle="@string/dashboard_page_transition_title" />
+    </LinearLayout>
+
     <LinearLayout
         style="@style/HyperOS.Group"
         android:layout_marginTop="@dimen/section_spacing">

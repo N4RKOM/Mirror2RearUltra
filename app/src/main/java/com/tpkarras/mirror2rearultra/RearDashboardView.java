@@ -18,8 +18,10 @@ import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.os.SystemClock;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.animation.DecelerateInterpolator;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 
@@ -166,6 +168,48 @@ public final class RearDashboardView extends View {
     }
     /** The page {@link #pageLines} last chose, for per-page layout. */
     private int currentPage = 1;
+    private static final long TRANSITION_MILLIS = 260L;
+    /** How long a swipe that did not go far enough takes to run back. */
+    private static final long REVERT_MILLIS = 200L;
+    /** How far the page being left lags behind in the parallax style. */
+    private static final float PARALLAX_LAG = 0.3f;
+    /** How much smaller the page is at the far end of the zoom. */
+    private static final float ZOOM_DEPTH = 0.08f;
+    private final DecelerateInterpolator transitionCurve = new DecelerateInterpolator(1.8f);
+    /** The page being left while a transition plays, or zero when none is. */
+    private int transitionFrom;
+    /** The page being turned to. */
+    private int transitionTo;
+    private long transitionStartMillis;
+    private long transitionDurationMillis = TRANSITION_MILLIS;
+    /**
+     * How far across the turn the animation starts and where it ends, from
+     * zero (the old page in place) to one (the new one). A turn that began
+     * under a finger carries on from where the finger let go, and a swipe that
+     * was not far enough runs back to zero.
+     */
+    private float transitionFractionFrom;
+    private float transitionFractionTo = 1f;
+    /** One when the new page comes in from the right, minus one from the left. */
+    private float transitionDirection = 1f;
+    /** A swipe is following the finger: the pages are drawn where it has taken them. */
+    private boolean scrubbing;
+    private float scrubFraction;
+    private int scrubArriving;
+    private float scrubDirection = 1f;
+    /** The pages either way, as drawn and as the swipe counts them. */
+    private int scrubForwardPage;
+    private int scrubBackPage;
+    private int scrubForwardRaw;
+    private int scrubBackRaw;
+    private DashboardWidgetLayout.PageTransition transitionStyle =
+            DashboardWidgetLayout.PageTransition.OFF;
+    /**
+     * Whether a page has been drawn since the view was last shown. The first
+     * page after the panel wakes appears where it is rather than sliding in
+     * from a page nobody saw.
+     */
+    private boolean hasDrawnPage;
     /**
      * How often the page on screen is due to change, or zero when nothing
      * cycles. Set while the lines are being worked out and acted on once the
@@ -718,10 +762,40 @@ public final class RearDashboardView extends View {
         canvas.translate(shift, -shift);
 
         drawGrid(canvas);
-        List<Line> lines = pageLines(createLines());
-        // pageLines has just settled which page is on screen, and each page may
-        // want its own arrangement: a dense trip page reads better compact than
-        // the clock page beside it.
+        List<Line> every = createLines();
+        List<Line> lines = pageLines(every);
+        // The turn drawn this frame: under a finger, or an animation running
+        // on its own. A negative fraction means the page is simply at rest.
+        boolean animating = !scrubbing && transitionFrom != 0;
+        float fraction = scrubbing ? scrubFraction : animating ? transitionFraction() : -1f;
+        float dotPosition = currentPage;
+        if (fraction >= 0f) {
+            int leaving = scrubbing ? currentPage : transitionFrom;
+            int arriving = scrubbing ? scrubArriving : transitionTo;
+            drawTransition(canvas, every, density, leaving, arriving, fraction,
+                    scrubbing ? scrubDirection : transitionDirection);
+            dotPosition = leaving + (arriving - leaving) * fraction;
+        } else {
+            drawPageContent(canvas, lines, density);
+        }
+        drawPageDots(canvas, density, dotPosition);
+        canvas.restore();
+        drawSelection(canvas, getResources().getDisplayMetrics().density);
+        hasDrawnPage = true;
+        schedulePageFlip();
+        if (animating && fraction >= 0f) {
+            postInvalidateOnAnimation();
+        }
+    }
+
+    /**
+     * One page's lines in the arrangement its own layout asks for.
+     *
+     * <p>pageLines has just settled which page is on screen, and each page may
+     * want its own arrangement: a dense trip page reads better compact than
+     * the clock page beside it.
+     */
+    private void drawPageContent(Canvas canvas, List<Line> lines, float density) {
         DashboardSettings.Layout layout = DashboardWidgetLayout.loadPageLayout(
                 getContext(), currentPage, settings.layout);
         if (containsFullscreenWidget(lines)) {
@@ -735,10 +809,282 @@ public final class RearDashboardView extends View {
         } else {
             drawStacked(canvas, lines, density);
         }
-        drawPageDots(canvas, density);
-        canvas.restore();
-        drawSelection(canvas, getResources().getDisplayMetrics().density);
-        schedulePageFlip();
+    }
+
+    /**
+     * Decides whether turning from one page to another is worth animating, and
+     * remembers what the animation needs.
+     *
+     * <p>Not in the builder, whose preview is being edited and picked from; not
+     * the first page after the view was shown; not when the two pages are held
+     * the other way round, since the window is rotated and re-measured for the
+     * new one and would change size under the slide; not when the system has
+     * animations switched off.
+     */
+    private void startTransition(int from, int to) {
+        if (transitionFrom == from && transitionTo == to) {
+            // A swipe the finger carried part of the way has already begun this
+            // very turn; starting it again would pull the page back to the start.
+            return;
+        }
+        transitionFrom = 0;
+        if (!hasDrawnPage || widgetSelectedListener != null || selectedPage > 0
+                || pagesOnPanel <= 1 || getWidth() <= 0) {
+            return;
+        }
+        DashboardWidgetLayout.PageTransition style =
+                DashboardWidgetLayout.loadPageTransition(getContext());
+        if (style == DashboardWidgetLayout.PageTransition.OFF
+                || !android.animation.ValueAnimator.areAnimatorsEnabled()
+                || DashboardWidgetLayout.loadPageOrientation(getContext(), from)
+                != DashboardWidgetLayout.loadPageOrientation(getContext(), to)) {
+            return;
+        }
+        // Forward is the next page round, wrapping from the last to the first,
+        // which is what a swipe to the left and the automatic cycling both do.
+        runTransition(style, from, to, to == from % pagesOnPanel + 1 ? 1f : -1f,
+                0f, 1f, TRANSITION_MILLIS);
+    }
+
+    private void runTransition(DashboardWidgetLayout.PageTransition style, int from, int to,
+            float direction, float fractionFrom, float fractionTo, long durationMillis) {
+        transitionStyle = style;
+        transitionFrom = from;
+        transitionTo = to;
+        transitionDirection = direction;
+        transitionFractionFrom = fractionFrom;
+        transitionFractionTo = fractionTo;
+        transitionDurationMillis = durationMillis;
+        transitionStartMillis = SystemClock.uptimeMillis();
+    }
+
+    /**
+     * How far across the turn the running transition has got, or minus one
+     * once it is over.
+     */
+    private float transitionFraction() {
+        if (transitionFrom == 0) {
+            return -1f;
+        }
+        float elapsed = (SystemClock.uptimeMillis() - transitionStartMillis)
+                / (float) transitionDurationMillis;
+        if (elapsed >= 1f) {
+            transitionFrom = 0;
+            transitionTo = 0;
+            return -1f;
+        }
+        float eased = transitionCurve.getInterpolation(Math.max(0f, elapsed));
+        return transitionFractionFrom + (transitionFractionTo - transitionFractionFrom) * eased;
+    }
+
+    /** The page a swipe in this direction reaches, as the swipe itself counts it. */
+    private int neighbourPage(boolean forward) {
+        int maxPage = 1;
+        for (DashboardWidgetLayout.Widget widget : DashboardWidgetLayout.Widget.values()) {
+            maxPage = Math.max(maxPage, DashboardWidgetLayout.loadPage(getContext(), widget));
+        }
+        return forward ? currentPage % maxPage + 1 : (currentPage + maxPage - 2) % maxPage + 1;
+    }
+
+    /**
+     * Starts a swipe that follows the finger, once it has plainly gone sideways.
+     *
+     * <p>Only where a turn would be animated at all, and where both neighbours
+     * are pages that can be shown and are held the same way round: otherwise
+     * the swipe stays the plain kind that turns the page when the finger lifts.
+     * The page is pinned for the duration, so the timer cannot turn it under
+     * the finger.
+     */
+    private boolean beginScrub(float travelX, float travelY) {
+        if (Math.abs(travelX) <= ViewConfiguration.get(getContext()).getScaledTouchSlop()
+                || Math.abs(travelX) <= Math.abs(travelY)
+                || !hasDrawnPage || selectedPage > 0 || pagesOnPanel <= 1 || getWidth() <= 0
+                || !android.animation.ValueAnimator.areAnimatorsEnabled()) {
+            return false;
+        }
+        DashboardWidgetLayout.PageTransition style =
+                DashboardWidgetLayout.loadPageTransition(getContext());
+        if (style == DashboardWidgetLayout.PageTransition.OFF) {
+            return false;
+        }
+        int forwardRaw = neighbourPage(true);
+        int backRaw = neighbourPage(false);
+        int forward = Math.min(forwardRaw, pagesOnPanel);
+        int back = Math.min(backRaw, pagesOnPanel);
+        DashboardWidgetLayout.Orientation here =
+                DashboardWidgetLayout.loadPageOrientation(getContext(), currentPage);
+        if (forward == currentPage || back == currentPage
+                || DashboardWidgetLayout.loadPageOrientation(getContext(), forward) != here
+                || DashboardWidgetLayout.loadPageOrientation(getContext(), back) != here) {
+            return false;
+        }
+        transitionFrom = 0;
+        transitionTo = 0;
+        transitionStyle = style;
+        scrubForwardRaw = forwardRaw;
+        scrubBackRaw = backRaw;
+        scrubForwardPage = forward;
+        scrubBackPage = back;
+        scrubbing = true;
+        userPage = currentPage;
+        markPageInteraction();
+        if (getParent() != null) {
+            getParent().requestDisallowInterceptTouchEvent(true);
+        }
+        updateScrub(travelX);
+        return true;
+    }
+
+    private void updateScrub(float travel) {
+        boolean forward = travel < 0f;
+        scrubDirection = forward ? 1f : -1f;
+        scrubArriving = forward ? scrubForwardPage : scrubBackPage;
+        scrubFraction = Math.min(1f, Math.abs(travel) / Math.max(1f, getWidth()));
+        invalidate();
+    }
+
+    /**
+     * Lets go of a followed swipe: far enough turns the page the rest of the
+     * way, and not far enough puts it back. A cancelled touch always puts it
+     * back.
+     */
+    private void finishScrub(boolean lifted) {
+        scrubbing = false;
+        float fraction = scrubFraction;
+        boolean forward = scrubDirection > 0f;
+        boolean far = lifted && fraction * getWidth() >= Math.max(18f, getWidth() * 0.18f);
+        if (far) {
+            userPage = forward ? scrubForwardRaw : scrubBackRaw;
+            markPageInteraction();
+            runTransition(transitionStyle, currentPage, scrubArriving, scrubDirection,
+                    fraction, 1f, Math.max(90L, Math.round(TRANSITION_MILLIS * (1f - fraction))));
+        } else {
+            runTransition(transitionStyle, currentPage, scrubArriving, scrubDirection,
+                    fraction, 0f, Math.max(90L, Math.round(REVERT_MILLIS * fraction)));
+        }
+        invalidate();
+    }
+
+    /** The lines of another page, laid out as that page would be. */
+    private List<Line> linesOnPage(List<Line> every, int page) {
+        List<Line> result = new ArrayList<>();
+        for (Line line : every) {
+            if (DashboardWidgetLayout.loadPage(getContext(), line.widget) == page) {
+                result.add(line);
+            }
+        }
+        return paginateLines(result);
+    }
+
+    /**
+     * Draws the page being left and the page coming in, offset against each
+     * other.
+     *
+     * <p>Plain sliding moves them together, side by side. The parallax style
+     * lets the old page travel only a part of the way and fade as it goes,
+     * which is also what keeps the two from printing over one another, since
+     * neither has a backdrop of its own. The lines of the incoming page are
+     * the ones left in {@code drawnLines}, so a touch lands on what is
+     * arriving.
+     *
+     * <p>{@code eased} is how far across the turn the pages are, already
+     * shaped by whoever asks: an easing curve for an animation, the finger's
+     * own travel for a swipe being followed. The page the view rests on is
+     * left as it was found.
+     */
+    private void drawTransition(Canvas canvas, List<Line> every, float density,
+            int leavingPage, int arrivingPage, float eased, float dir) {
+        float width = getWidth();
+        float height = getHeight();
+        // Where each page is at this moment: an offset, a scale about the
+        // middle and an opacity. Every style is a different choice of these.
+        float outX = 0f, outY = 0f, outScale = 1f, inX = 0f, inY = 0f, inScale = 1f;
+        int outAlpha = 255;
+        int inAlpha = 255;
+        switch (transitionStyle) {
+            case SLIDE:
+                outX = -dir * width * eased;
+                inX = dir * width * (1f - eased);
+                break;
+            case PARALLAX:
+                outX = -dir * width * eased * PARALLAX_LAG;
+                inX = dir * width * (1f - eased);
+                outAlpha = alphaOf(1f - eased * 1.4f);
+                inAlpha = alphaOf(eased * 1.4f);
+                break;
+            case VERTICAL:
+                outY = -dir * height * eased * PARALLAX_LAG;
+                inY = dir * height * (1f - eased);
+                outAlpha = alphaOf(1f - eased * 1.4f);
+                inAlpha = alphaOf(eased * 1.4f);
+                break;
+            case ZOOM:
+                outScale = 1f - ZOOM_DEPTH * eased;
+                inScale = 1f - ZOOM_DEPTH * (1f - eased);
+                outAlpha = alphaOf(1f - eased * 1.4f);
+                inAlpha = alphaOf(eased * 1.4f);
+                break;
+            case FADE:
+            default:
+                outAlpha = alphaOf(1f - eased);
+                inAlpha = alphaOf(eased);
+                break;
+        }
+
+        int resting = currentPage;
+        currentPage = leavingPage;
+        List<Line> leaving = linesOnPage(every, leavingPage);
+        int saved = beginTransitionLayer(canvas, outAlpha, outX, outY, outScale, width, height);
+        drawPageContent(canvas, leaving, density);
+        canvas.restoreToCount(saved);
+
+        // What the old page drew is not to be hit; only the new page answers
+        // to a finger.
+        drawnLines.clear();
+        currentPage = arrivingPage;
+        List<Line> arriving = linesOnPage(every, arrivingPage);
+        saved = beginTransitionLayer(canvas, inAlpha, inX, inY, inScale, width, height);
+        drawPageContent(canvas, arriving, density);
+        canvas.restoreToCount(saved);
+        currentPage = resting;
+    }
+
+    private int beginTransitionLayer(Canvas canvas, int alpha, float dx, float dy, float scale,
+            float width, float height) {
+        int saved = alpha < 255
+                ? canvas.saveLayerAlpha(-width, -height, 2f * width, 2f * height, alpha)
+                : canvas.save();
+        canvas.translate(dx, dy);
+        if (scale != 1f) {
+            canvas.scale(scale, scale, width / 2f, height / 2f);
+        }
+        return saved;
+    }
+
+    private static int alphaOf(float fraction) {
+        return Math.round(255f * Math.max(0f, Math.min(1f, fraction)));
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        if (visibility != View.VISIBLE) {
+            hasDrawnPage = false;
+            transitionFrom = 0;
+            transitionTo = 0;
+            scrubbing = false;
+        }
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        if (visibility != View.VISIBLE) {
+            hasDrawnPage = false;
+            transitionFrom = 0;
+            transitionTo = 0;
+            scrubbing = false;
+        }
     }
 
     /**
@@ -752,8 +1098,12 @@ public final class RearDashboardView extends View {
      * <p>They sit in the margin the layouts leave below them, and they are
      * drawn inside the burn-in shift so they wander with everything else
      * rather than marking the same pixels all day.
+     *
+     * <p>{@code position} is the page the highlight is on, between two pages
+     * while one is turning: the filled dot gives way to the next as the page
+     * moves, rather than changing hands at the end.
      */
-    private void drawPageDots(Canvas canvas, float density) {
+    private void drawPageDots(Canvas canvas, float density, float position) {
         if (pagesOnPanel <= 1 || getWidth() <= 0 || getHeight() <= 0) {
             return;
         }
@@ -761,10 +1111,13 @@ public final class RearDashboardView extends View {
         float step = radius * 3.4f;
         float y = getHeight() - Math.max(3f, density * 3.2f) - radius;
         float x = (getWidth() - step * (pagesOnPanel - 1)) / 2f;
+        int muted = mutedColour();
         iconPaint.setStyle(Paint.Style.FILL);
         for (int page = 1; page <= pagesOnPanel; page++) {
-            iconPaint.setColor(page == currentPage ? currentPalette.text : mutedColour());
-            canvas.drawCircle(x, y, page == currentPage ? radius : radius * 0.78f, iconPaint);
+            float weight = Math.max(0f, 1f - Math.abs(page - position));
+            iconPaint.setColor(androidx.core.graphics.ColorUtils.blendARGB(
+                    muted, currentPalette.text, weight));
+            canvas.drawCircle(x, y, radius * (0.78f + 0.22f * weight), iconPaint);
             x += step;
         }
         iconPaint.setStyle(Paint.Style.STROKE);
@@ -964,6 +1317,7 @@ public final class RearDashboardView extends View {
         if (currentPage == page) {
             return;
         }
+        startTransition(currentPage, page);
         currentPage = page;
         OnPageChangedListener listener = pageChangedListener;
         if (listener != null) {
@@ -1082,6 +1436,16 @@ public final class RearDashboardView extends View {
                         .getScaledTouchSlop()) {
                     cancelPendingLongPress();
                 }
+                if (!interactive && draggedWidget == null) {
+                    float travel = event.getX() - touchStartX;
+                    if (scrubbing) {
+                        updateScrub(travel);
+                        return true;
+                    }
+                    if (beginScrub(travel, event.getY() - touchStartY)) {
+                        return true;
+                    }
+                }
                 if (draggedWidget == null) {
                     return true;
                 }
@@ -1100,6 +1464,13 @@ public final class RearDashboardView extends View {
                 cancelPendingLongPress();
                 if (longPressFired) {
                     longPressFired = false;
+                    return true;
+                }
+                if (scrubbing) {
+                    finishScrub(event.getActionMasked() == MotionEvent.ACTION_UP);
+                    if (getParent() != null) {
+                        getParent().requestDisallowInterceptTouchEvent(false);
+                    }
                     return true;
                 }
                 if (getParent() != null) {
