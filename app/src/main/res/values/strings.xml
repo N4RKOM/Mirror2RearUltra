@@ -356,6 +356,16 @@
     <string name="dashboard_named_template_delete">Delete</string>
     <string name="dashboard_named_template_delete_message">Delete the template «%1$s»?</string>
     <string name="dashboard_named_template_full">No room for another template</string>
+    <string name="dashboard_named_template_export">Export…</string>
+    <string name="dashboard_named_template_export_all">Export all</string>
+    <string name="dashboard_named_template_import">Import</string>
+    <string name="dashboard_named_template_export_empty">No saved templates to export</string>
+    <string name="dashboard_named_template_exported">Templates exported</string>
+    <string name="dashboard_named_template_export_failed">Could not export the templates</string>
+    <string name="dashboard_named_template_import_invalid">This file is not a Mirror2RearUltra template file</string>
+    <string name="dashboard_named_template_import_failed">Could not read the file</string>
+    <string name="dashboard_named_template_imported">Templates imported: %1$d</string>
+    <string name="dashboard_named_template_imported_partial">Imported %1$d of %2$d: there is room for no more templates</string>
     <string name="dashboard_builder_preview_pick_hint">Tap a widget in the preview to reach its settings. In the free view you can also drag it and pinch to resize.</string>
     <string name="dashboard_builder_preview_free_hint">Drag a widget in the preview to place it, and pinch to resize. Tap one to reach its settings.</string>
     <string name="dashboard_builder_snap">Snap to a grid</string>

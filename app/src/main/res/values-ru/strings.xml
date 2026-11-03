@@ -174,6 +174,16 @@
     <string name="dashboard_named_template_delete">Удалить</string>
     <string name="dashboard_named_template_delete_message">Удалить шаблон «%1$s»?</string>
     <string name="dashboard_named_template_full">Больше шаблонов сохранить нельзя</string>
+    <string name="dashboard_named_template_export">Экспортировать…</string>
+    <string name="dashboard_named_template_export_all">Экспорт всех</string>
+    <string name="dashboard_named_template_import">Импорт</string>
+    <string name="dashboard_named_template_export_empty">Нет сохранённых шаблонов для экспорта</string>
+    <string name="dashboard_named_template_exported">Шаблоны экспортированы</string>
+    <string name="dashboard_named_template_export_failed">Не удалось экспортировать шаблоны</string>
+    <string name="dashboard_named_template_import_invalid">Файл не является файлом шаблонов Mirror2RearUltra</string>
+    <string name="dashboard_named_template_import_failed">Не удалось прочитать файл</string>
+    <string name="dashboard_named_template_imported">Импортировано шаблонов: %1$d</string>
+    <string name="dashboard_named_template_imported_partial">Импортировано %1$d из %2$d: места для остальных нет</string>
     <string name="dashboard_builder_preview_pick_hint">Нажмите на виджет в предпросмотре, чтобы попасть к его настройкам. В свободном виде его можно ещё перетаскивать и менять размер щипком.</string>
     <string name="dashboard_builder_preview_free_hint">Перетаскивайте виджеты в предпросмотре, размер меняется щипком. Нажатие открывает его настройки.</string>
     <string name="dashboard_builder_snap">Прилипание к сетке</string>

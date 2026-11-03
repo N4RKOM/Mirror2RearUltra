@@ -283,6 +283,65 @@ final class DashboardTemplateStore {
         editor.apply();
     }
 
+    /**
+     * The named templates with these ids, ready for a file: each one's name and
+     * the values of its slot, without the slot's prefix.
+     */
+    static List<TemplateBundleCodec.Template> exportNamed(Context context, List<String> ids) {
+        SharedPreferences in = prefs(context);
+        List<TemplateBundleCodec.Template> result = new ArrayList<>();
+        for (String id : ids) {
+            if (!in.getBoolean(key(id, SAVED), false)) continue;
+            String prefix = prefix(id);
+            Map<String, String> state = new LinkedHashMap<>();
+            for (Map.Entry<String, ?> entry : in.getAll().entrySet()) {
+                if (!entry.getKey().startsWith(prefix)) continue;
+                String encoded = DashboardWidgetLayout.encodeStateValue(entry.getValue());
+                if (encoded != null && !encoded.startsWith("t:")) {
+                    state.put(entry.getKey().substring(prefix.length()), encoded);
+                }
+            }
+            result.add(new TemplateBundleCodec.Template(in.getString(NAMED_NAME_PREFIX + id, id), state));
+        }
+        return result;
+    }
+
+    /**
+     * Adds the templates of a file to the list, each in a slot of its own.
+     *
+     * <p>Added rather than replacing: what is already saved is left as it is,
+     * and a template loaded twice is simply two. Stops when {@link #MAX_NAMED}
+     * are used.
+     *
+     * @return how many were added
+     */
+    static int importNamed(Context context, List<TemplateBundleCodec.Template> templates) {
+        SharedPreferences in = prefs(context);
+        List<String> ids = splitIds(in.getString(NAMED_INDEX, ""));
+        SharedPreferences.Editor editor = in.edit();
+        int added = 0;
+        for (TemplateBundleCodec.Template template : templates) {
+            if (ids.size() >= MAX_NAMED) break;
+            String id = NAMED_SLOT_PREFIX + System.currentTimeMillis();
+            while (ids.contains(id)) {
+                id = id + "_";
+            }
+            String prefix = prefix(id);
+            for (Map.Entry<String, String> entry : template.state.entrySet()) {
+                Object value = DashboardWidgetLayout.decodeStateValue(entry.getValue());
+                String key = prefix + entry.getKey();
+                if (value instanceof Boolean) editor.putBoolean(key, (Boolean) value);
+                else if (value instanceof Integer) editor.putInt(key, (Integer) value);
+                else if (value instanceof String) editor.putString(key, (String) value);
+            }
+            editor.putString(NAMED_NAME_PREFIX + id, template.name);
+            ids.add(id);
+            added++;
+        }
+        editor.putString(NAMED_INDEX, String.join(",", ids)).apply();
+        return added;
+    }
+
     static Map<String, String> exportState(Context context) {
         Map<String, String> result = new LinkedHashMap<>();
         for (Map.Entry<String, ?> entry : prefs(context).getAll().entrySet()) {

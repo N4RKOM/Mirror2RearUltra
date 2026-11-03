@@ -47,6 +47,17 @@ public class DashboardTemplatesActivity extends AppCompatActivity {
     private LinearLayout namedTemplates;
     private TextView namedTemplatesEmpty;
     private MaterialButton addNamedTemplateButton;
+    private androidx.activity.result.ActivityResultLauncher<String> exportLauncher;
+    private androidx.activity.result.ActivityResultLauncher<String[]> importLauncher;
+    /** The templates the file being picked is for; the picker returns after the tap, not with it. */
+    private List<String> pendingExportIds = new ArrayList<>();
+    private final java.util.concurrent.ExecutorService fileExecutor =
+            java.util.concurrent.Executors.newSingleThreadExecutor();
+
+    @Override protected void onDestroy() {
+        fileExecutor.shutdownNow();
+        super.onDestroy();
+    }
 
     @Override protected void onCreate(@Nullable Bundle state) {
         super.onCreate(state);
@@ -86,6 +97,30 @@ public class DashboardTemplatesActivity extends AppCompatActivity {
         namedTemplatesEmpty = findViewById(R.id.dashboard_named_templates_empty);
         addNamedTemplateButton = findViewById(R.id.dashboard_named_template_add);
         addNamedTemplateButton.setOnClickListener(view -> promptForNewTemplate());
+        exportLauncher = registerForActivityResult(
+                new androidx.activity.result.contract.ActivityResultContracts.CreateDocument(
+                        "application/xml"),
+                uri -> {
+                    if (uri != null) {
+                        exportTemplates(uri, pendingExportIds);
+                    }
+                });
+        importLauncher = registerForActivityResult(
+                new androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
+                uri -> {
+                    if (uri != null) {
+                        importTemplates(uri);
+                    }
+                });
+        findViewById(R.id.dashboard_named_template_export).setOnClickListener(view -> {
+            List<String> ids = new ArrayList<>();
+            for (DashboardTemplateStore.Named named : DashboardTemplateStore.listNamed(this)) {
+                ids.add(named.id);
+            }
+            startExport(ids);
+        });
+        findViewById(R.id.dashboard_named_template_import).setOnClickListener(view ->
+                importLauncher.launch(new String[]{"*/*"}));
         renderNamedTemplates();
 
         permissionLauncher = registerForActivityResult(
@@ -437,12 +472,15 @@ public class DashboardTemplatesActivity extends AppCompatActivity {
                 .setItems(new CharSequence[]{
                         getString(R.string.dashboard_named_template_overwrite),
                         getString(R.string.dashboard_named_template_rename),
+                        getString(R.string.dashboard_named_template_export),
                         getString(R.string.dashboard_named_template_delete)
                 }, (dialog, which) -> {
                     if (which == 0) {
                         DashboardTemplateStore.overwriteNamed(this, template.id);
                         Toast.makeText(this, R.string.dashboard_custom_template_saved,
                                 Toast.LENGTH_SHORT).show();
+                    } else if (which == 2) {
+                        startExport(new ArrayList<>(java.util.Collections.singletonList(template.id)));
                     } else if (which == 1) {
                         promptForTemplateName(R.string.dashboard_named_template_rename,
                                 template.name, name -> {
@@ -456,6 +494,85 @@ public class DashboardTemplatesActivity extends AppCompatActivity {
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
+    }
+
+    private void startExport(List<String> ids) {
+        if (ids.isEmpty()) {
+            Toast.makeText(this, R.string.dashboard_named_template_export_empty,
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        pendingExportIds = ids;
+        String stamp = new java.text.SimpleDateFormat("yyyyMMdd-HHmmss", java.util.Locale.ROOT)
+                .format(new java.util.Date());
+        exportLauncher.launch("Mirror2RearUltra-templates-" + stamp + ".xml");
+    }
+
+    private void exportTemplates(android.net.Uri uri, List<String> ids) {
+        fileExecutor.execute(() -> {
+            try (java.io.OutputStream output = getContentResolver().openOutputStream(uri, "wt")) {
+                if (output == null) {
+                    throw new java.io.IOException("No output stream");
+                }
+                List<TemplateBundleCodec.Template> templates =
+                        DashboardTemplateStore.exportNamed(this, ids);
+                if (templates.isEmpty()) {
+                    // The activity was recreated while the picker was open, or
+                    // the templates were deleted meanwhile: nothing to write.
+                    throw new java.io.IOException("Nothing to export");
+                }
+                java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+                TemplateBundleCodec.write(templates, bytes);
+                output.write(bytes.toByteArray());
+                output.flush();
+                runOnUiThread(() -> Toast.makeText(this,
+                        R.string.dashboard_named_template_exported, Toast.LENGTH_SHORT).show());
+            } catch (java.io.IOException | RuntimeException error) {
+                runOnUiThread(() -> Toast.makeText(this,
+                        R.string.dashboard_named_template_export_failed, Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private void importTemplates(android.net.Uri uri) {
+        fileExecutor.execute(() -> {
+            List<TemplateBundleCodec.Template> templates;
+            try (java.io.InputStream input = getContentResolver().openInputStream(uri)) {
+                if (input == null) {
+                    throw new java.io.IOException("No input stream");
+                }
+                java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+                byte[] buffer = new byte[8192];
+                int read;
+                while ((read = input.read(buffer)) != -1) {
+                    if (bytes.size() + read > TemplateBundleCodec.MAX_FILE_BYTES) {
+                        throw new java.io.IOException("File is too large");
+                    }
+                    bytes.write(buffer, 0, read);
+                }
+                templates = TemplateBundleCodec.read(
+                        new java.io.ByteArrayInputStream(bytes.toByteArray()));
+            } catch (TemplateBundleCodec.BundleException error) {
+                runOnUiThread(() -> Toast.makeText(this,
+                        R.string.dashboard_named_template_import_invalid, Toast.LENGTH_LONG).show());
+                return;
+            } catch (java.io.IOException | RuntimeException error) {
+                runOnUiThread(() -> Toast.makeText(this,
+                        R.string.dashboard_named_template_import_failed, Toast.LENGTH_LONG).show());
+                return;
+            }
+            List<TemplateBundleCodec.Template> loaded = templates;
+            runOnUiThread(() -> {
+                int added = DashboardTemplateStore.importNamed(this, loaded);
+                renderNamedTemplates();
+                renderTriggers();
+                Toast.makeText(this, added == loaded.size()
+                                ? getString(R.string.dashboard_named_template_imported, added)
+                                : getString(R.string.dashboard_named_template_imported_partial,
+                                        added, loaded.size()),
+                        Toast.LENGTH_LONG).show();
+            });
+        });
     }
 
     private void confirmDeleteTemplate(DashboardTemplateStore.Named template) {
