@@ -28,7 +28,7 @@ final class AppLook {
     /** The languages the app has its own strings for; others fall back to English. */
     private static final String[] LANGUAGE_TAGS = {
             "en", "ru", "ar", "cs", "el", "es", "et", "fa", "fi", "fr", "ga", "he", "hi", "it",
-            "ja", "nl", "no", "ro", "sv", "sw", "uk", "zh"};
+            "ja", "nl", "no", "ro", "sv", "sw", "tr", "uk", "zh"};
 
     private static final String KEY_MONET = "monet";
     private static final String KEY_BLUR = "blur";
