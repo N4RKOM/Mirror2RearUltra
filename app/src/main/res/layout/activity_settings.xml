@@ -16,6 +16,7 @@
                     <View android:id="@+id/widgets_home_preview_tap" android:layout_width="match_parent" android:layout_height="match_parent" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true" android:contentDescription="@string/widgets_home_builder" />
                 </com.google.android.material.card.MaterialCardView>
                 <FrameLayout android:id="@+id/widgets_home_page_tabs" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_md" android:visibility="gone" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/widgets_home_toggle_button" style="@style/HyperOS.Button.Primary" android:layout_width="match_parent" android:layout_height="@dimen/button_height" android:layout_marginTop="@dimen/spacing_md" />
                 <TextView android:id="@+id/widgets_home_widgets_header" style="@style/HyperOS.SectionHeader" android:layout_marginTop="@dimen/section_spacing" android:text="@string/widgets_home_widgets_header" />
                 <LinearLayout style="@style/HyperOS.Group">
                     <LinearLayout android:id="@+id/widgets_home_rows" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
@@ -41,7 +42,7 @@
                 </LinearLayout>
             </LinearLayout>
             <LinearLayout android:id="@+id/section_mirror" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
-                <LinearLayout android:id="@+id/status_card" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/hyper_surface_background" android:orientation="vertical" android:padding="@dimen/spacing_md">
+                <LinearLayout android:id="@+id/status_card" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_sm" android:gravity="center_vertical" android:background="@drawable/hyper_surface_background" android:orientation="vertical" android:padding="@dimen/spacing_md">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
                         <com.tpkarras.mirror2rearultra.PanelPreviewView android:id="@+id/hub_panel_preview" android:layout_width="wrap_content" android:layout_height="64dp" />
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="@dimen/spacing_md" android:layout_weight="1" android:orientation="vertical">
@@ -77,11 +78,11 @@
             </LinearLayout>
             <LinearLayout android:id="@+id/section_general" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
                 <!-- Device status first: what this phone can do decides what the rest does. -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/hyper_surface_background" android:orientation="vertical" android:padding="@dimen/spacing_md">
+                <LinearLayout android:id="@+id/capabilities_card" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_sm" android:gravity="center_vertical" android:background="@drawable/hyper_surface_background" android:orientation="vertical" android:padding="@dimen/spacing_md">
                     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/capabilities_title" android:textAppearance="@style/HyperOS.Text.SectionHeader" />
                     <TextView android:id="@+id/root_status_value" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_sm" android:background="@drawable/hyper_status_chip_background" android:paddingHorizontal="@dimen/spacing_sm" android:paddingVertical="@dimen/spacing_xs" android:text="@string/capability_unknown" android:textAppearance="@style/HyperOS.Text.RowSummary" android:textColor="@color/hyper_on_accent_container" />
                     <TextView android:id="@+id/hardware_brightness_status_value" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_xs" android:background="@drawable/hyper_status_chip_background" android:paddingHorizontal="@dimen/spacing_sm" android:paddingVertical="@dimen/spacing_xs" android:text="@string/capability_unknown" android:textAppearance="@style/HyperOS.Text.RowSummary" android:textColor="@color/hyper_on_accent_container" />
-                    <com.google.android.material.button.MaterialButton android:id="@+id/capability_refresh_button" style="@style/HyperOS.Button.Compact" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_md" android:text="@string/capability_refresh" app:icon="@drawable/ic_row_refresh" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/capability_refresh_button" style="@style/HyperOS.Button.Compact" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_sm" android:text="@string/capability_refresh" app:icon="@drawable/ic_row_refresh" />
                 </LinearLayout>
                 <TextView style="@style/HyperOS.SectionHeader" android:layout_marginTop="@dimen/section_spacing" android:text="@string/app_look_title" />
                 <LinearLayout style="@style/HyperOS.Group">

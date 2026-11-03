@@ -58,6 +58,7 @@ public class SettingsActivity extends AppCompatActivity implements
     private PanelPreviewView hubPreview;
     private TextView profileSummary;
     private TextView toggleButton;
+    private TextView widgetsToggleButton;
     private TextView statusValue;
     private TextView rootStatusValue;
     /** Shown over the home screen while the rear screen cannot work without the module. */
@@ -278,6 +279,8 @@ public class SettingsActivity extends AppCompatActivity implements
     private void bindInteractions() {
         bindWidgetsHome();
         toggleButton.setOnClickListener(view -> toggleMirroring());
+        widgetsToggleButton = findViewById(R.id.widgets_home_toggle_button);
+        widgetsToggleButton.setOnClickListener(view -> toggleDashboard());
 
         findViewById(R.id.image_settings_button).setOnClickListener(view ->
                 startActivity(new Intent(this, ImageSettingsActivity.class))
@@ -503,6 +506,7 @@ public class SettingsActivity extends AppCompatActivity implements
         // Pinned to the shown page, as the builder pins it: waiting for the
         // preview to cycle round to the page being looked at is no preview.
         homePreview.setSelectedPage(pageCount > 1 ? homePage : 0);
+        matchTopBlocksToPreview(panel);
         homePreview.setContentDescription(WidgetCatalog.pageLabel(this, homePage));
         sizeHomePreview(DashboardWidgetLayout.loadPageOrientation(this, homePage), panel);
     }
@@ -512,10 +516,8 @@ public class SettingsActivity extends AppCompatActivity implements
             @Nullable Point panel) {
         LinearLayout.LayoutParams params =
                 (LinearLayout.LayoutParams) homePreviewContainer.getLayoutParams();
-        int maxHeight = Math.min(dp(220),
-                Math.round(getResources().getDisplayMetrics().heightPixels * 0.32f));
-        int availableWidth = Math.max(dp(120), getResources().getDisplayMetrics().widthPixels
-                - 2 * getResources().getDimensionPixelSize(R.dimen.page_margin_horizontal));
+        int maxHeight = previewMaxHeight();
+        int availableWidth = previewAvailableWidth();
         if (panel == null) {
             boolean portrait = orientation == DashboardWidgetLayout.Orientation.PORTRAIT;
             params.width = portrait ? dp(130) : -1;
@@ -536,6 +538,31 @@ public class SettingsActivity extends AppCompatActivity implements
         }
         params.gravity = Gravity.CENTER_HORIZONTAL;
         homePreviewContainer.setLayoutParams(params);
+    }
+
+    private int previewMaxHeight() {
+        return Math.min(dp(220),
+                Math.round(getResources().getDisplayMetrics().heightPixels * 0.32f));
+    }
+
+    private int previewAvailableWidth() {
+        return Math.max(dp(120), getResources().getDisplayMetrics().widthPixels
+                - 2 * getResources().getDimensionPixelSize(R.dimen.page_margin_horizontal));
+    }
+
+    /**
+     * The top block of the Mirror and Settings tabs stands where the widgets
+     * preview does, as tall as it is on a landscape page, so switching tabs
+     * does not make the first block jump.
+     */
+    private void matchTopBlocksToPreview(@Nullable Point panel) {
+        int height = dp(150);
+        if (panel != null) {
+            float aspect = (float) Math.max(panel.x, panel.y) / Math.min(panel.x, panel.y);
+            height = Math.min(Math.round(previewAvailableWidth() / aspect), previewMaxHeight());
+        }
+        findViewById(R.id.status_card).setMinimumHeight(height);
+        findViewById(R.id.capabilities_card).setMinimumHeight(height);
     }
 
     /** One line under each settings row saying what it is set to. */
@@ -705,6 +732,15 @@ public class SettingsActivity extends AppCompatActivity implements
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP));
     }
 
+    /** Same start and stop as the widgets tile, from the Widgets tab. */
+    private void toggleDashboard() {
+        Intent intent = DashboardLauncher.toggle(this);
+        updateStatus(MirrorState.isActive());
+        if (intent != null) {
+            startActivity(intent);
+        }
+    }
+
     private void selectProfile(MirrorProfile profile) {
         if (activeProfile != null && activeProfile.id.equals(profile.id)) {
             return;
@@ -741,6 +777,9 @@ public class SettingsActivity extends AppCompatActivity implements
         // when nothing, or only the widgets, is running.
         boolean mirroring = active;
         toggleButton.setText(mirroring ? R.string.hub_stop : R.string.hub_start);
+        boolean widgets = running && MirrorState.isDashboardOnly();
+        widgetsToggleButton.setText(widgets
+                ? R.string.widgets_home_stop : R.string.widgets_home_start);
     }
 
     private void updateCapabilityUi(DeviceCapabilityState.Snapshot snapshot) {

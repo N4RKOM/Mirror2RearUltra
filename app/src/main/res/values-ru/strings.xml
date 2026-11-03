@@ -699,6 +699,8 @@
     <string name="hub_status_off">Выключено</string>
     <string name="hub_start">Запустить на панели</string>
     <string name="hub_stop">Остановить</string>
+    <string name="widgets_home_start">Запустить виджеты на панели</string>
+    <string name="widgets_home_stop">Остановить виджеты</string>
     <string name="hub_tile_image">%1$s · %2$d° · %3$d%%</string>
     <string name="capture_tab_title">Съёмка</string>
     <string name="hub_tile_profiles">Профилей: %1$d · %2$s</string>

@@ -701,6 +701,8 @@
     <string name="hub_status_off">Off</string>
     <string name="hub_start">Start on rear panel</string>
     <string name="hub_stop">Stop</string>
+    <string name="widgets_home_start">Start widgets on rear panel</string>
+    <string name="widgets_home_stop">Stop widgets</string>
     <string name="hub_tile_image">%1$s · %2$d° · %3$d%%</string>
     <string name="capture_tab_title">Capture</string>
     <string name="hub_tile_profiles">Profiles: %1$d · %2$s</string>

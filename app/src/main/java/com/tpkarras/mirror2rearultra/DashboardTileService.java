@@ -22,23 +22,9 @@ public class DashboardTileService extends TileService {
     @SuppressLint("StartActivityAndCollapseDeprecated")
     public void onClick() {
         super.onClick();
-        if (MirrorState.isDashboardOnly()) {
-            MirrorState.setActive(this, false);
-            updateTile();
-            return;
-        }
-        if (MirrorState.isActive()) {
-            MirrorState.setActive(this, false);
-            if (ForegroundService.isRunning()) {
-                startService(ForegroundService.createStopIntent(this));
-            }
-        }
-        MirrorState.armSession(this, true);
+        Intent intent = DashboardLauncher.toggle(this);
         updateTile();
-
-        Intent intent = new Intent(this, DisplayActivity.class)
-                .putExtra(DisplayActivity.EXTRA_DASHBOARD_ONLY, true)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (intent == null) return;
         PendingIntent pendingIntent = PendingIntent.getActivity(this, REQUEST_START_DASHBOARD,
                 intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         try {
