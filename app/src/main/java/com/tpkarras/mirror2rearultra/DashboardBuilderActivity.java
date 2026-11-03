@@ -1878,6 +1878,14 @@ public class DashboardBuilderActivity extends AppCompatActivity {
                     getString(R.string.dashboard_variant_date_year),
                     getString(R.string.dashboard_variant_date_weekday)};
         }
+        if (widget == DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA) {
+            return new String[]{
+                    getString(R.string.dashboard_variant_default),
+                    getString(R.string.dashboard_variant_media_columns),
+                    getString(R.string.dashboard_variant_media_cover),
+                    getString(R.string.dashboard_variant_media_backdrop),
+                    getString(R.string.dashboard_variant_media_tiles)};
+        }
         return new String[]{
                 getString(R.string.dashboard_variant_default),
                 getString(R.string.dashboard_variant_alternate),

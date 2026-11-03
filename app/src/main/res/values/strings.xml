@@ -429,6 +429,10 @@
     <string name="dashboard_variant_default">Standard</string>
     <string name="dashboard_variant_alternate">Compact</string>
     <string name="dashboard_variant_detailed">Detailed</string>
+    <string name="dashboard_variant_media_columns">Columns</string>
+    <string name="dashboard_variant_media_cover">Cover</string>
+    <string name="dashboard_variant_media_backdrop">Cover backdrop</string>
+    <string name="dashboard_variant_media_tiles">Tiles</string>
     <string name="dashboard_variant_charging">charging</string>
     <string name="dashboard_variant_battery">charge</string>
     <string name="dashboard_variant_memory">RAM</string>

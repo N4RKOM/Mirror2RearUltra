@@ -1945,16 +1945,22 @@ public final class RearDashboardView extends View {
     }
 
     private boolean handleFullscreenTap(float x, float y) {
-        if (y < getHeight() * 0.52f
-                || !DashboardWidgetLayout.isWidgetEnabled(
+        if (!DashboardWidgetLayout.isWidgetEnabled(
                 getContext(), DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA)
                 || DashboardWidgetLayout.loadPage(
                 getContext(), DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA) != currentPage) {
             return false;
         }
-        if (x < getWidth() / 3f) return MediaNotificationListenerService.previous();
-        if (x > getWidth() * 2f / 3f) return MediaNotificationListenerService.next();
-        return MediaNotificationListenerService.playPause();
+        // The zones drawn are the zones that answer: one table for both.
+        MediaPanelLayout.Action action = MediaPanelLayout.hit(
+                variantOf(DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA),
+                x, y, getWidth(), getHeight());
+        if (action == null) return false;
+        switch (action) {
+            case PREVIOUS: return MediaNotificationListenerService.previous();
+            case NEXT: return MediaNotificationListenerService.next();
+            default: return MediaNotificationListenerService.playPause();
+        }
     }
 
     private void drawFullscreen(Canvas canvas, List<Line> lines, float density) {
@@ -2406,72 +2412,361 @@ public final class RearDashboardView extends View {
      * beside them, and all three go quiet when there is no session to talk to.
      */
     private void drawFullscreenMedia(Canvas canvas, float density) {
-        RectF panel = fullscreenPanel(canvas, density);
+        DashboardWidgetLayout.Variant variant =
+                variantOf(DashboardWidgetLayout.Widget.FULLSCREEN_MEDIA);
         boolean live = !snapshot.mediaTitle.isEmpty() || !snapshot.mediaArtist.isEmpty();
-        float controlSize = clamp(Math.min(panel.width() * 0.14f, panel.height() * 0.3f),
-                11f * density, 30f * density);
-        float controlsCentre = panel.bottom - controlSize * 0.58f;
-        float rule = controlsCentre - controlSize * 0.72f;
-
-        // The rule above the controls doubles as the track's own progress: on
-        // a panel this short there is no room for a bar of its own, and a line
-        // that fills as the track plays says the same thing in the same place.
         MediaWidgetState.Snapshot media = MediaWidgetState.get();
-        float ruleLeft = panel.left + panel.width() * 0.06f;
-        float ruleRight = panel.right - panel.width() * 0.06f;
+        float w = getWidth();
+        float h = getHeight();
+
+        // The card runs to the panel's edges: the margin it used to keep was
+        // space a finger could have hit, and the looks that follow put their
+        // controls in zones that touch, so there is nothing to leave round them.
+        float bleed = 16f * density;
+        canvas.drawRect(-bleed, -bleed, w + bleed, h + bleed, panelPaint);
+
+        boolean backdrop = variant == DashboardWidgetLayout.Variant.FOURTH
+                && live && media.artwork != null;
+        int ink = currentPalette.text;
+        int soft = mutedColour();
+        if (backdrop) {
+            drawCovering(canvas, media.artwork, new RectF(0f, 0f, w, h));
+            fillRect(canvas, new RectF(0f, 0f, w, h * 0.5f), Color.argb(70, 0, 0, 0), 0f);
+            fillRect(canvas, new RectF(0f, h * 0.5f, w, h), Color.argb(150, 0, 0, 0), 0f);
+            ink = Color.WHITE;
+            soft = Color.argb(190, 255, 255, 255);
+        }
+        int colour = live ? ink : soft;
+
+        RectF previous = mediaZone(variant, MediaPanelLayout.Action.PREVIOUS, w, h);
+        RectF play = mediaZone(variant, MediaPanelLayout.Action.PLAY_PAUSE, w, h);
+        RectF next = mediaZone(variant, MediaPanelLayout.Action.NEXT, w, h);
+        float top = previous.top;
+        float margin = w * 0.04f;
+        // The default look keeps its first arrangement: a card with the icon and
+        // words above a rule and three small marks below it. Its zones, though,
+        // are three full-height thirds, so what answers a finger is far larger
+        // than what is drawn - the marks stay where they were, the aim does not
+        // have to.
+        RectF card = new RectF(0f, 0f, w, h);
+        float markSize = clamp(Math.min(card.width() * 0.14f, card.height() * 0.3f) * 0.85f,
+                11f * density, 34f * density);
+        // Clear of the page dots, which sit on the panel's lower edge.
+        float markCentre = card.bottom - markSize * 0.58f - card.height() * 0.07f;
+        if (variant == DashboardWidgetLayout.Variant.DEFAULT) {
+            top = markCentre - markSize * 0.72f;
+        }
+        // Each look keeps the words in the part the controls leave over.
+        RectF words;
+        switch (variant) {
+            case ALTERNATE:
+                words = new RectF(margin, 0f, w - margin, top);
+                break;
+            case DETAILED:
+                words = new RectF(MediaPanelLayout.COVER_RIGHT * w + margin * 0.6f, 0f,
+                        w - margin * 0.6f, top);
+                break;
+            case FOURTH:
+                words = new RectF(margin, h * 0.58f, w - margin, h - margin * 0.9f);
+                break;
+            case FIFTH:
+                words = new RectF(margin, 0f, w - margin, top - h * 0.03f);
+                break;
+            default:
+                words = new RectF(card.left, card.top, card.right, top);
+                break;
+        }
+
+        float glyph = variant == DashboardWidgetLayout.Variant.DEFAULT ? markSize
+                : clamp(Math.min(play.width() * 0.36f,
+                variant == DashboardWidgetLayout.Variant.FOURTH ? h * 0.30f : play.height() * 0.62f),
+                14f * density, 64f * density);
+
+        switch (variant) {
+            case ALTERNATE: {
+                // Columns with the centre one lifted, so the middle reads as the main control.
+                fillRect(canvas, play, faint(currentPalette.text), 0f);
+                drawProgressLine(canvas, media, live, 0f, w, 0f, Math.max(2f, density * 2f),
+                        density, ink);
+                drawRule(canvas, 0f, w, top, density);
+                drawVerticalRule(canvas, play.left, top, h, density);
+                drawVerticalRule(canvas, play.right, top, h, density);
+                drawMediaWords(canvas, words, live, density, ink, soft, 0.40f);
+                break;
+            }
+            case DETAILED: {
+                RectF cover = new RectF(0f, 0f, MediaPanelLayout.COVER_RIGHT * w, h);
+                if (live && media.artwork != null) {
+                    drawCovering(canvas, media.artwork, cover);
+                } else {
+                    fillRect(canvas, cover, faint(currentPalette.text), 0f);
+                    Bitmap icon = live ? appIcon(media.packageName,
+                            Math.round(Math.min(cover.width(), cover.height()) * 0.5f)) : null;
+                    if (icon != null) {
+                        float side = Math.min(cover.width(), cover.height()) * 0.5f;
+                        canvas.drawBitmap(icon, null, new RectF(cover.centerX() - side / 2f,
+                                cover.centerY() - side / 2f, cover.centerX() + side / 2f,
+                                cover.centerY() + side / 2f), null);
+                    }
+                }
+                drawProgressLine(canvas, media, live, words.left, words.right, top,
+                        Math.max(1.5f, density * 1.5f), density, ink);
+                drawMediaWords(canvas, words, live, density, ink, soft, 0.40f);
+                float disc = Math.min(play.width(), play.height()) * 0.46f;
+                fillCircle(canvas, play.centerX(), play.centerY(), disc, live ? ink : soft);
+                break;
+            }
+            case FOURTH: {
+                // Only beside the marks: the words below run under the zone edges.
+                drawVerticalRule(canvas, play.left, h * 0.06f, words.top - h * 0.04f, density);
+                drawVerticalRule(canvas, play.right, h * 0.06f, words.top - h * 0.04f, density);
+                float barHeight = Math.max(2f, h * 0.03f);
+                drawProgressLine(canvas, media, live, 0f, w, h - barHeight / 2f, barHeight,
+                        density, ink);
+                drawMediaWords(canvas, words, live, density, ink, soft, 0.30f);
+                break;
+            }
+            case FIFTH: {
+                // Tiles: the words on one line above, the three controls on their own plates.
+                float gap = Math.max(2f * density, h * 0.02f);
+                float radius = Math.min(play.height(), play.width()) * 0.14f;
+                fillRect(canvas, inset(previous, gap), faint(currentPalette.text), radius);
+                fillRect(canvas, inset(next, gap), faint(currentPalette.text), radius);
+                fillRect(canvas, inset(play, gap), live ? ink : soft, radius);
+                drawProgressLine(canvas, media, live, 0f, w, top - h * 0.015f,
+                        Math.max(2f, density * 1.6f), density, ink);
+                drawOneLine(canvas, words, live, density, ink, soft);
+                break;
+            }
+            default: {
+                // Icon and words on top, a rule that fills as the track plays,
+                // the three marks below it.
+                drawProgressLine(canvas, media, live, card.left + card.width() * 0.04f,
+                        card.right - card.width() * 0.04f, top,
+                        Math.max(1.5f, density * 1.2f), density, ink);
+                if (live) {
+                    drawIconAndLines(canvas, words, media.artwork, media.packageName,
+                            snapshot.mediaTitle.isEmpty() ? snapshot.mediaArtist
+                                    : snapshot.mediaTitle,
+                            snapshot.mediaTitle.isEmpty() ? "" : snapshot.mediaArtist,
+                            density, 1.2f, 1.9f, false, true);
+                } else {
+                    drawNothingPlaying(canvas, words, density, soft);
+                }
+                break;
+            }
+        }
+        if (!live && variant != DashboardWidgetLayout.Variant.DEFAULT
+                && variant != DashboardWidgetLayout.Variant.FIFTH) {
+            // The looks above draw their own words; this is the same line when there are none.
+            drawNothingPlaying(canvas, words, density, soft);
+        }
+
+        float centreY = variant == DashboardWidgetLayout.Variant.FOURTH ? h * 0.32f
+                : variant == DashboardWidgetLayout.Variant.DEFAULT ? markCentre
+                : play.centerY();
+        int skipColour = variant == DashboardWidgetLayout.Variant.FOURTH && live
+                ? Color.argb(170, 255, 255, 255) : colour;
+        drawSkip(canvas, previous.centerX(), centreY, glyph, false, skipColour);
+        drawSkip(canvas, next.centerX(), centreY, glyph, true, skipColour);
+        int playColour = colour;
+        if (variant == DashboardWidgetLayout.Variant.DETAILED
+                || variant == DashboardWidgetLayout.Variant.FIFTH) {
+            // On the filled disc or plate the mark is cut out of it, in the panel's own colour.
+            playColour = currentPalette.surface;
+        }
+        drawTransportState(canvas, play.centerX(), centreY, glyph * 1.2f,
+                snapshot.mediaPlaying, playColour);
+        textPaint.setTextAlign(Paint.Align.LEFT);
+    }
+
+    private RectF mediaZone(DashboardWidgetLayout.Variant variant,
+            MediaPanelLayout.Action action, float w, float h) {
+        float[] zone = MediaPanelLayout.zone(variant, action);
+        return new RectF(zone[0] * w, zone[1] * h, zone[2] * w, zone[3] * h);
+    }
+
+    private static RectF inset(RectF box, float by) {
+        return new RectF(box.left + by, box.top + by, box.right - by, box.bottom - by);
+    }
+
+    /** The text colour at a whisper, for a plate that lifts a zone off the card. */
+    private static int faint(int colour) {
+        return Color.argb(30, Color.red(colour), Color.green(colour), Color.blue(colour));
+    }
+
+    private void fillRect(Canvas canvas, RectF box, int colour, float radius) {
+        iconPaint.setStyle(Paint.Style.FILL);
+        iconPaint.setColor(colour);
+        if (radius > 0f) {
+            canvas.drawRoundRect(box, radius, radius, iconPaint);
+        } else {
+            canvas.drawRect(box, iconPaint);
+        }
+        iconPaint.setStyle(Paint.Style.STROKE);
+    }
+
+    private void fillCircle(Canvas canvas, float x, float y, float radius, int colour) {
+        iconPaint.setStyle(Paint.Style.FILL);
+        iconPaint.setColor(colour);
+        canvas.drawCircle(x, y, radius, iconPaint);
+        iconPaint.setStyle(Paint.Style.STROKE);
+    }
+
+    private void drawRule(Canvas canvas, float from, float to, float y, float density) {
         iconPaint.setColor(mutedColour());
         iconPaint.setStyle(Paint.Style.STROKE);
         iconPaint.setStrokeWidth(Math.max(1f, density * 0.7f));
-        canvas.drawLine(ruleLeft, rule, ruleRight, rule, iconPaint);
+        canvas.drawLine(from, y, to, y, iconPaint);
+    }
+
+    private void drawVerticalRule(Canvas canvas, float x, float from, float to, float density) {
+        iconPaint.setColor(mutedColour());
+        iconPaint.setStyle(Paint.Style.STROKE);
+        iconPaint.setStrokeWidth(Math.max(1f, density * 0.7f));
+        canvas.drawLine(x, from, x, to, iconPaint);
+    }
+
+    /**
+     * A line that fills as the track plays, centred on {@code y}.
+     *
+     * <p>There is no room on a panel this short for a bar of its own, so the
+     * progress rides on a rule or an edge that is there anyway. The redraw it
+     * needs is asked for only while there is something to move.
+     */
+    private void drawProgressLine(Canvas canvas, MediaWidgetState.Snapshot media, boolean live,
+            float from, float to, float y, float thickness, float density, int ink) {
+        iconPaint.setStyle(Paint.Style.STROKE);
+        iconPaint.setColor(Color.argb(70, Color.red(ink), Color.green(ink), Color.blue(ink)));
+        iconPaint.setStrokeWidth(thickness);
+        canvas.drawLine(from, y, to, y, iconPaint);
         if (live && media.durationMillis > 0L) {
             float through = clamp(media.positionNow() / (float) media.durationMillis, 0f, 1f);
-            iconPaint.setColor(currentPalette.text);
-            iconPaint.setStrokeWidth(Math.max(1f, density * 1.4f));
-            canvas.drawLine(ruleLeft, rule,
-                    ruleLeft + (ruleRight - ruleLeft) * through, rule, iconPaint);
+            iconPaint.setColor(ink);
+            canvas.drawLine(from, y, from + (to - from) * through, y, iconPaint);
             if (media.playing && !paused) {
-                // Nothing else on the panel moves this often, so the redraw is
-                // asked for only while there is something to move.
                 removeCallbacks(progressTick);
                 postDelayed(progressTick, 1_000L);
             }
         }
+    }
 
-        RectF above = new RectF(panel.left, panel.top, panel.right, rule);
-        if (live) {
-            drawNowPlaying(canvas, above, density);
-        } else {
-            String nothing = getResources().getString(R.string.dashboard_media_nothing_playing);
-            float available = above.width() * 0.88f;
-            textPaint.setTextAlign(Paint.Align.CENTER);
-            textPaint.setColor(mutedColour());
-            textPaint.setTextSize(fitTextSize(nothing, available,
-                    clamp(above.height() * 0.4f, 10f * density, 22f * density), 8f * density));
-            canvas.drawText(TextUtils.ellipsize(nothing, textPaint, available,
-                            TextUtils.TruncateAt.END).toString(), above.centerX(),
-                    above.centerY() - (textPaint.descent() + textPaint.ascent()) / 2f, textPaint);
-            textPaint.setColor(currentPalette.text);
+    /** The track over the artist, left aligned in {@code area}; a line too long slides past. */
+    private void drawMediaWords(Canvas canvas, RectF area, boolean live, float density,
+            int ink, int soft, float share) {
+        if (!live) {
+            return;
         }
+        String title = snapshot.mediaTitle.isEmpty() ? snapshot.mediaArtist : snapshot.mediaTitle;
+        String artist = snapshot.mediaTitle.isEmpty() ? "" : snapshot.mediaArtist;
+        float available = Math.max(1f, area.width());
+        textPaint.setTextAlign(Paint.Align.LEFT);
+        textPaint.setFakeBoldText(true);
+        // Set at the size asked for, not shrunk to fit: what is too long slides past.
+        float titleSize = clamp(Math.min(area.height() * share * 1.15f, getWidth() * 0.14f),
+                12f * density, 40f * density);
+        textPaint.setTextSize(titleSize);
+        textPaint.getTextBounds(title, 0, title.length(), inkBounds);
+        float titleTop = inkBounds.top;
+        float titleHeight = inkBounds.height();
+        textPaint.setFakeBoldText(false);
+        float artistSize = artist.isEmpty() ? 0f
+                : clamp(titleSize * 0.7f, 7f * density, 26f * density);
+        float artistTop = 0f;
+        float artistHeight = 0f;
+        if (!artist.isEmpty()) {
+            textPaint.setTextSize(artistSize);
+            textPaint.getTextBounds(artist, 0, artist.length(), inkBounds);
+            artistTop = inkBounds.top;
+            artistHeight = inkBounds.height();
+        }
+        float gap = titleSize * 0.4f;
+        float y = area.centerY()
+                - (titleHeight + (artist.isEmpty() ? 0f : gap + artistHeight)) / 2f;
+        textPaint.setColor(ink);
+        textPaint.setFakeBoldText(true);
+        textPaint.setTextSize(titleSize);
+        drawLine(canvas, title, area.left, y - titleTop, available, true, 0, area);
+        textPaint.setFakeBoldText(false);
+        if (!artist.isEmpty()) {
+            y += titleHeight + gap;
+            textPaint.setTextSize(artistSize);
+            textPaint.setColor(soft);
+            drawLine(canvas, artist, area.left, y - artistTop, available, true, 1, area);
+        }
+        textPaint.setColor(currentPalette.text);
+    }
 
-        int colour = live ? currentPalette.text : mutedColour();
-        drawSkip(canvas, panel.left + panel.width() / 6f, controlsCentre, controlSize,
-                false, colour);
-        drawTransportState(canvas, panel.centerX(), controlsCentre, controlSize,
-                snapshot.mediaPlaying, colour);
-        drawSkip(canvas, panel.right - panel.width() / 6f, controlsCentre, controlSize,
-                true, colour);
+    /** Track and artist on one line, the artist softer, for the strip the tiles leave. */
+    private void drawOneLine(Canvas canvas, RectF area, boolean live, float density,
+            int ink, int soft) {
+        if (!live) {
+            drawNothingPlaying(canvas, area, density, soft);
+            return;
+        }
+        String title = snapshot.mediaTitle.isEmpty() ? snapshot.mediaArtist : snapshot.mediaTitle;
+        String artist = snapshot.mediaTitle.isEmpty() ? "" : snapshot.mediaArtist;
+        float available = Math.max(1f, area.width());
+        textPaint.setTextAlign(Paint.Align.LEFT);
+        textPaint.setFakeBoldText(true);
+        float size = clamp(area.height() * 0.62f, 11f * density, 30f * density);
+        textPaint.setTextSize(size);
+        float baseline = area.centerY() - (textPaint.descent() + textPaint.ascent()) / 2f;
+        float titleWidth = textPaint.measureText(title);
+        textPaint.setFakeBoldText(false);
+        float split = artist.isEmpty() ? 0f : size * 0.6f;
+        float artistWidth = artist.isEmpty() ? 0f : textPaint.measureText(artist);
+        float unit = titleWidth + split + artistWidth;
+        float offset = 0f;
+        float distance = unit + size * 2f;
+        boolean slides = unit > available;
+        if (slides) {
+            offset = scrollOffset(0, title + "\n" + artist, distance);
+        }
+        int state = canvas.save();
+        canvas.clipRect(area.left, area.top, area.left + available, area.bottom);
+        // Drawn twice while it slides, so the head follows the tail round.
+        for (int copy = 0; copy < (slides ? 2 : 1); copy++) {
+            float x = area.left - offset + copy * distance;
+            textPaint.setFakeBoldText(true);
+            textPaint.setColor(ink);
+            canvas.drawText(title, x, baseline, textPaint);
+            textPaint.setFakeBoldText(false);
+            if (!artist.isEmpty()) {
+                textPaint.setColor(soft);
+                canvas.drawText(artist, x + titleWidth + split, baseline, textPaint);
+            }
+        }
+        canvas.restoreToCount(state);
+        textPaint.setColor(currentPalette.text);
+    }
+
+    private void drawNothingPlaying(Canvas canvas, RectF area, float density, int soft) {
+        String nothing = getResources().getString(R.string.dashboard_media_nothing_playing);
+        float available = area.width() * 0.88f;
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setColor(soft);
+        textPaint.setTextSize(fitTextSize(nothing, available,
+                clamp(area.height() * 0.4f, 10f * density, 24f * density), 8f * density));
+        canvas.drawText(TextUtils.ellipsize(nothing, textPaint, available,
+                        TextUtils.TruncateAt.END).toString(), area.centerX(),
+                area.centerY() - (textPaint.descent() + textPaint.ascent()) / 2f, textPaint);
+        textPaint.setColor(currentPalette.text);
         textPaint.setTextAlign(Paint.Align.LEFT);
     }
 
-    /** The icon on the left, the words beside it, a rule between the two. */
-    private void drawNowPlaying(Canvas canvas, RectF area, float density) {
-        // The track's own picture where the player offers one; failing that,
-        // the icon of whoever is playing, which at least says where it is from.
-        MediaWidgetState.Snapshot media = MediaWidgetState.get();
-        drawIconAndLines(canvas, area, media.artwork, media.packageName,
-                snapshot.mediaTitle.isEmpty() ? snapshot.mediaArtist : snapshot.mediaTitle,
-                snapshot.mediaTitle.isEmpty() ? "" : snapshot.mediaArtist,
-                density);
+    /** A picture scaled to cover {@code box} and cropped to it, rather than fitted inside. */
+    private void drawCovering(Canvas canvas, Bitmap picture, RectF box) {
+        float scale = Math.max(box.width() / picture.getWidth(),
+                box.height() / picture.getHeight());
+        float drawnWidth = picture.getWidth() * scale;
+        float drawnHeight = picture.getHeight() * scale;
+        int state = canvas.save();
+        canvas.clipRect(box);
+        canvas.drawBitmap(picture, null, new RectF(box.centerX() - drawnWidth / 2f,
+                box.centerY() - drawnHeight / 2f, box.centerX() + drawnWidth / 2f,
+                box.centerY() + drawnHeight / 2f), null);
+        canvas.restoreToCount(state);
     }
 
     /**
@@ -2487,8 +2782,22 @@ public final class RearDashboardView extends View {
      */
     private void drawIconAndLines(Canvas canvas, RectF area, @Nullable Bitmap picture,
             String packageName, String title, String subtitle, float density) {
+        drawIconAndLines(canvas, area, picture, packageName, title, subtitle, density,
+                1f, 1f, true, false);
+    }
+
+    /**
+     * As above, with the picture {@code pictureBoost} times and the words
+     * {@code boost} times what they would be, and the rule between them
+     * optional: without it the words sit close beside the picture. With
+     * {@code scrolling} the words keep the size they were asked for and a line
+     * too long for the room slides past it, rather than shrinking to fit.
+     */
+    private void drawIconAndLines(Canvas canvas, RectF area, @Nullable Bitmap picture,
+            String packageName, String title, String subtitle, float density,
+            float pictureBoost, float boost, boolean divided, boolean scrolling) {
         float iconSize = clamp(Math.min(area.width() * 0.22f, area.height() * 0.76f),
-                13f * density, 38f * density);
+                13f * density, 38f * density * pictureBoost);
         Bitmap icon = picture;
         boolean artwork = icon != null;
         if (icon == null) {
@@ -2501,20 +2810,27 @@ public final class RearDashboardView extends View {
         if (icon != null) {
             drawPicture(canvas, icon, new RectF(left, area.centerY() - iconSize / 2f,
                     left + iconSize, area.centerY() + iconSize / 2f), artwork);
-            float divider = left + iconSize * 1.42f;
-            iconPaint.setColor(mutedColour());
-            iconPaint.setStyle(Paint.Style.STROKE);
-            canvas.drawLine(divider, area.top + area.height() * 0.18f,
-                    divider, area.bottom - area.height() * 0.18f, iconPaint);
-            textLeft = divider + iconSize * 0.42f;
+            if (divided) {
+                float divider = left + iconSize * 1.42f;
+                iconPaint.setColor(mutedColour());
+                iconPaint.setStyle(Paint.Style.STROKE);
+                canvas.drawLine(divider, area.top + area.height() * 0.18f,
+                        divider, area.bottom - area.height() * 0.18f, iconPaint);
+                textLeft = divider + iconSize * 0.42f;
+            } else {
+                textLeft = left + iconSize + iconSize * 0.22f;
+            }
         }
         float available = Math.max(1f, area.right - margin - textLeft);
 
         textPaint.setTextAlign(Paint.Align.LEFT);
         textPaint.setFakeBoldText(true);
-        float titleSize = fitTextSize(title, available,
-                clamp(Math.min(area.height() * 0.42f, area.width() * 0.13f),
-                        11f * density, 30f * density), 8f * density);
+        float titleWanted = clamp(Math.min(area.height() * 0.42f, area.width() * 0.13f) * boost,
+                11f * density, 30f * density * boost);
+        // Two lines have to stand in the height there is; scrolling frees the width, not that.
+        float titleSize = scrolling
+                ? Math.min(titleWanted, area.height() * 0.4f)
+                : fitTextSize(title, available, titleWanted, 8f * density);
         textPaint.setTextSize(titleSize);
         textPaint.getTextBounds(title, 0, title.length(), inkBounds);
         float titleTop = inkBounds.top;
@@ -2523,8 +2839,9 @@ public final class RearDashboardView extends View {
 
         // Given the same chance to fit as the title, and a lower floor: it is
         // the second line, so it may go smaller before it is cut.
-        float artistSize = artist.isEmpty() ? 0f : fitTextSize(artist, available,
-                clamp(titleSize * 0.66f, 7f * density, 20f * density), 6f * density);
+        float artistWanted = clamp(titleSize * 0.66f, 7f * density, 20f * density * boost);
+        float artistSize = artist.isEmpty() ? 0f : scrolling ? artistWanted
+                : fitTextSize(artist, available, artistWanted, 6f * density);
         float artistTop = 0f;
         float artistHeight = 0f;
         if (!artist.isEmpty()) {
@@ -2539,17 +2856,69 @@ public final class RearDashboardView extends View {
 
         textPaint.setFakeBoldText(true);
         textPaint.setTextSize(titleSize);
-        canvas.drawText(TextUtils.ellipsize(title, textPaint, available,
-                TextUtils.TruncateAt.END).toString(), textLeft, y - titleTop, textPaint);
+        drawLine(canvas, title, textLeft, y - titleTop, available, scrolling, 0, area);
         textPaint.setFakeBoldText(false);
         if (!artist.isEmpty()) {
             y += titleHeight + gap;
             textPaint.setTextSize(artistSize);
             textPaint.setColor(mutedColour());
-            canvas.drawText(TextUtils.ellipsize(artist, textPaint, available,
-                    TextUtils.TruncateAt.END).toString(), textLeft, y - artistTop, textPaint);
+            drawLine(canvas, artist, textLeft, y - artistTop, available, scrolling, 1, area);
             textPaint.setColor(currentPalette.text);
         }
+    }
+
+    /** What each scrolling line last showed and since when, so a new text starts at its head. */
+    private final String[] scrollText = {"", ""};
+    private final long[] scrollSince = new long[2];
+
+    /**
+     * A line of text in the room given: cut off with an ellipsis, or - when it
+     * scrolls and does not fit - slid past in a loop, with a pause at its head
+     * each time round so it can be read before it moves.
+     *
+     * <p>The slide needs a redraw every frame, which nothing else on the panel
+     * does, so it is asked for only while a line is actually moving and the
+     * panel is awake.
+     */
+    private void drawLine(Canvas canvas, String text, float left, float baseline,
+            float available, boolean scrolling, int slot, RectF band) {
+        float width = textPaint.measureText(text);
+        if (!scrolling) {
+            canvas.drawText(TextUtils.ellipsize(text, textPaint, available,
+                    TextUtils.TruncateAt.END).toString(), left, baseline, textPaint);
+            return;
+        }
+        if (width <= available) {
+            canvas.drawText(text, left, baseline, textPaint);
+            return;
+        }
+        float distance = width + textPaint.getTextSize() * 2f;
+        float offset = scrollOffset(slot, text, distance);
+        int state = canvas.save();
+        canvas.clipRect(left, band.top, left + available, band.bottom);
+        canvas.drawText(text, left - offset, baseline, textPaint);
+        canvas.drawText(text, left - offset + distance, baseline, textPaint);
+        canvas.restoreToCount(state);
+    }
+
+    /**
+     * How far the line in {@code slot} has slid, for one trip of {@code distance}
+     * and then the pause at its head. Asks for the next frame as it answers.
+     */
+    private float scrollOffset(int slot, String key, float distance) {
+        long now = SystemClock.uptimeMillis();
+        if (!key.equals(scrollText[slot])) {
+            scrollText[slot] = key;
+            scrollSince[slot] = now;
+        }
+        float speed = 38f * contentDensity() / 1000f;
+        long hold = 1_800L;
+        long travel = (long) (distance / speed);
+        long phase = (now - scrollSince[slot]) % (hold + travel);
+        if (!paused) {
+            postInvalidateDelayed(33L);
+        }
+        return phase < hold ? 0f : (phase - hold) * speed;
     }
 
     /**
